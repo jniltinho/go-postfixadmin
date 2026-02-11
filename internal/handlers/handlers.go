@@ -3,9 +3,10 @@ package handlers
 import (
 	"net/http"
 
+	"go-postfixadmin/internal/models"
+	"go-postfixadmin/internal/utils"
+
 	"github.com/labstack/echo/v5"
-	"github.com/nilton/Go-Postfixadmin/internal/models"
-	"github.com/nilton/Go-Postfixadmin/internal/utils"
 	"gorm.io/gorm"
 )
 

@@ -1,4 +1,4 @@
-module github.com/nilton/Go-Postfixadmin
+module go-postfixadmin
 
 go 1.25.4
 

@@ -11,9 +11,10 @@ import (
 	"os"
 	"path"
 
+	"go-postfixadmin/internal/handlers"
+
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
-	"github.com/nilton/Go-Postfixadmin/internal/handlers"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
