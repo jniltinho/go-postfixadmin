@@ -1,0 +1,105 @@
+{{define "login.html"}}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Go-PostfixAdmin</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .dot-pattern {
+            background-image: radial-gradient(circle, #cbd5e1 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+
+        .neo-shadow {
+            box-shadow: 4px 4px 0px #1E293B;
+        }
+
+        .neo-shadow-sm {
+            box-shadow: 2px 2px 0px #1E293B;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-brand-background font-sans text-brand-text min-h-screen flex items-start justify-center p-6 pt-[10vh] dot-pattern">
+    <div class="w-full max-w-md">
+        <!-- Brand Header -->
+        <div class="text-center mb-8">
+            <div
+                class="inline-flex items-center justify-center w-16 h-16 bg-brand-primary border-2 border-brand-text neo-shadow-sm mb-4 transform hover:-translate-y-1 transition-transform cursor-pointer">
+                <i data-lucide="mail" class="text-white w-8 h-8"></i>
+            </div>
+            <h1 class="text-4xl font-mono font-bold tracking-tight text-brand-text mb-2">Go-PostfixAdmin</h1>
+            <p class="text-gray-500 font-medium">Professional Email Administration</p>
+        </div>
+
+        <!-- Square Card -->
+        <div class="bg-white border-2 border-brand-text p-8 neo-shadow">
+            <h2 class="text-xl font-bold mb-6 uppercase tracking-widest">Sign In</h2>
+
+            {{if .error}}
+            <div class="bg-red-50 border-2 border-red-500 text-red-700 p-4 mb-6 flex items-start">
+                <i data-lucide="alert-circle" class="w-5 h-5 mr-3 shrink-0"></i>
+                <span class="text-sm font-bold uppercase tracking-tight">{{.error}}</span>
+            </div>
+            {{end}}
+
+            <form action="/login" method="POST" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-bold mb-2 uppercase tracking-wide">Username</label>
+                    <div class="relative group">
+                        <div
+                            class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-brand-primary transition-colors">
+                            <i data-lucide="user" class="w-5 h-5"></i>
+                        </div>
+                        <input type="text" name="username" required placeholder="admin@domain.com"
+                            class="w-full pl-11 pr-4 py-3 bg-white border-2 border-brand-text focus:border-brand-primary focus:shadow-[4px_4px_0px_#3B82F6] outline-none transition-all placeholder:text-gray-400">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold mb-2 uppercase tracking-wide">Password</label>
+                    <div class="relative group">
+                        <div
+                            class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-brand-primary transition-colors">
+                            <i data-lucide="lock" class="w-5 h-5"></i>
+                        </div>
+                        <input type="password" name="password" required placeholder="••••••••"
+                            class="w-full pl-11 pr-4 py-3 bg-white border-2 border-brand-text focus:border-brand-primary focus:shadow-[4px_4px_0px_#3B82F6] outline-none transition-all placeholder:text-gray-400">
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit"
+                        class="w-full bg-brand-primary hover:bg-white hover:text-brand-primary border-2 border-brand-text text-white font-bold py-4 shadow-[3px_3px_0px_#1E293B] transform active:translate-x-1 active:translate-y-1 active:shadow-none transition-all flex items-center justify-center group cursor-pointer uppercase tracking-widest">
+                        <span>Authenticate</span>
+                        <i data-lucide="arrow-right"
+                            class="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform"></i>
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-8 pt-6 border-t-2 border-gray-100 text-center">
+                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                    Secure Administrative Access System
+                </p>
+            </div>
+        </div>
+
+        <!-- Footer Info -->
+        <p class="text-center mt-8 text-sm text-gray-400 font-bold uppercase tracking-widest">
+            &copy; 2026 Go-Postfixadmin. v1.0.0
+        </p>
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>
+{{end}}

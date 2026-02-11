@@ -1,0 +1,102 @@
+{{define "title"}}Domains - Go-PostfixAdmin{{end}}
+{{define "breadcrumb"}}Domains Listing{{end}}
+
+{{define "content"}}
+<div class="mb-12 flex justify-between items-end">
+    <div>
+        <h2 class="text-4xl font-mono font-black uppercase tracking-tight mb-2">Domains</h2>
+        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Manage and monitor your registered mail
+            domains.</p>
+    </div>
+    <button
+        class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-8 py-5 shadow-[3px_3px_0px_#1E293B] flex items-center transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest">
+        <i data-lucide="plus" class="w-5 h-5 mr-3"></i>
+        Register Domain
+    </button>
+</div>
+
+<div class="bg-white border-4 border-brand-text neo-shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left">
+            <thead>
+                <tr class="border-b-4 border-brand-text bg-gray-50">
+                    <th class="px-8 py-6 font-black text-[10px] uppercase tracking-[0.2em] text-gray-400">Domain Name
+                    </th>
+                    <th class="px-8 py-6 font-black text-[10px] uppercase tracking-[0.2em] text-gray-400">Description
+                    </th>
+                    <th class="px-8 py-6 font-black text-[10px] uppercase tracking-[0.2em] text-gray-400 text-center">
+                        Aliases</th>
+                    <th class="px-8 py-6 font-black text-[10px] uppercase tracking-[0.2em] text-gray-400 text-center">
+                        Mailboxes</th>
+                    <th class="px-8 py-6 font-black text-[10px] uppercase tracking-[0.2em] text-gray-400">Status</th>
+                    <th class="px-8 py-6 font-black text-[10px] uppercase tracking-[0.2em] text-gray-400 text-right">
+                        Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y-2 divide-gray-100">
+                {{range .Domains}}
+                <tr class="group hover:bg-brand-primary/5 transition-colors cursor-pointer">
+                    <td class="px-8 py-6">
+                        <div class="flex items-center">
+                            <div
+                                class="w-10 h-10 border-2 border-brand-text bg-white flex items-center justify-center mr-4 group-hover:bg-brand-primary group-hover:text-white transition-colors">
+                                <i data-lucide="globe" class="w-5 h-5 group-hover:text-white transition-colors"></i>
+                            </div>
+                            <span class="font-mono font-black text-brand-text text-sm tracking-tight">{{.Domain}}</span>
+                        </div>
+                    </td>
+                    <td class="px-8 py-6">
+                        <span class="text-xs font-bold text-gray-500 uppercase tracking-tight line-clamp-1">{{if
+                            .Description}}{{.Description}}{{else}}No description.{{end}}</span>
+                    </td>
+                    <td class="px-8 py-6 text-center">
+                        <span class="font-mono font-black text-gray-400">{{.Aliases}}</span>
+                    </td>
+                    <td class="px-8 py-6 text-center">
+                        <span class="font-mono font-black text-gray-400">{{.Mailboxes}}</span>
+                    </td>
+                    <td class="px-8 py-6">
+                        {{if .Active}}
+                        <div
+                            class="inline-flex items-center px-4 py-1 bg-green-500 text-white border-2 border-brand-text text-[10px] font-black uppercase tracking-widest neo-shadow-subtle">
+                            Active
+                        </div>
+                        {{else}}
+                        <div
+                            class="inline-flex items-center px-4 py-1 bg-red-500 text-white border-2 border-brand-text text-[10px] font-black uppercase tracking-widest neo-shadow-subtle">
+                            Inactive
+                        </div>
+                        {{end}}
+                    </td>
+                    <td class="px-8 py-6 text-right">
+                        <div class="flex items-center justify-end space-x-2">
+                            <button
+                                class="w-10 h-10 border-2 border-brand-text bg-white hover:bg-brand-primary hover:text-white transition-all cursor-pointer flex items-center justify-center">
+                                <i data-lucide="edit-3" class="w-4 h-4"></i>
+                            </button>
+                            <button
+                                class="w-10 h-10 border-2 border-brand-text bg-white hover:bg-red-500 hover:text-white transition-all cursor-pointer flex items-center justify-center">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {{else}}
+                <tr>
+                    <td colspan="6" class="px-8 py-20 text-center">
+                        <div class="flex flex-col items-center">
+                            <div
+                                class="w-20 h-20 border-2 border-gray-100 bg-gray-50 flex items-center justify-center text-gray-200 mb-4">
+                                <i data-lucide="search-x" class="w-10 h-10"></i>
+                            </div>
+                            <p class="text-xs font-black uppercase tracking-widest text-gray-300">No domains discovered.
+                            </p>
+                        </div>
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+</div>
+{{end}}
