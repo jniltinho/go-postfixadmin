@@ -24,11 +24,17 @@ Este projeto oferece duas formas principais de build: utilizando `make` (local) 
 
 O build local automatiza a geração do CSS e a compilação do binário Go.
 
-```bash
-# Instalar todas as dependências (Recomendado)
-make deps
+#### Instalação de Dependências
 
-# Caso prefira instalar manualmente:
+Para instalar todas as dependências (Recomendado):
+
+```bash
+make deps
+```
+
+Caso prefira instalar manualmente:
+
+```bash
 go mod download
 npm install
 ```
@@ -88,3 +94,11 @@ docker run -p 8080:8080 -e DATABASE_URL="seu-dsn" postfixadmin:latest
 | `make clean` | Remove o binário e arquivos de CSS gerados |
 | `make tidy` | Limpa e organiza as dependências do Go |
 | `make deps` | Instala todas as dependências necessárias |
+
+---
+
+## 📸 Screenshots
+
+![Go-Postfixadmin Login Screen](DOCUMENTS/screenshots/postfixadmin_01.png)
+
+Confira mais imagens na pasta [screenshots](DOCUMENTS/screenshots).
