@@ -19,9 +19,7 @@ func CheckPassword(plain, hashed string) (bool, error) {
 		return hexHash == hashed[5:], nil
 	}
 
-	if strings.HasPrefix(hashed, "{CRYPT}") {
-		hashed = hashed[7:]
-	}
+	hashed = strings.TrimPrefix(hashed, "{CRYPT}")
 
 	// For CRYPT and SHA512-CRYPT
 	cryptScheme := crypt.SHA512.New()
