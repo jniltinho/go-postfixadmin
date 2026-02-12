@@ -10,10 +10,12 @@ import (
 	"gorm.io/gorm"
 )
 
+// Handler é o controlador principal da aplicação
 type Handler struct {
 	DB *gorm.DB
 }
 
+// Login processa autenticação de administradores
 func (h *Handler) Login(c *echo.Context) error {
 	if c.Request().Method == http.MethodPost {
 		username := c.FormValue("username")
@@ -39,6 +41,7 @@ func (h *Handler) Login(c *echo.Context) error {
 	return c.Render(http.StatusOK, "login.html", nil)
 }
 
+// Dashboard exibe a página inicial com estatísticas
 func (h *Handler) Dashboard(c *echo.Context) error {
 	var domainCount int64
 	var mailboxCount int64
@@ -51,42 +54,5 @@ func (h *Handler) Dashboard(c *echo.Context) error {
 	return c.Render(http.StatusOK, "dashboard.html", map[string]interface{}{
 		"DomainCount":  domainCount,
 		"MailboxCount": mailboxCount,
-	})
-}
-
-type DomainDisplay struct {
-	models.Domain
-	AliasCount   int64
-	MailboxCount int64
-}
-
-func (h *Handler) ListDomains(c *echo.Context) error {
-	var domains []models.Domain
-	var displayDomains []DomainDisplay
-
-	if h.DB != nil {
-		h.DB.Where("domain != ?", "ALL").Find(&domains)
-
-		for _, d := range domains {
-			var aliasCount int64
-			var mailboxCount int64
-
-			// Count aliases excluding those that are mailboxes
-			h.DB.Model(&models.Alias{}).
-				Where("domain = ?", d.Domain).
-				Where("address NOT IN (?)", h.DB.Table("mailbox").Select("username")).
-				Count(&aliasCount)
-
-			h.DB.Model(&models.Mailbox{}).Where("domain = ?", d.Domain).Count(&mailboxCount)
-
-			displayDomains = append(displayDomains, DomainDisplay{
-				Domain:       d,
-				AliasCount:   aliasCount,
-				MailboxCount: mailboxCount,
-			})
-		}
-	}
-	return c.Render(http.StatusOK, "domains.html", map[string]interface{}{
-		"Domains": displayDomains,
 	})
 }

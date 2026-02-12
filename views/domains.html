@@ -8,35 +8,39 @@
         <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Manage and monitor your registered mail
             domains.</p>
     </div>
-    <button
+    <a href="/domains/add"
         class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-8 py-5 shadow-[3px_3px_0px_#1E293B] flex items-center transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest">
         <i data-lucide="plus" class="w-5 h-5 mr-3"></i>
         Register Domain
-    </button>
+    </a>
 </div>
 
 <div class="bg-white border-4 border-brand-text neo-shadow-sm overflow-hidden">
     <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
-            <thead>
-                <tr
-                    class="border-b-4 border-brand-text bg-gray-50 text-xs font-bold uppercase tracking-wider text-gray-600">
-                    <th class="px-4 py-4">Domínio</th>
-                    <th class="px-4 py-4">Descrição</th>
-                    <th class="px-4 py-4 text-center">Aliases</th>
-                    <th class="px-4 py-4 text-center">Contas de email</th>
-                    <th class="px-4 py-4 text-center">MX de backup</th>
-                    <th class="px-4 py-4 text-center">Habilitado</th>
-                    <th class="px-4 py-4 text-center">Última Modificação</th>
-                    <th class="px-4 py-4 text-center">Pass expires</th>
+            <thead class="bg-brand-primary text-white border-b-4 border-brand-text">
+                <tr>
+                    <th class="px-4 py-4 text-xs font-black uppercase tracking-widest">Domínio</th>
+                    <th class="px-4 py-4 text-xs font-black uppercase tracking-widest">Descrição</th>
+                    <th class="px-4 py-4 text-center text-xs font-black uppercase tracking-widest">Aliases</th>
+                    <th class="px-4 py-4 text-center text-xs font-black uppercase tracking-widest">Contas de email</th>
+                    <th class="px-4 py-4 text-center text-xs font-black uppercase tracking-widest">MX de backup</th>
+                    <th class="px-4 py-4 text-center text-xs font-black uppercase tracking-widest">Habilitado</th>
+                    <th class="px-4 py-4 text-center text-xs font-black uppercase tracking-widest">Última Modificação
+                    </th>
+                    <th class="px-4 py-4 text-center text-xs font-black uppercase tracking-widest">Pass expires</th>
                     <th class="px-4 py-4 text-right"></th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 text-sm">
                 {{range .Domains}}
                 <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-4 py-4 font-medium">
-                        <a href="#" class="text-blue-600 hover:underline">{{.Domain.Domain}}</a>
+                    <td class="px-4 py-4">
+                        <a href="#"
+                            onclick="viewDomainMailboxes('{{.Domain.Domain}}', {{.MailboxCount}}); return false;"
+                            class="text-brand-primary hover:underline font-bold cursor-pointer">
+                            {{.Domain.Domain}}
+                        </a>
                     </td>
                     <td class="px-4 py-4 text-gray-500">
                         {{if .Description}}{{.Description}}{{else}}{{end}}
@@ -90,11 +94,11 @@
                     </td>
                     <td class="px-4 py-4 text-right">
                         <div class="flex items-center justify-end space-x-2">
-                            <button
+                            <a href="/domains/edit/{{.Domain.Domain}}"
                                 class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-3 rounded flex items-center transition-colors">
                                 <i data-lucide="edit" class="w-3 h-3 mr-1"></i> Editar
-                            </button>
-                            <button
+                            </a>
+                            <button onclick="confirmDelete('{{.Domain.Domain}}')"
                                 class="bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-2 px-3 rounded flex items-center transition-colors">
                                 <i data-lucide="trash-2" class="w-3 h-3 mr-1"></i> Remover
                             </button>
@@ -112,4 +116,40 @@
         </table>
     </div>
 </div>
+
+<script>
+    function viewDomainMailboxes(domainName, mailboxCount) {
+        if (mailboxCount === 0) {
+            alert(`O domínio "${domainName}" não possui caixas postais cadastradas.`);
+            return;
+        }
+
+        window.location.href = `/mailboxes?domain=${encodeURIComponent(domainName)}`;
+    }
+
+    function confirmDelete(domainName) {
+        if (!confirm(`Tem certeza que deseja remover o domínio "${domainName}"?\n\nATENÇÃO: Todos os aliases e mailboxes associados também serão removidos!`)) {
+            return;
+        }
+
+        fetch(`/domains/delete/${domainName}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Domínio removido com sucesso!');
+                    window.location.reload();
+                } else {
+                    alert('Erro ao remover domínio: ' + data.error);
+                }
+            })
+            .catch(error => {
+                alert('Erro na requisição: ' + error);
+            });
+    }
+</script>
 {{end}}

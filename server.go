@@ -116,6 +116,12 @@ func StartServer(embeddedFiles embed.FS, port int, db *gorm.DB) {
 	e.POST("/login", h.Login)
 	e.GET("/dashboard", h.Dashboard)
 	e.GET("/domains", h.ListDomains)
+	e.GET("/domains/add", h.AddDomainForm)
+	e.POST("/domains/add", h.AddDomain)
+	e.GET("/domains/edit/:domain", h.EditDomainForm)
+	e.POST("/domains/edit/:domain", h.EditDomain)
+	e.DELETE("/domains/delete/:domain", h.DeleteDomain)
+	e.GET("/mailboxes", h.ListMailboxes)
 
 	e.GET("/", func(c *echo.Context) error {
 		return c.Redirect(http.StatusMovedPermanently, "/dashboard")
