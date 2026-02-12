@@ -21,6 +21,8 @@ func main() {
 	runFlag := flag.Bool("run", false, "Start the administration server")
 	migrateFlag := flag.Bool("migrate", false, "Run database migration")
 	portFlag := flag.Int("port", 8080, "Port to run the server on")
+	dbUrl := flag.String("db-url", "", "Database URL connection string")
+	dbDriver := flag.String("db-driver", "mysql", "Database driver (mysql or postgres)")
 	flag.Parse()
 
 	if *versionFlag {
@@ -29,13 +31,14 @@ func main() {
 	}
 
 	// Connect to Database
-	db, err := utils.ConnectDB()
+	db, err := utils.ConnectDB(*dbUrl, *dbDriver)
 	if err != nil {
 		if *migrateFlag {
 			slog.Error("Failed to connect to database for migration", "error", err)
 			os.Exit(1)
 		}
 		slog.Warn("Warning: Database connection failed.", "error", err)
+		db = nil
 	}
 
 	if *migrateFlag {

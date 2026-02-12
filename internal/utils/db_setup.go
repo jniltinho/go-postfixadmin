@@ -10,16 +10,24 @@ import (
 	"gorm.io/gorm"
 )
 
-// ConnectDB initializes the database connection based on environment variables
-func ConnectDB() (*gorm.DB, error) {
+// ConnectDB initializes the database connection
+func ConnectDB(dsn string, driver string) (*gorm.DB, error) {
 	var db *gorm.DB
 	var err error
-	dsn := os.Getenv("DATABASE_URL")
+
+	if dsn == "" {
+		dsn = os.Getenv("DATABASE_URL")
+	}
+
 	if dsn == "" {
 		dsn = "user:password@tcp(localhost:3306)/postfixadmin?charset=utf8mb4&parseTime=True&loc=Local"
 	}
 
-	if os.Getenv("DB_DRIVER") == "postgres" {
+	if driver == "" {
+		driver = os.Getenv("DB_DRIVER")
+	}
+
+	if driver == "postgres" {
 		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	} else {
 		db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})

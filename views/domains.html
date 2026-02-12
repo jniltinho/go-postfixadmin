@@ -17,81 +17,94 @@
 
 <div class="bg-white border-4 border-brand-text neo-shadow-sm overflow-hidden">
     <div class="overflow-x-auto">
-        <table class="w-full text-left">
+        <table class="w-full text-left border-collapse">
             <thead>
-                <tr class="border-b-4 border-brand-text bg-gray-50">
-                    <th class="px-8 py-6 font-black text-[10px] uppercase tracking-[0.2em] text-gray-400">Domain Name
-                    </th>
-                    <th class="px-8 py-6 font-black text-[10px] uppercase tracking-[0.2em] text-gray-400">Description
-                    </th>
-                    <th class="px-8 py-6 font-black text-[10px] uppercase tracking-[0.2em] text-gray-400 text-center">
-                        Aliases</th>
-                    <th class="px-8 py-6 font-black text-[10px] uppercase tracking-[0.2em] text-gray-400 text-center">
-                        Mailboxes</th>
-                    <th class="px-8 py-6 font-black text-[10px] uppercase tracking-[0.2em] text-gray-400">Status</th>
-                    <th class="px-8 py-6 font-black text-[10px] uppercase tracking-[0.2em] text-gray-400 text-right">
-                        Actions</th>
+                <tr
+                    class="border-b-4 border-brand-text bg-gray-50 text-xs font-bold uppercase tracking-wider text-gray-600">
+                    <th class="px-4 py-4">Domínio</th>
+                    <th class="px-4 py-4">Descrição</th>
+                    <th class="px-4 py-4 text-center">Aliases</th>
+                    <th class="px-4 py-4 text-center">Contas de email</th>
+                    <th class="px-4 py-4 text-center">MX de backup</th>
+                    <th class="px-4 py-4 text-center">Habilitado</th>
+                    <th class="px-4 py-4 text-center">Última Modificação</th>
+                    <th class="px-4 py-4 text-center">Pass expires</th>
+                    <th class="px-4 py-4 text-right"></th>
                 </tr>
             </thead>
-            <tbody class="divide-y-2 divide-gray-100">
+            <tbody class="divide-y divide-gray-200 text-sm">
                 {{range .Domains}}
-                <tr class="group hover:bg-brand-primary/5 transition-colors cursor-pointer">
-                    <td class="px-8 py-6">
-                        <div class="flex items-center">
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-4 py-4 font-medium">
+                        <a href="#" class="text-blue-600 hover:underline">{{.Domain.Domain}}</a>
+                    </td>
+                    <td class="px-4 py-4 text-gray-500">
+                        {{if .Description}}{{.Description}}{{else}}{{end}}
+                    </td>
+                    <td class="px-4 py-4">
+                        <div class="flex items-center justify-center">
                             <div
-                                class="w-10 h-10 border-2 border-brand-text bg-white flex items-center justify-center mr-4 group-hover:bg-brand-primary group-hover:text-white transition-colors">
-                                <i data-lucide="globe" class="w-5 h-5 group-hover:text-white transition-colors"></i>
+                                class="w-32 bg-gray-200 rounded-sm h-6 relative border border-gray-300 overflow-hidden">
+                                <!-- Progress Bar Logic: Calculate percentage -->
+                                <div class="bg-green-500 h-full absolute top-0 left-0"
+                                    style="width:{{if gt .Aliases 0}}{{printf " %.0f" (mul (div (float64 .AliasCount)
+                                    (float64 .Aliases)) 100.0)}}{{else}}0{{end}}%"></div>
+                                <div
+                                    class="absolute inset-0 flex items-center justify-center text-xs font-bold text-gray-700 z-10">
+                                    {{.AliasCount}} / {{.Aliases}}
+                                </div>
                             </div>
-                            <span class="font-mono font-black text-brand-text text-sm tracking-tight">{{.Domain}}</span>
                         </div>
                     </td>
-                    <td class="px-8 py-6">
-                        <span class="text-xs font-bold text-gray-500 uppercase tracking-tight line-clamp-1">{{if
-                            .Description}}{{.Description}}{{else}}No description.{{end}}</span>
+                    <td class="px-4 py-4">
+                        <div class="flex items-center justify-center">
+                            <div
+                                class="w-32 bg-gray-200 rounded-sm h-6 relative border border-gray-300 overflow-hidden">
+                                <div class="bg-green-500 h-full absolute top-0 left-0"
+                                    style="width:{{if gt .Mailboxes 0}}{{printf " %.0f" (mul (div (float64
+                                    .MailboxCount) (float64 .Mailboxes)) 100.0)}}{{else}}0{{end}}%"></div>
+                                <div
+                                    class="absolute inset-0 flex items-center justify-center text-xs font-bold text-gray-700 z-10">
+                                    {{.MailboxCount}} / {{.Mailboxes}}
+                                </div>
+                            </div>
+                        </div>
                     </td>
-                    <td class="px-8 py-6 text-center">
-                        <span class="font-mono font-black text-gray-400">{{.Aliases}}</span>
+                    <td class="px-4 py-4 text-center text-gray-600">
+                        {{if .BackupMX}}Sim{{else}}Não{{end}}
                     </td>
-                    <td class="px-8 py-6 text-center">
-                        <span class="font-mono font-black text-gray-400">{{.Mailboxes}}</span>
-                    </td>
-                    <td class="px-8 py-6">
+                    <td class="px-4 py-4 text-center">
                         {{if .Active}}
-                        <div
-                            class="inline-flex items-center px-4 py-1 bg-green-500 text-white border-2 border-brand-text text-[10px] font-black uppercase tracking-widest neo-shadow-subtle">
-                            Active
-                        </div>
+                        <span
+                            class="px-3 py-1 bg-yellow-400 text-white font-bold rounded shadow-sm border border-yellow-500">Sim</span>
                         {{else}}
-                        <div
-                            class="inline-flex items-center px-4 py-1 bg-red-500 text-white border-2 border-brand-text text-[10px] font-black uppercase tracking-widest neo-shadow-subtle">
-                            Inactive
-                        </div>
+                        <span
+                            class="px-3 py-1 bg-red-500 text-white font-bold rounded shadow-sm border border-red-600">Não</span>
                         {{end}}
                     </td>
-                    <td class="px-8 py-6 text-right">
+                    <td class="px-4 py-4 text-center text-gray-600">
+                        {{.Modified.Format "2006-01-02"}}
+                    </td>
+                    <td class="px-4 py-4 text-center text-gray-600">
+                        {{if .PasswordExpiry}}{{.PasswordExpiry}}{{else}}365{{end}}
+                    </td>
+                    <td class="px-4 py-4 text-right">
                         <div class="flex items-center justify-end space-x-2">
                             <button
-                                class="w-10 h-10 border-2 border-brand-text bg-white hover:bg-brand-primary hover:text-white transition-all cursor-pointer flex items-center justify-center">
-                                <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-3 rounded flex items-center transition-colors">
+                                <i data-lucide="edit" class="w-3 h-3 mr-1"></i> Editar
                             </button>
                             <button
-                                class="w-10 h-10 border-2 border-brand-text bg-white hover:bg-red-500 hover:text-white transition-all cursor-pointer flex items-center justify-center">
-                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                class="bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-2 px-3 rounded flex items-center transition-colors">
+                                <i data-lucide="trash-2" class="w-3 h-3 mr-1"></i> Remover
                             </button>
                         </div>
                     </td>
                 </tr>
                 {{else}}
                 <tr>
-                    <td colspan="6" class="px-8 py-20 text-center">
-                        <div class="flex flex-col items-center">
-                            <div
-                                class="w-20 h-20 border-2 border-gray-100 bg-gray-50 flex items-center justify-center text-gray-200 mb-4">
-                                <i data-lucide="search-x" class="w-10 h-10"></i>
-                            </div>
-                            <p class="text-xs font-black uppercase tracking-widest text-gray-300">No domains discovered.
-                            </p>
-                        </div>
+                    <td colspan="9" class="px-8 py-20 text-center text-gray-400">
+                        Nenhum domínio encontrado.
                     </td>
                 </tr>
                 {{end}}

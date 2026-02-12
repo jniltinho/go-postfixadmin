@@ -52,6 +52,23 @@ func StartServer(embeddedFiles embed.FS, port int, db *gorm.DB) {
 	layout := "views/layout.html"
 	viewFiles, _ := embeddedFiles.ReadDir("views")
 
+	funcMap := template.FuncMap{
+		"mul": func(a, b float64) float64 { return a * b },
+		"div": func(a, b float64) float64 { return a / b },
+		"float64": func(i any) float64 {
+			switch v := i.(type) {
+			case int:
+				return float64(v)
+			case int64:
+				return float64(v)
+			case float64:
+				return v
+			default:
+				return 0
+			}
+		},
+	}
+
 	for _, file := range viewFiles {
 		name := file.Name()
 		if name == "layout.html" {
@@ -59,11 +76,24 @@ func StartServer(embeddedFiles embed.FS, port int, db *gorm.DB) {
 		}
 
 		pagePath := path.Join("views", name)
+
+		var tmpl *template.Template
+		var err error
+
 		if name == "login.html" {
-			t.templates[name] = template.Must(template.ParseFS(embeddedFiles, pagePath))
+			tmpl, err = template.New(name).Funcs(funcMap).ParseFS(embeddedFiles, pagePath)
 		} else {
-			t.templates[name] = template.Must(template.ParseFS(embeddedFiles, layout, pagePath))
+			// For pages using layout, we need to parse layout first or together.
+			// template.ParseFS uses the filenames as template names.
+			// "base" is likely defined in layout.html.
+			tmpl, err = template.New(name).Funcs(funcMap).ParseFS(embeddedFiles, layout, pagePath)
 		}
+
+		if err != nil {
+			slog.Error("Failed to parse template", "name", name, "error", err)
+			os.Exit(1)
+		}
+		t.templates[name] = tmpl
 	}
 
 	e.Renderer = t
