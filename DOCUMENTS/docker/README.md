@@ -1,0 +1,176 @@
+[![GitHub CI build status badge](https://github.com/postfixadmin/docker/workflows/GitHub%20CI/badge.svg)](https://github.com/postfixadmin/docker/actions?query=workflow%3A%22GitHub+CI%22)
+<!--[![update.sh build status badge](https://img.shields.io/jenkins/s/https/doi-janky.infosiftr.net/job/update.sh/job/postfixadmin.svg?label=Automated%20update.sh)](https://doi-janky.infosiftr.net/job/update.sh/job/postfixadmin/)-->
+[![Docker Pulls](https://img.shields.io/docker/pulls/library/postfixadmin)](https://hub.docker.com/_/postfixadmin)
+[![Docker Image Version](https://img.shields.io/docker/v/library/postfixadmin?sort=semver&logo=postfixadmin&label=Postfixadmin)](https://hub.docker.com/_/postfixadmin/tags)
+
+# Building
+
+ * Clone this repo ( `git clone https://github.com/postfixadmin/docker.git docker` ) and then run :
+ * `docker build --pull --rm -t postfixadmin-image <VARIANT>` from within the created directory (where \<VARIANT\> is replaced by apache, fpm or fpm-alpine)
+
+## Image Variants
+
+The following variant are currently provided:
+
+### apache
+
+This starts an Apache webserver with PHP, so you can use `postfixadmin` out of the box.
+
+### fpm-alpine
+
+This image has a very small footprint. It is based on Alpine Linux and starts only a PHP FPM process. Use this variant if you already have a seperate webserver. 
+
+If you need more tools, that are not available on Alpine Linux, use the `fpm` image instead.
+
+### fpm
+
+This image is based on Debian and starts only a PHP FPM container. 
+
+Use this variant if you already have a seperate webserver.
+
+# Running
+
+Some knowledge of Postfixadmin is assumed. 
+
+Advanced users will probably want to specify a custom configuration (config.local.php file).
+
+If you're just trying out the software, there's probably no need for a config.local.php file.
+
+
+## No config.local.php / no existing setup
+
+You have two options :
+
+ * Use a default sqlite database, or
+ * Use an external database (MySQL, PgSQL etc).
+ 
+You can configure this through the following environment variables when running the docker container.
+
+ * POSTFIXADMIN\_DB\_TYPE=...  - sqlite, mysqli, pgsql
+ * POSTFIXADMIN\_DB\_NAME=.... - database name or path to database file (sqlite)
+ * POSTFIXADMIN\_DB\_USER=...  - mysqli/pgsql only (db server user name)
+ * POSTFIXADMIN\_DB\_HOST=...  - hostname for database, default is localhost.
+ * POSTFIXADMIN\_DB\_PORT=...  - port for the database (optional)
+ * POSTFIXADMIN\_DB\_PASSWORD=... - mysqli/pgsql only (db server user password)
+ * POSTFIXADMIN_ENCRYPT=... - database password encryption (e.g. md5crypt, SHA512-CRYPT)
+ * POSTFIXADMIN\_SETUP\_PASSWORD=... - generated from setup.php or `php -r "echo password_hash('mysecretpassword', PASSWORD_DEFAULT);"` 
+
+Note: An SQLite database is probably not recommended for production use, but is a quick and easy way to try out the software without dependencies.
+
+Note2: For details about database password encryption please refer to the [postfixadmin hashing documentation](https://github.com/postfixadmin/postfixadmin/blob/postfixadmin_3.3/DOCUMENTS/HASHING.md)
+
+You can also set the postfix host and port.
+
+ * POSTFIXADMIN\_SMTP\_SERVER=... - localhost per default
+ * POSTFIXADMIN\_SMTP\_PORT=...   - 25 per default
+
+You can enable DKIM through the following enviroment variables
+ * POSTFIXADMIN\_DKIM=...  - YES/NO
+ * POSTFIXADMIN\_DKIM\_ALL\_ADMINS=... - YES/NO
+
+### Using Docker secrets
+
+As an alternative to passing sensitive information via environment variables, `_FILE` may be appended to some of the previously listed environment variables, causing the initialization script to load the values for those variables from files present in the container. In particular, this can be used to load passwords from Docker secrets stored in /run/secrets/<secret_name> files. For example:
+
+```bash
+docker run -e POSTFIXADMIN_DB_USER_FILE=/run/secrets/postfix-db-user
+           -e POSTFIXADMIN_DB_PASSWORD_FILE=/run/secrets/postfix-db-passwd
+           -e POSTFIXADMIN_SETUP_PASSWORD_FILE=/run/secrets/postfix-setup-passwd
+        postfixadmin
+```
+
+All environment vars are supporting the secret's docker strategy.
+
+Note, the POSTFIXADMIN_SETUP_PASSWORD varaible contains dollar signs, so needs quoting to avoid variable expansion. See also #63
+
+### Example docker run
+
+Setup password is : mysecretpassword 
+
+```bash
+docker run -e POSTFIXADMIN_DB_TYPE=mysqli \
+           -e POSTFIXADMIN_DB_HOST=whatever \
+           -e POSTFIXADMIN_DB_USER=user \
+           -e POSTFIXADMIN_DB_PASSWORD=changeme \
+           -e POSTFIXADMIN_DB_NAME=postfixadmin \
+           -e POSTFIXADMIN_SETUP_PASSWORD='$2y$10$3ycavDC7g.JQrxZRRDZ5IuS2O2Y6Rpl79XWTDnbI5nPREYfUIf6dK' \
+           -e POSTFIXADMIN_SMTP_SERVER=postfix \
+           -e POSTFIXADMIN_SMTP_PORT=25 \
+           -e POSTFIXADMIN_ENCRYPT=md5crypt \
+           -e POSTFIXADMIN_DKIM=YES \
+           -e POSTFIXADMIN_DKIM_ALL_ADMINS=NO \
+           --name postfixadmin \
+           -p 8080:80 \
+        postfixadmin
+```
+
+Then visit http://localhost:8080/setup.php. Use mysecretpassword to login to the page.
+
+## Existing setup / with config.local.php
+
+Postfixadmin's default configuration is stored in a config.inc.php file (see https://github.com/postfixadmin/postfixadmin/blob/master/config.inc.php ). 
+
+To customise, copy this file, remove everything you don't want to override, and call it **config.local.php**.
+
+
+```bash
+docker run -v /local/path/to/config.local.php:/var/www/html/config.local.php \
+           --name postfixadmin \
+           -p 8080:80 \
+           postfixadmin
+```
+
+# Next Steps
+
+Once the container is running, try visiting :
+
+ * http://localhost:8080/setup.php (to create admin users)
+ * http://localhost:8080/ (to login as the domain admin you created through setup.php)
+
+
+# Docker Compose
+
+Try something like the below in a **docker-compose.yml** file; changing the usernames/passwords as required.
+
+This is using a POSTFIXADMIN_SETUP_PASSWORD of 'mysecretpassword'. Note a $ is changed to $$ to get around variable expansion issues ( see #63 )
+
+## Steps 
+
+ 1. `docker compose up` 
+ 2. `docker compose logs -f postfixadmin` (it may take about 30s for the database to build, and the web ui to be ready)
+ 3. Point your web browser at http://localhost:8000/setup.php - login with your setup password (mysecretpassword).
+ 4. Add a super admin account .... 
+ 5. Visit http://localhost:8000/login.php and login with your new admin account, add mailboxes etc.
+
+
+```yaml
+
+services:
+   db:
+     image: mysql:8.0
+     restart: always
+     environment:
+       MYSQL_ROOT_PASSWORD: notSecureChangeMe
+       MYSQL_DATABASE: postfixadmin
+       MYSQL_USER: postfixadmin
+       MYSQL_PASSWORD: postfixadminPassword
+
+   postfixadmin:
+     depends_on:
+       - db
+     image: postfixadmin:latest
+     ports:
+       - "8000:80"
+     restart: always
+     environment:
+       POSTFIXADMIN_DB_TYPE: mysqli
+       POSTFIXADMIN_DB_HOST: db
+       POSTFIXADMIN_DB_USER: postfixadmin
+       POSTFIXADMIN_DB_NAME: postfixadmin
+       POSTFIXADMIN_DB_PASSWORD: postfixadminPassword
+       POSTFIXADMIN_SMTP_SERVER: postfix
+       POSTFIXADMIN_SETUP_PASSWORD: $$2y$$10$$8./sbCrwpLGeWv/6auLtC.ROq/pRpm573QNdISESNqZ9p0uoL3eq6
+       POSTFIXADMIN_SMTP_PORT: 25
+       POSTFIXADMIN_ENCRYPT: md5crypt
+
+```

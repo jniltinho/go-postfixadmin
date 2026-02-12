@@ -42,11 +42,17 @@ func (Mailbox) TableName() string {
 
 // Admin represents the 'admin' table
 type Admin struct {
-	Username string    `gorm:"primaryKey;column:username"`
-	Password string    `gorm:"column:password"`
-	Created  time.Time `gorm:"column:created"`
-	Modified time.Time `gorm:"column:modified"`
-	Active   bool      `gorm:"column:active"`
+	Username      string    `gorm:"primaryKey;column:username"`
+	Password      string    `gorm:"column:password"`
+	Created       time.Time `gorm:"column:created"`
+	Modified      time.Time `gorm:"column:modified"`
+	Active        bool      `gorm:"column:active"`
+	Superadmin    bool      `gorm:"column:superadmin"`
+	Phone         string    `gorm:"column:phone"`
+	EmailOther    string    `gorm:"column:email_other"`
+	Token         string    `gorm:"column:token"`
+	TokenValidity time.Time `gorm:"column:token_validity"`
+	TOTPSecret    *string   `gorm:"column:totp_secret"`
 }
 
 func (Admin) TableName() string {

@@ -1,0 +1,8 @@
+
+.git
+.gitignore
+node_modules
+DOCUMENTS
+DOCUMENTS/docker/dbdata
+postfixadmin
+go.sum

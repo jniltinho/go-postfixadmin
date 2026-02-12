@@ -10,10 +10,11 @@ import (
 	"github.com/GehirnInc/crypt"
 	_ "github.com/GehirnInc/crypt/md5_crypt"
 	_ "github.com/GehirnInc/crypt/sha512_crypt"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // CheckPassword verifies if the plaintext password matches the hashed password
-// supports {MD5}, {CRYPT}, and $6$ (SHA512-CRYPT)
+// supports {MD5}, {CRYPT}, $6$ (SHA512-CRYPT), and Bcrypt ($2a$, $2y$, $2b$)
 func CheckPassword(plain, hashed string) (bool, error) {
 	if strings.HasPrefix(hashed, "{MD5}") {
 		hash := md5.Sum([]byte(plain))
@@ -22,6 +23,12 @@ func CheckPassword(plain, hashed string) (bool, error) {
 	}
 
 	hashed = strings.TrimPrefix(hashed, "{CRYPT}")
+
+	// Check for Bcrypt ($2a$, $2y$, $2b$)
+	if strings.HasPrefix(hashed, "$2") {
+		err := bcrypt.CompareHashAndPassword([]byte(hashed), []byte(plain))
+		return err == nil, nil
+	}
 
 	// For CRYPT and SHA512-CRYPT
 	cryptScheme := crypt.SHA512.New()
@@ -63,4 +70,13 @@ func HashPasswordMD5Crypt(plain string) (string, error) {
 		return "", err
 	}
 	return hash, nil
+}
+
+// HashPasswordBcrypt generates a Bcrypt hash ($2y$)
+func HashPasswordBcrypt(plain string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(plain), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+	return string(bytes), nil
 }
