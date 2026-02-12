@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -45,5 +46,34 @@ func TestCheckPassword(t *testing.T) {
 				t.Logf("CheckPassword() got = %v, want %v (This might be expected for dummy hashes)", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestHashPasswordMD5Crypt(t *testing.T) {
+	password := "mypassword"
+	hash, err := HashPasswordMD5Crypt(password)
+	if err != nil {
+		t.Fatalf("HashPasswordMD5Crypt failed: %v", err)
+	}
+
+	if !strings.HasPrefix(hash, "$1$") {
+		t.Errorf("Expected hash to start with $1$, got %s", hash)
+	}
+
+	match, err := CheckPassword(password, hash)
+	if err != nil {
+		t.Fatalf("CheckPassword failed to verify generated hash: %v", err)
+	}
+
+	if !match {
+		t.Error("CheckPassword failed to verify correct password")
+	}
+
+	match, err = CheckPassword("wrongpassword", hash)
+	if err != nil {
+		t.Fatalf("CheckPassword error on wrong password: %v", err)
+	}
+	if match {
+		t.Error("CheckPassword verified wrong password")
 	}
 }

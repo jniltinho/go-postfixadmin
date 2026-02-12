@@ -2,7 +2,9 @@ package utils
 
 import (
 	"crypto/md5"
+	"crypto/rand"
 	"encoding/hex"
+	"fmt"
 	"strings"
 
 	"github.com/GehirnInc/crypt"
@@ -41,6 +43,22 @@ func CheckPassword(plain, hashed string) (bool, error) {
 func HashPassword(plain string) (string, error) {
 	cryptScheme := crypt.SHA512.New()
 	hash, err := cryptScheme.Generate([]byte(plain), []byte("$6$rounds=5000$salt"))
+	if err != nil {
+		return "", err
+	}
+	return hash, nil
+}
+
+// HashPasswordMD5Crypt generates a MD5-CRYPT hash ($1$) with a random salt
+func HashPasswordMD5Crypt(plain string) (string, error) {
+	salt := make([]byte, 8)
+	if _, err := rand.Read(salt); err != nil {
+		return "", err
+	}
+	saltStr := fmt.Sprintf("$1$%x", salt)
+
+	cryptScheme := crypt.MD5.New()
+	hash, err := cryptScheme.Generate([]byte(plain), []byte(saltStr))
 	if err != nil {
 		return "", err
 	}
