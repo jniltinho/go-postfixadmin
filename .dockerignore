@@ -6,3 +6,7 @@ DOCUMENTS
 DOCUMENTS/docker/dbdata
 postfixadmin
 go.sum
+LICENSE
+README.md
+design-system
+Makefile

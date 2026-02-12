@@ -77,3 +77,31 @@ func TestHashPasswordMD5Crypt(t *testing.T) {
 		t.Error("CheckPassword verified wrong password")
 	}
 }
+
+func TestHashPasswordBcrypt(t *testing.T) {
+	password := "mybcryptpassword"
+	hash, err := HashPasswordBcrypt(password)
+	if err != nil {
+		t.Fatalf("HashPasswordBcrypt failed: %v", err)
+	}
+
+	if !strings.HasPrefix(hash, "$2") {
+		t.Errorf("Expected hash to start with $2, got %s", hash)
+	}
+
+	match, err := CheckPassword(password, hash)
+	if err != nil {
+		t.Fatalf("CheckPassword failed to verify generated bcrypt hash: %v", err)
+	}
+	if !match {
+		t.Error("CheckPassword failed to verify correct bcrypt password")
+	}
+
+	match, err = CheckPassword("wrongpassword", hash)
+	if err != nil {
+		t.Fatalf("CheckPassword error on wrong password: %v", err)
+	}
+	if match {
+		t.Error("CheckPassword verified wrong bcrypt password")
+	}
+}
