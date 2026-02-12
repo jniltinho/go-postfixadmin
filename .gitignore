@@ -29,7 +29,7 @@ go.work.sum
 .env
 
 # Docker data
-DOCUMENTS/docker/dbdata/
-DOCUMENTS/docker/dbdata/*
+DOCUMENTS/docker/_dbdata/
+DOCUMENTS/docker/_dbdata/*
 
 
