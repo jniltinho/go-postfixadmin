@@ -4,6 +4,7 @@
 node_modules
 DOCUMENTS
 postfixadmin
+go-postfixadmin
 go.sum
 LICENSE
 README.md

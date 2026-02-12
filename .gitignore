@@ -9,6 +9,7 @@
 *.so
 *.dylib
 postfixadmin
+go-postfixadmin
 node_modules
 package-lock.json
 
