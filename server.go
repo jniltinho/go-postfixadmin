@@ -15,8 +15,6 @@ import (
 
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
-	"gorm.io/driver/mysql"
-	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
@@ -39,30 +37,12 @@ func (t *Template) Render(c *echo.Context, w io.Writer, name string, data any) e
 	return tmpl.ExecuteTemplate(w, name, data)
 }
 
-func StartServer(embeddedFiles embed.FS, port int) {
+func StartServer(embeddedFiles embed.FS, port int, db *gorm.DB) {
 	e := echo.New()
 
 	// Middleware
 	e.Use(middleware.RequestLogger())
 	e.Use(middleware.Recover())
-
-	// Database Connection
-	var db *gorm.DB
-	var err error
-	dsn := os.Getenv("DATABASE_URL")
-	if dsn == "" {
-		dsn = "user:password@tcp(localhost:3306)/postfixadmin?charset=utf8mb4&parseTime=True&loc=Local"
-	}
-
-	if os.Getenv("DB_DRIVER") == "postgres" {
-		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	} else {
-		db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	}
-
-	if err != nil {
-		e.Logger.Warn("Warning: Database connection failed. Proceeding for build check.")
-	}
 
 	// Template Pre-parsing (from embed.FS)
 	t := &Template{
