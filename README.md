@@ -99,7 +99,7 @@ DATABASE_URL="host=localhost user=gorm password=gorm dbname=gorm port=9920 sslmo
 
 ---
 
-## � Flags da CLI
+## 📝 Flags da CLI
 
 Abaixo estão as flags disponíveis ao executar o binário `./postfixadmin`:
 
@@ -123,7 +123,7 @@ Usage of ./postfixadmin:
 
 ---
 
-## �📝 Comandos úteis do Makefile
+## 📝 Comandos úteis do Makefile
 
 | Comando | Descrição |
 | :--- | :--- |
