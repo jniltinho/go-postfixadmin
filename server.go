@@ -1,7 +1,9 @@
 package main
 
 import (
+	"crypto/rand"
 	"embed"
+	"encoding/hex"
 	"fmt"
 	"html/template"
 	"io"
@@ -12,9 +14,12 @@ import (
 	"path"
 
 	"go-postfixadmin/internal/handlers"
+	"go-postfixadmin/internal/middleware"
 
+	"github.com/gorilla/sessions"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v5"
-	"github.com/labstack/echo/v5/middleware"
+	echoMiddleware "github.com/labstack/echo/v5/middleware"
 	"gorm.io/gorm"
 )
 
@@ -41,8 +46,25 @@ func StartServer(embeddedFiles embed.FS, port int, db *gorm.DB) {
 	e := echo.New()
 
 	// Middleware
-	e.Use(middleware.RequestLogger())
-	e.Use(middleware.Recover())
+	e.Use(echoMiddleware.RequestLogger())
+	e.Use(echoMiddleware.Recover())
+
+	// Session Middleware
+	// Using a hardcoded secret for simplicity. In production, use os.Getenv("SESSION_SECRET")
+	secret := os.Getenv("SESSION_SECRET")
+	if secret == "" {
+		bytes := make([]byte, 32)
+		if _, err := rand.Read(bytes); err != nil {
+			secret = "9a048f79e88e35de37dc2c43c1fa002f358f92957a7690e60109cfe8a65178e0"
+		} else {
+			secret = hex.EncodeToString(bytes)
+			slog.Info("Generated random session secret", "secret", secret)
+		}
+	}
+	e.Use(session.Middleware(sessions.NewCookieStore([]byte(secret))))
+
+	// Auth Middleware
+	e.Use(middleware.AuthMiddleware)
 
 	// Template Pre-parsing (from embed.FS)
 	t := &Template{
@@ -114,6 +136,7 @@ func StartServer(embeddedFiles embed.FS, port int, db *gorm.DB) {
 
 	e.GET("/login", h.Login)
 	e.POST("/login", h.Login)
+	e.GET("/logout", h.Logout)
 	e.GET("/dashboard", h.Dashboard)
 	e.GET("/domains", h.ListDomains)
 	e.GET("/domains/add", h.AddDomainForm)

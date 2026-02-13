@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"go-postfixadmin/internal/middleware"
 	"go-postfixadmin/internal/models"
 	"go-postfixadmin/internal/utils"
 
@@ -36,9 +37,20 @@ func (h *Handler) Login(c *echo.Context) error {
 			return c.Render(http.StatusUnauthorized, "login.html", map[string]interface{}{"error": "Invalid credentials"})
 		}
 
+		// Set session
+		if err := middleware.SetSession(c); err != nil {
+			return c.Render(http.StatusInternalServerError, "login.html", map[string]interface{}{"error": "Failed to create session"})
+		}
+
 		return c.Redirect(http.StatusFound, "/dashboard")
 	}
 	return c.Render(http.StatusOK, "login.html", nil)
+}
+
+// Logout encerra a sessão
+func (h *Handler) Logout(c *echo.Context) error {
+	middleware.ClearSession(c)
+	return c.Redirect(http.StatusFound, "/login")
 }
 
 // Dashboard exibe a página inicial com estatísticas
