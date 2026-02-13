@@ -1,0 +1,379 @@
+{{define "title"}}Edit Mailbox - Go-PostfixAdmin{{end}}
+{{define "breadcrumb"}}Edit Email Account{{end}}
+
+{{define "content"}}
+<div class="max-w-6xl mx-auto">
+    <div class="mb-8">
+        <h2 class="text-4xl font-mono font-black uppercase tracking-tight mb-2">Edit Email Account</h2>
+        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Update mailbox settings and configuration.
+        </p>
+    </div>
+
+    {{if .Error}}
+    <div class="mb-6 bg-red-50 border-4 border-red-600 neo-shadow-sm p-6">
+        <div class="flex items-start">
+            <i data-lucide="alert-circle" class="w-6 h-6 text-red-600 mr-3 mt-1"></i>
+            <div>
+                <h3 class="font-black text-red-600 uppercase tracking-wide mb-1">Error</h3>
+                <p class="text-sm text-red-700">{{.Error}}</p>
+            </div>
+        </div>
+    </div>
+    {{end}}
+
+    {{if .Mailbox}}
+    <form method="POST" action="/mailboxes/edit/{{.Mailbox.Username}}" class="space-y-6" id="mailboxForm">
+        <!-- Basic Information Card -->
+        <div class="bg-white border-4 border-brand-text neo-shadow-sm p-8">
+            <h3 class="text-xl font-mono font-black uppercase tracking-tight mb-6 flex items-center">
+                <i data-lucide="mail" class="w-5 h-5 mr-2"></i>
+                Email Account
+            </h3>
+
+            <div class="space-y-6">
+                <!-- Email Address (Read-only) -->
+                <div>
+                    <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
+                        Email Address
+                    </label>
+                    <div class="w-full px-4 py-3 border-2 border-gray-300 bg-gray-50 font-medium font-mono text-lg">
+                        {{.Mailbox.Username}}
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">Email address cannot be changed</p>
+                </div>
+
+                <!-- Display Name -->
+                <div>
+                    <label for="name" class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
+                        Display Name
+                    </label>
+                    <input type="text" id="name" name="name" placeholder="John Doe" value="{{.Mailbox.Name}}"
+                        class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors">
+                    <p class="text-xs text-gray-500 mt-2">Full name displayed in email client</p>
+                </div>
+
+                <!-- Active Toggle -->
+                <div class="flex items-center">
+                    <input type="checkbox" id="active" name="active" value="true" {{if .Mailbox.Active}}checked{{end}}
+                        class="w-6 h-6 border-2 border-brand-text cursor-pointer">
+                    <label for="active" class="ml-3 text-sm font-bold cursor-pointer">
+                        Habilitado
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Password Section Card (Optional) -->
+        <details class="bg-white border-4 border-brand-text neo-shadow-sm">
+            <summary
+                class="p-8 cursor-pointer font-mono font-black uppercase tracking-tight text-lg flex items-center hover:bg-gray-50 transition-colors">
+                <i data-lucide="key" class="w-5 h-5 mr-2"></i>
+                Change Password (Optional)
+                <i data-lucide="chevron-down" class="w-5 h-5 ml-auto"></i>
+            </summary>
+
+            <div class="px-8 pb-8 pt-0 space-y-6 border-t-4 border-brand-text">
+                <!-- Password Change Checkbox -->
+                <div class="bg-yellow-50 border-2 border-yellow-600 p-4 rounded flex items-start">
+                    <input type="checkbox" id="change_password_toggle" name="change_password" value="true"
+                        class="w-6 h-6 border-2 border-brand-text cursor-pointer mt-1">
+                    <div class="ml-3">
+                        <label for="change_password_toggle" class="font-bold text-yellow-900 cursor-pointer">
+                            I want to change the password
+                        </label>
+                        <p class="text-xs text-yellow-700 mt-1">Leave unchecked to keep current password</p>
+                    </div>
+                </div>
+
+                <div id="passwordFields" class="space-y-6 hidden">
+                    <!-- Password Generator Button -->
+                    <div class="flex items-center justify-between bg-blue-50 border-2 border-blue-600 p-4 rounded">
+                        <div class="flex items-center">
+                            <i data-lucide="wand-2" class="w-5 h-5 text-blue-600 mr-3"></i>
+                            <div>
+                                <p class="font-bold text-blue-900">Need a strong password?</p>
+                                <p class="text-xs text-blue-700">Generate a secure random password automatically</p>
+                            </div>
+                        </div>
+                        <button type="button" onclick="generatePassword()"
+                            class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-black px-6 py-3 shadow-[2px_2px_0px_#1E3A8A] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#1E3A8A] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest">
+                            Generate
+                        </button>
+                    </div>
+
+                    <!-- New Password Input -->
+                    <div>
+                        <label for="password"
+                            class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
+                            New Password
+                        </label>
+                        <div class="relative">
+                            <input type="password" id="password" name="password" minlength="8"
+                                placeholder="Minimum 8 characters"
+                                class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors pr-12">
+                            <button type="button" onclick="togglePassword('password')"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary transition-colors">
+                                <i data-lucide="eye" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">Minimum 8 characters required</p>
+                    </div>
+
+                    <!-- Password Strength Meter -->
+                    <div id="strengthMeter" class="hidden">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-black uppercase tracking-widest text-brand-text">Password
+                                Strength</span>
+                            <span id="strengthText" class="text-xs font-bold uppercase tracking-wider"></span>
+                        </div>
+                        <div class="h-2 bg-gray-200 border-2 border-brand-text overflow-hidden">
+                            <div id="strengthBar" class="h-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Confirm Password Input -->
+                    <div>
+                        <label for="password_confirm"
+                            class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
+                            Confirm New Password
+                        </label>
+                        <div class="relative">
+                            <input type="password" id="password_confirm" name="password_confirm" minlength="8"
+                                placeholder="Re-enter password"
+                                class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors pr-12">
+                            <button type="button" onclick="togglePassword('password_confirm')"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary transition-colors">
+                                <i data-lucide="eye" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                        <p id="matchIndicator" class="text-xs mt-2 hidden"></p>
+                    </div>
+                </div>
+            </div>
+        </details>
+
+        <!-- Advanced Settings Card -->
+        <details class="bg-white border-4 border-brand-text neo-shadow-sm" open>
+            <summary
+                class="p-8 cursor-pointer font-mono font-black uppercase tracking-tight text-lg flex items-center hover:bg-gray-50 transition-colors">
+                <i data-lucide="settings" class="w-5 h-5 mr-2"></i>
+                Advanced Settings
+                <i data-lucide="chevron-down" class="w-5 h-5 ml-auto"></i>
+            </summary>
+
+            <div class="px-8 pb-8 pt-0 space-y-6 border-t-4 border-brand-text">
+                <div class="grid grid-cols-2 gap-6">
+                    <!-- Quota -->
+                    <div>
+                        <label for="quota"
+                            class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
+                            Quota (MB)
+                        </label>
+                        <input type="number" id="quota" name="quota" min="0" value="{{.QuotaMB}}"
+                            class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors">
+                        <p class="text-xs text-gray-500 mt-2">Storage limit (0 = unlimited)</p>
+                    </div>
+
+                    <!-- SMTP Active -->
+                    <div class="flex items-center pt-8">
+                        <input type="checkbox" id="smtp_active" name="smtp_active" value="true" {{if
+                            .Mailbox.SMTPActive}}checked{{end}}
+                            class="w-6 h-6 border-2 border-brand-text cursor-pointer">
+                        <label for="smtp_active" class="ml-3 text-sm font-bold cursor-pointer">
+                            SMTP Active (can send email)
+                        </label>
+                    </div>
+                </div>
+
+
+
+                <!-- Alternative Email -->
+                <div>
+                    <label for="email_other"
+                        class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
+                        Alternative Email
+                    </label>
+                    <input type="email" id="email_other" name="email_other" placeholder="alternative@email.com"
+                        value="{{.Mailbox.EmailOther}}"
+                        class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors">
+                </div>
+            </div>
+        </details>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center justify-end space-x-4">
+            <a href="/mailboxes?domain={{.Mailbox.Domain}}"
+                class="bg-white hover:bg-gray-50 text-brand-text border-2 border-brand-text font-black px-8 py-4 shadow-[2px_2px_0px_#1E293B] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center">
+                <i data-lucide="x" class="w-5 h-5 mr-2"></i>
+                Cancel
+            </a>
+            <button type="submit" id="submitBtn"
+                class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-8 py-4 shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center">
+                <i data-lucide="save" class="w-5 h-5 mr-2"></i>
+                Update Mailbox
+            </button>
+        </div>
+    </form>
+    {{end}}
+</div>
+
+<script>
+    // Toggle password change fields
+    document.getElementById('change_password_toggle').addEventListener('change', function () {
+        const fields = document.getElementById('passwordFields');
+        const passwordInput = document.getElementById('password');
+        const confirmInput = document.getElementById('password_confirm');
+
+        if (this.checked) {
+            fields.classList.remove('hidden');
+            passwordInput.required = true;
+            confirmInput.required = true;
+        } else {
+            fields.classList.add('hidden');
+            passwordInput.required = false;
+            confirmInput.required = false;
+            passwordInput.value = '';
+            confirmInput.value = '';
+            document.getElementById('strengthMeter').classList.add('hidden');
+            document.getElementById('matchIndicator').classList.add('hidden');
+        }
+    });
+
+    // Toggle password visibility
+    function togglePassword(fieldId) {
+        const field = document.getElementById(fieldId);
+        const icon = event.currentTarget.querySelector('i');
+
+        if (field.type === 'password') {
+            field.type = 'text';
+            icon.setAttribute('data-lucide', 'eye-off');
+        } else {
+            field.type = 'password';
+            icon.setAttribute('data-lucide', 'eye');
+        }
+        lucide.createIcons();
+    }
+
+    // Generate complex password
+    async function generatePassword() {
+        try {
+            const response = await fetch('/api/generate-password');
+            const data = await response.json();
+
+            document.getElementById('password').value = data.password;
+            document.getElementById('password_confirm').value = data.password;
+
+            // Trigger validation updates
+            checkPasswordStrength();
+            checkPasswordMatch();
+        } catch (error) {
+            console.error('Failed to generate password:', error);
+            alert('Failed to generate password. Please try again.');
+        }
+    }
+
+    // Check password strength
+    function checkPasswordStrength() {
+        const password = document.getElementById('password').value;
+        const meter = document.getElementById('strengthMeter');
+        const bar = document.getElementById('strengthBar');
+        const text = document.getElementById('strengthText');
+
+        if (password.length === 0) {
+            meter.classList.add('hidden');
+            return;
+        }
+
+        meter.classList.remove('hidden');
+
+        let strength = 0;
+        let strengthLabel = '';
+        let color = '';
+
+        // Calculate strength
+        if (password.length >= 8) strength += 25;
+        if (password.length >= 12) strength += 15;
+        if (/[a-z]/.test(password)) strength += 15;
+        if (/[A-Z]/.test(password)) strength += 15;
+        if (/[0-9]/.test(password)) strength += 15;
+        if (/[^a-zA-Z0-9]/.test(password)) strength += 15;
+
+        // Determine label and color
+        if (strength < 40) {
+            strengthLabel = 'Weak';
+            color = '#DC2626'; // red-600
+        } else if (strength < 60) {
+            strengthLabel = 'Fair';
+            color = '#F59E0B'; // amber-500
+        } else if (strength < 80) {
+            strengthLabel = 'Good';
+            color = '#10B981'; // green-500
+        } else {
+            strengthLabel = 'Strong';
+            color = '#059669'; // green-600
+        }
+
+        bar.style.width = strength + '%';
+        bar.style.backgroundColor = color;
+        text.textContent = strengthLabel;
+        text.style.color = color;
+    }
+
+    // Check password match
+    function checkPasswordMatch() {
+        const password = document.getElementById('password').value;
+        const confirm = document.getElementById('password_confirm').value;
+        const indicator = document.getElementById('matchIndicator');
+        const submitBtn = document.getElementById('submitBtn');
+
+        if (confirm.length === 0) {
+            indicator.classList.add('hidden');
+            return;
+        }
+
+        indicator.classList.remove('hidden');
+
+        if (password === confirm) {
+            indicator.textContent = '✓ Passwords match';
+            indicator.className = 'text-xs mt-2 font-bold text-green-600';
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        } else {
+            indicator.textContent = '✗ Passwords do not match';
+            indicator.className = 'text-xs mt-2 font-bold text-red-600';
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+    }
+
+    // Event listeners for password validation
+    document.getElementById('password').addEventListener('input', function () {
+        checkPasswordStrength();
+        checkPasswordMatch();
+    });
+
+    document.getElementById('password_confirm').addEventListener('input', checkPasswordMatch);
+
+    // Form validation
+    document.getElementById('mailboxForm').addEventListener('submit', function (e) {
+        const changePassword = document.getElementById('change_password_toggle').checked;
+
+        if (changePassword) {
+            const password = document.getElementById('password').value;
+            const confirm = document.getElementById('password_confirm').value;
+
+            if (password.length < 8) {
+                e.preventDefault();
+                alert('Password must be at least 8 characters');
+                return false;
+            }
+
+            if (password !== confirm) {
+                e.preventDefault();
+                alert('Passwords do not match');
+                return false;
+            }
+        }
+    });
+</script>
+{{end}}

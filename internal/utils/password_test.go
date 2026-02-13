@@ -85,8 +85,8 @@ func TestHashPasswordBcrypt(t *testing.T) {
 		t.Fatalf("HashPasswordBcrypt failed: %v", err)
 	}
 
-	if !strings.HasPrefix(hash, "$2") {
-		t.Errorf("Expected hash to start with $2, got %s", hash)
+	if !strings.HasPrefix(hash, "$2y$") {
+		t.Errorf("Expected hash to start with $2y$, got %s", hash)
 	}
 
 	match, err := CheckPassword(password, hash)

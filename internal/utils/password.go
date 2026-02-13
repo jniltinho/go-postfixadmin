@@ -25,8 +25,12 @@ func CheckPassword(plain, hashed string) (bool, error) {
 	hashed = strings.TrimPrefix(hashed, "{CRYPT}")
 
 	// Check for Bcrypt ($2a$, $2y$, $2b$)
+	// Check for Bcrypt ($2a$, $2y$, $2b$)
 	if strings.HasPrefix(hashed, "$2") {
-		err := bcrypt.CompareHashAndPassword([]byte(hashed), []byte(plain))
+		// Go's bcrypt package expects $2a$ or $2b, but handles $2y$ by treating it as $2a$ if we replace it
+		// standard lib support for $2y$ might be limited, so normalize for check
+		normalizedHash := strings.Replace(hashed, "$2y$", "$2a$", 1)
+		err := bcrypt.CompareHashAndPassword([]byte(normalizedHash), []byte(plain))
 		return err == nil, nil
 	}
 
@@ -46,14 +50,16 @@ func CheckPassword(plain, hashed string) (bool, error) {
 	return err == nil, nil
 }
 
-// HashPassword generates a SHA512-CRYPT hash (default for new passwords)
+// HashPassword generates a Bcrypt hash ($2y$10$) compatible with PHP/PostfixAdmin
 func HashPassword(plain string) (string, error) {
-	cryptScheme := crypt.SHA512.New()
-	hash, err := cryptScheme.Generate([]byte(plain), []byte("$6$rounds=5000$salt"))
+	// Generate bcrypt hash with default cost (10)
+	hash, err := bcrypt.GenerateFromPassword([]byte(plain), bcrypt.DefaultCost)
 	if err != nil {
 		return "", err
 	}
-	return hash, nil
+	// Replace $2a$ with $2y$ for PHP compatibility (fixes high-bit bug in old PHP versions)
+	// PostfixAdmin typically expects $2y$ prefix
+	return strings.Replace(string(hash), "$2a$", "$2y$", 1), nil
 }
 
 // HashPasswordMD5Crypt generates a MD5-CRYPT hash ($1$) with a random salt
@@ -78,5 +84,5 @@ func HashPasswordBcrypt(plain string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return string(bytes), nil
+	return strings.Replace(string(bytes), "$2a$", "$2y$", 1), nil
 }

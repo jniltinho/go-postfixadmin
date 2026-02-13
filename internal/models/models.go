@@ -36,11 +36,10 @@ type Mailbox struct {
 	Created        time.Time `gorm:"column:created"`
 	Modified       time.Time `gorm:"column:modified"`
 	Active         bool      `gorm:"column:active"`
-	Phone          string    `gorm:"column:phone"`
 	EmailOther     string    `gorm:"column:email_other"`
 	Token          string    `gorm:"column:token"`
-	TokenValidity  time.Time `gorm:"column:token_validity"`
-	PasswordExpiry time.Time `gorm:"column:password_expiry"`
+	TokenValidity  time.Time `gorm:"column:token_validity;default:'2000-01-01 00:00:00'"`
+	PasswordExpiry time.Time `gorm:"column:password_expiry;default:'2000-01-01 00:00:00'"`
 	TOTPSecret     *string   `gorm:"column:totp_secret"`
 	SMTPActive     bool      `gorm:"column:smtp_active;default:true"`
 }

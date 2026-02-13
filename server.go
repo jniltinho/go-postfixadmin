@@ -122,6 +122,12 @@ func StartServer(embeddedFiles embed.FS, port int, db *gorm.DB) {
 	e.POST("/domains/edit/:domain", h.EditDomain)
 	e.DELETE("/domains/delete/:domain", h.DeleteDomain)
 	e.GET("/mailboxes", h.ListMailboxes)
+	e.GET("/mailboxes/add", h.AddMailboxForm)
+	e.POST("/mailboxes/add", h.AddMailbox)
+	e.GET("/mailboxes/edit/:username", h.EditMailboxForm)
+	e.POST("/mailboxes/edit/:username", h.EditMailbox)
+	e.DELETE("/mailboxes/delete/:username", h.DeleteMailbox)
+	e.GET("/api/generate-password", h.GeneratePassword)
 
 	e.GET("/", func(c *echo.Context) error {
 		return c.Redirect(http.StatusMovedPermanently, "/dashboard")
