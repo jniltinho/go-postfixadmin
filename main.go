@@ -20,6 +20,7 @@ func main() {
 	versionFlag := flag.Bool("version", false, "Display version information")
 	runFlag := flag.Bool("run", false, "Start the administration server")
 	migrateFlag := flag.Bool("migrate", false, "Run database migration")
+	importSQLFlag := flag.String("import-sql", "", "Import SQL file to database")
 	portFlag := flag.Int("port", 8080, "Port to run the server on")
 	dbUrl := flag.String("db-url", "", "Database URL connection string")
 	dbDriver := flag.String("db-driver", "mysql", "Database driver (mysql or postgres)")
@@ -33,8 +34,8 @@ func main() {
 	// Connect to Database
 	db, err := utils.ConnectDB(*dbUrl, *dbDriver)
 	if err != nil {
-		if *migrateFlag {
-			slog.Error("Failed to connect to database for migration", "error", err)
+		if *migrateFlag || *importSQLFlag != "" {
+			slog.Error("Failed to connect to database for operation", "error", err)
 			os.Exit(1)
 		}
 		slog.Warn("Warning: Database connection failed.", "error", err)
@@ -50,8 +51,17 @@ func main() {
 		slog.Info("Database migration completed successfully.")
 	}
 
+	if *importSQLFlag != "" {
+		slog.Info("Importing SQL file...", "file", *importSQLFlag)
+		if err := utils.ImportSQL(db, *importSQLFlag); err != nil {
+			slog.Error("Failed to import SQL file", "error", err)
+			os.Exit(1)
+		}
+		slog.Info("SQL file imported successfully.")
+	}
+
 	if !*runFlag {
-		if !*migrateFlag {
+		if !*migrateFlag && *importSQLFlag == "" {
 			flag.Usage()
 		}
 		return

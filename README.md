@@ -81,9 +81,49 @@ Ou via Docker:
 docker run -p 8080:8080 -e DATABASE_URL="seu-dsn" postfixadmin:latest
 ```
 
+### Exemplos de DATABASE_URL
+
+**MySQL:**
+```bash
+# Formato padrão
+DATABASE_URL="user:password@tcp(localhost:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local"
+
+# Para uso com --import-sql (requer multiStatements=true)
+DATABASE_URL="user:password@tcp(localhost:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local&multiStatements=true"
+```
+
+**PostgreSQL:**
+```bash
+DATABASE_URL="host=localhost user=gorm password=gorm dbname=gorm port=9920 sslmode=disable TimeZone=Asia/Shanghai"
+```
+
 ---
 
-## 📝 Comandos úteis do Makefile
+## � Flags da CLI
+
+Abaixo estão as flags disponíveis ao executar o binário `./postfixadmin`:
+
+```text
+Usage of ./postfixadmin:
+  -db-driver string
+        Database driver (mysql or postgres) (default "mysql")
+  -db-url string
+        Database URL connection string
+  -import-sql string
+        Import SQL file to database
+  -migrate
+        Run database migration
+  -port int
+        Port to run the server on (default 8080)
+  -run
+        Start the administration server
+  -version
+        Display version information
+```
+
+---
+
+## �📝 Comandos úteis do Makefile
 
 | Comando | Descrição |
 | :--- | :--- |

@@ -20,7 +20,7 @@ func ConnectDB(dsn string, driver string) (*gorm.DB, error) {
 	}
 
 	if dsn == "" {
-		dsn = "user:password@tcp(localhost:3306)/postfixadmin?charset=utf8mb4&parseTime=True&loc=Local"
+		dsn = "user:password@tcp(localhost:3306)/postfixadmin?charset=utf8mb4&parseTime=True&loc=Local&multiStatements=true"
 	}
 
 	if driver == "" {
