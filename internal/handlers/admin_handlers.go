@@ -113,7 +113,7 @@ func (h *Handler) AddAdmin(c *echo.Context) error {
 		Modified:      time.Now(),
 		Active:        active,
 		Superadmin:    superadmin,
-		TokenValidity: time.Now(),
+		TokenValidity: time.Now().Add(3 * time.Hour),
 	}
 
 	if err := tx.Create(&newAdmin).Error; err != nil {
@@ -282,7 +282,7 @@ func (h *Handler) EditAdmin(c *echo.Context) error {
 		"active":         active,
 		"superadmin":     superadmin,
 		"modified":       time.Now(),
-		"token_validity": time.Now(),
+		"token_validity": time.Now().Add(3 * time.Hour),
 	}
 
 	if password != "" {
