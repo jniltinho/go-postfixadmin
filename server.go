@@ -15,6 +15,7 @@ import (
 
 	"go-postfixadmin/internal/handlers"
 	"go-postfixadmin/internal/middleware"
+	"go-postfixadmin/internal/routes"
 
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
@@ -134,27 +135,8 @@ func StartServer(embeddedFiles embed.FS, port int, db *gorm.DB) {
 	staticHandler := http.FileServer(http.FS(publicFS))
 	e.GET("/static/*", echo.WrapHandler(http.StripPrefix("/static/", staticHandler)))
 
-	e.GET("/login", h.Login)
-	e.POST("/login", h.Login)
-	e.GET("/logout", h.Logout)
-	e.GET("/dashboard", h.Dashboard)
-	e.GET("/domains", h.ListDomains)
-	e.GET("/domains/add", h.AddDomainForm)
-	e.POST("/domains/add", h.AddDomain)
-	e.GET("/domains/edit/:domain", h.EditDomainForm)
-	e.POST("/domains/edit/:domain", h.EditDomain)
-	e.DELETE("/domains/delete/:domain", h.DeleteDomain)
-	e.GET("/mailboxes", h.ListMailboxes)
-	e.GET("/mailboxes/add", h.AddMailboxForm)
-	e.POST("/mailboxes/add", h.AddMailbox)
-	e.GET("/mailboxes/edit/:username", h.EditMailboxForm)
-	e.POST("/mailboxes/edit/:username", h.EditMailbox)
-	e.DELETE("/mailboxes/delete/:username", h.DeleteMailbox)
-	e.GET("/api/generate-password", h.GeneratePassword)
-
-	e.GET("/", func(c *echo.Context) error {
-		return c.Redirect(http.StatusMovedPermanently, "/dashboard")
-	})
+	// Register Application Routes
+	routes.RegisterRoutes(e, h)
 
 	addr := fmt.Sprintf(":%d", port)
 	slog.Info("Starting server", "address", addr)
