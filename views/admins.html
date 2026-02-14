@@ -35,9 +35,7 @@
                     </td>
                     <td class="px-4 py-4 text-center">
                         {{if eq .DomainCount "ALL"}}
-                        <span
-                            class="inline-block px-2 py-1 text-[10px] font-black uppercase tracking-wider bg-brand-secondary text-white border border-brand-text">Super
-                            administrador</span>
+                        <span class="font-mono font-bold">Super Administrador</span>
                         {{else}}
                         <span class="font-mono font-bold">{{.DomainCount}}</span>
                         {{end}}

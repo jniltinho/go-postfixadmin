@@ -37,9 +37,9 @@ func RegisterRoutes(e *echo.Echo, h *handlers.Handler) {
 	// Admins
 	e.GET("/admins", h.ListAdmins)
 	e.GET("/admins/add", h.AddAdminForm)
-	// e.POST("/admins/add", h.AddAdmin) // To be implemented
-	e.GET("/admins/edit/:username", h.EditAdminForm) // Placeholder
-	// e.POST("/admins/edit/:username", h.EditAdmin) // To be implemented
+	e.POST("/admins/add", h.AddAdmin)
+	e.GET("/admins/edit/:username", h.EditAdminForm)
+	e.POST("/admins/edit/:username", h.EditAdmin)
 	e.DELETE("/admins/delete/:username", h.DeleteAdmin)
 
 	// API / Utils

@@ -59,7 +59,7 @@ type Admin struct {
 	Phone         string    `gorm:"column:phone"`
 	EmailOther    string    `gorm:"column:email_other"`
 	Token         string    `gorm:"column:token"`
-	TokenValidity time.Time `gorm:"column:token_validity"`
+	TokenValidity time.Time `gorm:"column:token_validity;"`
 	TOTPSecret    *string   `gorm:"column:totp_secret"`
 }
 

@@ -1,6 +1,7 @@
 
 .git
 .gitignore
+.env
 node_modules
 DOCUMENTS
 postfixadmin

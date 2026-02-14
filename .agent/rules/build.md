@@ -14,13 +14,13 @@ Before executing any Go-related build or execution commands (such as `go build`,
 ### Required Command Patterns
 
 * **For Running (Development):**
-  `export DATABASE_URL="postfixadmin:postfixadminPassword@tcp(localhost:3318)/postfixadmin?charset=utf8mb4&parseTime=True&loc=Local&multiStatements=true" && go run main.go`
+  `source .env && go run main.go`
 
 * **For Building:**
-  `export DATABASE_URL="postfixadmin:postfixadminPassword@tcp(localhost:3318)/postfixadmin?charset=utf8mb4&parseTime=True&loc=Local&multiStatements=true" && go build -o postfixadmin`
+  `source .env && go build -o postfixadmin`
 
 * **For Executing the Binary:**
-  `export DATABASE_URL="postfixadmin:postfixadminPassword@tcp(localhost:3318)/postfixadmin?charset=utf8mb4&parseTime=True&loc=Local&multiStatements=true" && ./postfixadmin --run`
+  `source .env && ./postfixadmin --run`
 
 ---
 
