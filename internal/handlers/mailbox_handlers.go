@@ -213,7 +213,7 @@ func (h *Handler) AddMailbox(c *echo.Context) error {
 			Active:         active,
 			EmailOther:     emailOther,
 			SMTPActive:     smtpActive,
-			TokenValidity:  defaultDate,
+			TokenValidity:  time.Now().Add(3 * time.Hour),
 			PasswordExpiry: defaultDate,
 		}
 
@@ -333,6 +333,7 @@ func (h *Handler) EditMailbox(c *echo.Context) error {
 	mailbox.SMTPActive = smtpActive
 	mailbox.EmailOther = emailOther
 	mailbox.Modified = time.Now()
+	mailbox.TokenValidity = time.Now().Add(3 * time.Hour)
 
 	if err := h.DB.Save(&mailbox).Error; err != nil {
 		return c.Render(http.StatusInternalServerError, "edit_mailbox.html", map[string]interface{}{
