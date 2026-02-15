@@ -12,6 +12,7 @@ import (
 const (
 	SessionName       = "session"
 	AuthKey           = "authenticated"
+	UsernameKey       = "username" // New key for storing username
 	LastActivityKey   = "last_activity"
 	InactivityTimeout = 60 * time.Minute
 )
@@ -56,7 +57,7 @@ func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 }
 
 // SetSession authenticates the user and sets initial session values
-func SetSession(c *echo.Context) error {
+func SetSession(c *echo.Context, username string) error {
 	sess, _ := session.Get(SessionName, c)
 	sess.Options = &sessions.Options{
 		Path:     "/",
@@ -64,8 +65,21 @@ func SetSession(c *echo.Context) error {
 		HttpOnly: true,
 	}
 	sess.Values[AuthKey] = true
+	sess.Values[UsernameKey] = username
 	sess.Values[LastActivityKey] = time.Now().Unix()
 	return sess.Save(c.Request(), c.Response())
+}
+
+// GetUsername retrieves the username from the session
+func GetUsername(c *echo.Context) string {
+	sess, _ := session.Get(SessionName, c)
+	if sess == nil {
+		return ""
+	}
+	if username, ok := sess.Values[UsernameKey].(string); ok {
+		return username
+	}
+	return ""
 }
 
 // ClearSession removes the session

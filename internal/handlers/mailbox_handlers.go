@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"go-postfixadmin/internal/middleware"
 	"go-postfixadmin/internal/models"
 	"go-postfixadmin/internal/utils"
 
@@ -23,11 +24,46 @@ func (h *Handler) ListMailboxes(c *echo.Context) error {
 	var mailboxes []models.Mailbox
 	domainFilter := c.QueryParam("domain") // Query parameter opcional
 
+	var isSuperAdmin bool
 	if h.DB != nil {
 		query := h.DB.Order("username ASC")
 
-		// Aplicar filtro se domínio fornecido
+		// Security: Filter by allowed domains
+		username := middleware.GetUsername(c)
+		allowedDomains, isSuper, err := utils.GetAllowedDomains(h.DB, username)
+		if err != nil {
+			return c.Render(http.StatusInternalServerError, "mailboxes.html", map[string]interface{}{
+				"Error": "Failed to check permissions: " + err.Error(),
+			})
+		}
+		isSuperAdmin = isSuper
+
+		if !isSuperAdmin {
+			if len(allowedDomains) == 0 {
+				query = query.Where("1 = 0") // No domains allowed
+			} else {
+				query = query.Where("domain IN ?", allowedDomains)
+			}
+		}
+
+		// Apply optional domain filter
 		if domainFilter != "" {
+			// Ensure the requested filter is allowed
+			if !isSuperAdmin {
+				allowed := false
+				for _, d := range allowedDomains {
+					if d == domainFilter {
+						allowed = true
+						break
+					}
+				}
+				if !allowed {
+					// User requested a forbidden domain filter
+					return c.Render(http.StatusForbidden, "mailboxes.html", map[string]interface{}{
+						"Error": "Access denied to this domain",
+					})
+				}
+			}
 			query = query.Where("domain = ?", domainFilter)
 		}
 
@@ -37,6 +73,7 @@ func (h *Handler) ListMailboxes(c *echo.Context) error {
 	return c.Render(http.StatusOK, "mailboxes.html", map[string]interface{}{
 		"Mailboxes":    mailboxes,
 		"DomainFilter": domainFilter, // Para exibir no template
+		"IsSuperAdmin": isSuperAdmin,
 	})
 }
 
@@ -44,12 +81,31 @@ func (h *Handler) ListMailboxes(c *echo.Context) error {
 func (h *Handler) AddMailboxForm(c *echo.Context) error {
 	var domains []models.Domain
 
+	var isSuperAdmin bool // Create variable in outer scope
+
 	if h.DB != nil {
-		h.DB.Where("domain != ?", "ALL").Where("active = ?", true).Order("domain ASC").Find(&domains)
+		// Security: Filter domains
+		username := middleware.GetUsername(c)
+		allowedDomains, isSuper, err := utils.GetAllowedDomains(h.DB, username)
+		if err != nil {
+			return c.Render(http.StatusInternalServerError, "mailboxes.html", map[string]interface{}{"Error": "Permission check failed"})
+		}
+		isSuperAdmin = isSuper
+
+		query := h.DB.Where("domain != ?", "ALL").Where("active = ?", true).Order("domain ASC")
+		if !isSuperAdmin {
+			if len(allowedDomains) == 0 {
+				query = query.Where("1 = 0")
+			} else {
+				query = query.Where("domain IN ?", allowedDomains)
+			}
+		}
+		query.Find(&domains)
 	}
 
 	return c.Render(http.StatusOK, "add_mailbox.html", map[string]interface{}{
-		"Domains": domains,
+		"Domains":      domains,
+		"IsSuperAdmin": isSuperAdmin,
 	})
 }
 
@@ -58,6 +114,26 @@ func (h *Handler) AddMailbox(c *echo.Context) error {
 	// Parse form data
 	localPart := strings.ToLower(strings.TrimSpace(c.FormValue("local_part")))
 	domain := strings.TrimSpace(c.FormValue("domain"))
+
+	// Security: Validate domain access
+	loggedInUser := middleware.GetUsername(c)
+	allowedDomains, isSuperAdmin, err := utils.GetAllowedDomains(h.DB, loggedInUser)
+	if err != nil {
+		return c.Render(http.StatusInternalServerError, "add_mailbox.html", map[string]interface{}{"Error": "Permission check failed"})
+	}
+
+	if !isSuperAdmin {
+		allowed := false
+		for _, d := range allowedDomains {
+			if d == domain {
+				allowed = true
+				break
+			}
+		}
+		if !allowed {
+			return c.Render(http.StatusForbidden, "add_mailbox.html", map[string]interface{}{"Error": "Access denied to this domain"})
+		}
+	}
 	name := strings.TrimSpace(c.FormValue("name"))
 	password := c.FormValue("password")
 	passwordConfirm := c.FormValue("password_confirm")
@@ -84,60 +160,64 @@ func (h *Handler) AddMailbox(c *echo.Context) error {
 	// Validation: required fields
 	if localPart == "" || domain == "" {
 		return c.Render(http.StatusBadRequest, "add_mailbox.html", map[string]interface{}{
-			"Error":      "Local part and domain are required",
-			"Domains":    domains,
-			"LocalPart":  localPart,
-			"Domain":     domain,
-			"Name":       name,
-			"Active":     active,
-			"SMTPActive": smtpActive,
-			"EmailOther": emailOther,
-			"Quota":      quota / quotaMultiplier,
+			"Error":        "Local part and domain are required",
+			"Domains":      domains,
+			"LocalPart":    localPart,
+			"Domain":       domain,
+			"Name":         name,
+			"Active":       active,
+			"SMTPActive":   smtpActive,
+			"EmailOther":   emailOther,
+			"Quota":        quota / quotaMultiplier,
+			"IsSuperAdmin": isSuperAdmin,
 		})
 	}
 
 	// Validation: local part minimum 4 characters
 	if len(localPart) < 4 {
 		return c.Render(http.StatusBadRequest, "add_mailbox.html", map[string]interface{}{
-			"Error":      "Username must be at least 4 characters",
-			"Domains":    domains,
-			"LocalPart":  localPart,
-			"Domain":     domain,
-			"Name":       name,
-			"Active":     active,
-			"SMTPActive": smtpActive,
-			"EmailOther": emailOther,
-			"Quota":      quota / quotaMultiplier,
+			"Error":        "Username must be at least 4 characters",
+			"Domains":      domains,
+			"LocalPart":    localPart,
+			"Domain":       domain,
+			"Name":         name,
+			"Active":       active,
+			"SMTPActive":   smtpActive,
+			"EmailOther":   emailOther,
+			"Quota":        quota / quotaMultiplier,
+			"IsSuperAdmin": isSuperAdmin,
 		})
 	}
 
 	// Validation: password minimum 8 characters
 	if len(password) < 8 {
 		return c.Render(http.StatusBadRequest, "add_mailbox.html", map[string]interface{}{
-			"Error":      "Password must be at least 8 characters",
-			"Domains":    domains,
-			"LocalPart":  localPart,
-			"Domain":     domain,
-			"Name":       name,
-			"Active":     active,
-			"SMTPActive": smtpActive,
-			"EmailOther": emailOther,
-			"Quota":      quota / quotaMultiplier,
+			"Error":        "Password must be at least 8 characters",
+			"Domains":      domains,
+			"LocalPart":    localPart,
+			"Domain":       domain,
+			"Name":         name,
+			"Active":       active,
+			"SMTPActive":   smtpActive,
+			"EmailOther":   emailOther,
+			"Quota":        quota / quotaMultiplier,
+			"IsSuperAdmin": isSuperAdmin,
 		})
 	}
 
 	// Validation: password confirmation match
 	if password != passwordConfirm {
 		return c.Render(http.StatusBadRequest, "add_mailbox.html", map[string]interface{}{
-			"Error":      "Password and confirmation do not match",
-			"Domains":    domains,
-			"LocalPart":  localPart,
-			"Domain":     domain,
-			"Name":       name,
-			"Active":     active,
-			"SMTPActive": smtpActive,
-			"EmailOther": emailOther,
-			"Quota":      quota / quotaMultiplier,
+			"Error":        "Password and confirmation do not match",
+			"Domains":      domains,
+			"LocalPart":    localPart,
+			"Domain":       domain,
+			"Name":         name,
+			"Active":       active,
+			"SMTPActive":   smtpActive,
+			"EmailOther":   emailOther,
+			"Quota":        quota / quotaMultiplier,
+			"IsSuperAdmin": isSuperAdmin,
 		})
 	}
 
@@ -145,15 +225,16 @@ func (h *Handler) AddMailbox(c *echo.Context) error {
 	localPartRegex := regexp.MustCompile(`^[a-zA-Z0-9._-]+$`)
 	if !localPartRegex.MatchString(localPart) {
 		return c.Render(http.StatusBadRequest, "add_mailbox.html", map[string]interface{}{
-			"Error":      "Invalid local part format. Use only letters, numbers, dots, hyphens, and underscores",
-			"Domains":    domains,
-			"LocalPart":  localPart,
-			"Domain":     domain,
-			"Name":       name,
-			"Active":     active,
-			"SMTPActive": smtpActive,
-			"EmailOther": emailOther,
-			"Quota":      quota / quotaMultiplier,
+			"Error":        "Invalid local part format. Use only letters, numbers, dots, hyphens, and underscores",
+			"Domains":      domains,
+			"LocalPart":    localPart,
+			"Domain":       domain,
+			"Name":         name,
+			"Active":       active,
+			"SMTPActive":   smtpActive,
+			"EmailOther":   emailOther,
+			"Quota":        quota / quotaMultiplier,
+			"IsSuperAdmin": isSuperAdmin,
 		})
 	}
 
@@ -164,15 +245,16 @@ func (h *Handler) AddMailbox(c *echo.Context) error {
 	var existingMailbox models.Mailbox
 	if err := h.DB.Where("username = ?", username).First(&existingMailbox).Error; err == nil {
 		return c.Render(http.StatusBadRequest, "add_mailbox.html", map[string]interface{}{
-			"Error":      "Mailbox already exists",
-			"Domains":    domains,
-			"LocalPart":  localPart,
-			"Domain":     domain,
-			"Name":       name,
-			"Active":     active,
-			"SMTPActive": smtpActive,
-			"EmailOther": emailOther,
-			"Quota":      quota / quotaMultiplier,
+			"Error":        "Mailbox already exists",
+			"Domains":      domains,
+			"LocalPart":    localPart,
+			"Domain":       domain,
+			"Name":         name,
+			"Active":       active,
+			"SMTPActive":   smtpActive,
+			"EmailOther":   emailOther,
+			"Quota":        quota / quotaMultiplier,
+			"IsSuperAdmin": isSuperAdmin,
 		})
 	}
 
@@ -180,15 +262,16 @@ func (h *Handler) AddMailbox(c *echo.Context) error {
 	hashedPassword, err := utils.HashPassword(password)
 	if err != nil {
 		return c.Render(http.StatusInternalServerError, "add_mailbox.html", map[string]interface{}{
-			"Error":      "Failed to hash password: " + err.Error(),
-			"Domains":    domains,
-			"LocalPart":  localPart,
-			"Domain":     domain,
-			"Name":       name,
-			"Active":     active,
-			"SMTPActive": smtpActive,
-			"EmailOther": emailOther,
-			"Quota":      quota / quotaMultiplier,
+			"Error":        "Failed to hash password: " + err.Error(),
+			"Domains":      domains,
+			"LocalPart":    localPart,
+			"Domain":       domain,
+			"Name":         name,
+			"Active":       active,
+			"SMTPActive":   smtpActive,
+			"EmailOther":   emailOther,
+			"Quota":        quota / quotaMultiplier,
+			"IsSuperAdmin": isSuperAdmin,
 		})
 	}
 
@@ -231,15 +314,16 @@ func (h *Handler) AddMailbox(c *echo.Context) error {
 
 	if err != nil {
 		return c.Render(http.StatusInternalServerError, "add_mailbox.html", map[string]interface{}{
-			"Error":      "Failed to create mailbox: " + err.Error(),
-			"Domains":    domains,
-			"LocalPart":  localPart,
-			"Domain":     domain,
-			"Name":       name,
-			"Active":     active,
-			"SMTPActive": smtpActive,
-			"EmailOther": emailOther,
-			"Quota":      quota / quotaMultiplier,
+			"Error":        "Failed to create mailbox: " + err.Error(),
+			"Domains":      domains,
+			"LocalPart":    localPart,
+			"Domain":       domain,
+			"Name":         name,
+			"Active":       active,
+			"SMTPActive":   smtpActive,
+			"EmailOther":   emailOther,
+			"Quota":        quota / quotaMultiplier,
+			"IsSuperAdmin": isSuperAdmin,
 		})
 	}
 
@@ -258,9 +342,29 @@ func (h *Handler) EditMailboxForm(c *echo.Context) error {
 		})
 	}
 
+	// Security: Check permission
+	loggedInUser := middleware.GetUsername(c)
+	allowedDomains, isSuperAdmin, err := utils.GetAllowedDomains(h.DB, loggedInUser)
+	if err != nil {
+		return c.Render(http.StatusInternalServerError, "edit_mailbox.html", map[string]interface{}{"Error": "Permission check failed"})
+	}
+	if !isSuperAdmin {
+		allowed := false
+		for _, d := range allowedDomains {
+			if d == mailbox.Domain {
+				allowed = true
+				break
+			}
+		}
+		if !allowed {
+			return c.Render(http.StatusForbidden, "mailboxes.html", map[string]interface{}{"Error": "Access denied"})
+		}
+	}
+
 	return c.Render(http.StatusOK, "edit_mailbox.html", map[string]interface{}{
-		"Mailbox": mailbox,
-		"QuotaMB": mailbox.Quota / 1024000,
+		"Mailbox":      mailbox,
+		"QuotaMB":      mailbox.Quota / 1024000,
+		"IsSuperAdmin": isSuperAdmin,
 	})
 }
 
@@ -274,6 +378,25 @@ func (h *Handler) EditMailbox(c *echo.Context) error {
 		return c.Render(http.StatusNotFound, "edit_mailbox.html", map[string]interface{}{
 			"Error": "Mailbox not found",
 		})
+	}
+
+	// Security: Check permission
+	loggedInUser := middleware.GetUsername(c)
+	allowedDomains, isSuperAdmin, err := utils.GetAllowedDomains(h.DB, loggedInUser)
+	if err != nil {
+		return c.Render(http.StatusInternalServerError, "edit_mailbox.html", map[string]interface{}{"Error": "Permission check failed"})
+	}
+	if !isSuperAdmin {
+		allowed := false
+		for _, d := range allowedDomains {
+			if d == mailbox.Domain {
+				allowed = true
+				break
+			}
+		}
+		if !allowed {
+			return c.Render(http.StatusForbidden, "mailboxes.html", map[string]interface{}{"Error": "Access denied"})
+		}
 	}
 
 	// Parse form data
@@ -301,16 +424,18 @@ func (h *Handler) EditMailbox(c *echo.Context) error {
 		// Validation: password minimum 8 characters
 		if len(password) < 8 {
 			return c.Render(http.StatusBadRequest, "edit_mailbox.html", map[string]interface{}{
-				"Error":   "Password must be at least 8 characters",
-				"Mailbox": mailbox,
+				"Error":        "Password must be at least 8 characters",
+				"Mailbox":      mailbox,
+				"IsSuperAdmin": isSuperAdmin,
 			})
 		}
 
 		// Validation: password confirmation match
 		if password != passwordConfirm {
 			return c.Render(http.StatusBadRequest, "edit_mailbox.html", map[string]interface{}{
-				"Error":   "Password and confirmation do not match",
-				"Mailbox": mailbox,
+				"Error":        "Password and confirmation do not match",
+				"Mailbox":      mailbox,
+				"IsSuperAdmin": isSuperAdmin,
 			})
 		}
 
@@ -318,8 +443,9 @@ func (h *Handler) EditMailbox(c *echo.Context) error {
 		hashedPassword, err := utils.HashPassword(password)
 		if err != nil {
 			return c.Render(http.StatusInternalServerError, "edit_mailbox.html", map[string]interface{}{
-				"Error":   "Failed to hash password: " + err.Error(),
-				"Mailbox": mailbox,
+				"Error":        "Failed to hash password: " + err.Error(),
+				"Mailbox":      mailbox,
+				"IsSuperAdmin": isSuperAdmin,
 			})
 		}
 
@@ -337,8 +463,9 @@ func (h *Handler) EditMailbox(c *echo.Context) error {
 
 	if err := h.DB.Save(&mailbox).Error; err != nil {
 		return c.Render(http.StatusInternalServerError, "edit_mailbox.html", map[string]interface{}{
-			"Error":   "Failed to update mailbox: " + err.Error(),
-			"Mailbox": mailbox,
+			"Error":        "Failed to update mailbox: " + err.Error(),
+			"Mailbox":      mailbox,
+			"IsSuperAdmin": isSuperAdmin,
 		})
 	}
 
@@ -359,8 +486,27 @@ func (h *Handler) DeleteMailbox(c *echo.Context) error {
 		})
 	}
 
+	// Security: Check permission
+	loggedInUser := middleware.GetUsername(c)
+	allowedDomains, isSuperAdmin, err := utils.GetAllowedDomains(h.DB, loggedInUser)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "Permission check failed"})
+	}
+	if !isSuperAdmin {
+		allowed := false
+		for _, d := range allowedDomains {
+			if d == mailbox.Domain {
+				allowed = true
+				break
+			}
+		}
+		if !allowed {
+			return c.JSON(http.StatusForbidden, map[string]interface{}{"error": "Access denied"})
+		}
+	}
+
 	// Use transaction to ensure atomicity
-	err := h.DB.Transaction(func(tx *gorm.DB) error {
+	err = h.DB.Transaction(func(tx *gorm.DB) error {
 		// Delete the mailbox
 		if err := tx.Where("username = ?", username).Delete(&models.Mailbox{}).Error; err != nil {
 			return err

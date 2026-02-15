@@ -52,12 +52,20 @@
             <h3 class="text-xl font-black uppercase tracking-tight mb-2">New domain?</h3>
             <p class="text-white font-bold text-xs uppercase tracking-wide mb-6">Create a new domain in seconds.</p>
         </div>
+        {{if .IsSuperAdmin}}
         <a href="/domains/add"
             class="w-full bg-white text-brand-text border-2 border-brand-text font-black py-4 text-center shadow-[2px_2px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[3px_3px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none flex items-center justify-center group uppercase tracking-widest text-sm">
             <span>Create Domain</span>
             <i data-lucide="plus" class="w-5 h-5 ml-2"></i>
         </a>
-        </a>
+        {{else}}
+        <button disabled
+            class="w-full bg-gray-300 text-gray-500 border-2 border-gray-400 font-black py-4 text-center flex items-center justify-center cursor-not-allowed uppercase tracking-widest text-sm"
+            title="Only Superadmins can create domains">
+            <span>Create Domain</span>
+            <i data-lucide="lock" class="w-5 h-5 ml-2"></i>
+        </button>
+        {{end}}
     </div>
 
     <!-- Create Email Actions -->

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"go-postfixadmin/internal/middleware"
 	"go-postfixadmin/internal/models"
 	"go-postfixadmin/internal/utils"
 
@@ -18,6 +19,17 @@ type AdminData struct {
 
 // ListAdmins displays the list of administrators
 func (h *Handler) ListAdmins(c *echo.Context) error {
+	// Security: Only Superadmins can list admins
+	username := middleware.GetUsername(c)
+	isSuper, err := utils.IsSuperAdmin(h.DB, username)
+	if err != nil {
+		return c.Render(http.StatusInternalServerError, "dashboard.html", map[string]interface{}{"Error": "Permission check failed"})
+	}
+	if !isSuper {
+		// UX Improvement: Redirect to dashboard instead of showing error page
+		return c.Redirect(http.StatusFound, "/dashboard")
+	}
+
 	var admins []models.Admin
 
 	if h.DB == nil {
@@ -51,13 +63,21 @@ func (h *Handler) ListAdmins(c *echo.Context) error {
 	}
 
 	return c.Render(http.StatusOK, "admins.html", map[string]interface{}{
-		"Admins": adminList,
+		"Admins":       adminList,
+		"IsSuperAdmin": isSuper,
 	})
 }
 
 // AddAdminForm displays the form to add a new administrator
 // AddAdminForm displays the form to add a new administrator
 func (h *Handler) AddAdminForm(c *echo.Context) error {
+	// Security: Only Superadmins
+	username := middleware.GetUsername(c)
+	isSuper, err := utils.IsSuperAdmin(h.DB, username)
+	if err != nil || !isSuper {
+		return c.Render(http.StatusForbidden, "admins.html", map[string]interface{}{"Error": "Access denied"})
+	}
+
 	var domains []models.Domain
 
 	if h.DB != nil {
@@ -65,12 +85,20 @@ func (h *Handler) AddAdminForm(c *echo.Context) error {
 	}
 
 	return c.Render(http.StatusOK, "add_admin.html", map[string]interface{}{
-		"Domains": domains,
+		"Domains":      domains,
+		"IsSuperAdmin": true,
 	})
 }
 
 // AddAdmin processes the creation of a new administrator
 func (h *Handler) AddAdmin(c *echo.Context) error {
+	// Security: Only Superadmins
+	loggedInUser := middleware.GetUsername(c)
+	isSuper, err := utils.IsSuperAdmin(h.DB, loggedInUser)
+	if err != nil || !isSuper {
+		return c.Render(http.StatusForbidden, "admins.html", map[string]interface{}{"Error": "Access denied"})
+	}
+
 	// Get form values
 	username := c.FormValue("username")
 	password := c.FormValue("password")
@@ -163,14 +191,22 @@ func (h *Handler) renderAddAdminError(c *echo.Context, errorMsg, username string
 	}
 
 	return c.Render(http.StatusBadRequest, "add_admin.html", map[string]interface{}{
-		"Error":    errorMsg,
-		"Username": username,
-		"Domains":  domains,
+		"Error":        errorMsg,
+		"Username":     username,
+		"Domains":      domains,
+		"IsSuperAdmin": true,
 	})
 }
 
 // DeleteAdmin handles the deletion of an administrator
 func (h *Handler) DeleteAdmin(c *echo.Context) error {
+	// Security: Only Superadmins
+	loggedInUser := middleware.GetUsername(c)
+	isSuper, err := utils.IsSuperAdmin(h.DB, loggedInUser)
+	if err != nil || !isSuper {
+		return c.JSON(http.StatusForbidden, map[string]interface{}{"error": "Access denied"})
+	}
+
 	username := c.Param("username")
 	if username == "" {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
@@ -216,6 +252,13 @@ func (h *Handler) DeleteAdmin(c *echo.Context) error {
 
 // EditAdminForm displays the form to edit an administrator
 func (h *Handler) EditAdminForm(c *echo.Context) error {
+	// Security: Only Superadmins
+	loggedInUser := middleware.GetUsername(c)
+	isSuper, err := utils.IsSuperAdmin(h.DB, loggedInUser)
+	if err != nil || !isSuper {
+		return c.Render(http.StatusForbidden, "admins.html", map[string]interface{}{"Error": "Access denied"})
+	}
+
 	username := c.Param("username")
 	if username == "" {
 		return c.Redirect(http.StatusFound, "/admins")
@@ -256,13 +299,21 @@ func (h *Handler) EditAdminForm(c *echo.Context) error {
 	}
 
 	return c.Render(http.StatusOK, "edit_admin.html", map[string]interface{}{
-		"Admin":   admin,
-		"Domains": domainOptions,
+		"Admin":        admin,
+		"Domains":      domainOptions,
+		"IsSuperAdmin": true,
 	})
 }
 
 // EditAdmin processes the update of an administrator
 func (h *Handler) EditAdmin(c *echo.Context) error {
+	// Security: Only Superadmins
+	loggedInUser := middleware.GetUsername(c)
+	isSuper, err := utils.IsSuperAdmin(h.DB, loggedInUser)
+	if err != nil || !isSuper {
+		return c.JSON(http.StatusForbidden, map[string]interface{}{"error": "Access denied"})
+	}
+
 	username := c.Param("username")
 	if username == "" {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "Username required"})
@@ -290,8 +341,9 @@ func (h *Handler) EditAdmin(c *echo.Context) error {
 		if err != nil {
 			tx.Rollback()
 			return c.Render(http.StatusOK, "edit_admin.html", map[string]interface{}{
-				"Admin": models.Admin{Username: username}, // minimal data to re-render? ideally we re-fetch
-				"Error": "Failed to hash password",
+				"Admin":        models.Admin{Username: username}, // minimal data to re-render? ideally we re-fetch
+				"Error":        "Failed to hash password",
+				"IsSuperAdmin": true,
 			})
 		}
 		updates["password"] = crypted
@@ -300,7 +352,8 @@ func (h *Handler) EditAdmin(c *echo.Context) error {
 	if err := tx.Model(&models.Admin{}).Where("username = ?", username).Updates(updates).Error; err != nil {
 		tx.Rollback()
 		return c.Render(http.StatusOK, "edit_admin.html", map[string]interface{}{
-			"Error": "Failed to update admin: " + err.Error(),
+			"Error":        "Failed to update admin: " + err.Error(),
+			"IsSuperAdmin": true,
 		})
 	}
 
@@ -309,7 +362,8 @@ func (h *Handler) EditAdmin(c *echo.Context) error {
 	if err := tx.Where("username = ?", username).Delete(&models.DomainAdmin{}).Error; err != nil {
 		tx.Rollback()
 		return c.Render(http.StatusOK, "edit_admin.html", map[string]interface{}{
-			"Error": "Failed to update domain permissions: " + err.Error(),
+			"Error":        "Failed to update domain permissions: " + err.Error(),
+			"IsSuperAdmin": true,
 		})
 	}
 
@@ -325,7 +379,8 @@ func (h *Handler) EditAdmin(c *echo.Context) error {
 		if err := tx.Create(&da).Error; err != nil {
 			tx.Rollback()
 			return c.Render(http.StatusOK, "edit_admin.html", map[string]interface{}{
-				"Error": "Failed to assign domain ALL: " + err.Error(),
+				"Error":        "Failed to assign domain ALL: " + err.Error(),
+				"IsSuperAdmin": true,
 			})
 		}
 	} else if len(domains) > 0 {
@@ -340,7 +395,8 @@ func (h *Handler) EditAdmin(c *echo.Context) error {
 			if err := tx.Create(&da).Error; err != nil {
 				tx.Rollback()
 				return c.Render(http.StatusOK, "edit_admin.html", map[string]interface{}{
-					"Error": "Failed to assign domain " + d + ": " + err.Error(),
+					"Error":        "Failed to assign domain " + d + ": " + err.Error(),
+					"IsSuperAdmin": true,
 				})
 			}
 		}

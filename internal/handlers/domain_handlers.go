@@ -7,7 +7,9 @@ import (
 	"strings"
 	"time"
 
+	"go-postfixadmin/internal/middleware"
 	"go-postfixadmin/internal/models"
+	"go-postfixadmin/internal/utils"
 
 	"github.com/labstack/echo/v5"
 	"gorm.io/gorm"
@@ -25,8 +27,24 @@ func (h *Handler) ListDomains(c *echo.Context) error {
 	var domains []models.Domain
 	var displayDomains []DomainDisplay
 
+	username := middleware.GetUsername(c)
+	allowedDomains, isSuperAdmin, err := utils.GetAllowedDomains(h.DB, username)
+	if err != nil {
+		return c.Render(http.StatusInternalServerError, "domains.html", map[string]interface{}{
+			"Error": "Failed to check permissions: " + err.Error(),
+		})
+	}
+
 	if h.DB != nil {
-		h.DB.Where("domain != ?", "ALL").Find(&domains)
+		query := h.DB.Where("domain != ?", "ALL")
+		if !isSuperAdmin {
+			if len(allowedDomains) == 0 {
+				query = query.Where("1 = 0") // No domains allowed
+			} else {
+				query = query.Where("domain IN ?", allowedDomains)
+			}
+		}
+		query.Find(&domains)
 
 		for _, d := range domains {
 			var aliasCount int64
@@ -48,17 +66,34 @@ func (h *Handler) ListDomains(c *echo.Context) error {
 		}
 	}
 	return c.Render(http.StatusOK, "domains.html", map[string]interface{}{
-		"Domains": displayDomains,
+		"Domains":      displayDomains,
+		"IsSuperAdmin": isSuperAdmin,
 	})
 }
 
 // AddDomainForm exibe o formulário de adicionar domínio
 func (h *Handler) AddDomainForm(c *echo.Context) error {
+	// Security: Only Superadmins can add domains
+	username := middleware.GetUsername(c)
+	isSuper, err := utils.IsSuperAdmin(h.DB, username)
+	if err != nil {
+		return c.Render(http.StatusInternalServerError, "domains.html", map[string]interface{}{"Error": "Permission check failed"})
+	}
+	if !isSuper {
+		return c.Render(http.StatusForbidden, "domains.html", map[string]interface{}{"Error": "Access denied: Only Superadmins can create domains"})
+	}
 	return c.Render(http.StatusOK, "add_domain.html", nil)
 }
 
 // AddDomain processa a criação de um novo domínio
 func (h *Handler) AddDomain(c *echo.Context) error {
+	// Security: Only Superadmins can add domains
+	username := middleware.GetUsername(c)
+	isSuper, err := utils.IsSuperAdmin(h.DB, username)
+	if err != nil || !isSuper {
+		return c.Render(http.StatusForbidden, "domains.html", map[string]interface{}{"Error": "Access denied"})
+	}
+
 	// Parse form data
 	domainName := strings.TrimSpace(c.FormValue("domain"))
 	description := c.FormValue("description")
@@ -164,6 +199,13 @@ func (h *Handler) AddDomain(c *echo.Context) error {
 
 // EditDomainForm exibe o formulário de edição de domínio
 func (h *Handler) EditDomainForm(c *echo.Context) error {
+	// Security: Only Superadmins can edit domains
+	username := middleware.GetUsername(c)
+	isSuper, err := utils.IsSuperAdmin(h.DB, username)
+	if err != nil || !isSuper {
+		return c.Render(http.StatusForbidden, "domains.html", map[string]interface{}{"Error": "Access denied: Only Superadmins can edit domains"})
+	}
+
 	domainName := c.Param("domain")
 
 	var domain models.Domain
@@ -180,6 +222,13 @@ func (h *Handler) EditDomainForm(c *echo.Context) error {
 
 // EditDomain processa a edição de um domínio existente
 func (h *Handler) EditDomain(c *echo.Context) error {
+	// Security: Only Superadmins can edit domains
+	username := middleware.GetUsername(c)
+	isSuper, err := utils.IsSuperAdmin(h.DB, username)
+	if err != nil || !isSuper {
+		return c.Render(http.StatusForbidden, "domains.html", map[string]interface{}{"Error": "Access denied"})
+	}
+
 	domainName := c.Param("domain")
 
 	// Find existing domain
@@ -239,6 +288,13 @@ func (h *Handler) EditDomain(c *echo.Context) error {
 
 // DeleteDomain remove um domínio e todos os dados associados (aliases e mailboxes)
 func (h *Handler) DeleteDomain(c *echo.Context) error {
+	// Security: Only Superadmins can delete domains
+	username := middleware.GetUsername(c)
+	isSuper, err := utils.IsSuperAdmin(h.DB, username)
+	if err != nil || !isSuper {
+		return c.JSON(http.StatusForbidden, map[string]interface{}{"error": "Access denied: Only Superadmins can delete domains"})
+	}
+
 	domainName := c.Param("domain")
 
 	// Check if domain exists
@@ -251,7 +307,7 @@ func (h *Handler) DeleteDomain(c *echo.Context) error {
 	}
 
 	// Use transaction to ensure atomicity
-	err := h.DB.Transaction(func(tx *gorm.DB) error {
+	err = h.DB.Transaction(func(tx *gorm.DB) error {
 		// Delete all aliases for this domain
 		if err := tx.Where("domain = ?", domainName).Delete(&models.Alias{}).Error; err != nil {
 			return err

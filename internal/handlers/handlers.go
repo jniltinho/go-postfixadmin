@@ -38,7 +38,7 @@ func (h *Handler) Login(c *echo.Context) error {
 		}
 
 		// Set session
-		if err := middleware.SetSession(c); err != nil {
+		if err := middleware.SetSession(c, admin.Username); err != nil {
 			return c.Render(http.StatusInternalServerError, "login.html", map[string]interface{}{"error": "Failed to create session"})
 		}
 
@@ -55,16 +55,42 @@ func (h *Handler) Logout(c *echo.Context) error {
 
 // Dashboard exibe a página inicial com estatísticas
 func (h *Handler) Dashboard(c *echo.Context) error {
+	username := middleware.GetUsername(c)
+	allowedDomains, isSuperAdmin, err := utils.GetAllowedDomains(h.DB, username)
+	if err != nil {
+		return c.Render(http.StatusInternalServerError, "dashboard.html", map[string]interface{}{
+			"Error": "Failed to check permissions: " + err.Error(),
+		})
+	}
+
 	var domainCount int64
 	var mailboxCount int64
 
 	if h.DB != nil {
-		h.DB.Model(&models.Domain{}).Where("active = ? AND domain != ?", true, "ALL").Count(&domainCount)
-		h.DB.Model(&models.Mailbox{}).Where("active = ?", true).Count(&mailboxCount)
+		domainQuery := h.DB.Model(&models.Domain{}).Where("active = ? AND domain != ?", true, "ALL")
+		mailboxQuery := h.DB.Model(&models.Mailbox{}).Where("active = ?", true)
+
+		if !isSuperAdmin {
+			if len(allowedDomains) == 0 {
+				// No domains allowed, counts are 0
+				domainCount = 0
+				mailboxCount = 0
+			} else {
+				domainQuery = domainQuery.Where("domain IN ?", allowedDomains)
+				mailboxQuery = mailboxQuery.Where("domain IN ?", allowedDomains)
+				domainQuery.Count(&domainCount)
+				mailboxQuery.Count(&mailboxCount)
+			}
+		} else {
+			domainQuery.Count(&domainCount)
+			mailboxQuery.Count(&mailboxCount)
+		}
 	}
 
 	return c.Render(http.StatusOK, "dashboard.html", map[string]interface{}{
 		"DomainCount":  domainCount,
 		"MailboxCount": mailboxCount,
+		"IsSuperAdmin": isSuperAdmin,
+		"Username":     username,
 	})
 }
