@@ -42,6 +42,14 @@ func RegisterRoutes(e *echo.Echo, h *handlers.Handler) {
 	e.POST("/admins/edit/:username", h.EditAdmin)
 	e.DELETE("/admins/delete/:username", h.DeleteAdmin)
 
+	// Aliases
+	e.GET("/aliases", h.ListAliases)
+	e.GET("/aliases/add", h.AddAliasForm)
+	e.POST("/aliases/add", h.AddAlias)
+	e.GET("/aliases/edit/:address", h.EditAliasForm)
+	e.POST("/aliases/edit/:address", h.EditAlias)
+	e.DELETE("/aliases/delete/:address", h.DeleteAlias)
+
 	// API / Utils
 	e.GET("/api/generate-password", h.GeneratePassword)
 

@@ -1,0 +1,82 @@
+{{define "title"}}Edit Alias - Go-PostfixAdmin{{end}}
+{{define "breadcrumb"}}Edit Alias{{end}}
+
+{{define "content"}}
+<div class="max-w-6xl mx-auto">
+    <div class="mb-8">
+        <h2 class="text-4xl font-mono font-black uppercase tracking-tight mb-2">Edit Alias</h2>
+        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Update alias configuration.</p>
+    </div>
+
+    {{if .Error}}
+    <div class="mb-6 bg-red-50 border-4 border-red-600 neo-shadow-sm p-6">
+        <div class="flex items-start">
+            <i data-lucide="alert-circle" class="w-6 h-6 text-red-600 mr-3 mt-1"></i>
+            <div>
+                <h3 class="font-black text-red-600 uppercase tracking-wide mb-1">Error</h3>
+                <p class="text-sm text-red-700">{{.Error}}</p>
+            </div>
+        </div>
+    </div>
+    {{end}}
+
+    <form method="POST" action="/aliases/edit/{{.Alias.Address}}" class="space-y-6">
+        <div class="bg-white border-4 border-brand-text neo-shadow-sm p-8">
+            <h3 class="text-xl font-mono font-black uppercase tracking-tight mb-6 flex items-center">
+                <i data-lucide="info" class="w-5 h-5 mr-2"></i>
+                Alias Information
+            </h3>
+
+            <div class="space-y-6">
+                <!-- Address (Read-only) -->
+                <div>
+                    <label for="address"
+                        class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
+                        Alias Address
+                    </label>
+                    <input type="text" id="address" value="{{.Alias.Address}}" disabled
+                        class="w-full px-4 py-3 border-2 border-brand-text bg-gray-100 font-medium text-gray-600 cursor-not-allowed">
+                    <p class="text-xs text-gray-500 mt-2">
+                        The alias address cannot be changed. To rename, delete and create a new alias.
+                    </p>
+                </div>
+
+                <!-- Goto (To) -->
+                <div>
+                    <label for="goto" class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
+                        To (Recipients) <span class="text-red-500">*</span>
+                    </label>
+                    <textarea id="goto" name="goto" rows="5" required placeholder="recipient@example.com"
+                        class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors resize-y">{{.Alias.Goto}}</textarea>
+                    <p class="text-xs text-gray-500 mt-2">
+                        Enter one or more email addresses. One entry per line.
+                    </p>
+                </div>
+
+                <!-- Active Toggle -->
+                <div class="flex items-center pt-2">
+                    <input type="checkbox" id="active" name="active" value="true" {{if .Alias.Active}}checked{{end}}
+                        class="w-6 h-6 border-2 border-brand-text cursor-pointer">
+                    <label for="active" class="ml-3 text-sm font-bold cursor-pointer">
+                        Active
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center justify-end space-x-4">
+            <a href="/aliases"
+                class="bg-white hover:bg-gray-50 text-brand-text border-2 border-brand-text font-black px-8 py-4 shadow-[2px_2px_0px_#1E293B] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center">
+                <i data-lucide="x" class="w-5 h-5 mr-2"></i>
+                Cancel
+            </a>
+            <button type="submit"
+                class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-8 py-4 shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center">
+                <i data-lucide="check" class="w-5 h-5 mr-2"></i>
+                Save Changes
+            </button>
+        </div>
+    </form>
+</div>
+{{end}}
