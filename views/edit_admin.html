@@ -55,20 +55,28 @@
                 <!-- Active -->
                 <div class="flex items-center">
                     <input type="checkbox" id="active" name="active" value="true" {{if .Admin.Active}}checked{{end}}
-                        class="w-6 h-6 border-2 border-brand-text cursor-pointer">
-                    <label for="active" class="ml-3 text-sm font-bold cursor-pointer">
+                        {{if not .IsSuperAdmin}}disabled{{end}}
+                        class="w-6 h-6 border-2 border-brand-text cursor-pointer {{if not .IsSuperAdmin}}opacity-50 cursor-not-allowed{{end}}">
+                    <label for="active"
+                        class="ml-3 text-sm font-bold cursor-pointer {{if not .IsSuperAdmin}}opacity-50 cursor-not-allowed{{end}}">
                         Habilitado
                     </label>
+                    {{if not .IsSuperAdmin}}
+                    <input type="hidden" name="active" value="{{.Admin.Active}}">
+                    {{end}}
                 </div>
 
                 <!-- Superadmin -->
-                <div class="bg-yellow-50 border-2 border-yellow-600 p-4 rounded mt-4">
+                <div
+                    class="bg-yellow-50 border-2 border-yellow-600 p-4 rounded mt-4 {{if not .IsSuperAdmin}}opacity-50{{end}}">
                     <div class="flex items-start">
                         <input type="checkbox" id="superadmin" name="superadmin" value="true" {{if
-                            .Admin.Superadmin}}checked{{end}}
-                            class="w-6 h-6 border-2 border-brand-text cursor-pointer mt-1" onchange="toggleDomains()">
+                            .Admin.Superadmin}}checked{{end}} {{if not .IsSuperAdmin}}disabled{{end}}
+                            class="w-6 h-6 border-2 border-brand-text cursor-pointer mt-1 {{if not .IsSuperAdmin}}cursor-not-allowed{{end}}"
+                            onchange="toggleDomains()">
                         <div class="ml-3">
-                            <label for="superadmin" class="font-bold text-yellow-900 cursor-pointer">
+                            <label for="superadmin"
+                                class="font-bold text-yellow-900 cursor-pointer {{if not .IsSuperAdmin}}cursor-not-allowed{{end}}">
                                 Super Administrador
                             </label>
                             <p class="text-xs text-yellow-700 mt-1">Super admins têm acesso a todos os domínios e podem
@@ -81,7 +89,7 @@
 
         <!-- Domains Card -->
         <div id="domainsCard"
-            class="bg-white border-4 border-brand-text neo-shadow-sm p-8 {{if .Admin.Superadmin}}opacity-50 pointer-events-none{{end}}">
+            class="bg-white border-4 border-brand-text neo-shadow-sm p-8 {{if or .Admin.Superadmin (not .IsSuperAdmin)}}opacity-50 pointer-events-none{{end}}">
             <h3 class="text-xl font-mono font-black uppercase tracking-tight mb-6 flex items-center">
                 <i data-lucide="globe" class="w-5 h-5 mr-2"></i>
                 Domínios
