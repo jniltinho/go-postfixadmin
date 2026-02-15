@@ -19,28 +19,30 @@
         <table class="w-full text-left border-collapse">
             <thead class="bg-brand-primary text-white border-b-4 border-brand-text">
                 <tr>
-                    <th class="px-4 py-4 text-xs font-black uppercase tracking-widest">Administrador</th>
+                    <th class="px-4 py-4 text-left text-xs font-black uppercase tracking-widest">Administrador</th>
                     <th class="px-4 py-4 text-center text-xs font-black uppercase tracking-widest">Domínios</th>
                     <th class="px-4 py-4 text-center text-xs font-black uppercase tracking-widest">Habilitado</th>
-                    <th class="px-4 py-4 text-center text-xs font-black uppercase tracking-widest">Última Modificação
-                    </th>
+                    <th class="px-4 py-4 text-left text-xs font-black uppercase tracking-widest">Última Modificação</th>
                     <th class="px-4 py-4 text-right"></th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200 text-sm">
+            <tbody class="divide-y-2 divide-gray-200">
                 {{range .Admins}}
                 <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-4 py-4 font-bold text-brand-text">
-                        {{.Username}}
+                    <td class="px-4 py-1">
+                        <div class="flex items-center">
+                            <i data-lucide="shield" class="w-4 h-4 mr-2 text-brand-primary"></i>
+                            <span class="font-medium font-bold text-brand-text">{{.Username}}</span>
+                        </div>
                     </td>
-                    <td class="px-4 py-4 text-center">
+                    <td class="px-4 py-1 text-center">
                         {{if eq .DomainCount "ALL"}}
-                        <span class="font-mono font-bold">Super Administrador</span>
+                        <span class="font-mono font-bold text-xs">Super Administrador</span>
                         {{else}}
-                        <span class="font-mono font-bold">{{.DomainCount}}</span>
+                        <span class="font-mono font-bold text-sm">{{.DomainCount}}</span>
                         {{end}}
                     </td>
-                    <td class="px-4 py-4 text-center">
+                    <td class="px-4 py-1 text-center">
                         {{if .Active}}
                         <span
                             class="inline-block px-2 py-1 text-xs font-black uppercase tracking-wider bg-green-100 text-green-700 border-2 border-green-700">
@@ -53,10 +55,10 @@
                         </span>
                         {{end}}
                     </td>
-                    <td class="px-4 py-4 text-center text-gray-600">
-                        {{.Modified.Format "2006-01-02"}}
+                    <td class="px-4 py-1">
+                        <span class="text-sm text-gray-600">{{.Modified.Format "2006-01-02"}}</span>
                     </td>
-                    <td class="px-4 py-4 text-right">
+                    <td class="px-4 py-1 text-right">
                         <div class="flex items-center justify-end space-x-2">
                             <a href="/admins/edit/{{.Username}}"
                                 class="bg-blue-600 hover:bg-white hover:text-blue-600 text-white text-xs border border-brand-text font-black px-3 py-2 shadow-[1px_1px_0px_#1E293B] flex items-center transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[2px_2px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest">
@@ -64,7 +66,7 @@
                             </a>
                             <button onclick="confirmDelete('{{.Username}}')"
                                 class="bg-red-600 hover:bg-white hover:text-red-600 text-white text-xs border border-brand-text font-black px-3 py-2 shadow-[1px_1px_0px_#1E293B] flex items-center transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[2px_2px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest">
-                                <i data-lucide="trash-2" class="w-3 h-3 mr-2"></i> Remove
+                                <i data-lucide="trash-2" class="w-3 h-3 mr-2"></i> Remover
                             </button>
                         </div>
                     </td>

@@ -82,10 +82,30 @@ func (h *Handler) ListAliases(c *echo.Context) error {
 		query.Find(&aliases)
 	}
 
+	// Fetch domains for the filter dropdown
+	var domains []models.Domain
+	if h.DB != nil {
+		domainQuery := h.DB.Where("domain != ?", "ALL").Where("active = ?", true).Order("domain ASC")
+		if !isSuperAdmin {
+			// Reuse allowedDomains from earlier
+			allowedDomains, _, err := utils.GetAllowedDomains(h.DB, middleware.GetUsername(c))
+			if err == nil {
+				if len(allowedDomains) == 0 {
+					domainQuery = domainQuery.Where("1 = 0")
+				} else {
+					domainQuery = domainQuery.Where("domain IN ?", allowedDomains)
+				}
+			}
+		}
+		domainQuery.Find(&domains)
+	}
+
 	return c.Render(http.StatusOK, "aliases.html", map[string]interface{}{
 		"Aliases":      aliases,
+		"Domains":      domains,
 		"DomainFilter": domainFilter,
 		"IsSuperAdmin": isSuperAdmin,
+		"SessionUser":  middleware.GetUsername(c),
 	})
 }
 
@@ -117,6 +137,7 @@ func (h *Handler) AddAliasForm(c *echo.Context) error {
 	return c.Render(http.StatusOK, "add_alias.html", map[string]interface{}{
 		"Domains":      domains,
 		"IsSuperAdmin": isSuperAdmin,
+		"SessionUser":  middleware.GetUsername(c),
 	})
 }
 
@@ -286,6 +307,7 @@ func (h *Handler) EditAliasForm(c *echo.Context) error {
 	return c.Render(http.StatusOK, "edit_alias.html", map[string]interface{}{
 		"Alias":        alias,
 		"IsSuperAdmin": isSuperAdmin,
+		"SessionUser":  loggedInUser,
 	})
 }
 
@@ -329,6 +351,7 @@ func (h *Handler) EditAlias(c *echo.Context) error {
 			"Error":        "To (Recipients) is required",
 			"Alias":        alias,
 			"IsSuperAdmin": isSuperAdmin,
+			"SessionUser":  loggedInUser,
 		})
 	}
 
@@ -348,6 +371,7 @@ func (h *Handler) EditAlias(c *echo.Context) error {
 			"Error":        "At least one valid recipient is required",
 			"Alias":        alias,
 			"IsSuperAdmin": isSuperAdmin,
+			"SessionUser":  loggedInUser,
 		})
 	}
 
@@ -363,6 +387,7 @@ func (h *Handler) EditAlias(c *echo.Context) error {
 			"Error":        "Failed to update alias: " + err.Error(),
 			"Alias":        alias,
 			"IsSuperAdmin": isSuperAdmin,
+			"SessionUser":  loggedInUser,
 		})
 	}
 
@@ -442,5 +467,6 @@ func renderAddAliasError(c *echo.Context, errorMsg, localPart, domain, gotoRaw s
 		"Goto":         gotoRaw,
 		"Domains":      domains,
 		"IsSuperAdmin": isSuperAdmin,
+		"SessionUser":  middleware.GetUsername(c),
 	})
 }

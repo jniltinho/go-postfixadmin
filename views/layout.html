@@ -113,8 +113,10 @@
                     <div class="h-8 w-1 bg-brand-text mx-2"></div>
                     <div class="flex items-center space-x-3 cursor-pointer group">
                         <div class="text-right">
-                            <p class="text-xs font-black uppercase text-brand-text tracking-tight">Admin User</p>
-                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Superadmin</p>
+                            <p class="text-xs font-black uppercase text-brand-text tracking-tight">{{if
+                                .SessionUser}}{{.SessionUser}}{{else}}Admin{{end}}</p>
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{if
+                                .IsSuperAdmin}}SUPERADMIN{{else}}ADMIN{{end}}</p>
                         </div>
                         <div
                             class="w-10 h-10 border-2 border-brand-text bg-white flex items-center justify-center text-brand-text font-black group-hover:bg-brand-primary group-hover:text-white transition-colors">

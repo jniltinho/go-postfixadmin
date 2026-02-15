@@ -92,5 +92,6 @@ func (h *Handler) Dashboard(c *echo.Context) error {
 		"MailboxCount": mailboxCount,
 		"IsSuperAdmin": isSuperAdmin,
 		"Username":     username,
+		"SessionUser":  username,
 	})
 }

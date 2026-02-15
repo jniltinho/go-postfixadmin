@@ -68,6 +68,7 @@ func (h *Handler) ListDomains(c *echo.Context) error {
 	return c.Render(http.StatusOK, "domains.html", map[string]interface{}{
 		"Domains":      displayDomains,
 		"IsSuperAdmin": isSuperAdmin,
+		"SessionUser":  username,
 	})
 }
 
@@ -82,7 +83,9 @@ func (h *Handler) AddDomainForm(c *echo.Context) error {
 	if !isSuper {
 		return c.Render(http.StatusForbidden, "domains.html", map[string]interface{}{"Error": "Access denied: Only Superadmins can create domains"})
 	}
-	return c.Render(http.StatusOK, "add_domain.html", nil)
+	return c.Render(http.StatusOK, "add_domain.html", map[string]interface{}{
+		"SessionUser": username,
+	})
 }
 
 // AddDomain processa a criação de um novo domínio
@@ -132,6 +135,7 @@ func (h *Handler) AddDomain(c *echo.Context) error {
 			"BackupMX":    backupMX,
 			"Aliases":     aliases,
 			"Mailboxes":   mailboxes,
+			"SessionUser": username,
 		})
 	}
 
@@ -146,6 +150,7 @@ func (h *Handler) AddDomain(c *echo.Context) error {
 			"BackupMX":    backupMX,
 			"Aliases":     aliases,
 			"Mailboxes":   mailboxes,
+			"SessionUser": username,
 		})
 	}
 
@@ -161,6 +166,7 @@ func (h *Handler) AddDomain(c *echo.Context) error {
 			"BackupMX":    backupMX,
 			"Aliases":     aliases,
 			"Mailboxes":   mailboxes,
+			"SessionUser": username,
 		})
 	}
 
@@ -190,6 +196,7 @@ func (h *Handler) AddDomain(c *echo.Context) error {
 			"BackupMX":    backupMX,
 			"Aliases":     aliases,
 			"Mailboxes":   mailboxes,
+			"SessionUser": username,
 		})
 	}
 
@@ -216,7 +223,8 @@ func (h *Handler) EditDomainForm(c *echo.Context) error {
 	}
 
 	return c.Render(http.StatusOK, "edit_domain.html", map[string]interface{}{
-		"Domain": domain,
+		"Domain":      domain,
+		"SessionUser": username,
 	})
 }
 
@@ -277,8 +285,9 @@ func (h *Handler) EditDomain(c *echo.Context) error {
 
 	if err := h.DB.Save(&domain).Error; err != nil {
 		return c.Render(http.StatusInternalServerError, "edit_domain.html", map[string]interface{}{
-			"Error":  "Failed to update domain: " + err.Error(),
-			"Domain": domain,
+			"Error":       "Failed to update domain: " + err.Error(),
+			"Domain":      domain,
+			"SessionUser": username,
 		})
 	}
 

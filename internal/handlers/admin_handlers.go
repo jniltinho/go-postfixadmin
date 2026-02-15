@@ -65,6 +65,7 @@ func (h *Handler) ListAdmins(c *echo.Context) error {
 	return c.Render(http.StatusOK, "admins.html", map[string]interface{}{
 		"Admins":       adminList,
 		"IsSuperAdmin": isSuper,
+		"SessionUser":  username,
 	})
 }
 
@@ -87,6 +88,7 @@ func (h *Handler) AddAdminForm(c *echo.Context) error {
 	return c.Render(http.StatusOK, "add_admin.html", map[string]interface{}{
 		"Domains":      domains,
 		"IsSuperAdmin": true,
+		"SessionUser":  username,
 	})
 }
 
@@ -195,6 +197,7 @@ func (h *Handler) renderAddAdminError(c *echo.Context, errorMsg, username string
 		"Username":     username,
 		"Domains":      domains,
 		"IsSuperAdmin": true,
+		"SessionUser":  middleware.GetUsername(c),
 	})
 }
 
@@ -302,6 +305,7 @@ func (h *Handler) EditAdminForm(c *echo.Context) error {
 		"Admin":        admin,
 		"Domains":      domainOptions,
 		"IsSuperAdmin": true,
+		"SessionUser":  loggedInUser,
 	})
 }
 

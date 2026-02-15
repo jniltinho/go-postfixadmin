@@ -74,6 +74,7 @@ func (h *Handler) ListMailboxes(c *echo.Context) error {
 		"Mailboxes":    mailboxes,
 		"DomainFilter": domainFilter, // Para exibir no template
 		"IsSuperAdmin": isSuperAdmin,
+		"SessionUser":  middleware.GetUsername(c),
 	})
 }
 
@@ -106,6 +107,7 @@ func (h *Handler) AddMailboxForm(c *echo.Context) error {
 	return c.Render(http.StatusOK, "add_mailbox.html", map[string]interface{}{
 		"Domains":      domains,
 		"IsSuperAdmin": isSuperAdmin,
+		"SessionUser":  middleware.GetUsername(c),
 	})
 }
 
@@ -170,6 +172,7 @@ func (h *Handler) AddMailbox(c *echo.Context) error {
 			"EmailOther":   emailOther,
 			"Quota":        quota / quotaMultiplier,
 			"IsSuperAdmin": isSuperAdmin,
+			"SessionUser":  loggedInUser,
 		})
 	}
 
@@ -324,6 +327,7 @@ func (h *Handler) AddMailbox(c *echo.Context) error {
 			"EmailOther":   emailOther,
 			"Quota":        quota / quotaMultiplier,
 			"IsSuperAdmin": isSuperAdmin,
+			"SessionUser":  loggedInUser,
 		})
 	}
 
@@ -365,6 +369,7 @@ func (h *Handler) EditMailboxForm(c *echo.Context) error {
 		"Mailbox":      mailbox,
 		"QuotaMB":      mailbox.Quota / 1024000,
 		"IsSuperAdmin": isSuperAdmin,
+		"SessionUser":  loggedInUser,
 	})
 }
 
@@ -427,6 +432,7 @@ func (h *Handler) EditMailbox(c *echo.Context) error {
 				"Error":        "Password must be at least 8 characters",
 				"Mailbox":      mailbox,
 				"IsSuperAdmin": isSuperAdmin,
+				"SessionUser":  loggedInUser,
 			})
 		}
 
@@ -436,6 +442,7 @@ func (h *Handler) EditMailbox(c *echo.Context) error {
 				"Error":        "Password and confirmation do not match",
 				"Mailbox":      mailbox,
 				"IsSuperAdmin": isSuperAdmin,
+				"SessionUser":  loggedInUser,
 			})
 		}
 
@@ -446,6 +453,7 @@ func (h *Handler) EditMailbox(c *echo.Context) error {
 				"Error":        "Failed to hash password: " + err.Error(),
 				"Mailbox":      mailbox,
 				"IsSuperAdmin": isSuperAdmin,
+				"SessionUser":  loggedInUser,
 			})
 		}
 
@@ -466,6 +474,7 @@ func (h *Handler) EditMailbox(c *echo.Context) error {
 			"Error":        "Failed to update mailbox: " + err.Error(),
 			"Mailbox":      mailbox,
 			"IsSuperAdmin": isSuperAdmin,
+			"SessionUser":  loggedInUser,
 		})
 	}
 
