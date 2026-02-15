@@ -92,18 +92,37 @@
                 View logs <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
             </button>
         </div>
-        <div class="space-y-4">
-            <div
-                class="flex items-center p-4 border-2 border-transparent hover:border-brand-text transition-colors cursor-pointer bg-gray-50">
-                <div class="w-10 h-10 border-2 border-brand-text bg-white flex items-center justify-center mr-4">
-                    <i data-lucide="activity" class="w-5 h-5 text-brand-text"></i>
-                </div>
-                <div class="flex-1">
-                    <p class="text-xs font-black uppercase tracking-tight">System build check completed</p>
-                    <p class="text-[10px] font-bold text-gray-400 uppercase">2 minutes ago</p>
-                </div>
-                <span class="text-[10px] font-mono font-black text-gray-300">#LOG-281</span>
-            </div>
+        <div class="overflow-x-auto max-h-64 overflow-y-auto custom-scrollbar">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b-2 border-brand-text text-sm uppercase tracking-wide text-gray-500">
+                        <th class="py-2 px-2 font-black">Data/Hora</th>
+                        <th class="py-2 px-2 font-black">Administrador</th>
+                        <th class="py-2 px-2 font-black">Domínio</th>
+                        <th class="py-2 px-2 font-black">Ação</th>
+                        <th class="py-2 px-2 font-black">Descrição</th>
+                    </tr>
+                </thead>
+                <tbody class="text-sm font-medium text-gray-700">
+                    {{if .Logs}}
+                    {{range .Logs}}
+                    <tr class="border-b border-gray-100 hover:bg-yellow-50 transition-colors">
+                        <td class="py-1 px-2 whitespace-nowrap text-xs font-bold text-gray-500">{{.Timestamp.Format
+                            "2006-01-02 15:04:05"}}</td>
+                        <td class="py-1 px-2 text-brand-primary font-bold">{{.Username}}</td>
+                        <td class="py-1 px-2 text-gray-600">{{.Domain}}</td>
+                        <td class="py-1 px-2 uppercase text-xs font-black tracking-wide">{{.Action}}</td>
+                        <td class="py-1 px-2 text-gray-600 font-mono text-xs">{{.Data}}</td>
+                    </tr>
+                    {{end}}
+                    {{else}}
+                    <tr>
+                        <td colspan="5" class="py-8 text-center text-gray-400 font-bold uppercase tracking-widest">No
+                            recent activity found</td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

@@ -312,6 +312,11 @@ func (h *Handler) AddMailbox(c *echo.Context) error {
 			return err
 		}
 
+		// Log Action inside transaction
+		if err := utils.LogAction(tx, loggedInUser, c.RealIP(), domain, "create_mailbox", username); err != nil {
+			return err
+		}
+
 		return nil
 	})
 
@@ -478,6 +483,11 @@ func (h *Handler) EditMailbox(c *echo.Context) error {
 		})
 	}
 
+	// Log Action
+	if err := utils.LogAction(h.DB, loggedInUser, c.RealIP(), mailbox.Domain, "edit_mailbox", username); err != nil {
+		fmt.Printf("Failed to log edit_mailbox: %v\n", err)
+	}
+
 	// Redirect to mailboxes list filtered by domain
 	return c.Redirect(http.StatusFound, fmt.Sprintf("/mailboxes?domain=%s", mailbox.Domain))
 }
@@ -523,6 +533,11 @@ func (h *Handler) DeleteMailbox(c *echo.Context) error {
 
 		// Delete corresponding alias
 		if err := tx.Where("address = ?", username).Delete(&models.Alias{}).Error; err != nil {
+			return err
+		}
+
+		// Log Action inside transaction
+		if err := utils.LogAction(tx, loggedInUser, c.RealIP(), mailbox.Domain, "delete_mailbox", username); err != nil {
 			return err
 		}
 

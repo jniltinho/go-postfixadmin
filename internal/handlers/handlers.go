@@ -87,11 +87,29 @@ func (h *Handler) Dashboard(c *echo.Context) error {
 		}
 	}
 
+	var logs []models.Log
+	if h.DB != nil {
+		logQuery := h.DB.Order("timestamp desc").Limit(20)
+
+		if !isSuperAdmin {
+			if len(allowedDomains) == 0 {
+				// No domains allowed, no logs
+				logQuery = logQuery.Where("1 = 0")
+			} else {
+				// Filter logs by allowed domains
+				logQuery = logQuery.Where("domain IN ?", allowedDomains)
+			}
+		}
+
+		logQuery.Find(&logs)
+	}
+
 	return c.Render(http.StatusOK, "dashboard.html", map[string]interface{}{
 		"DomainCount":  domainCount,
 		"MailboxCount": mailboxCount,
 		"IsSuperAdmin": isSuperAdmin,
 		"Username":     username,
 		"SessionUser":  username,
+		"Logs":         logs,
 	})
 }

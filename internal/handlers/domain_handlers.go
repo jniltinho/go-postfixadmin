@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -200,6 +201,11 @@ func (h *Handler) AddDomain(c *echo.Context) error {
 		})
 	}
 
+	// Log Action
+	if err := utils.LogAction(h.DB, username, c.RealIP(), domainName, "create_domain", domainName); err != nil {
+		fmt.Printf("Failed to log create_domain: %v\n", err)
+	}
+
 	// Redirect to domains list on success
 	return c.Redirect(http.StatusFound, "/domains")
 }
@@ -291,6 +297,11 @@ func (h *Handler) EditDomain(c *echo.Context) error {
 		})
 	}
 
+	// Log Action
+	if err := utils.LogAction(h.DB, username, c.RealIP(), domainName, "edit_domain", domainName); err != nil {
+		fmt.Printf("Failed to log edit_domain: %v\n", err)
+	}
+
 	// Redirect to domains list on success
 	return c.Redirect(http.StatusFound, "/domains")
 }
@@ -329,6 +340,11 @@ func (h *Handler) DeleteDomain(c *echo.Context) error {
 
 		// Delete the domain itself
 		if err := tx.Where("domain = ?", domainName).Delete(&models.Domain{}).Error; err != nil {
+			return err
+		}
+
+		// Log Action inside transaction
+		if err := utils.LogAction(tx, username, c.RealIP(), domainName, "delete_domain", domainName); err != nil {
 			return err
 		}
 

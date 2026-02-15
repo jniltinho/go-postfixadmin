@@ -268,6 +268,11 @@ func (h *Handler) AddAlias(c *echo.Context) error {
 		return renderAddAliasError(c, "Falha ao criar alias: "+err.Error(), localPart, domain, gotoRaw, domains, isSuperAdmin)
 	}
 
+	// Log Action
+	if err := utils.LogAction(h.DB, middleware.GetUsername(c), c.RealIP(), domain, "create_alias", address); err != nil {
+		fmt.Printf("Failed to log create_alias: %v\n", err)
+	}
+
 	return c.Redirect(http.StatusFound, "/aliases")
 }
 
@@ -391,6 +396,11 @@ func (h *Handler) EditAlias(c *echo.Context) error {
 		})
 	}
 
+	// Log Action
+	if err := utils.LogAction(h.DB, middleware.GetUsername(c), c.RealIP(), alias.Domain, "edit_alias", address); err != nil {
+		fmt.Printf("Failed to log edit_alias: %v\n", err)
+	}
+
 	return c.Redirect(http.StatusFound, "/aliases")
 }
 
@@ -454,6 +464,13 @@ func (h *Handler) DeleteAlias(c *echo.Context) error {
 
 	if result.RowsAffected == 0 {
 		return c.JSON(http.StatusNotFound, map[string]interface{}{"error": "Alias not found"})
+	}
+
+	// Log Action
+	// For delete, we need the domain. We fetched 'alias' earlier which has the domain.
+	if err := utils.LogAction(h.DB, middleware.GetUsername(c), c.RealIP(), alias.Domain, "delete_alias", address); err != nil {
+		// Just log error
+		fmt.Printf("Failed to log delete_alias: %v\n", err)
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{"success": true})

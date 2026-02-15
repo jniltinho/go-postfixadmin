@@ -180,6 +180,16 @@ func (h *Handler) AddAdmin(c *echo.Context) error {
 		}
 	}
 
+	// Log Action
+	if err := utils.LogAction(tx, loggedInUser, c.RealIP(), "ALL", "create_admin", username); err != nil {
+		// Log error but don't fail transaction? Or fail?
+		// Usually logging failure shouldn't block action, but for audit strictness maybe it should.
+		// For now, let's just log it.
+		// Actually, let's include it in transaction for data integrity.
+		tx.Rollback()
+		return h.renderAddAdminError(c, "Falha ao registrar log: "+err.Error(), username)
+	}
+
 	tx.Commit()
 
 	return c.Redirect(http.StatusFound, "/admins")
@@ -243,6 +253,16 @@ func (h *Handler) DeleteAdmin(c *echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"success": false,
 			"error":   "Failed to delete administrator",
+		})
+	}
+
+	// Log Action
+	// For delete_admin, we use "ALL" as domain context
+	if err := utils.LogAction(tx, loggedInUser, c.RealIP(), "ALL", "delete_admin", username); err != nil {
+		tx.Rollback()
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"error":   "Failed to log action",
 		})
 	}
 
@@ -404,6 +424,15 @@ func (h *Handler) EditAdmin(c *echo.Context) error {
 				})
 			}
 		}
+	}
+
+	// Log Action
+	if err := utils.LogAction(tx, loggedInUser, c.RealIP(), "ALL", "edit_admin", username); err != nil {
+		tx.Rollback()
+		return c.Render(http.StatusOK, "edit_admin.html", map[string]interface{}{
+			"Error":        "Failed to log action: " + err.Error(),
+			"IsSuperAdmin": true,
+		})
 	}
 
 	tx.Commit()
