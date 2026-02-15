@@ -20,7 +20,7 @@ Before executing any Go-related build or execution commands (such as `go build`,
   `source .env && go build -o postfixadmin`
 
 * **For Executing the Binary:**
-  `source .env && ./postfixadmin --run`
+  `source .env && ./postfixadmin server`
 
 ---
 
