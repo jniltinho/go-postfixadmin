@@ -184,12 +184,19 @@
                     </div>
 
                     <!-- SMTP Active -->
-                    <div class="flex items-center pt-8">
-                        <input type="checkbox" id="smtp_active" name="smtp_active" value="true" {{if or (not .LocalPart)
-                            .SMTPActive}}checked{{end}} class="w-6 h-6 border-2 border-brand-text cursor-pointer">
-                        <label for="smtp_active" class="ml-3 text-sm font-bold cursor-pointer">
-                            SMTP Active (can send email)
+                    <div>
+                        <label
+                            class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2 invisible">
+                            Status
                         </label>
+                        <div class="flex items-center h-[52px]">
+                            <input type="checkbox" id="smtp_active" name="smtp_active" value="true" {{if or (not
+                                .LocalPart) .SMTPActive}}checked{{end}}
+                                class="w-6 h-6 border-2 border-brand-text cursor-pointer">
+                            <label for="smtp_active" class="ml-3 text-sm font-bold cursor-pointer">
+                                SMTP Active (can send email)
+                            </label>
+                        </div>
                     </div>
                 </div>
 

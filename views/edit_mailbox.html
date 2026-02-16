@@ -63,83 +63,55 @@
             </div>
         </div>
 
-        <!-- Password Section Card (Optional) -->
+        <!-- Password Section Card -->
         <details class="bg-white border-4 border-brand-text neo-shadow-sm">
             <summary
                 class="p-8 cursor-pointer font-mono font-black uppercase tracking-tight text-lg flex items-center hover:bg-gray-50 transition-colors">
                 <i data-lucide="key" class="w-5 h-5 mr-2"></i>
-                Change Password (Optional)
+                ALTERAR SENHA (Opcional)
                 <i data-lucide="chevron-down" class="w-5 h-5 ml-auto"></i>
             </summary>
 
+            <!-- Hidden input to signal password change -->
+            <input type="hidden" name="change_password" id="change_password" value="false">
+
             <div class="px-8 pb-8 pt-0 space-y-6 border-t-4 border-brand-text">
-                <!-- Password Change Checkbox -->
-                <div class="bg-yellow-50 border-2 border-yellow-600 p-4 rounded flex items-start">
-                    <input type="checkbox" id="change_password_toggle" name="change_password" value="true"
-                        class="w-6 h-6 border-2 border-brand-text cursor-pointer mt-1">
-                    <div class="ml-3">
-                        <label for="change_password_toggle" class="font-bold text-yellow-900 cursor-pointer">
-                            I want to change the password
-                        </label>
-                        <p class="text-xs text-yellow-700 mt-1">Leave unchecked to keep current password</p>
+                <!-- Password Generator Button -->
+                <div class="flex items-center justify-between bg-blue-50 border-2 border-blue-600 p-4 rounded mt-6">
+                    <div class="flex items-center">
+                        <i data-lucide="wand-2" class="w-5 h-5 text-blue-600 mr-3"></i>
+                        <div>
+                            <p class="font-bold text-blue-900">Precisa de uma senha forte?</p>
+                            <p class="text-xs text-blue-700">Gerar uma senha segura automaticamente</p>
+                        </div>
                     </div>
+                    <button type="button" onclick="generatePassword()"
+                        class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-black px-6 py-3 shadow-[2px_2px_0px_#1E3A8A] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#1E3A8A] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest">
+                        GERAR
+                    </button>
                 </div>
 
-                <div id="passwordFields" class="space-y-6 hidden">
-                    <!-- Password Generator Button -->
-                    <div class="flex items-center justify-between bg-blue-50 border-2 border-blue-600 p-4 rounded">
-                        <div class="flex items-center">
-                            <i data-lucide="wand-2" class="w-5 h-5 text-blue-600 mr-3"></i>
-                            <div>
-                                <p class="font-bold text-blue-900">Need a strong password?</p>
-                                <p class="text-xs text-blue-700">Generate a secure random password automatically</p>
-                            </div>
-                        </div>
-                        <button type="button" onclick="generatePassword()"
-                            class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-black px-6 py-3 shadow-[2px_2px_0px_#1E3A8A] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#1E3A8A] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest">
-                            Generate
-                        </button>
-                    </div>
-
-                    <!-- New Password Input -->
+                <!-- Password Inputs Grid -->
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Password Input -->
                     <div>
-                        <label for="password"
-                            class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
-                            New Password
-                        </label>
                         <div class="relative">
                             <input type="password" id="password" name="password" minlength="8"
-                                placeholder="Minimum 8 characters"
+                                placeholder="Mínimo 8 caracteres"
                                 class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors pr-12">
                             <button type="button" onclick="togglePassword('password')"
                                 class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary transition-colors">
                                 <i data-lucide="eye" class="w-5 h-5"></i>
                             </button>
                         </div>
-                        <p class="text-xs text-gray-500 mt-2">Minimum 8 characters required</p>
-                    </div>
-
-                    <!-- Password Strength Meter -->
-                    <div id="strengthMeter" class="hidden">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-xs font-black uppercase tracking-widest text-brand-text">Password
-                                Strength</span>
-                            <span id="strengthText" class="text-xs font-bold uppercase tracking-wider"></span>
-                        </div>
-                        <div class="h-2 bg-gray-200 border-2 border-brand-text overflow-hidden">
-                            <div id="strengthBar" class="h-full transition-all duration-300" style="width: 0%"></div>
-                        </div>
+                        <p class="text-xs text-gray-500 mt-2">Deixe em branco para manter a senha atual</p>
                     </div>
 
                     <!-- Confirm Password Input -->
                     <div>
-                        <label for="password_confirm"
-                            class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
-                            Confirm New Password
-                        </label>
                         <div class="relative">
                             <input type="password" id="password_confirm" name="password_confirm" minlength="8"
-                                placeholder="Re-enter password"
+                                placeholder="Repita a senha"
                                 class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors pr-12">
                             <button type="button" onclick="togglePassword('password_confirm')"
                                 class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary transition-colors">
@@ -147,6 +119,17 @@
                             </button>
                         </div>
                         <p id="matchIndicator" class="text-xs mt-2 hidden"></p>
+                    </div>
+                </div>
+
+                <!-- Password Strength Meter -->
+                <div id="strengthMeter" class="hidden">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-black uppercase tracking-widest text-brand-text">Força da Senha</span>
+                        <span id="strengthText" class="text-xs font-bold uppercase tracking-wider"></span>
+                    </div>
+                    <div class="h-2 bg-gray-200 border-2 border-brand-text overflow-hidden">
+                        <div id="strengthBar" class="h-full transition-all duration-300" style="width: 0%"></div>
                     </div>
                 </div>
             </div>
@@ -175,13 +158,19 @@
                     </div>
 
                     <!-- SMTP Active -->
-                    <div class="flex items-center pt-8">
-                        <input type="checkbox" id="smtp_active" name="smtp_active" value="true" {{if
-                            .Mailbox.SMTPActive}}checked{{end}}
-                            class="w-6 h-6 border-2 border-brand-text cursor-pointer">
-                        <label for="smtp_active" class="ml-3 text-sm font-bold cursor-pointer">
-                            SMTP Active (can send email)
+                    <div>
+                        <label
+                            class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2 invisible">
+                            Status
                         </label>
+                        <div class="flex items-center h-[52px]">
+                            <input type="checkbox" id="smtp_active" name="smtp_active" value="true" {{if
+                                .Mailbox.SMTPActive}}checked{{end}}
+                                class="w-6 h-6 border-2 border-brand-text cursor-pointer">
+                            <label for="smtp_active" class="ml-3 text-sm font-bold cursor-pointer">
+                                SMTP Active (can send email)
+                            </label>
+                        </div>
                     </div>
                 </div>
 
@@ -218,26 +207,24 @@
 </div>
 
 <script>
-    // Toggle password change fields
-    document.getElementById('change_password_toggle').addEventListener('change', function () {
-        const fields = document.getElementById('passwordFields');
-        const passwordInput = document.getElementById('password');
-        const confirmInput = document.getElementById('password_confirm');
+    // Auto-detect password change intention
+    function checkPasswordChangeIntention() {
+        const password = document.getElementById('password').value;
+        const confirm = document.getElementById('password_confirm').value;
+        const changePasswordInput = document.getElementById('change_password');
 
-        if (this.checked) {
-            fields.classList.remove('hidden');
-            passwordInput.required = true;
-            confirmInput.required = true;
+        if (password.length > 0 || confirm.length > 0) {
+            changePasswordInput.value = "true";
+            document.getElementById('password').required = true;
+            document.getElementById('password_confirm').required = true;
         } else {
-            fields.classList.add('hidden');
-            passwordInput.required = false;
-            confirmInput.required = false;
-            passwordInput.value = '';
-            confirmInput.value = '';
+            changePasswordInput.value = "false";
+            document.getElementById('password').required = false;
+            document.getElementById('password_confirm').required = false;
             document.getElementById('strengthMeter').classList.add('hidden');
             document.getElementById('matchIndicator').classList.add('hidden');
         }
-    });
+    }
 
     // Toggle password visibility
     function togglePassword(fieldId) {
@@ -348,15 +335,19 @@
 
     // Event listeners for password validation
     document.getElementById('password').addEventListener('input', function () {
+        checkPasswordChangeIntention();
         checkPasswordStrength();
         checkPasswordMatch();
     });
 
-    document.getElementById('password_confirm').addEventListener('input', checkPasswordMatch);
+    document.getElementById('password_confirm').addEventListener('input', function () {
+        checkPasswordChangeIntention();
+        checkPasswordMatch();
+    });
 
     // Form validation
     document.getElementById('mailboxForm').addEventListener('submit', function (e) {
-        const changePassword = document.getElementById('change_password_toggle').checked;
+        const changePassword = document.getElementById('change_password').value === "true";
 
         if (changePassword) {
             const password = document.getElementById('password').value;
