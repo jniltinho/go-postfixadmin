@@ -1,6 +1,16 @@
 # Go-Postfixadmin
 
+
 Professional Email Administration System built with Go, Echo, and Tailwind CSS.
+
+## ✨ Funcionalidades
+
+*   **Gerenciamento Completo**: Domínios, Caixas de Correio (Mailboxes) e Aliases.
+*   **Controle de Acesso (RBAC)**: Diferenciação entre Superadmin e Administradores de Domínio.
+*   **Design Moderno**: Interface responsiva e limpa construída com Tailwind CSS.
+*   **Segurança**: Hash de senhas forte e proteção contra ataques comuns.
+*   **CLI Integrada**: Ferramentas de linha de comando para automação e recuperação de acesso.
+
 
 ## 🛠 Ferramentas de Desenvolvimento
 
@@ -120,6 +130,29 @@ Usage of ./postfixadmin:
   -version
         Display version information
 ```
+
+### Comandos de Administração (CLI)
+
+O binário também suporta comandos administrativos diretos via subcomando `admin`:
+
+```bash
+# Listar todos os administradores
+./postfixadmin admin --list-admins
+
+# Listar todos os domínios
+./postfixadmin admin --list-domains
+
+# Criar um novo Superadmin (útil para primeiro acesso)
+./postfixadmin admin --add-superadmin "admin@example.com:password123"
+# Ou deixe a senha em branco para gerar uma aleatória
+./postfixadmin admin --add-superadmin "admin@example.com"
+```
+
+Outras flags disponíveis para `admin`:
+*   `--list-mailboxes`: Listar todas as caixas de correio.
+*   `--list-aliases`: Listar todos os aliases.
+*   `--domain-admins`: Listar administradores de domínio.
+
 
 ---
 
