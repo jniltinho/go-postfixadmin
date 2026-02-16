@@ -23,6 +23,7 @@
 
     <form method="POST" action="/admins/edit/{{.Admin.Username}}" class="space-y-6">
         <!-- Card Principal -->
+        <!-- Card Principal -->
         <div class="bg-white border-4 border-brand-text neo-shadow-sm p-8">
             <h3 class="text-xl font-mono font-black uppercase tracking-tight mb-6 flex items-center">
                 <i data-lucide="user" class="w-5 h-5 mr-2"></i>
@@ -41,51 +42,110 @@
                     <p class="text-xs text-gray-500 mt-2">O nome de usuário não pode ser alterado</p>
                 </div>
 
-                <!-- Password -->
-                <div>
-                    <label for="password"
-                        class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
-                        Senha
-                    </label>
-                    <input type="password" id="password" name="password"
-                        placeholder="Deixe em branco para manter a atual"
-                        class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors">
-                </div>
+                <!-- Options Grid -->
+                <div class="flex flex-wrap gap-6 pt-4">
+                    <!-- Active -->
+                    <div class="flex items-center">
+                        <input type="checkbox" id="active" name="active" value="true" {{if .Admin.Active}}checked{{end}}
+                            {{if not .IsSuperAdmin}}disabled{{end}}
+                            class="w-6 h-6 border-2 border-brand-text cursor-pointer {{if not .IsSuperAdmin}}opacity-50 cursor-not-allowed{{end}}">
+                        <label for="active"
+                            class="ml-3 text-sm font-bold cursor-pointer {{if not .IsSuperAdmin}}opacity-50 cursor-not-allowed{{end}}">
+                            Habilitado
+                        </label>
+                        {{if not .IsSuperAdmin}}
+                        <input type="hidden" name="active" value="{{.Admin.Active}}">
+                        {{end}}
+                    </div>
 
-                <!-- Active -->
-                <div class="flex items-center">
-                    <input type="checkbox" id="active" name="active" value="true" {{if .Admin.Active}}checked{{end}}
-                        {{if not .IsSuperAdmin}}disabled{{end}}
-                        class="w-6 h-6 border-2 border-brand-text cursor-pointer {{if not .IsSuperAdmin}}opacity-50 cursor-not-allowed{{end}}">
-                    <label for="active"
-                        class="ml-3 text-sm font-bold cursor-pointer {{if not .IsSuperAdmin}}opacity-50 cursor-not-allowed{{end}}">
-                        Habilitado
-                    </label>
-                    {{if not .IsSuperAdmin}}
-                    <input type="hidden" name="active" value="{{.Admin.Active}}">
-                    {{end}}
-                </div>
-
-                <!-- Superadmin -->
-                <div
-                    class="bg-yellow-50 border-2 border-yellow-600 p-4 rounded mt-4 {{if not .IsSuperAdmin}}opacity-50{{end}}">
-                    <div class="flex items-start">
+                    <!-- Superadmin -->
+                    <div class="flex items-center" {{if
+                        .IsSuperAdmin}}title="Super admins têm acesso a todos os domínios e podem gerenciar outros administradores."
+                        {{end}}>
                         <input type="checkbox" id="superadmin" name="superadmin" value="true" {{if
                             .Admin.Superadmin}}checked{{end}} {{if not .IsSuperAdmin}}disabled{{end}}
-                            class="w-6 h-6 border-2 border-brand-text cursor-pointer mt-1 {{if not .IsSuperAdmin}}cursor-not-allowed{{end}}"
+                            class="w-6 h-6 border-2 border-brand-text cursor-pointer {{if not .IsSuperAdmin}}cursor-not-allowed opacity-50{{end}}"
                             onchange="toggleDomains()">
-                        <div class="ml-3">
-                            <label for="superadmin"
-                                class="font-bold text-yellow-900 cursor-pointer {{if not .IsSuperAdmin}}cursor-not-allowed{{end}}">
-                                Super Administrador
-                            </label>
-                            <p class="text-xs text-yellow-700 mt-1">Super admins têm acesso a todos os domínios e podem
-                                gerenciar outros administradores.</p>
-                        </div>
+                        <label for="superadmin"
+                            class="ml-3 text-sm font-bold cursor-pointer {{if not .IsSuperAdmin}}cursor-not-allowed opacity-50{{end}}">
+                            Super Administrador
+                        </label>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Password Section (Collapsible) -->
+        <details class="bg-gray-50 border-2 border-brand-text neo-shadow-sm mb-4">
+            <summary
+                class="p-4 cursor-pointer font-bold uppercase tracking-tight text-sm flex items-center hover:bg-white transition-colors">
+                <i data-lucide="key" class="w-4 h-4 mr-2"></i>
+                ALTERAR SENHA (Opcional)
+                <i data-lucide="chevron-down" class="w-4 h-4 ml-auto"></i>
+            </summary>
+
+            <!-- Hidden input to signal password change -->
+            <input type="hidden" name="change_password" id="change_password" value="false">
+
+            <div class="px-4 pb-4 pt-0 space-y-4 border-t-2 border-brand-text">
+                <!-- Password Generator Button -->
+                <div class="flex items-center justify-between bg-blue-50 border-2 border-blue-600 p-3 rounded mt-4">
+                    <div class="flex items-center">
+                        <i data-lucide="wand-2" class="w-4 h-4 text-blue-600 mr-2"></i>
+                        <div>
+                            <p class="font-bold text-blue-900 text-xs">Precisa de uma senha forte?</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="generatePassword()"
+                        class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-black px-4 py-2 shadow-[2px_2px_0px_#1E3A8A] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#1E3A8A] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest">
+                        GERAR
+                    </button>
+                </div>
+
+                <!-- Password Inputs Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Password Input -->
+                    <div>
+                        <div class="relative">
+                            <input type="password" id="password" name="password" minlength="8"
+                                placeholder="Nova senha (mín. 8 caracteres)"
+                                class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors pr-12">
+                            <button type="button" onclick="togglePassword('password')"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary transition-colors">
+                                <i data-lucide="eye" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Confirm Password Input -->
+                    <div>
+                        <div class="relative">
+                            <input type="password" id="password_confirm" name="password_confirm" minlength="8"
+                                placeholder="Repita a nova senha"
+                                class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors pr-12">
+                            <button type="button" onclick="togglePassword('password_confirm')"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary transition-colors">
+                                <i data-lucide="eye" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                        <p id="matchIndicator" class="text-xs mt-2 hidden"></p>
+                    </div>
+                </div>
+
+                <!-- Password Strength Meter -->
+                <div id="strengthMeter" class="hidden">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-black uppercase tracking-widest text-brand-text">Força</span>
+                        <span id="strengthText" class="text-xs font-bold uppercase tracking-wider"></span>
+                    </div>
+                    <div class="h-2 bg-gray-200 border-2 border-brand-text overflow-hidden">
+                        <div id="strengthBar" class="h-full transition-all duration-300" style="width: 0%">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </details>
+
 
         <!-- Domains Card -->
         <div id="domainsCard"
@@ -139,11 +199,148 @@
 
         if (isSuper) {
             domainsCard.classList.add('opacity-50', 'pointer-events-none');
-            // Optional: Uncheck all domains to visualize they are ignored/overridden? 
-            // Or keep as is. Simple visual disable is enough for now.
         } else {
             domainsCard.classList.remove('opacity-50', 'pointer-events-none');
         }
     }
+
+    // Auto-detect password change intention
+    function checkPasswordChangeIntention() {
+        const password = document.getElementById('password').value;
+        const confirm = document.getElementById('password_confirm').value;
+        const changePasswordInput = document.getElementById('change_password');
+
+        if (password.length > 0 || confirm.length > 0) {
+            changePasswordInput.value = "true";
+            document.getElementById('password').required = true;
+            document.getElementById('password_confirm').required = true;
+        } else {
+            changePasswordInput.value = "false";
+            document.getElementById('password').required = false;
+            document.getElementById('password_confirm').required = false;
+            document.getElementById('strengthMeter').classList.add('hidden');
+            document.getElementById('matchIndicator').classList.add('hidden');
+        }
+    }
+
+    // Check password strength
+    function checkPasswordStrength() {
+        const password = document.getElementById('password').value;
+        const meter = document.getElementById('strengthMeter');
+        const bar = document.getElementById('strengthBar');
+        const text = document.getElementById('strengthText');
+
+        if (password.length === 0) {
+            meter.classList.add('hidden');
+            return;
+        }
+
+        meter.classList.remove('hidden');
+
+        let strength = 0;
+        let strengthLabel = '';
+        let color = '';
+
+        // Calculate strength
+        if (password.length >= 8) strength += 25;
+        if (password.length >= 12) strength += 15;
+        if (/[a-z]/.test(password)) strength += 15;
+        if (/[A-Z]/.test(password)) strength += 15;
+        if (/[0-9]/.test(password)) strength += 15;
+        if (/[^a-zA-Z0-9]/.test(password)) strength += 15;
+
+        // Determine label and color
+        if (strength < 40) {
+            strengthLabel = 'Fraca';
+            color = '#DC2626'; // red-600
+        } else if (strength < 60) {
+            strengthLabel = 'Média';
+            color = '#F59E0B'; // amber-500
+        } else if (strength < 80) {
+            strengthLabel = 'Boa';
+            color = '#10B981'; // green-500
+        } else {
+            strengthLabel = 'Forte';
+            color = '#059669'; // green-600
+        }
+
+        bar.style.width = strength + '%';
+        bar.style.backgroundColor = color;
+        text.textContent = strengthLabel;
+        text.style.color = color;
+    }
+
+    // Toggle password visibility
+    function togglePassword(fieldId) {
+        const field = document.getElementById(fieldId);
+        const icon = event.currentTarget.querySelector('i');
+
+        if (field.type === 'password') {
+            field.type = 'text';
+            icon.setAttribute('data-lucide', 'eye-off');
+        } else {
+            field.type = 'password';
+            icon.setAttribute('data-lucide', 'eye');
+        }
+        lucide.createIcons();
+    }
+
+    // Generate complex password
+    async function generatePassword() {
+        try {
+            const response = await fetch('/api/generate-password');
+            const data = await response.json();
+
+            document.getElementById('password').value = data.password;
+            document.getElementById('password_confirm').value = data.password;
+
+            // Trigger validation updates
+            checkPasswordChangeIntention();
+            checkPasswordStrength();
+            checkPasswordMatch();
+        } catch (error) {
+            console.error('Failed to generate password:', error);
+            alert('Failed to generate password. Please try again.');
+        }
+    }
+
+    // Check password match
+    function checkPasswordMatch() {
+        const password = document.getElementById('password').value;
+        const confirm = document.getElementById('password_confirm').value;
+        const indicator = document.getElementById('matchIndicator');
+        //const submitBtn = document.getElementById('submitBtn'); // No ID on submit btn in edit form?
+
+        if (confirm.length === 0) {
+            indicator.classList.add('hidden');
+            return;
+        }
+
+        indicator.classList.remove('hidden');
+
+        if (password === confirm) {
+            indicator.textContent = '✓ Senhas conferem';
+            indicator.className = 'text-xs mt-2 font-bold text-green-600';
+            //submitBtn.disabled = false;
+            //submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        } else {
+            indicator.textContent = '✗ Senhas não conferem';
+            indicator.className = 'text-xs mt-2 font-bold text-red-600';
+            //submitBtn.disabled = true;
+            //submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+    }
+
+    // Event listeners
+    document.getElementById('password').addEventListener('input', function () {
+        checkPasswordChangeIntention();
+        checkPasswordStrength();
+        checkPasswordMatch();
+    });
+
+    document.getElementById('password_confirm').addEventListener('input', function () {
+        checkPasswordChangeIntention();
+        checkPasswordMatch();
+    });
 </script>
 {{end}}
