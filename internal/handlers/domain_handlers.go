@@ -119,6 +119,17 @@ func (h *Handler) AddDomain(c *echo.Context) error {
 		}
 	}
 
+	// Parse quota (in MB, store as MB or Bytes? DB schema says int64, usually postfixadmin uses MB)
+	// standard postfixadmin uses MB in the UI and stores MB in the DB (quota field).
+	// MaxQuota is usually Bytes? Let's check model. Domain struct has Quota int64.
+	// Let's assume input is MB.
+	quota := int64(2048) // Default
+	if val := c.FormValue("quota"); val != "" {
+		if parsed, err := strconv.ParseInt(val, 10, 64); err == nil {
+			quota = parsed
+		}
+	}
+
 	var passwordExpiry *int
 	if val := c.FormValue("password_expiry"); val != "" {
 		if parsed, err := strconv.Atoi(val); err == nil {
@@ -178,8 +189,8 @@ func (h *Handler) AddDomain(c *echo.Context) error {
 		Description:    description,
 		Aliases:        aliases,
 		Mailboxes:      mailboxes,
-		MaxQuota:       0,
-		Quota:          0,
+		MaxQuota:       0,     // Not used in this form yet? Or is Quota the max quota for the domain?
+		Quota:          quota, // Domain quota
 		Transport:      "",
 		BackupMX:       backupMX,
 		Created:        now,
@@ -273,6 +284,16 @@ func (h *Handler) EditDomain(c *echo.Context) error {
 		}
 	}
 
+	var quota int64
+	// Default to existing quota if not provided? Or parse from form?
+	if val := c.FormValue("quota"); val != "" {
+		if parsed, err := strconv.ParseInt(val, 10, 64); err == nil {
+			quota = parsed
+		}
+	} else {
+		quota = domain.Quota
+	}
+
 	var passwordExpiry *int
 	if val := c.FormValue("password_expiry"); val != "" {
 		if parsed, err := strconv.Atoi(val); err == nil {
@@ -284,6 +305,7 @@ func (h *Handler) EditDomain(c *echo.Context) error {
 	domain.Description = description
 	domain.Aliases = aliases
 	domain.Mailboxes = mailboxes
+	domain.Quota = quota
 	domain.BackupMX = backupMX
 	domain.Modified = time.Now()
 	domain.Active = active

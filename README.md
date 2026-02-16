@@ -16,7 +16,7 @@ Professional Email Administration System built with Go, Echo, and Tailwind CSS.
 
 Para compilar o projeto localmente (sem Docker), você precisará instalar as seguintes ferramentas:
 
-1.  **Go (v1.25.4 ou superior)**: Linguagem principal do projeto.
+1.  **Go (v1.26 ou superior)**: Linguagem principal do projeto.
     *   [Download Go](https://go.dev/dl/)
 2.  **Node.js (v20 ou superior)**: Necessário para o processamento do CSS com Tailwind.
     *   [Download Node.js](https://nodejs.org/)

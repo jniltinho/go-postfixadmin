@@ -95,6 +95,17 @@
                         <p class="text-xs text-gray-500 mt-2">Maximum number of mailboxes (0 = unlimited)</p>
                     </div>
 
+                    <!-- Quota Limit -->
+                    <div>
+                        <label for="quota"
+                            class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
+                            Domain Quota (MB)
+                        </label>
+                        <input type="number" id="quota" name="quota" min="0" value="{{.Domain.Quota}}"
+                            class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors">
+                        <p class="text-xs text-gray-500 mt-2">Maximum quota in MB (0 = unlimited)</p>
+                    </div>
+
                     <!-- Password Expiry -->
                     <div>
                         <label for="password_expiry"
