@@ -34,4 +34,4 @@ EXPOSE 8080
 # Set the entrypoint
 ENTRYPOINT ["/app/postfixadmin"]
 # Default command starting the server
-CMD ["--run", "--port", "8080"]
+CMD ["server", "--port", "8080"]

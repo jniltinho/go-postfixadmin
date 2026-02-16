@@ -82,7 +82,7 @@ Este comando executa um build multi-stage que:
 Após o build, você pode rodar o binário diretamente:
 
 ```bash
-./postfixadmin --run --port 8080
+./postfixadmin server --port=8080
 ```
 
 Ou via Docker:
@@ -114,21 +114,26 @@ DATABASE_URL="host=localhost user=gorm password=gorm dbname=gorm port=9920 sslmo
 Abaixo estão as flags disponíveis ao executar o binário `./postfixadmin`:
 
 ```text
-Usage of ./postfixadmin:
-  -db-driver string
-        Database driver (mysql or postgres) (default "mysql")
-  -db-url string
-        Database URL connection string
-  -import-sql string
-        Import SQL file to database
-  -migrate
-        Run database migration
-  -port int
-        Port to run the server on (default 8080)
-  -run
-        Start the administration server
-  -version
-        Display version information
+A command line interface for Go-Postfixadmin application.
+
+Usage:
+  postfixadmin [command]
+
+Available Commands:
+  admin       Admin management utilities
+  completion  Generate the autocompletion script for the specified shell
+  help        Help about any command
+  import      Import SQL file to database
+  migrate     Run database migration
+  server      Start the administration server
+  version     Display version information
+
+Flags:
+      --db-driver string   Database driver (mysql or postgres) (default "mysql")
+      --db-url string      Database URL connection string
+  -h, --help               help for postfixadmin
+
+Use "postfixadmin [command] --help" for more information about a command.
 ```
 
 ### Comandos de Administração (CLI)

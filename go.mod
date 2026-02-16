@@ -1,6 +1,6 @@
 module go-postfixadmin
 
-go 1.25.4
+go 1.26
 
 require (
 	github.com/GehirnInc/crypt v0.0.0-20230320061759-8cc1b52080c5
