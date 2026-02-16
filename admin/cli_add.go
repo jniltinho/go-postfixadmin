@@ -1,8 +1,10 @@
 package admin
 
 import (
+	"crypto/rand"
 	"fmt"
 	"log/slog"
+	"math/big"
 	"os"
 	"strings"
 	"time"
@@ -111,4 +113,17 @@ func AddSuperAdmin(db *gorm.DB, input string) {
 	}
 
 	fmt.Printf("Superadmin '%s' created successfully.\n", username)
+}
+
+func generateRandomPassword(length int) (string, error) {
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*"
+	b := make([]byte, length)
+	for i := range b {
+		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
+		if err != nil {
+			return "", err
+		}
+		b[i] = charset[num.Int64()]
+	}
+	return string(b), nil
 }
