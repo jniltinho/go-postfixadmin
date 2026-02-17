@@ -269,6 +269,7 @@ func (h *Handler) EditDomain(c *echo.Context) error {
 	active := c.FormValue("active") == "true"
 	backupMX := c.FormValue("backupmx") == "true"
 
+	// ...
 	// Parse numeric fields
 	aliases := 10
 	if val := c.FormValue("aliases"); val != "" {
@@ -301,6 +302,9 @@ func (h *Handler) EditDomain(c *echo.Context) error {
 		}
 	}
 
+	// Check if active state is changing
+	activeChanged := domain.Active != active
+
 	// Update domain fields
 	domain.Description = description
 	domain.Aliases = aliases
@@ -311,17 +315,37 @@ func (h *Handler) EditDomain(c *echo.Context) error {
 	domain.Active = active
 	domain.PasswordExpiry = passwordExpiry
 
-	if err := h.DB.Save(&domain).Error; err != nil {
+	// Use transaction to ensure atomicity (especially for cascading updates)
+	err = h.DB.Transaction(func(tx *gorm.DB) error {
+		if activeChanged {
+			// Update all mailboxes for this domain to match the new domain active state
+			if err := tx.Model(&models.Mailbox{}).Where("domain = ?", domain.Domain).Update("active", active).Error; err != nil {
+				return err
+			}
+			// Update all aliases for this domain to match the new domain active state
+			if err := tx.Model(&models.Alias{}).Where("domain = ?", domain.Domain).Update("active", active).Error; err != nil {
+				return err
+			}
+		}
+
+		if err := tx.Save(&domain).Error; err != nil {
+			return err
+		}
+
+		// Log Action
+		if err := utils.LogAction(tx, username, c.RealIP(), domainName, "edit_domain", domainName); err != nil {
+			fmt.Printf("Failed to log edit_domain: %v\n", err)
+			return nil
+		}
+		return nil
+	})
+
+	if err != nil {
 		return c.Render(http.StatusInternalServerError, "edit_domain.html", map[string]interface{}{
 			"Error":       "Failed to update domain: " + err.Error(),
 			"Domain":      domain,
 			"SessionUser": username,
 		})
-	}
-
-	// Log Action
-	if err := utils.LogAction(h.DB, username, c.RealIP(), domainName, "edit_domain", domainName); err != nil {
-		fmt.Printf("Failed to log edit_domain: %v\n", err)
 	}
 
 	// Redirect to domains list on success

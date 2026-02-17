@@ -21,7 +21,12 @@ func (h *Handler) ListAliases(c *echo.Context) error {
 	var isSuperAdmin bool
 
 	if h.DB != nil {
-		query := h.DB.Order("address ASC")
+		// Start query with specific selection and join to filter by active domains
+		// We use Table("alias") to be explicit and Select("alias.*") to avoid GORM mapping issues
+		query := h.DB.Table("alias").Select("alias.*").
+			Joins("JOIN domain ON alias.domain = domain.domain").
+			Where("domain.active = ?", true).
+			Order("alias.address ASC")
 
 		// Security: Filter by allowed domains
 		username := middleware.GetUsername(c)
@@ -37,7 +42,7 @@ func (h *Handler) ListAliases(c *echo.Context) error {
 			if len(allowedDomains) == 0 {
 				query = query.Where("1 = 0") // No domains allowed
 			} else {
-				query = query.Where("domain IN ?", allowedDomains)
+				query = query.Where("alias.domain IN ?", allowedDomains)
 			}
 		}
 
@@ -59,7 +64,7 @@ func (h *Handler) ListAliases(c *echo.Context) error {
 					})
 				}
 			}
-			query = query.Where("domain = ?", domainFilter)
+			query = query.Where("alias.domain = ?", domainFilter)
 		}
 
 		// Show only pure aliases, not mailbox aliases

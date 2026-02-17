@@ -26,7 +26,12 @@ func (h *Handler) ListMailboxes(c *echo.Context) error {
 
 	var isSuperAdmin bool
 	if h.DB != nil {
-		query := h.DB.Order("username ASC")
+		// Start query with specific selection and join to filter by active domains
+		// We use Table("mailbox") to be explicit and Select("mailbox.*") to avoid GORM mapping issues
+		query := h.DB.Table("mailbox").Select("mailbox.*").
+			Joins("JOIN domain ON mailbox.domain = domain.domain").
+			Where("domain.active = ?", true).
+			Order("mailbox.username ASC")
 
 		// Security: Filter by allowed domains
 		username := middleware.GetUsername(c)
@@ -42,7 +47,7 @@ func (h *Handler) ListMailboxes(c *echo.Context) error {
 			if len(allowedDomains) == 0 {
 				query = query.Where("1 = 0") // No domains allowed
 			} else {
-				query = query.Where("domain IN ?", allowedDomains)
+				query = query.Where("mailbox.domain IN ?", allowedDomains)
 			}
 		}
 
@@ -64,7 +69,7 @@ func (h *Handler) ListMailboxes(c *echo.Context) error {
 					})
 				}
 			}
-			query = query.Where("domain = ?", domainFilter)
+			query = query.Where("mailbox.domain = ?", domainFilter)
 		}
 
 		query.Find(&mailboxes)

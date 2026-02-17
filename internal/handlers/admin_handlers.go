@@ -84,7 +84,7 @@ func (h *Handler) AddAdminForm(c *echo.Context) error {
 	var domains []models.Domain
 
 	if h.DB != nil {
-		h.DB.Where("domain != ?", "ALL").Order("domain ASC").Find(&domains)
+		h.DB.Where("domain != ? AND active = ?", "ALL", true).Order("domain ASC").Find(&domains)
 	}
 
 	return c.Render(http.StatusOK, "add_admin.html", map[string]interface{}{
@@ -201,7 +201,7 @@ func (h *Handler) AddAdmin(c *echo.Context) error {
 func (h *Handler) renderAddAdminError(c *echo.Context, errorMsg, username string) error {
 	var domains []models.Domain
 	if h.DB != nil {
-		h.DB.Where("domain != ?", "ALL").Order("domain ASC").Find(&domains)
+		h.DB.Where("domain != ? AND active = ?", "ALL", true).Order("domain ASC").Find(&domains)
 	}
 
 	return c.Render(http.StatusBadRequest, "add_admin.html", map[string]interface{}{
@@ -300,7 +300,7 @@ func (h *Handler) EditAdminForm(c *echo.Context) error {
 
 	// Fetch all domains
 	var allDomains []models.Domain
-	h.DB.Find(&allDomains)
+	h.DB.Where("domain != ? AND active = ?", "ALL", true).Find(&allDomains)
 
 	// Fetch assigned domains for this admin
 	var domainAdmins []models.DomainAdmin
@@ -318,9 +318,6 @@ func (h *Handler) EditAdminForm(c *echo.Context) error {
 
 	var domainOptions []DomainOption
 	for _, d := range allDomains {
-		if d.Domain == "ALL" {
-			continue
-		}
 		domainOptions = append(domainOptions, DomainOption{
 			Domain:   d.Domain,
 			Assigned: assignedMap[d.Domain],
