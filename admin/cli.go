@@ -9,6 +9,7 @@ import (
 	"go-postfixadmin/internal/models"
 
 	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/jedib0t/go-pretty/v6/text"
 	"gorm.io/gorm"
 )
 
@@ -52,7 +53,10 @@ func ListAllDomains(db *gorm.DB) {
 		// Let's keep that logic.
 		t.AppendRow(table.Row{d.Domain, d.Description, d.Aliases, d.Mailboxes, FormatQuota(d.Quota * 1024000 * 1024000), active, d.Modified.Format("2006-01-02 15:04:05")})
 	}
-
+	style := table.StyleDefault
+	style.Format.Footer = text.FormatDefault
+	t.SetStyle(style)
+	t.AppendFooter(table.Row{"List All Domains", strings.Join(os.Args, " ")})
 	t.Render()
 }
 
@@ -75,8 +79,12 @@ func ListAllMailboxes(db *gorm.DB) {
 		}
 		// Previous logic: formatQuota(m.Quota * 1024000)
 		t.AppendRow(table.Row{m.Username, m.Name, m.Domain, FormatQuota(m.Quota * 1024000), active, m.Modified.Format("2006-01-02 15:04:05")})
-	}
 
+	}
+	style := table.StyleDefault
+	style.Format.Footer = text.FormatDefault
+	t.SetStyle(style)
+	t.AppendFooter(table.Row{"List All Mailboxes", strings.Join(os.Args, " ")})
 	t.Render()
 }
 
@@ -103,7 +111,10 @@ func ListAllAdmins(db *gorm.DB) {
 		}
 		t.AppendRow(table.Row{a.Username, super, active, a.Modified.Format("2006-01-02 15:04:05")})
 	}
-
+	style := table.StyleDefault
+	style.Format.Footer = text.FormatDefault
+	t.SetStyle(style)
+	t.AppendFooter(table.Row{"List All Admins", strings.Join(os.Args, " ")})
 	t.Render()
 }
 
@@ -126,6 +137,57 @@ func ListAllAliases(db *gorm.DB) {
 		}
 		t.AppendRow(table.Row{a.Address, a.Goto, a.Domain, active, a.Modified.Format("2006-01-02 15:04:05")})
 	}
+	style := table.StyleDefault
+	style.Format.Footer = text.FormatDefault
+	t.SetStyle(style)
+	t.AppendFooter(table.Row{"List All Aliases", strings.Join(os.Args, " ")})
+	t.Render()
+}
 
+// ListDomainAdmins lists all domain administrators in the database
+func ListDomainAdmins(db *gorm.DB) {
+	var domainAdmins []models.DomainAdmin
+	if err := db.Order("username DESC").Find(&domainAdmins).Error; err != nil {
+		slog.Error("Failed to fetch domain admins", "error", err)
+		os.Exit(1)
+	}
+
+	t := table.NewWriter()
+	t.SetOutputMirror(os.Stdout)
+	t.AppendHeader(table.Row{"Username", "Domain", "Active", "Created"})
+
+	for _, da := range domainAdmins {
+		active := "No"
+		if da.Active {
+			active = "Yes"
+		}
+		t.AppendRow(table.Row{da.Username, da.Domain, active, da.Created.Format("2006-01-02 15:04:05")})
+	}
+	style := table.StyleDefault
+	style.Format.Footer = text.FormatDefault
+	t.SetStyle(style)
+	t.AppendFooter(table.Row{"List All Domain Admins", strings.Join(os.Args, " ")})
+	t.Render()
+}
+
+// ListLogs lists all system logs in the database
+func ListLogs(db *gorm.DB) {
+	var logs []models.Log
+	if err := db.Order("id DESC").Limit(100).Find(&logs).Error; err != nil {
+		slog.Error("Failed to fetch logs", "error", err)
+		os.Exit(1)
+	}
+
+	t := table.NewWriter()
+	t.SetOutputMirror(os.Stdout)
+	t.AppendHeader(table.Row{"Date", "Username", "Domain", "Action", "Data"})
+
+	for _, l := range logs {
+		t.AppendRow(table.Row{l.Timestamp.Format("2006-01-02 15:04:05"), l.Username, l.Domain, l.Action, l.Data})
+	}
+	style := table.StyleDefault
+	style.Format.Footer = text.FormatDefault
+	t.SetStyle(style)
+	t.AppendFooter(table.Row{"List System Logs (Last 100)", strings.Join(os.Args, " ")})
 	t.Render()
 }

@@ -16,6 +16,7 @@ var (
 	listAdmins       bool
 	listAliases      bool
 	listDomainAdmins bool
+	listLogs         bool
 	addSuperAdmin    string
 )
 
@@ -40,6 +41,8 @@ var adminCmd = &cobra.Command{
 			admin.ListAllAliases(db)
 		} else if listDomainAdmins {
 			admin.ListDomainAdmins(db)
+		} else if listLogs {
+			admin.ListLogs(db)
 		} else if addSuperAdmin != "" {
 			admin.AddSuperAdmin(db, addSuperAdmin)
 		} else {
@@ -50,10 +53,11 @@ var adminCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(adminCmd)
-	adminCmd.Flags().BoolVarP(&listDomains, "list-domains", "l", false, "List all domains")
-	adminCmd.Flags().BoolVarP(&listMailboxes, "list-mailboxes", "m", false, "List all mailboxes")
+	adminCmd.Flags().BoolVarP(&listDomains, "list-domains", "D", false, "List all domains")
+	adminCmd.Flags().BoolVarP(&listMailboxes, "list-mailboxes", "M", false, "List all mailboxes")
 	adminCmd.Flags().BoolVarP(&listAdmins, "list-admins", "a", false, "List all admins")
 	adminCmd.Flags().BoolVarP(&listAliases, "list-aliases", "s", false, "List all aliases")
 	adminCmd.Flags().BoolVarP(&listDomainAdmins, "domain-admins", "d", false, "List all domain admins")
+	adminCmd.Flags().BoolVarP(&listLogs, "list-logs", "L", false, "List all system logs")
 	adminCmd.Flags().StringVar(&addSuperAdmin, "add-superadmin", "", "Add a new superadmin (format: email:password)")
 }
