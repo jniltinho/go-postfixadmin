@@ -1,19 +1,19 @@
-{{define "title"}}Domains - Go-PostfixAdmin{{end}}
-{{define "breadcrumb"}}Domains Listing{{end}}
+{{define "title"}}Domínios - Go-PostfixAdmin{{end}}
+{{define "breadcrumb"}}Listagem de Domínios{{end}}
 
 {{define "content"}}
 <div class="mb-12 flex justify-between items-end">
     <div>
-        <h2 class="text-4xl font-mono font-black uppercase tracking-tight mb-2">Domains</h2>
-        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Manage and monitor your registered mail
-            domains.</p>
+        <h2 class="text-4xl font-mono font-black uppercase tracking-tight mb-2">Domínios</h2>
+        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Gerencie e monitore seus domínios de email
+            registrados.</p>
     </div>
     <div class="flex space-x-4">
         {{if .IsSuperAdmin}}
         <a href="/domains/add"
             class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-8 py-5 shadow-[3px_3px_0px_#1E293B] flex items-center transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest">
             <i data-lucide="plus-circle" class="w-5 h-5 mr-3"></i>
-            Create Domain
+            Adicionar Domínio
         </a>
         {{end}}
     </div>

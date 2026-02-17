@@ -3,8 +3,9 @@
 
 {{define "content"}}
 <div class="mb-12">
-    <h2 class="text-4xl font-mono font-black uppercase tracking-tight mb-2">System Overview</h2>
-    <p class="text-gray-500 font-bold uppercase text-xs tracking-widest">Monitoring your mail server infrastructure.</p>
+    <h2 class="text-4xl font-mono font-black uppercase tracking-tight mb-2">Visão Geral</h2>
+    <p class="text-gray-500 font-bold uppercase text-xs tracking-widest">Monitorando sua infraestrutura de servidor de
+        Email.</p>
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -19,10 +20,10 @@
             <span
                 class="text-xs font-black text-white bg-green-500 border-2 border-brand-text px-3 py-1 uppercase tracking-widest">Active</span>
         </div>
-        <p class="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Total Domains</p>
+        <p class="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Total de Domínios</p>
         <div class="flex items-baseline space-x-2">
             <h3 class="text-5xl font-mono font-black text-brand-text">{{.DomainCount}}</h3>
-            <span class="text-xs font-bold uppercase text-gray-400 tracking-tighter">deployed</span>
+            <span class="text-xs font-bold uppercase text-gray-400 tracking-tighter">disponíveis</span>
         </div>
     </div>
 
@@ -38,10 +39,10 @@
                 class="text-xs font-black text-white bg-brand-secondary border-2 border-brand-text px-3 py-1 uppercase tracking-widest">In
                 Use</span>
         </div>
-        <p class="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Active Mailboxes</p>
+        <p class="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Contas de Email</p>
         <div class="flex items-baseline space-x-2">
             <h3 class="text-5xl font-mono font-black text-brand-text">{{.MailboxCount}}</h3>
-            <span class="text-xs font-bold uppercase text-gray-400 tracking-tighter">accounts</span>
+            <span class="text-xs font-bold uppercase text-gray-400 tracking-tighter">contas</span>
         </div>
     </div>
 

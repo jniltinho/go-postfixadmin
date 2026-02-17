@@ -5,7 +5,7 @@
 <div class="mb-12 flex justify-between items-end">
     <div>
         <h2 class="text-4xl font-mono font-black uppercase tracking-tight mb-2">Contas de Email</h2>
-        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Manage mailboxes and email accounts</p>
+        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Gerencie suas contas de email</p>
     </div>
     <a href="/mailboxes/add"
         class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-8 py-5 shadow-[3px_3px_0px_#1E293B] flex items-center transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest">
@@ -17,8 +17,8 @@
 <!-- Filter by Domain -->
 <div class="mb-8">
     <form method="GET" action="/mailboxes" class="flex items-center">
-        <label for="domain" class="mr-4 text-xs font-black uppercase tracking-widest text-brand-text">Filter by
-            Domain:</label>
+        <label for="domain" class="mr-4 text-xs font-black uppercase tracking-widest text-brand-text">Filtrar por
+            Domínio:</label>
         <select name="domain" onchange="this.form.submit()"
             class="h-10 px-4 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors bg-white">
             <option value="">Todos Domínios</option>
@@ -38,7 +38,7 @@
             <tr>
                 <th class="px-4 py-4 text-left text-xs font-black uppercase tracking-widest">Email</th>
                 <th class="px-4 py-4 text-left text-xs font-black uppercase tracking-widest">Nome</th>
-                <th class="px-4 py-4 text-left text-xs font-black uppercase tracking-widest">Domain</th>
+                <th class="px-4 py-4 text-left text-xs font-black uppercase tracking-widest">Domínio</th>
                 <th class="px-4 py-4 text-left text-xs font-black uppercase tracking-widest">Quota</th>
                 <th class="px-4 py-4 text-center text-xs font-black uppercase tracking-widest">Ativo</th>
                 <th class="px-4 py-4 text-left text-xs font-black uppercase tracking-widest">Modificado</th>
@@ -99,7 +99,7 @@
             {{else}}
             <tr>
                 <td colspan="7" class="px-8 py-20 text-center text-gray-400">
-                    Nenhum mailbox encontrado.
+                    Nenhum Email encontrado.
                 </td>
             </tr>
             {{end}}
