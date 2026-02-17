@@ -183,7 +183,7 @@ func ListLogs(db *gorm.DB) {
 	t.AppendHeader(table.Row{"Date", "Username", "Domain", "Action", "Data"})
 
 	for _, l := range logs {
-		t.AppendRow(table.Row{l.Timestamp.Format("2006-01-02 15:04:05"), l.Username, l.Domain, l.Action, l.Data})
+		t.AppendRow(table.Row{l.Timestamp.Format("2006-01-02 15:04:05"), l.Username, l.Domain, strings.ToUpper(l.Action), l.Data})
 	}
 	style := table.StyleDefault
 	style.Format.Footer = text.FormatDefault
