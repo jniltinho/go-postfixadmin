@@ -147,7 +147,7 @@ func ListAllAliases(db *gorm.DB) {
 // ListDomainAdmins lists all domain administrators in the database
 func ListDomainAdmins(db *gorm.DB) {
 	var domainAdmins []models.DomainAdmin
-	if err := db.Order("username DESC").Find(&domainAdmins).Error; err != nil {
+	if err := db.Order("domain ASC").Find(&domainAdmins).Error; err != nil {
 		slog.Error("Failed to fetch domain admins", "error", err)
 		os.Exit(1)
 	}
