@@ -29,7 +29,7 @@ var migrateCmd = &cobra.Command{
 }
 
 var importCmd = &cobra.Command{
-	Use:   "import [sql_file]",
+	Use:   "importsql",
 	Short: "Import SQL file to database",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {

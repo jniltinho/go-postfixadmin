@@ -14,8 +14,8 @@ type Domain struct {
 	Quota          int64     `gorm:"column:quota"`
 	Transport      string    `gorm:"column:transport"`
 	BackupMX       bool      `gorm:"column:backupmx"`
-	Created        time.Time `gorm:"column:created"`
-	Modified       time.Time `gorm:"column:modified"`
+	Created        time.Time `gorm:"column:created;default:'2000-01-01 00:00:00'"`
+	Modified       time.Time `gorm:"column:modified;default:'2000-01-01 00:00:00'"`
 	Active         bool      `gorm:"column:active"`
 	PasswordExpiry *int      `gorm:"column:password_expiry"`
 }
@@ -27,20 +27,21 @@ func (Domain) TableName() string {
 // Mailbox represents the 'mailbox' table
 type Mailbox struct {
 	Username       string    `gorm:"primaryKey;column:username"`
-	Password       string    `gorm:"column:password"`
+	Password       string    `gorm:"column:password;not null"`
 	Name           string    `gorm:"column:name"`
-	Maildir        string    `gorm:"column:maildir"`
-	Quota          int64     `gorm:"column:quota"`
-	LocalPart      string    `gorm:"column:local_part"`
-	Domain         string    `gorm:"column:domain"`
-	Created        time.Time `gorm:"column:created"`
-	Modified       time.Time `gorm:"column:modified"`
-	Active         bool      `gorm:"column:active"`
+	Maildir        string    `gorm:"column:maildir;not null"`
+	Quota          int64     `gorm:"column:quota;default:0;not null"`
+	LocalPart      string    `gorm:"column:local_part;not null"`
+	Domain         string    `gorm:"column:domain;index:domain;not null"`
+	Created        time.Time `gorm:"column:created;default:'2000-01-01 00:00:00'"`
+	Modified       time.Time `gorm:"column:modified;default:'2000-01-01 00:00:00'"`
+	Active         bool      `gorm:"column:active;default:true;not null"`
 	EmailOther     string    `gorm:"column:email_other"`
+	Phone          string    `gorm:"column:phone;default:'+0000000000000'"`
 	Token          string    `gorm:"column:token"`
 	TokenValidity  time.Time `gorm:"column:token_validity;default:'2000-01-01 00:00:00'"`
 	PasswordExpiry time.Time `gorm:"column:password_expiry;default:'2000-01-01 00:00:00'"`
-	TOTPSecret     *string   `gorm:"column:totp_secret"`
+	TOTPSecret     *string   `gorm:"column:totp_secret;default:null"`
 	SMTPActive     bool      `gorm:"column:smtp_active;default:true"`
 }
 
@@ -84,9 +85,9 @@ func (Alias) TableName() string {
 // DomainAdmin represents the 'domain_admins' table
 type DomainAdmin struct {
 	ID       int       `gorm:"primaryKey;column:id;autoIncrement"`
-	Username string    `gorm:"column:username"`
-	Domain   string    `gorm:"column:domain"`
-	Created  time.Time `gorm:"column:created"`
+	Username string    `gorm:"column:username;index:username"`
+	Domain   string    `gorm:"column:domain;index:domain"`
+	Created  time.Time `gorm:"column:created;default:'2000-01-01 00:00:00'"`
 	Active   bool      `gorm:"column:active"`
 }
 
@@ -96,7 +97,7 @@ func (DomainAdmin) TableName() string {
 
 // Log represents the 'log' table
 type Log struct {
-	Timestamp time.Time `gorm:"column:timestamp"`
+	Timestamp time.Time `gorm:"column:timestamp;default:'2000-01-01 00:00:00'"`
 	Username  string    `gorm:"column:username"`
 	Domain    string    `gorm:"column:domain"`
 	Action    string    `gorm:"column:action"`
@@ -138,14 +139,14 @@ type Fetchmail struct {
 	ExtraOptions   *string   `gorm:"column:extra_options;type:text"`
 	ReturnedText   *string   `gorm:"column:returned_text;type:text"`
 	Mda            *string   `gorm:"column:mda"`
-	Date           time.Time `gorm:"column:date"`
+	Date           time.Time `gorm:"column:date;type:timestamp;default:'2000-01-01 00:00:00';not null"`
 	SSLCertCk      bool      `gorm:"column:sslcertck;default:false"`
 	SSLCertPath    *string   `gorm:"column:sslcertpath"`
 	SSLFingerprint *string   `gorm:"column:sslfingerprint"`
 	Domain         *string   `gorm:"column:domain"`
 	Active         bool      `gorm:"column:active;default:false"`
-	Created        time.Time `gorm:"column:created"`
-	Modified       time.Time `gorm:"column:modified"`
+	Created        time.Time `gorm:"column:created;default:'2000-01-01 00:00:00'"`
+	Modified       time.Time `gorm:"column:modified;type:timestamp;default:CURRENT_TIMESTAMP;autoUpdateTime;not null"`
 	SrcPort        int       `gorm:"column:src_port;default:0"`
 }
 
@@ -179,8 +180,8 @@ func (MailboxAppPassword) TableName() string {
 // Quota represents the 'quota' table
 type Quota struct {
 	Username string `gorm:"primaryKey;column:username"`
-	Path     string `gorm:"primaryKey;column:path"`
-	Current  int64  `gorm:"column:current;default:0"`
+	Path     string `gorm:"primaryKey;column:path;not null"`
+	Current  int64  `gorm:"column:current;default:0;not null"`
 }
 
 func (Quota) TableName() string {
@@ -190,8 +191,8 @@ func (Quota) TableName() string {
 // Quota2 represents the 'quota2' table
 type Quota2 struct {
 	Username string `gorm:"primaryKey;column:username"`
-	Bytes    int64  `gorm:"column:bytes;default:0"`
-	Messages int    `gorm:"column:messages;default:0"`
+	Bytes    int64  `gorm:"column:bytes;default:0;not null"`
+	Messages int    `gorm:"column:messages;default:0;not null"`
 }
 
 func (Quota2) TableName() string {
@@ -216,12 +217,12 @@ type Vacation struct {
 	Subject      string    `gorm:"column:subject"`
 	Body         string    `gorm:"column:body;type:text"`
 	Cache        string    `gorm:"column:cache;type:text"`
-	Domain       string    `gorm:"column:domain"`
-	Created      time.Time `gorm:"column:created"`
-	Active       bool      `gorm:"column:active;default:true"`
-	Modified     time.Time `gorm:"column:modified;autoCreateTime"`
-	ActiveFrom   time.Time `gorm:"column:activefrom"`
-	ActiveUntil  time.Time `gorm:"column:activeuntil"`
+	Domain       string    `gorm:"column:domain;not null"`
+	Created      time.Time `gorm:"column:created;default:'2000-01-01 00:00:00'"`
+	Active       bool      `gorm:"column:active;default:true;not null"`
+	Modified     time.Time `gorm:"column:modified;type:timestamp;default:CURRENT_TIMESTAMP;autoUpdateTime;not null"`
+	ActiveFrom   time.Time `gorm:"column:activefrom;type:timestamp;default:'2000-01-01 00:00:00';not null"`
+	ActiveUntil  time.Time `gorm:"column:activeuntil;type:timestamp;default:'2000-01-01 00:00:00';not null"`
 	IntervalTime int       `gorm:"column:interval_time;default:0"`
 }
 
@@ -233,7 +234,7 @@ func (Vacation) TableName() string {
 type VacationNotification struct {
 	OnVacation string    `gorm:"primaryKey;column:on_vacation"`
 	Notified   string    `gorm:"primaryKey;column:notified"`
-	NotifiedAt time.Time `gorm:"column:notified_at;autoCreateTime"`
+	NotifiedAt time.Time `gorm:"column:notified_at;type:timestamp;default:CURRENT_TIMESTAMP;autoUpdateTime;not null"`
 }
 
 func (VacationNotification) TableName() string {

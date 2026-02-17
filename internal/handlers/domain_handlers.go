@@ -360,6 +360,11 @@ func (h *Handler) DeleteDomain(c *echo.Context) error {
 			return err
 		}
 
+		// Delete all domain_admins for this domain
+		if err := tx.Where("domain = ?", domainName).Delete(&models.DomainAdmin{}).Error; err != nil {
+			return err
+		}
+
 		// Delete the domain itself
 		if err := tx.Where("domain = ?", domainName).Delete(&models.Domain{}).Error; err != nil {
 			return err
