@@ -98,7 +98,7 @@ docker run -p 8080:8080 -e DATABASE_URL="seu-dsn" postfixadmin:latest
 # Formato padrão
 DATABASE_URL="user:password@tcp(localhost:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local"
 
-# Para uso com --import-sql (requer multiStatements=true)
+# Para uso com importsql (requer multiStatements=true)
 DATABASE_URL="user:password@tcp(localhost:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local&multiStatements=true"
 ```
 
@@ -123,7 +123,7 @@ Available Commands:
   admin       Admin management utilities
   completion  Generate the autocompletion script for the specified shell
   help        Help about any command
-  import      Import SQL file to database
+  importsql   Import SQL file to database
   migrate     Run database migration
   server      Start the administration server
   version     Display version information
