@@ -1,16 +1,16 @@
-{{define "title"}}Mailboxes - Go-PostfixAdmin{{end}}
-{{define "breadcrumb"}}Email Accounts{{end}}
+{{define "title"}}Emails - Go-PostfixAdmin{{end}}
+{{define "breadcrumb"}}Contas de Email{{end}}
 
 {{define "content"}}
 <div class="mb-12 flex justify-between items-end">
     <div>
-        <h2 class="text-4xl font-mono font-black uppercase tracking-tight mb-2">Email Accounts</h2>
+        <h2 class="text-4xl font-mono font-black uppercase tracking-tight mb-2">Contas de Email</h2>
         <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Manage mailboxes and email accounts</p>
     </div>
     <a href="/mailboxes/add"
         class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-8 py-5 shadow-[3px_3px_0px_#1E293B] flex items-center transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest">
-        <i data-lucide="plus" class="w-5 h-5 mr-3"></i>
-        Create Email Account
+        <i data-lucide="plus-circle" class="w-5 h-5 mr-3"></i>
+        Adicionar Email
     </a>
 </div>
 
@@ -42,7 +42,7 @@
                 <th class="px-4 py-4 text-left text-xs font-black uppercase tracking-widest">Quota</th>
                 <th class="px-4 py-4 text-center text-xs font-black uppercase tracking-widest">Ativo</th>
                 <th class="px-4 py-4 text-left text-xs font-black uppercase tracking-widest">Modificado</th>
-                <th class="px-4 py-4 text-right text-xs font-black uppercase tracking-widest">Actions</th>
+                <th class="px-4 py-4 text-right"></th>
             </tr>
         </thead>
         <tbody class="divide-y-2 divide-gray-200">

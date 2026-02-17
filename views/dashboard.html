@@ -49,20 +49,20 @@
     <div
         class="bg-brand-cta border-2 border-brand-text p-8 text-white flex flex-col justify-between shadow-[3px_3px_0px_#1E293B]">
         <div>
-            <h3 class="text-xl font-black uppercase tracking-tight mb-2">New domain?</h3>
-            <p class="text-white font-bold text-xs uppercase tracking-wide mb-6">Create a new domain in seconds.</p>
+            <h3 class="text-xl font-black uppercase tracking-tight mb-2">Novo domínio?</h3>
+            <p class="text-white font-bold text-xs uppercase tracking-wide mb-6">Crie um novo domínio em segundos.</p>
         </div>
         {{if .IsSuperAdmin}}
         <a href="/domains/add"
             class="w-full bg-white text-brand-text border-2 border-brand-text font-black py-4 text-center shadow-[2px_2px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[3px_3px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none flex items-center justify-center group uppercase tracking-widest text-sm">
-            <span>Create Domain</span>
-            <i data-lucide="plus" class="w-5 h-5 ml-2"></i>
+            <span>Adicionar Domínio</span>
+            <i data-lucide="plus-circle" class="w-5 h-5 ml-2"></i>
         </a>
         {{else}}
         <button disabled
             class="w-full bg-gray-300 text-gray-500 border-2 border-gray-400 font-black py-4 text-center flex items-center justify-center cursor-not-allowed uppercase tracking-widest text-sm"
             title="Only Superadmins can create domains">
-            <span>Create Domain</span>
+            <span>Adicionar Domínio</span>
             <i data-lucide="lock" class="w-5 h-5 ml-2"></i>
         </button>
         {{end}}
@@ -72,13 +72,13 @@
     <div
         class="bg-brand-primary border-2 border-brand-text p-8 text-white flex flex-col justify-between shadow-[3px_3px_0px_#1E293B]">
         <div>
-            <h3 class="text-xl font-black uppercase tracking-tight mb-2">New Email?</h3>
-            <p class="text-white font-bold text-xs uppercase tracking-wide mb-6">Create new account.</p>
+            <h3 class="text-xl font-black uppercase tracking-tight mb-2">Novo Email?</h3>
+            <p class="text-white font-bold text-xs uppercase tracking-wide mb-6">Crie uma nova conta.</p>
         </div>
         <a href="/mailboxes/add"
             class="w-full bg-white text-brand-text border-2 border-brand-text font-black py-4 text-center shadow-[2px_2px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[3px_3px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none flex items-center justify-center group uppercase tracking-widest text-sm">
-            <span>Create Email</span>
-            <i data-lucide="plus" class="w-5 h-5 ml-2"></i>
+            <span>Adicionar Email</span>
+            <i data-lucide="plus-circle" class="w-5 h-5 ml-2"></i>
         </a>
     </div>
 </div>
@@ -86,10 +86,10 @@
 <div class="mt-12">
     <div class="bg-white border-2 border-brand-text p-8 neo-shadow-sm">
         <div class="flex items-center justify-between mb-8">
-            <h3 class="text-xl font-black uppercase tracking-widest">Recent Activity</h3>
+            <h3 class="text-xl font-black uppercase tracking-widest">Atividades Recentes</h3>
             <button
                 class="text-brand-primary font-black uppercase tracking-widest text-xs flex items-center hover:underline cursor-pointer">
-                View logs <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
+                Ver logs <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
             </button>
         </div>
         <div class="overflow-x-auto max-h-64 overflow-y-auto custom-scrollbar">
@@ -117,8 +117,8 @@
                     {{end}}
                     {{else}}
                     <tr>
-                        <td colspan="5" class="py-8 text-center text-gray-400 font-bold uppercase tracking-widest">No
-                            recent activity found</td>
+                        <td colspan="5" class="py-8 text-center text-gray-400 font-bold uppercase tracking-widest">
+                            Nenhuma atividade recente encontrada</td>
                     </tr>
                     {{end}}
                 </tbody>
