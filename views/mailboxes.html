@@ -14,20 +14,23 @@
     </a>
 </div>
 
-{{if .DomainFilter}}
-<div class="mb-6 p-4 bg-blue-50 border-2 border-blue-600 flex items-center justify-between rounded">
-    <div class="flex items-center">
-        <i data-lucide="filter" class="w-5 h-5 mr-3 text-blue-600"></i>
-        <span class="font-bold text-blue-900">Filtrado por domínio:
-            <span class="font-mono text-blue-700">{{.DomainFilter}}</span>
-        </span>
-    </div>
-    <a href="/mailboxes" class="text-sm font-bold text-blue-600 hover:underline flex items-center">
-        <i data-lucide="x" class="w-4 h-4 mr-1"></i>
-        Remover filtro
-    </a>
+<!-- Filter by Domain -->
+<div class="mb-8">
+    <form method="GET" action="/mailboxes" class="flex items-center">
+        <label for="domain" class="mr-4 text-xs font-black uppercase tracking-widest text-brand-text">Filter by
+            Domain:</label>
+        <select name="domain" onchange="this.form.submit()"
+            class="h-10 px-4 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors bg-white">
+            <option value="">Todos Domínios</option>
+            {{range .Domains}}
+            <option value="{{.Domain}}" {{if eq .Domain $.DomainFilter}}selected{{end}}>{{.Domain}}</option>
+            {{end}}
+        </select>
+        {{if .DomainFilter}}
+        <a href="/mailboxes" class="ml-4 text-xs font-bold text-red-500 hover:underline">Limpar Filtro</a>
+        {{end}}
+    </form>
 </div>
-{{end}}
 
 <div class="bg-white border-4 border-brand-text neo-shadow-sm overflow-hidden">
     <table class="w-full">

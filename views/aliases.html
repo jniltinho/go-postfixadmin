@@ -19,19 +19,15 @@
     <form method="GET" action="/aliases" class="flex items-center">
         <label for="domain" class="mr-4 text-xs font-black uppercase tracking-widest text-brand-text">Filter by
             Domain:</label>
-        <select name="domain"
+        <select name="domain" onchange="this.form.submit()"
             class="h-10 px-4 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors bg-white">
-            <option value="">All Domains</option>
+            <option value="">Todos Domínios</option>
             {{range .Domains}}
             <option value="{{.Domain}}" {{if eq .Domain $.DomainFilter}}selected{{end}}>{{.Domain}}</option>
             {{end}}
         </select>
-        <button type="submit"
-            class="h-10 ml-4 bg-white hover:bg-gray-50 text-brand-text border-2 border-brand-text font-black px-4 shadow-[2px_2px_0px_#1E293B] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest text-xs flex items-center">
-            Filter
-        </button>
         {{if .DomainFilter}}
-        <a href="/aliases" class="ml-4 text-xs font-bold text-red-500 hover:underline">Clear Filter</a>
+        <a href="/aliases" class="ml-4 text-xs font-bold text-red-500 hover:underline">Limpar Filtro</a>
         {{end}}
     </form>
 </div>
