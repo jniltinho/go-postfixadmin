@@ -24,7 +24,7 @@
                     <th class="px-4 py-4 text-left text-xs font-black uppercase tracking-widest">Administrador</th>
                     <th class="px-4 py-4 text-center text-xs font-black uppercase tracking-widest">Domínios</th>
                     <th class="px-4 py-4 text-center text-xs font-black uppercase tracking-widest">Habilitado</th>
-                    <th class="px-4 py-4 text-left text-xs font-black uppercase tracking-widest">Última Modificação</th>
+                    <th class="px-4 py-4 text-left text-xs font-black uppercase tracking-widest">Modificado</th>
                     <th class="px-4 py-4 text-right"></th>
                 </tr>
             </thead>
@@ -58,7 +58,7 @@
                         {{end}}
                     </td>
                     <td class="px-4 py-1">
-                        <span class="text-sm text-gray-600">{{.Modified.Format "2006-01-02"}}</span>
+                        <span class="text-sm text-gray-600">{{.Modified.Format "2006-01-02 15:04"}}</span>
                     </td>
                     <td class="px-4 py-1 text-right">
                         <div class="flex items-center justify-end space-x-2">

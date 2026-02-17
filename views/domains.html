@@ -30,8 +30,7 @@
                     <th class="px-4 py-4 text-center text-xs font-black uppercase tracking-widest">Contas de email</th>
                     <th class="px-4 py-4 text-center text-xs font-black uppercase tracking-widest">MX de backup</th>
                     <th class="px-4 py-4 text-center text-xs font-black uppercase tracking-widest">Habilitado</th>
-                    <th class="px-4 py-4 text-center text-xs font-black uppercase tracking-widest">Última Modificação
-                    </th>
+                    <th class="px-4 py-4 text-center text-xs font-black uppercase tracking-widest">Modificado</th>
                     <th class="px-4 py-4 text-center text-xs font-black uppercase tracking-widest">Pass expires</th>
                     <th class="px-4 py-4 text-right"></th>
                 </tr>
@@ -95,7 +94,7 @@
                         {{end}}
                     </td>
                     <td class="px-4 py-1 text-center text-gray-600">
-                        {{.Modified.Format "2006-01-02"}}
+                        {{.Modified.Format "2006-01-02 15:04"}}
                     </td>
                     <td class="px-4 py-1 text-center text-gray-600">
                         {{if .PasswordExpiry}}{{.PasswordExpiry}}{{else}}365{{end}}
