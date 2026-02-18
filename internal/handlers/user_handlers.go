@@ -121,6 +121,14 @@ func (h *Handler) UpdateUserPassword(c *echo.Context) error {
 		return c.Redirect(http.StatusFound, "/users/dashboard")
 	}
 
+	// Log action
+	parts := strings.Split(username, "@")
+	domain := ""
+	if len(parts) == 2 {
+		domain = parts[1]
+	}
+	utils.LogAction(h.DB, username, c.RealIP(), domain, "EDIT_PASSWORD", username)
+
 	middleware.SetFlash(c, "message", "Senha atualizada com sucesso")
 	return c.Redirect(http.StatusFound, "/users/dashboard")
 }
@@ -171,6 +179,17 @@ func (h *Handler) UpdateUserForwarding(c *echo.Context) error {
 		tx.Rollback()
 		middleware.SetFlash(c, "error", "Falha ao atualizar o redirecionamento")
 		return c.Redirect(http.StatusFound, "/users/dashboard")
+	}
+
+	// Log action
+	parts := strings.Split(username, "@")
+	domain := ""
+	if len(parts) == 2 {
+		domain = parts[1]
+	}
+	if err := utils.LogAction(tx, username, c.RealIP(), domain, "EDIT_ALIAS_FORWARDING", alias.Goto); err != nil {
+		// Log error but don't fail transaction? Or should we?
+		// PostfixAdmin logs are usually best-effort.
 	}
 
 	tx.Commit()
