@@ -79,19 +79,13 @@
                 </a>
             </nav>
 
-            <div class="p-4 mt-auto border-t-2 border-gray-100">
-                <a href="/login"
-                    class="flex items-center py-3 px-4 border-2 border-transparent font-bold text-red-500 hover:border-red-500 hover:bg-red-50 transition-all group">
-                    <i data-lucide="log-out" class="w-5 h-5 mr-3"></i>
-                    Logout
-                </a>
-            </div>
+
         </aside>
 
         <!-- Main Content Area -->
         <div class="flex-1 flex flex-col overflow-hidden bg-brand-background/50">
             <!-- Header -->
-            <header class="h-20 bg-white border-b-2 border-brand-text flex items-center justify-between px-8 z-10">
+            <header class="h-14 bg-white border-b-2 border-brand-text flex items-center justify-between px-8 z-10">
                 <div class="flex items-center text-xs font-black uppercase tracking-widest text-gray-400">
                     <span>System</span>
                     <i data-lucide="chevron-right" class="w-4 h-4 mx-2"></i>
@@ -99,12 +93,7 @@
                 </div>
 
                 <div class="flex items-center space-x-4">
-                    <button
-                        class="p-2 border-2 border-transparent hover:border-brand-text text-gray-400 hover:text-brand-text transition-all cursor-pointer">
-                        <i data-lucide="bell" class="w-5 h-5"></i>
-                    </button>
-                    <div class="h-8 w-1 bg-brand-text mx-2"></div>
-                    <div class="flex items-center space-x-3 cursor-pointer group">
+                    <div class="flex items-center space-x-3">
                         <div class="text-right">
                             <p class="text-xs font-black uppercase text-brand-text tracking-tight">{{if
                                 .SessionUser}}{{.SessionUser}}{{else}}Admin{{end}}</p>
@@ -112,10 +101,16 @@
                                 .IsSuperAdmin}}SUPERADMIN{{else}}ADMIN{{end}}</p>
                         </div>
                         <div
-                            class="w-10 h-10 border-2 border-brand-text bg-white flex items-center justify-center text-brand-text font-black group-hover:bg-brand-primary group-hover:text-white transition-colors">
-                            AD
+                            class="w-10 h-10 border-2 border-brand-text bg-brand-primary flex items-center justify-center text-white font-black">
+                            <i data-lucide="shield" class="w-5 h-5"></i>
                         </div>
                     </div>
+                    <div class="h-8 w-1 bg-brand-text mx-2"></div>
+                    <a href="/login"
+                        class="flex items-center py-2 px-4 border-2 border-transparent font-bold text-red-500 hover:border-red-500 hover:bg-red-50 transition-all">
+                        <i data-lucide="log-out" class="w-5 h-5 mr-2"></i>
+                        Sair
+                    </a>
                 </div>
             </header>
 

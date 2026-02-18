@@ -369,9 +369,6 @@
   .mt-12 {
     margin-top: calc(var(--spacing) * 12);
   }
-  .mt-auto {
-    margin-top: auto;
-  }
   .mr-1 {
     margin-right: calc(var(--spacing) * 1);
   }
@@ -957,9 +954,6 @@
   .object-cover {
     object-fit: cover;
   }
-  .p-2 {
-    padding: calc(var(--spacing) * 2);
-  }
   .p-3 {
     padding: calc(var(--spacing) * 3);
   }
@@ -1336,24 +1330,10 @@
       }
     }
   }
-  .group-hover\:bg-brand-primary {
-    &:is(:where(.group):hover *) {
-      @media (hover: hover) {
-        background-color: var(--color-brand-primary);
-      }
-    }
-  }
   .group-hover\:text-brand-text {
     &:is(:where(.group):hover *) {
       @media (hover: hover) {
         color: var(--color-brand-text);
-      }
-    }
-  }
-  .group-hover\:text-white {
-    &:is(:where(.group):hover *) {
-      @media (hover: hover) {
-        color: var(--color-white);
       }
     }
   }
@@ -1488,13 +1468,6 @@
     &:hover {
       @media (hover: hover) {
         color: var(--color-brand-secondary);
-      }
-    }
-  }
-  .hover\:text-brand-text {
-    &:hover {
-      @media (hover: hover) {
-        color: var(--color-brand-text);
       }
     }
   }
