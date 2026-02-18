@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"go-postfixadmin/internal/handlers"
+	"go-postfixadmin/internal/middleware"
 
 	"github.com/labstack/echo/v5"
 )
@@ -52,6 +53,17 @@ func RegisterRoutes(e *echo.Echo, h *handlers.Handler) {
 
 	// API / Utils
 	e.GET("/api/generate-password", h.GeneratePassword)
+
+	// User Portal Routes
+	e.GET("/users/login", h.UserLogin)
+	e.POST("/users/login", h.UserLogin)
+	e.GET("/users/logout", h.UserLogout)
+
+	userGroup := e.Group("/users")
+	userGroup.Use(middleware.UserAuthMiddleware)
+	userGroup.GET("/dashboard", h.UserDashboard)
+	userGroup.POST("/password", h.UpdateUserPassword)
+	userGroup.POST("/forwarding", h.UpdateUserForwarding)
 
 	// Root Redirect
 	e.GET("/", func(c *echo.Context) error {

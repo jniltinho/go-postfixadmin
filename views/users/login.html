@@ -1,11 +1,11 @@
-{{define "login.html"}}
+{{define "users/login.html"}}
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Go-PostfixAdmin</title>
+    <title>User Login - Go-PostfixAdmin</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -30,16 +30,16 @@
         <!-- Brand Header -->
         <div class="text-center mb-8">
             <div
-                class="inline-flex items-center justify-center w-16 h-16 bg-brand-primary border-2 border-brand-text neo-shadow-sm mb-4 transform hover:-translate-y-1 transition-transform cursor-pointer">
-                <i data-lucide="mail" class="text-white w-8 h-8"></i>
+                class="inline-flex items-center justify-center w-16 h-16 bg-brand-secondary border-2 border-brand-text neo-shadow-sm mb-4 transform hover:-translate-y-1 transition-transform cursor-pointer">
+                <i data-lucide="user" class="text-white w-8 h-8"></i>
             </div>
             <h1 class="text-4xl font-mono font-bold tracking-tight text-brand-text mb-2">Go-PostfixAdmin</h1>
-            <p class="text-gray-500 font-medium">Administração de Email Profissional</p>
+            <p class="text-gray-500 font-medium">Portal do Usuário</p>
         </div>
 
         <!-- Square Card -->
         <div class="bg-white border-2 border-brand-text p-8 neo-shadow">
-            <h2 class="text-xl font-bold mb-6 uppercase tracking-widest">Login</h2>
+            <h2 class="text-xl font-bold mb-6 uppercase tracking-widest">Login do Usuário</h2>
 
             {{if .error}}
             <div class="bg-red-50 border-2 border-red-500 text-red-700 p-4 mb-6 flex items-start">
@@ -48,48 +48,44 @@
             </div>
             {{end}}
 
-            <form action="/login" method="POST" class="space-y-6">
+            <form action="/users/login" method="POST" class="space-y-6">
                 <div>
-                    <label class="block text-sm font-bold mb-2 uppercase tracking-wide">Username</label>
+                    <label class="block text-sm font-bold mb-2 uppercase tracking-wide">E-mail</label>
                     <div class="relative group">
                         <div
-                            class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-brand-primary transition-colors">
-                            <i data-lucide="user" class="w-5 h-5"></i>
+                            class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-brand-secondary transition-colors">
+                            <i data-lucide="mail" class="w-5 h-5"></i>
                         </div>
-                        <input type="text" name="username" required placeholder="admin@domain.com"
-                            class="w-full pl-11 pr-4 py-3 bg-white border-2 border-brand-text focus:border-brand-primary focus:shadow-[4px_4px_0px_#3B82F6] outline-none transition-all placeholder:text-gray-400">
+                        <input type="text" name="username" required placeholder="user@domain.com"
+                            class="w-full pl-11 pr-4 py-3 bg-white border-2 border-brand-text focus:border-brand-secondary focus:shadow-[4px_4px_0px_#10B981] outline-none transition-all placeholder:text-gray-400">
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-bold mb-2 uppercase tracking-wide">Password</label>
+                    <label class="block text-sm font-bold mb-2 uppercase tracking-wide">Senha</label>
                     <div class="relative group">
                         <div
-                            class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-brand-primary transition-colors">
+                            class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-brand-secondary transition-colors">
                             <i data-lucide="lock" class="w-5 h-5"></i>
                         </div>
                         <input type="password" name="password" required placeholder="••••••••"
-                            class="w-full pl-11 pr-4 py-3 bg-white border-2 border-brand-text focus:border-brand-primary focus:shadow-[4px_4px_0px_#3B82F6] outline-none transition-all placeholder:text-gray-400">
+                            class="w-full pl-11 pr-4 py-3 bg-white border-2 border-brand-text focus:border-brand-secondary focus:shadow-[4px_4px_0px_#10B981] outline-none transition-all placeholder:text-gray-400">
                     </div>
                 </div>
 
                 <div class="pt-2">
                     <button type="submit"
-                        class="w-full bg-brand-primary hover:bg-white hover:text-brand-primary border-2 border-brand-text text-white font-bold py-4 shadow-[3px_3px_0px_#1E293B] transform active:translate-x-1 active:translate-y-1 active:shadow-none transition-all flex items-center justify-center group cursor-pointer uppercase tracking-widest">
-                        <span>Autenticar</span>
+                        class="w-full bg-brand-secondary hover:bg-white hover:text-brand-secondary border-2 border-brand-text text-white font-bold py-4 shadow-[3px_3px_0px_#1E293B] transform active:translate-x-1 active:translate-y-1 active:shadow-none transition-all flex items-center justify-center group cursor-pointer uppercase tracking-widest">
+                        <span>Entrar</span>
                         <i data-lucide="arrow-right"
                             class="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform"></i>
                     </button>
                 </div>
             </form>
 
-            <div class="mt-8 pt-6 border-t-2 border-gray-100 text-center space-y-3">
-                <p class="text-xs text-gray-500">
-                    Usuários devem <a href="/users/login" class="text-brand-primary font-bold hover:underline">clicar
-                        aqui</a> para acessar a seção de usuários.
-                </p>
+            <div class="mt-8 pt-6 border-t-2 border-gray-100 text-center">
                 <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                    Sistema de Acesso Administrativo Seguro
+                    Portal de Acesso do Usuário
                 </p>
             </div>
         </div>

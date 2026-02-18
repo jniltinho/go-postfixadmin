@@ -1,0 +1,316 @@
+{{define "title"}}Painel do Usuário - Go-PostfixAdmin{{end}}
+
+{{define "content"}}
+<div class="max-w-6xl mx-auto">
+    <div class="mb-10">
+        <h2 class="text-4xl font-mono font-black uppercase tracking-tight mb-2">Minha Conta</h2>
+        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Gerencie sua senha e configurações de
+            redirecionamento.</p>
+    </div>
+
+    {{if .Error}}
+    <div class="mb-4 bg-red-50 border-2 border-red-600 px-4 py-3 flex items-center">
+        <i data-lucide="alert-circle" class="w-5 h-5 text-red-600 mr-3 shrink-0"></i>
+        <span class="text-sm font-bold text-red-700">{{.Error}}</span>
+    </div>
+    {{end}}
+
+    {{if .Message}}
+    <div class="mb-4 bg-green-50 border-2 border-green-600 px-4 py-3 flex items-center">
+        <i data-lucide="check-circle" class="w-5 h-5 text-green-600 mr-3 shrink-0"></i>
+        <span class="text-sm font-bold text-green-700">{{.Message}}</span>
+    </div>
+    {{end}}
+
+    <!-- User Info Card -->
+    <div class="bg-white border-4 border-brand-text neo-shadow-sm px-8 py-4 mb-8">
+        <div class="flex items-center">
+            <div
+                class="w-16 h-16 bg-brand-secondary border-2 border-brand-text flex items-center justify-center text-white mr-6">
+                <i data-lucide="user" class="w-8 h-8"></i>
+            </div>
+            <div>
+                <h3 class="text-2xl font-mono font-black tracking-tight">{{.User.Name}}</h3>
+                <p class="text-sm font-bold text-gray-500 font-mono">{{.User.Username}}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Forwarding Configuration Card -->
+        <div class="bg-white border-4 border-brand-text neo-shadow-sm p-8">
+            <h3 class="text-xl font-mono font-black uppercase tracking-tight mb-6 flex items-center">
+                <i data-lucide="corner-up-right" class="w-5 h-5 mr-2"></i>
+                Configurar Redirecionamento
+            </h3>
+            <p class="text-xs text-gray-500 mb-6">Configure para onde seus e-mails devem ser entregues. Insira um
+                endereço
+                por linha.</p>
+
+            <form action="/users/forwarding" method="POST" class="space-y-6">
+                <div>
+                    <label for="forwarding"
+                        class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
+                        Encaminhar Para
+                    </label>
+                    <textarea id="forwarding" name="forwarding" rows="4" placeholder="destinatario@example.com"
+                        class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors resize-y">{{if .GotoDisplay}}{{.GotoDisplay}}{{else}}{{.User.Username}}{{end}}</textarea>
+                    <p class="text-xs text-gray-500 mt-2">
+                        Para receber localmente e encaminhar, inclua seu próprio endereço na lista.
+                        <br>Para desativar o redirecionamento, deixe apenas o seu endereço.
+                    </p>
+                </div>
+
+                <button type="submit" id="saveForwardingBtn"
+                    class="w-full bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black py-4 shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center justify-center">
+                    <i data-lucide="save" class="w-5 h-5 mr-2"></i>
+                    Salvar Redirecionamento
+                </button>
+            </form>
+        </div>
+
+        <!-- Change Password Card -->
+        <div class="bg-white border-4 border-brand-text neo-shadow-sm p-8">
+            <h3 class="text-xl font-mono font-black uppercase tracking-tight mb-6 flex items-center">
+                <i data-lucide="key" class="w-5 h-5 mr-2"></i>
+                Alterar Senha
+            </h3>
+            <p class="text-xs text-gray-500 mb-6">Atualize a senha da sua caixa de correio.</p>
+
+            <form action="/users/password" method="POST" class="space-y-6" id="passwordForm">
+                <div>
+                    <label for="current_password"
+                        class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
+                        Senha Atual <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative group">
+                        <div
+                            class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-brand-primary transition-colors">
+                            <i data-lucide="lock" class="w-5 h-5"></i>
+                        </div>
+                        <input type="password" name="current_password" id="current_password" required
+                            placeholder="Sua senha atual"
+                            class="w-full pl-11 pr-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors">
+                    </div>
+                </div>
+
+                <!-- New Password Inputs Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <div class="flex items-center mb-2 h-7">
+                            <label for="new_password"
+                                class="block text-xs font-black uppercase tracking-widest text-brand-text">
+                                Nova Senha <span class="text-red-500">*</span>
+                            </label>
+                        </div>
+                        <div class="relative">
+                            <input type="password" id="new_password" name="new_password" required minlength="8"
+                                placeholder="Mín. 8 caracteres"
+                                class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors pr-12">
+                            <button type="button" onclick="togglePassword('new_password')"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary transition-colors cursor-pointer">
+                                <i data-lucide="eye" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex items-center justify-between mb-2 h-7">
+                            <label for="confirm_password"
+                                class="block text-xs font-black uppercase tracking-widest text-brand-text">
+                                Confirmar Senha <span class="text-red-500">*</span>
+                            </label>
+                            <button type="button" onclick="generatePassword()" title="Precisa de uma senha forte?"
+                                class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black px-3 py-1 border-2 border-blue-800 shadow-[1px_1px_0px_#1E3A8A] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[2px_2px_0px_#1E3A8A] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center">
+                                <i data-lucide="wand-2" class="w-3 h-3 mr-1"></i>
+                                Gerar
+                            </button>
+                        </div>
+                        <div class="relative">
+                            <input type="password" id="confirm_password" name="confirm_password" required minlength="8"
+                                placeholder="Repita a nova senha"
+                                class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors pr-12">
+                            <button type="button" onclick="togglePassword('confirm_password')"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary transition-colors cursor-pointer">
+                                <i data-lucide="eye" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                        <p id="matchIndicator" class="text-xs mt-2 hidden"></p>
+                    </div>
+                </div>
+
+                <!-- Password Strength Meter -->
+                <div id="strengthMeter" class="hidden">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-black uppercase tracking-widest text-brand-text">Força</span>
+                        <span id="strengthText" class="text-xs font-bold uppercase tracking-wider"></span>
+                    </div>
+                    <div class="h-2 bg-gray-200 border-2 border-brand-text overflow-hidden">
+                        <div id="strengthBar" class="h-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <button type="submit" id="submitBtn"
+                    class="w-full bg-brand-cta hover:bg-white hover:text-brand-cta text-white border-2 border-brand-text font-black py-4 shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center justify-center">
+                    <i data-lucide="shield" class="w-5 h-5 mr-2"></i>
+                    Alterar Senha
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Toggle password visibility
+    function togglePassword(fieldId) {
+        const field = document.getElementById(fieldId);
+        const icon = event.currentTarget.querySelector('i');
+
+        if (field.type === 'password') {
+            field.type = 'text';
+            icon.setAttribute('data-lucide', 'eye-off');
+        } else {
+            field.type = 'password';
+            icon.setAttribute('data-lucide', 'eye');
+        }
+        lucide.createIcons();
+    }
+
+    // Generate strong password
+    async function generatePassword() {
+        try {
+            const response = await fetch('/api/generate-password');
+            const data = await response.json();
+
+            document.getElementById('new_password').value = data.password;
+            document.getElementById('confirm_password').value = data.password;
+
+            // Show password so user can see/copy it
+            document.getElementById('new_password').type = 'text';
+            document.getElementById('confirm_password').type = 'text';
+
+            // Trigger validation updates
+            checkPasswordStrength();
+            checkPasswordMatch();
+
+            lucide.createIcons();
+        } catch (error) {
+            console.error('Failed to generate password:', error);
+            alert('Falha ao gerar senha. Tente novamente.');
+        }
+    }
+    function checkPasswordStrength() {
+        const password = document.getElementById('new_password').value;
+        const meter = document.getElementById('strengthMeter');
+        const bar = document.getElementById('strengthBar');
+        const text = document.getElementById('strengthText');
+
+        if (password.length === 0) {
+            meter.classList.add('hidden');
+            return;
+        }
+
+        meter.classList.remove('hidden');
+
+        let strength = 0;
+        let strengthLabel = '';
+        let color = '';
+
+        if (password.length >= 8) strength += 25;
+        if (password.length >= 12) strength += 15;
+        if (/[a-z]/.test(password)) strength += 15;
+        if (/[A-Z]/.test(password)) strength += 15;
+        if (/[0-9]/.test(password)) strength += 15;
+        if (/[^a-zA-Z0-9]/.test(password)) strength += 15;
+
+        if (strength < 40) {
+            strengthLabel = 'Fraca';
+            color = '#DC2626';
+        } else if (strength < 60) {
+            strengthLabel = 'Regular';
+            color = '#F59E0B';
+        } else if (strength < 80) {
+            strengthLabel = 'Boa';
+            color = '#10B981';
+        } else {
+            strengthLabel = 'Forte';
+            color = '#059669';
+        }
+
+        bar.style.width = strength + '%';
+        bar.style.backgroundColor = color;
+        text.textContent = strengthLabel;
+        text.style.color = color;
+    }
+
+    // Check password match
+    function checkPasswordMatch() {
+        const password = document.getElementById('new_password').value;
+        const confirm = document.getElementById('confirm_password').value;
+        const indicator = document.getElementById('matchIndicator');
+        const submitBtn = document.getElementById('submitBtn');
+
+        if (confirm.length === 0) {
+            indicator.classList.add('hidden');
+            return;
+        }
+
+        indicator.classList.remove('hidden');
+
+        if (password === confirm) {
+            indicator.textContent = '✓ Senhas conferem';
+            indicator.className = 'text-xs mt-2 font-bold text-green-600';
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        } else {
+            indicator.textContent = '✗ Senhas não conferem';
+            indicator.className = 'text-xs mt-2 font-bold text-red-600';
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+    }
+
+    // Event listeners
+    document.getElementById('new_password').addEventListener('input', function () {
+        checkPasswordStrength();
+        checkPasswordMatch();
+    });
+
+    document.getElementById('confirm_password').addEventListener('input', function () {
+        checkPasswordMatch();
+    });
+
+    // Form validation
+    document.getElementById('passwordForm').addEventListener('submit', function (e) {
+        const password = document.getElementById('new_password').value;
+        const confirm = document.getElementById('confirm_password').value;
+
+        if (password.length < 8) {
+            e.preventDefault();
+            alert('A senha deve ter pelo menos 8 caracteres');
+            return false;
+        }
+
+        if (password !== confirm) {
+            e.preventDefault();
+            alert('As senhas não conferem');
+            return false;
+        }
+    });
+
+    // Forwarding textarea validation
+    const fwdTextarea = document.getElementById('forwarding');
+    const fwdBtn = document.getElementById('saveForwardingBtn');
+    function checkForwarding() {
+        const empty = fwdTextarea.value.trim() === '';
+        fwdBtn.disabled = empty;
+        if (empty) {
+            fwdBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        } else {
+            fwdBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+    }
+    fwdTextarea.addEventListener('input', checkForwarding);
+    checkForwarding();
+</script>
+{{end}}

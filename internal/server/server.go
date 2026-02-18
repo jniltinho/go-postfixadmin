@@ -36,11 +36,18 @@ func (t *Template) Render(c *echo.Context, w io.Writer, name string, data any) e
 		return echo.NewHTTPError(http.StatusInternalServerError, "Template not found: "+name)
 	}
 
-	if name != "login.html" {
-		return tmpl.ExecuteTemplate(w, "base", data)
+	// Standalone login pages (no layout)
+	if name == "login.html" || name == "users/login.html" {
+		return tmpl.ExecuteTemplate(w, name, data)
 	}
 
-	return tmpl.ExecuteTemplate(w, name, data)
+	// User portal pages use user_base layout
+	if len(name) > 6 && name[:6] == "users/" {
+		return tmpl.ExecuteTemplate(w, "user_base", data)
+	}
+
+	// Admin pages use base layout
+	return tmpl.ExecuteTemplate(w, "base", data)
 }
 
 func StartServer(embeddedFiles embed.FS, port int, db *gorm.DB, ssl bool, certFile, keyFile string) {
@@ -72,9 +79,6 @@ func StartServer(embeddedFiles embed.FS, port int, db *gorm.DB, ssl bool, certFi
 		templates: make(map[string]*template.Template),
 	}
 
-	layout := "views/layout.html"
-	viewFiles, _ := embeddedFiles.ReadDir("views")
-
 	funcMap := template.FuncMap{
 		"mul": func(a, b float64) float64 { return a * b },
 		"div": func(a, b float64) float64 { return a / b },
@@ -92,31 +96,63 @@ func StartServer(embeddedFiles embed.FS, port int, db *gorm.DB, ssl bool, certFi
 		},
 	}
 
-	for _, file := range viewFiles {
-		name := file.Name()
-		if name == "layout.html" {
-			continue
-		}
+	// Layouts
+	layout := "views/layout.html"
+	userLayout := "views/user_layout.html"
 
-		pagePath := path.Join("views", name)
-
-		var tmpl *template.Template
-		var err error
-
-		if name == "login.html" {
-			tmpl, err = template.New(name).Funcs(funcMap).ParseFS(embeddedFiles, pagePath)
-		} else {
-			// For pages using layout, we need to parse layout first or together.
-			// template.ParseFS uses the filenames as template names.
-			// "base" is likely defined in layout.html.
-			tmpl, err = template.New(name).Funcs(funcMap).ParseFS(embeddedFiles, layout, pagePath)
-		}
-
+	// Walk view directory
+	err := fs.WalkDir(embeddedFiles, "views", func(filePath string, d fs.DirEntry, err error) error {
 		if err != nil {
-			slog.Error("Failed to parse template", "name", name, "error", err)
-			os.Exit(1)
+			return err
 		}
-		t.templates[name] = tmpl
+		if d.IsDir() {
+			return nil
+		}
+
+		name := d.Name()
+		// Skip layouts themselves
+		if name == "layout.html" || name == "user_layout.html" {
+			return nil
+		}
+
+		// Determine template key and layout
+		var tmplKey string
+		var tmpl *template.Template
+		var parseErr error
+
+		// Check if it's a user view
+		if path.Dir(filePath) == "views/users" {
+			tmplKey = "users/" + name
+			if name == "login.html" {
+				// User login is standalone (no layout)
+				tmpl, parseErr = template.New(tmplKey).Funcs(funcMap).ParseFS(embeddedFiles, filePath)
+			} else {
+				// User pages use user_layout.html
+				tmpl, parseErr = template.New(tmplKey).Funcs(funcMap).ParseFS(embeddedFiles, userLayout, filePath)
+			}
+		} else {
+			// Admin views
+			tmplKey = name
+			if name == "login.html" {
+				// Admin login is standalone
+				tmpl, parseErr = template.New(tmplKey).Funcs(funcMap).ParseFS(embeddedFiles, filePath)
+			} else {
+				// Admin pages use layout.html
+				tmpl, parseErr = template.New(tmplKey).Funcs(funcMap).ParseFS(embeddedFiles, layout, filePath)
+			}
+		}
+
+		if parseErr != nil {
+			return fmt.Errorf("failed to parse template %s: %w", filePath, parseErr)
+		}
+
+		t.templates[tmplKey] = tmpl
+		return nil
+	})
+
+	if err != nil {
+		slog.Error("Failed to load templates", "error", err)
+		os.Exit(1)
 	}
 
 	e.Renderer = t
