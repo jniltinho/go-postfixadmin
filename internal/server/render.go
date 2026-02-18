@@ -67,6 +67,17 @@ func templateFuncMap() template.FuncMap {
 			}
 			return template.HTML(strings.Join(trimmed, "<br>"))
 		},
+		"commaToNewlines": func(s string) string {
+			parts := strings.Split(s, ",")
+			var trimmed []string
+			for _, p := range parts {
+				p = strings.TrimSpace(p)
+				if p != "" {
+					trimmed = append(trimmed, p)
+				}
+			}
+			return strings.Join(trimmed, "\n")
+		},
 	}
 }
 

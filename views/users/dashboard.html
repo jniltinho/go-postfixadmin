@@ -54,7 +54,7 @@
                         Encaminhar Para
                     </label>
                     <textarea id="forwarding" name="forwarding" rows="4" placeholder="destinatario@example.com"
-                        class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors resize-y">{{if .GotoDisplay}}{{.GotoDisplay}}{{else}}{{.User.Username}}{{end}}</textarea>
+                        class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors resize-y">{{if .Alias.Goto}}{{commaToNewlines .Alias.Goto}}{{else}}{{.User.Username}}{{end}}</textarea>
                     <p class="text-xs text-gray-500 mt-2">
                         Para receber localmente e encaminhar, inclua seu próprio endereço na lista.
                         <br>Para desativar o redirecionamento, deixe apenas o seu endereço.

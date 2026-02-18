@@ -63,26 +63,11 @@ func (h *Handler) UserDashboard(c *echo.Context) error {
 	var alias models.Alias
 	h.DB.First(&alias, "address = ?", username)
 
-	// Convert comma-separated goto to one address per line for display
-	gotoDisplay := alias.Goto
-	if gotoDisplay != "" {
-		parts := strings.Split(gotoDisplay, ",")
-		var trimmed []string
-		for _, p := range parts {
-			p = strings.TrimSpace(p)
-			if p != "" {
-				trimmed = append(trimmed, p)
-			}
-		}
-		gotoDisplay = strings.Join(trimmed, "\n")
-	}
-
 	return c.Render(http.StatusOK, "users/dashboard.html", map[string]interface{}{
-		"User":        mailbox,
-		"Alias":       alias,
-		"GotoDisplay": gotoDisplay,
-		"Message":     middleware.GetFlash(c, "message"),
-		"Error":       middleware.GetFlash(c, "error"),
+		"User":    mailbox,
+		"Alias":   alias,
+		"Message": middleware.GetFlash(c, "message"),
+		"Error":   middleware.GetFlash(c, "error"),
 	})
 }
 
