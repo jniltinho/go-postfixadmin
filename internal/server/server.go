@@ -43,7 +43,7 @@ func (t *Template) Render(c *echo.Context, w io.Writer, name string, data any) e
 	return tmpl.ExecuteTemplate(w, name, data)
 }
 
-func StartServer(embeddedFiles embed.FS, port int, db *gorm.DB) {
+func StartServer(embeddedFiles embed.FS, port int, db *gorm.DB, ssl bool, certFile, keyFile string) {
 	e := echo.New()
 
 	// Middleware
@@ -140,8 +140,23 @@ func StartServer(embeddedFiles embed.FS, port int, db *gorm.DB) {
 
 	addr := fmt.Sprintf(":%d", port)
 	slog.Info("Starting server", "address", addr)
-	if err := e.Start(addr); err != nil {
-		slog.Error("failed to start server", "error", err)
-		os.Exit(1)
+
+	if ssl {
+		if certFile == "" || keyFile == "" {
+			slog.Error("SSL enabled but cert or key file not provided")
+			os.Exit(1)
+		}
+		slog.Info("SSL enabled", "cert", certFile, "key", keyFile)
+
+		server := &http.Server{Addr: addr, Handler: e}
+		if err := server.ListenAndServeTLS(certFile, keyFile); err != nil && err != http.ErrServerClosed {
+			slog.Error("failed to start server with SSL", "error", err)
+			os.Exit(1)
+		}
+	} else {
+		if err := e.Start(addr); err != nil {
+			slog.Error("failed to start server", "error", err)
+			os.Exit(1)
+		}
 	}
 }
