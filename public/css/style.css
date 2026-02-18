@@ -528,9 +528,6 @@
   .w-6 {
     width: calc(var(--spacing) * 6);
   }
-  .w-7 {
-    width: calc(var(--spacing) * 7);
-  }
   .w-8 {
     width: calc(var(--spacing) * 8);
   }
@@ -539,9 +536,6 @@
   }
   .w-12 {
     width: calc(var(--spacing) * 12);
-  }
-  .w-14 {
-    width: calc(var(--spacing) * 14);
   }
   .w-16 {
     width: calc(var(--spacing) * 16);
@@ -572,6 +566,9 @@
   }
   .max-w-prose {
     max-width: 65ch;
+  }
+  .min-w-\[70px\] {
+    min-width: 70px;
   }
   .flex-1 {
     flex: 1;

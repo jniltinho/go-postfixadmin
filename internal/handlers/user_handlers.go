@@ -127,7 +127,7 @@ func (h *Handler) UpdateUserPassword(c *echo.Context) error {
 	if len(parts) == 2 {
 		domain = parts[1]
 	}
-	utils.LogAction(h.DB, username, c.RealIP(), domain, "EDIT_PASSWORD", username)
+	utils.LogAction(h.DB, username, c.RealIP(), domain, "USER_EDIT_PASSWORD", username)
 
 	middleware.SetFlash(c, "message", "Senha atualizada com sucesso")
 	return c.Redirect(http.StatusFound, "/users/dashboard")
@@ -187,7 +187,7 @@ func (h *Handler) UpdateUserForwarding(c *echo.Context) error {
 	if len(parts) == 2 {
 		domain = parts[1]
 	}
-	if err := utils.LogAction(tx, username, c.RealIP(), domain, "EDIT_ALIAS_FORWARDING", alias.Goto); err != nil {
+	if err := utils.LogAction(tx, username, c.RealIP(), domain, "USER_EDIT_ALIAS", alias.Goto); err != nil {
 		// Log error but don't fail transaction? Or should we?
 		// PostfixAdmin logs are usually best-effort.
 	}
