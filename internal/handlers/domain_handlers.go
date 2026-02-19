@@ -374,6 +374,16 @@ func (h *Handler) DeleteDomain(c *echo.Context) error {
 
 	// Use transaction to ensure atomicity
 	err = h.DB.Transaction(func(tx *gorm.DB) error {
+		// Delete all alias_domain records where alias_domain matches (Source)
+		if err := tx.Where("alias_domain = ?", domainName).Delete(&models.AliasDomain{}).Error; err != nil {
+			return err
+		}
+
+		// Delete all alias_domain records where target_domain matches (Target)
+		if err := tx.Where("target_domain = ?", domainName).Delete(&models.AliasDomain{}).Error; err != nil {
+			return err
+		}
+
 		// Delete all aliases for this domain
 		if err := tx.Where("domain = ?", domainName).Delete(&models.Alias{}).Error; err != nil {
 			return err
