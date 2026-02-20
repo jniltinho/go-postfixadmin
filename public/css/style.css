@@ -20,7 +20,6 @@
     --color-blue-500: oklch(62.3% 0.214 259.815);
     --color-blue-600: oklch(54.6% 0.245 262.881);
     --color-blue-700: oklch(48.8% 0.243 264.376);
-    --color-blue-800: oklch(42.4% 0.199 265.638);
     --color-gray-50: oklch(98.5% 0.002 247.839);
     --color-gray-100: oklch(96.7% 0.003 264.542);
     --color-gray-200: oklch(92.8% 0.006 264.531);
@@ -80,7 +79,7 @@
     --default-font-family: var(--font-sans);
     --default-mono-font-family: var(--font-mono);
     --color-brand-primary: #3B82F6;
-    --color-brand-secondary: #60A5FA;
+    --color-brand-secondary: #6366ee;
     --color-brand-cta: #F97316;
     --color-brand-background: #F8FAFC;
     --color-brand-text: #1E293B;
@@ -822,9 +821,6 @@
     border-bottom-style: var(--tw-border-style);
     border-bottom-width: 4px;
   }
-  .border-blue-800 {
-    border-color: var(--color-blue-800);
-  }
   .border-brand-text {
     border-color: var(--color-brand-text);
   }
@@ -1530,9 +1526,9 @@
       box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
     }
   }
-  .focus\:shadow-\[4px_4px_0px_\#10B981\] {
+  .focus\:shadow-\[4px_4px_0px_\#6366ee\] {
     &:focus {
-      --tw-shadow: 4px 4px 0px var(--tw-shadow-color, #10B981);
+      --tw-shadow: 4px 4px 0px var(--tw-shadow-color, #6366ee);
       box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
     }
   }
