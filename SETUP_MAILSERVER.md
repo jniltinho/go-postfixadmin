@@ -43,7 +43,7 @@ mydomain   = example.com
 myorigin   = $mydomain
 
 # Virtual mailboxes
-virtual_mailbox_base    = /var/mail/vmail
+virtual_mailbox_base    = /var/vmail
 virtual_mailbox_domains = proxy:mysql:/etc/postfix/sql/mysql_virtual_domains_maps.cf
 virtual_mailbox_maps    = proxy:mysql:/etc/postfix/sql/mysql_virtual_mailbox_maps.cf,
                           proxy:mysql:/etc/postfix/sql/mysql_virtual_alias_domain_mailbox_maps.cf
