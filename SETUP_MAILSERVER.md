@@ -160,7 +160,7 @@ query    = SELECT maildir FROM mailbox,alias_domain
 ```ini
 protocols = imap lmtp
 
-mail_location = maildir:/var/mail/vmail/%d/%n/Maildir
+mail_location = maildir:/var/vmail/%d/%n/Maildir
 
 # Usuário de sistema para entrega
 mail_uid = 1001
@@ -201,7 +201,7 @@ password_query = \
   FROM mailbox WHERE username='%u' AND active='1'
 
 user_query = \
-  SELECT CONCAT('/var/mail/vmail/', maildir) AS home, \
+  SELECT CONCAT('/var/vmail/', maildir) AS home, \
          1001 AS uid, 1001 AS gid, \
          CONCAT('*:bytes=', quota) AS quota_rule \
   FROM mailbox WHERE username='%u' AND active='1'
@@ -236,7 +236,7 @@ service auth {
 
 ```bash
 groupadd -g 1001 vmail
-useradd -g vmail -u 1001 vmail -d /var/mail/vmail -m
+useradd -g vmail -u 1001 vmail -d /var/vmail -m
 ```
 
 ---
