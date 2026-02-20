@@ -107,6 +107,32 @@ DATABASE_URL="user:password@tcp(localhost:3306)/dbname?charset=utf8mb4&parseTime
 DATABASE_URL="host=localhost user=gorm password=gorm dbname=gorm port=9920 sslmode=disable TimeZone=Asia/Shanghai"
 ```
 
+### 3. Deploy com Systemd (Linux)
+
+Para implantar a aplicação de forma nativa em um servidor Linux, você pode utilizar o arquivo de serviço do Systemd incluído no projeto.
+
+O arquivo pré-configurado está localizado em `DOCUMENTS/setup/postfixadmin.service`. Ele espera que a aplicação esteja alocada no diretório `/opt/go-postfixadmin` e lerá as variáveis de ambiente de um arquivo `.env` neste mesmo diretório.
+
+**Instalação do Serviço:**
+
+```bash
+# 1. Copie o arquivo para o diretório de serviços do systemd
+sudo cp DOCUMENTS/setup/postfixadmin.service /etc/systemd/system/
+
+# 2. Recarregue as configurações do systemd
+sudo systemctl daemon-reload
+
+# 3. Ative o serviço para rodar junto com o boot do sistema
+sudo systemctl enable postfixadmin.service
+
+# 4. Inicie o serviço
+sudo systemctl start postfixadmin.service
+
+# 5. Acompanhe os logs em tempo real
+# O serviço direciona a saída para o arquivo postfixadmin.log
+tail -f /opt/go-postfixadmin/postfixadmin.log
+```
+
 ---
 
 ## 📝 Flags da CLI

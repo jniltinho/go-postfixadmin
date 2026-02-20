@@ -1,0 +1,33 @@
+[Unit]
+Description=Go Postfixadmin Service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+
+# Diretório de trabalho conforme solicitado
+WorkingDirectory=/opt/go-postfixadmin
+
+# Comando para iniciar o servidor (incluindo o argumento 'server' que o binário exige)
+ExecStart=/opt/go-postfixadmin/postfixadmin server
+
+# Reiniciar automaticamente em caso de falha
+Restart=always
+RestartSec=5s
+
+# Carregar variáveis de ambiente do arquivo .env (o '-' ignora se o arquivo não existir)
+EnvironmentFile=-/opt/go-postfixadmin/.env
+
+# Configurar saída de logs diretamente para um arquivo
+StandardOutput=append:/opt/go-postfixadmin/postfixadmin.log
+StandardError=append:/opt/go-postfixadmin/postfixadmin.log
+
+# Práticas recomendadas de segurança (descomentar se necessário)
+# NoNewPrivileges=yes
+# ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target
