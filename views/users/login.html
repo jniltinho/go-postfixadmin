@@ -42,7 +42,8 @@
             <h2 class="text-xl font-bold mb-6 uppercase tracking-widest">Login do Usuário</h2>
 
             {{if .error}}
-            <div class="bg-red-50 border-2 border-red-500 text-red-700 p-4 mb-6 flex items-start">
+            <div
+                class="bg-red-50 border-2 border-red-500 text-red-700 p-4 mb-6 flex items-start flash-message transition-opacity duration-500">
                 <i data-lucide="alert-circle" class="w-5 h-5 mr-3 shrink-0"></i>
                 <span class="text-sm font-bold uppercase tracking-tight">{{.error}}</span>
             </div>
@@ -98,6 +99,18 @@
 
     <script>
         lucide.createIcons();
+
+        // Auto-dismiss flash messages
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.flash-message').forEach(function (el) {
+                setTimeout(function () {
+                    el.style.opacity = '0';
+                    setTimeout(function () {
+                        el.remove();
+                    }, 500);
+                }, 5000);
+            });
+        });
     </script>
 </body>
 
