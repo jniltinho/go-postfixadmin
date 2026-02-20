@@ -6,11 +6,11 @@ require (
 	github.com/GehirnInc/crypt v0.0.0-20230320061759-8cc1b52080c5
 	github.com/gorilla/sessions v1.4.0
 	github.com/jedib0t/go-pretty/v6 v6.7.8
+	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo-contrib v0.50.0
 	github.com/labstack/echo/v5 v5.0.3
 	github.com/spf13/cobra v1.10.2
 	golang.org/x/crypto v0.48.0
-	golang.org/x/term v0.40.0
 	gorm.io/driver/mysql v1.6.0
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.31.1

@@ -14,13 +14,13 @@ Before executing any Go-related build or execution commands (such as `go build`,
 ### Required Command Patterns
 
 * **For Running (Development):**
-  `source .env && go run main.go`
+  `go run main.go server`
 
 * **For Building:**
-  `source .env && go build -o postfixadmin`
+  `go build -o postfixadmin`
 
 * **For Executing the Binary:**
-  `source .env && ./postfixadmin server`
+  `./postfixadmin server`
 
 ---
 

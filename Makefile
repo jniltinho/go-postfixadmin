@@ -1,4 +1,3 @@
-SHELL := /bin/bash
 BINARY_NAME=postfixadmin
 
 .PHONY: all build run clean css help
@@ -20,11 +19,11 @@ build-prod: css
 
 run: build
 	@echo "Starting application..."
-	source .env && ./$(BINARY_NAME) server
+	./$(BINARY_NAME) server
 
 css:
 	@echo "Building CSS with Tailwind..."
-	npx @tailwindcss/cli -i ./public/css/input.css -o ./public/css/style.css
+	npx @tailwindcss/cli -i ./public/css/input.css -o ./public/css/style.css --minify
 
 watch-css:
 	@echo "Watching CSS changes..."

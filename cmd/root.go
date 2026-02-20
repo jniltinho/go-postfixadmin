@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
 )
 
@@ -31,7 +32,12 @@ func Execute(files embed.FS) {
 	}
 }
 
+func initConfig() {
+	_ = godotenv.Load()
+}
+
 func init() {
+	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVar(&dbUrl, "db-url", "", "Database URL connection string")
 	rootCmd.PersistentFlags().StringVar(&dbDriver, "db-driver", "mysql", "Database driver (mysql or postgres)")
 }

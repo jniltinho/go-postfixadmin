@@ -28,6 +28,11 @@ func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			return next(c)
 		}
 
+		// Prevent browser caching of protected pages
+		c.Response().Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+		c.Response().Header().Set("Pragma", "no-cache")
+		c.Response().Header().Set("Expires", "0")
+
 		sess, _ := session.Get(SessionName, c)
 		if sess == nil {
 			return c.Redirect(http.StatusFound, "/login")
@@ -66,6 +71,11 @@ func UserAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		if c.Path() == "/users/login" || c.Path() == "/static/*" {
 			return next(c)
 		}
+
+		// Prevent browser caching of protected pages
+		c.Response().Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+		c.Response().Header().Set("Pragma", "no-cache")
+		c.Response().Header().Set("Expires", "0")
 
 		sess, _ := session.Get(UserSessionName, c)
 		if sess == nil {
@@ -153,6 +163,10 @@ func GetUser(c *echo.Context) string {
 // ClearSession removes the admin session
 func ClearSession(c *echo.Context) error {
 	sess, _ := session.Get(SessionName, c)
+	// Clear all values in the session
+	for key := range sess.Values {
+		delete(sess.Values, key)
+	}
 	sess.Options.MaxAge = -1
 	return sess.Save(c.Request(), c.Response())
 }
@@ -160,6 +174,10 @@ func ClearSession(c *echo.Context) error {
 // ClearUserSession removes the user session
 func ClearUserSession(c *echo.Context) error {
 	sess, _ := session.Get(UserSessionName, c)
+	// Clear all values in the session
+	for key := range sess.Values {
+		delete(sess.Values, key)
+	}
 	sess.Options.MaxAge = -1
 	return sess.Save(c.Request(), c.Response())
 }
