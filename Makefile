@@ -3,7 +3,7 @@ BINARY_NAME=postfixadmin
 
 .PHONY: all build run clean css help
 
-all: css build
+all: css build-prod
 
 build: css
 	@echo "Building Go application..."

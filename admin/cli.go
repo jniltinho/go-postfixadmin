@@ -144,6 +144,32 @@ func ListAllAliases(db *gorm.DB) {
 	t.Render()
 }
 
+// ListAllAliasDomains lists all alias domains in the database
+func ListAllAliasDomains(db *gorm.DB) {
+	var aliasDomains []models.AliasDomain
+	if err := db.Order("alias_domain ASC").Find(&aliasDomains).Error; err != nil {
+		slog.Error("Failed to fetch alias domains", "error", err)
+		os.Exit(1)
+	}
+
+	t := table.NewWriter()
+	t.SetOutputMirror(os.Stdout)
+	t.AppendHeader(table.Row{"Alias Domain", "Target Domain", "Active", "Modified"})
+
+	for _, ad := range aliasDomains {
+		active := "No"
+		if ad.Active {
+			active = "Yes"
+		}
+		t.AppendRow(table.Row{ad.AliasDomain, ad.TargetDomain, active, ad.Modified.Format("2006-01-02 15:04:05")})
+	}
+	style := table.StyleDefault
+	style.Format.Footer = text.FormatDefault
+	t.SetStyle(style)
+	t.AppendFooter(table.Row{"List All Alias Domains", strings.Join(os.Args, " ")})
+	t.Render()
+}
+
 // ListDomainAdmins lists all domain administrators in the database
 func ListDomainAdmins(db *gorm.DB) {
 	var domainAdmins []models.DomainAdmin
