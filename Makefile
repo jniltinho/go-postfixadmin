@@ -1,3 +1,4 @@
+SHELL := /bin/bash
 BINARY_NAME=postfixadmin
 
 .PHONY: all build run clean css help
@@ -7,12 +8,19 @@ all: css build
 build: css
 	@echo "Building Go application..."
 	rm -f $(BINARY_NAME)
+	CGO_ENABLED=0 go build -o $(BINARY_NAME) -v
+
+
+build-prod: css
+	@echo "Building Go application..."
+	rm -f $(BINARY_NAME)
 	CGO_ENABLED=0 go build -o $(BINARY_NAME) -v -ldflags="-s -w"
 	upx $(BINARY_NAME)
 
+
 run: build
 	@echo "Starting application..."
-	./$(BINARY_NAME) --run
+	source .env && ./$(BINARY_NAME) server
 
 css:
 	@echo "Building CSS with Tailwind..."
@@ -36,6 +44,13 @@ deps:
 	go mod download
 	npm install
 
+certs:
+	@echo "Generating SSL certificates..."
+	mkdir -p certs
+	openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
+		-keyout certs/server.key -out certs/server.crt \
+		-subj "/C=BR/ST=SP/L=Sao Paulo/O=Development/CN=localhost"
+
 build-docker:
 	@echo "Building Docker image..."
 	docker build --no-cache --progress=plain -t $(BINARY_NAME):latest .
@@ -49,4 +64,5 @@ help:
 	@echo "  clean         - Remove binary and generated CSS"
 	@echo "  tidy          - Run go mod tidy"
 	@echo "  deps          - Install Go and NPM dependencies"
+	@echo "  certs         - Generate self-signed SSL certificates"
 	@echo "  build-docker  - Build the Docker image"
