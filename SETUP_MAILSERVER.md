@@ -1,6 +1,6 @@
 # SETUP_MAILSERVER.md
 
-> Guia completo de configuração de servidor de e-mail com **Postfix + Dovecot + PostfixAdmin + MySQL**
+> Guia completo de configuração de servidor de e-mail com **Postfix + Dovecot + Go-PostfixAdmin + MySQL**
 
 ---
 
