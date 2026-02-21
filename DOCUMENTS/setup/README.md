@@ -47,9 +47,22 @@ O Go-PostfixAdmin será responsável por gerenciar a estrutura do banco (tabelas
    Transfira o executável `postfixadmin`, a pasta de `views` e os diretórios estáticos para o servidor (ex: `/opt/go-postfixadmin`).
    
 2. **Configurar o Ambiente (.env):**
-   Crie o arquivo `/opt/go-postfixadmin/.env`:
+   Crie o arquivo `/opt/go-postfixadmin/.env` e adicione as variáveis de ambiente necessárias para o correto funcionamento:
+   
    ```env
+   # Configurações do Banco de Dados
    DATABASE_URL="postfix:sua_senha_segura@tcp(localhost:3306)/postfix?charset=utf8mb4&parseTime=True&loc=Local"
+   DB_DRIVER=mysql
+   
+   # Configurações do Servidor Web
+   PORT=8080
+   
+   # Chave Secreta de Sessão (Gere uma string 64-char via: openssl rand -hex 32)
+   SESSION_SECRET=your_super_secret_session_key_here
+   
+   # (Opcional) Configurações de SSL para servidor standalone seguro
+   # SSL_CERT="/etc/letsencrypt/live/mail.example.com/fullchain.pem"
+   # SSL_KEY="/etc/letsencrypt/live/mail.example.com/privkey.pem"
    ```
 
 3. **Executar as Migrations:**
