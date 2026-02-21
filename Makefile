@@ -1,5 +1,11 @@
 BINARY_NAME=postfixadmin
 
+DATE=`date +%Y-%m-%d\ %H:%M`
+VERSION=v1.0.1
+PREFIX=go-postfixadmin/cmd
+LDFLAGS = -X '${PREFIX}.Version=${VERSION}' -X '${PREFIX}.BuildDate=${DATE}'
+FLAGS=-v -ldflags="-s -w ${LDFLAGS}"
+
 .PHONY: all build run clean css help
 
 all: css build-prod
@@ -7,13 +13,13 @@ all: css build-prod
 build: css
 	@echo "Building Go application..."
 	rm -f $(BINARY_NAME)
-	CGO_ENABLED=0 go build -o $(BINARY_NAME) -v
+	CGO_ENABLED=0 go build -o $(BINARY_NAME) ${FLAGS}
 
 
 build-prod: css
 	@echo "Building Go application..."
 	rm -f $(BINARY_NAME)
-	CGO_ENABLED=0 go build -o $(BINARY_NAME) -v -ldflags="-s -w"
+	CGO_ENABLED=0 go build -o $(BINARY_NAME) ${FLAGS}
 	upx $(BINARY_NAME)
 
 

@@ -6,13 +6,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const Version = "1.0.1"
+var (
+	Version   = "1.0.1"
+	BuildDate = "Unknown"
+)
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Display version information",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("Go-Postfixadmin version %s\n", Version)
+		fmt.Printf("Go-Postfixadmin version %s (Build Date: %s)\n", Version, BuildDate)
 	},
 }
 
