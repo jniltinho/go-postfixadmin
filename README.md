@@ -155,8 +155,10 @@ Available Commands:
   version     Display version information
 
 Flags:
-      --db-driver string   Database driver (mysql or postgres) (default "mysql")
+      --config string      config file (default is ./config.toml)
+      --db-driver string   Database driver (mysql or postgres)
       --db-url string      Database URL connection string
+      --generate-config    Generate a default config.toml file in the current directory
   -h, --help               help for postfixadmin
 
 Use "postfixadmin [command] --help" for more information about a command.

@@ -14,12 +14,20 @@ var (
 		Use:   "postfixadmin",
 		Short: "Go-Postfixadmin CLI",
 		Long:  `A command line interface for Go-Postfixadmin application.`,
+		Run: func(cmd *cobra.Command, args []string) {
+			if generateConfigFlag {
+				generateConfig()
+			} else {
+				cmd.Help()
+			}
+		},
 	}
 
 	// Global flags
-	cfgFile  string
-	dbUrl    string
-	dbDriver string
+	cfgFile            string
+	dbUrl              string
+	dbDriver           string
+	generateConfigFlag bool
 
 	// Shared resources
 	EmbeddedFiles embed.FS
@@ -53,6 +61,7 @@ func initConfig() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
+	rootCmd.Flags().BoolVar(&generateConfigFlag, "generate-config", false, "Generate a default config.toml file in the current directory")
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./config.toml)")
 	rootCmd.PersistentFlags().StringVar(&dbUrl, "db-url", "", "Database URL connection string")
 	rootCmd.PersistentFlags().StringVar(&dbDriver, "db-driver", "", "Database driver (mysql or postgres)")
