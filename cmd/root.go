@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -17,6 +17,7 @@ var (
 	}
 
 	// Global flags
+	cfgFile  string
 	dbUrl    string
 	dbDriver string
 
@@ -33,11 +34,29 @@ func Execute(files embed.FS) {
 }
 
 func initConfig() {
-	_ = godotenv.Load()
+	if cfgFile != "" {
+		viper.SetConfigFile(cfgFile)
+	} else {
+		viper.AddConfigPath(".")
+		viper.AddConfigPath("/etc/postfixadmin")
+		viper.AddConfigPath("$HOME/.postfixadmin")
+		viper.SetConfigName("config")
+		viper.SetConfigType("toml")
+	}
+
+	viper.AutomaticEnv()
+
+	if err := viper.ReadInConfig(); err == nil {
+		// Successfully read config
+	}
 }
 
 func init() {
 	cobra.OnInitialize(initConfig)
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./config.toml)")
 	rootCmd.PersistentFlags().StringVar(&dbUrl, "db-url", "", "Database URL connection string")
-	rootCmd.PersistentFlags().StringVar(&dbDriver, "db-driver", "mysql", "Database driver (mysql or postgres)")
+	rootCmd.PersistentFlags().StringVar(&dbDriver, "db-driver", "", "Database driver (mysql or postgres)")
+
+	viper.BindPFlag("database.url", rootCmd.PersistentFlags().Lookup("db-url"))
+	viper.BindPFlag("database.driver", rootCmd.PersistentFlags().Lookup("db-driver"))
 }

@@ -1,0 +1,350 @@
+# PostfixAdmin Configuration
+# Converted from config.inc.php
+# Reference: https://github.com/postfixadmin/postfixadmin
+
+# =============================================================================
+# General
+# =============================================================================
+
+# IMPORTANT: Set to true after you have configured this file.
+configured = false
+
+# Hashed password for setup.php (generate by visiting setup.php in a browser).
+setup_password = "changeme"
+
+version = "4.0.1"
+
+# URL of your PostfixAdmin instance (used in password recovery emails).
+# Leave empty to auto-detect from $_SERVER parameters.
+# site_url = "https://postfixadmin.example.org"
+
+# =============================================================================
+# Language
+# =============================================================================
+
+[language]
+default  = "en"
+# hook = ""   # name of a custom function to add/override translations
+
+# =============================================================================
+# Database
+# =============================================================================
+
+[database]
+# type: mysqli | pgsql | sqlite
+type     = "mysqli"
+host     = "localhost"
+user     = "postfix"
+password = "postfixadmin"
+name     = "postfix"
+socket   = ""
+prefix   = ""
+
+# Uncomment to override default port (MySQL: 3306, PostgreSQL: 5432)
+# port = "5432"
+
+# SQLite only: full path to the database file
+# name = "/etc/postfix/sqlite/postfixadmin.db"
+
+[database.ssl]
+enabled             = false
+key                 = ""
+cert                = ""
+ca                  = ""
+ca_path             = ""
+cipher              = ""
+verify_server_cert  = true
+
+[database.tables]
+admin                = "admin"
+alias                = "alias"
+alias_domain         = "alias_domain"
+config               = "config"
+domain               = "domain"
+domain_admins        = "domain_admins"
+fetchmail            = "fetchmail"
+log                  = "log"
+mailbox              = "mailbox"
+vacation             = "vacation"
+vacation_notification = "vacation_notification"
+quota                = "quota"
+quota2               = "quota2"
+dkim                 = "dkim"
+dkim_signing         = "dkim_signing"
+
+# =============================================================================
+# SMTP (used by PostfixAdmin to send notification emails)
+# =============================================================================
+
+[smtp]
+server  = "localhost"
+port    = "25"
+# type: plain | tls | starttls
+type    = "plain"
+# FQDN of the PostfixAdmin server, used in HELO
+client  = ""
+
+[admin]
+email         = ""
+smtp_password = ""
+name          = "Postmaster"
+
+# =============================================================================
+# Password / Encryption
+# =============================================================================
+
+[password]
+# Hashing method for mailbox passwords stored in the database.
+# Options: PLAIN, CLEAR, CLEARTEXT, ARGON2ID, ARGON2I, SHA512-CRYPT,
+#          SHA256-CRYPT, BLF-CRYPT, md5crypt, md5, system,
+#          php_crypt, php_crypt:SHA512, php_crypt:SHA512:50000,
+#          dovecot:CRYPT-METHOD, authlib, sha512.b64
+encrypt = "php_crypt"
+
+# Courier-authlib flavor (only when encrypt = "authlib")
+# Options: md5 | md5raw | SHA | crypt
+authlib_default_flavor = "md5raw"
+
+# Path to doveadm binary (for dovecot encryption method)
+dovecotpw = "/usr/bin/doveadm pw"
+
+# Generate random passwords automatically
+generate = "NO"
+
+# Always display password after mailbox/admin creation
+show = "NO"
+
+# Password expiration tracking (requires domain password_expiry field)
+expiration = "YES"
+
+# Password validation rules (regex => PALANG error key)
+[password.validation]
+"/.{5}/"           = "password_too_short 5"
+"/([a-zA-Z].*){3}/" = "password_no_characters 3"
+"/([0-9].*){2}/"   = "password_no_digits 2"
+
+# =============================================================================
+# Mailboxes & Domains
+# =============================================================================
+
+[mailbox]
+# Store mailboxes per domain (YES = /virtual/domain.tld/user@domain.tld)
+domain_path      = "YES"
+# Include domain in mailbox name (NO = /virtual/domain.tld/user)
+domain_in_mailbox = "NO"
+# Custom function name to generate maildir path (or "NO" to disable)
+maildir_name_hook = "NO"
+
+# Legal characters for usernames (regex). Empty = no restriction.
+username_legal_chars = ""
+
+# Default limits for new domains (quota in MB)
+[domain.defaults]
+aliases              = "10"
+mailboxes            = "10"
+maxquota             = "10"
+domain_quota_default = "2048"
+
+# =============================================================================
+# Quota
+# =============================================================================
+
+[quota]
+enabled           = "NO"
+domain_quota      = "YES"
+# Bytes per MB: 1024000 or 1048576
+multiplier        = "1024000"
+# Fill-level thresholds for color indicators (percent)
+level_med_pct     = 55
+level_high_pct    = 90
+
+# =============================================================================
+# Default Aliases (created for every new domain)
+# =============================================================================
+
+[default_aliases]
+abuse      = "abuse@change-this-to-your.domain.tld"
+hostmaster = "hostmaster@change-this-to-your.domain.tld"
+postmaster = "postmaster@change-this-to-your.domain.tld"
+webmaster  = "webmaster@change-this-to-your.domain.tld"
+
+# =============================================================================
+# Vacation (Auto-Reply)
+# =============================================================================
+
+[vacation]
+enabled        = "YES"
+# Autoreply domain — must match Postfix transport_maps entry.
+# This domain does NOT need real DNS; it must not be used for normal mail.
+domain         = "autoreply.change-this-to-your.domain.tld"
+# Allow users to control their own vacation settings
+control        = "YES"
+# Allow domain admins to edit user vacation settings
+control_admin  = "YES"
+
+# Reply frequency options: seconds => PALANG key
+# 0 = reply only once; 1 = reply to every mail
+[vacation.choice_of_reply]
+0        = "reply_once"
+604800   = "reply_once_per_week"   # 60*60*24*7
+
+# =============================================================================
+# Alias Control
+# =============================================================================
+
+[alias]
+edit_alias          = "YES"
+alias_control       = "YES"
+alias_control_admin = "YES"
+special_alias_control = "NO"
+alias_domain        = "YES"
+
+# =============================================================================
+# Transport
+# =============================================================================
+
+[transport]
+enabled  = "NO"
+options  = ["virtual", "local", "relay"]
+default  = "virtual"
+
+# =============================================================================
+# Features / Tabs
+# =============================================================================
+
+[features]
+backup              = "NO"
+sendmail            = "YES"
+sendmail_all_admins = "NO"
+logging             = "YES"
+fetchmail           = "YES"
+fetchmail_extra_options = "NO"
+used_quotas         = "NO"
+new_quota_table     = "YES"
+xmlrpc_enabled      = false
+totp                = "NO"
+app_passwords       = "NO"
+
+# =============================================================================
+# OpenDKIM
+# =============================================================================
+
+[dkim]
+enabled    = "NO"
+all_admins = "NO"
+
+# =============================================================================
+# Password Reset
+# =============================================================================
+
+[password_reset]
+forgotten_user_password_reset  = true
+forgotten_admin_password_reset = false
+# Name of a custom function to send SMS for password reset (or "")
+sms_send_function = ""
+
+# =============================================================================
+# Email Checks
+# =============================================================================
+
+[emailcheck]
+resolve_domain   = "YES"
+localaliasonly   = "NO"
+
+# If using recipient_delimiter in Postfix (e.g. "+"), set it here.
+recipient_delimiter = ""
+
+# =============================================================================
+# Theme
+# =============================================================================
+
+[theme]
+name       = "default"
+favicon    = "images/favicon.ico"
+logo       = "images/logo-default.png"
+css        = "css/bootstrap.css"
+custom_css = ""
+
+# =============================================================================
+# UI / Display
+# =============================================================================
+
+[ui]
+page_size        = "10"
+show_header_text = "NO"
+header_text      = ":: Postfix Admin ::"
+show_footer_text = "YES"
+footer_text      = "Return to change-this-to-your.domain.tld"
+footer_link      = "http://change-this-to-your.domain.tld"
+motd_user        = ""
+motd_admin       = ""
+motd_superadmin  = ""
+
+welcome_text = """
+Hi,
+
+Welcome to your new account.
+"""
+
+# =============================================================================
+# Status / Color Indicators
+# =============================================================================
+
+[show_status]
+enabled      = "YES"
+key          = "YES"
+text         = "  "
+
+undeliverable         = "YES"
+undeliverable_color   = "tomato"
+undeliverable_exceptions = ["unixmail.domain.ext", "exchangeserver.domain.ext"]
+
+expired       = "YES"
+expired_color = "orange"
+
+vacation      = "YES"
+vacation_color = "turquoise"
+
+disabled      = "YES"
+disabled_color = "grey"
+
+popimap       = "YES"
+popimap_color = "darkgrey"
+
+custom_domains = ["subdomain.domain.ext", "domain2.ext"]
+custom_colors  = ["lightgreen", "lightblue"]
+
+# =============================================================================
+# Post-action Scripts (optional)
+# Executed by the webserver user; you may need sudo for permission handling.
+# See: DOCUMENTS/FAQ.txt
+# =============================================================================
+
+[scripts]
+mailbox_postcreation_script          = ""
+mailbox_postedit_script              = ""
+mailbox_postdeletion_script          = ""
+mailbox_postpassword_script          = ""
+mailbox_post_totp_change_secret_script = ""
+mailbox_post_totp_exception_add_script = ""
+mailbox_post_totp_exception_delete_script = ""
+mailbox_postapppassword_script       = ""
+domain_postcreation_script           = ""
+domain_postedit_script               = ""
+domain_postdeletion_script           = ""
+
+# =============================================================================
+# Struct Hooks (custom function names to modify form fields, or "")
+# =============================================================================
+
+[struct_hooks]
+admin        = ""
+domain       = ""
+alias        = ""
+mailbox      = ""
+alias_domain = ""
+fetchmail    = ""
+dkim         = ""
+dkim_signing = ""
+
+smtp_active_flag = "NO"

@@ -29,6 +29,7 @@ RUN apk add --no-cache ca-certificates tzdata
 WORKDIR /app
 # Copy the binary from the builder stage
 COPY --from=go-builder /app/postfixadmin .
+COPY config.toml.example config.toml
 # Expose the default port
 EXPOSE 8080
 # Set the entrypoint

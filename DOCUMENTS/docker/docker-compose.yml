@@ -31,6 +31,8 @@ services:
      image: postfixadmin-image:latest
      ports:
        - "8000:80"
+     volumes:
+       - ./config.local.php:/var/www/html/config.local.php
      restart: always
      environment:
        TZ: America/Sao_Paulo
@@ -43,8 +45,6 @@ services:
        POSTFIXADMIN_SETUP_PASSWORD: $$2y$$10$$8./sbCrwpLGeWv/6auLtC.ROq/pRpm573QNdISESNqZ9p0uoL3eq6
        POSTFIXADMIN_SMTP_PORT: 25
        POSTFIXADMIN_ENCRYPT: md5crypt
-       POSTFIXADMIN_VACATION_CONTROL: YES
-       POSTFIXADMIN_VACATION_CONTROL_ADMIN: YES
 
    phpmyadmin:
      image: phpmyadmin

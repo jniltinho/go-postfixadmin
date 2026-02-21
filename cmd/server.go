@@ -2,13 +2,12 @@ package cmd
 
 import (
 	"log/slog"
-	"os"
-	"strconv"
 
 	"go-postfixadmin/internal/server"
 	"go-postfixadmin/internal/utils"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -22,34 +21,31 @@ var serverCmd = &cobra.Command{
 	Use:   "server",
 	Short: "Start the administration server",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Override with ENV if not set via flags
+		// Override with Viper config if not set via flags
 		if !cmd.Flags().Changed("port") {
-			if envPort := os.Getenv("APP_PORT"); envPort != "" {
-				if p, err := strconv.Atoi(envPort); err == nil {
-					port = p
-				}
-			} else if envPort := os.Getenv("PORT"); envPort != "" {
-				if p, err := strconv.Atoi(envPort); err == nil {
-					port = p
-				}
+			if vPort := viper.GetInt("server.port"); vPort != 0 {
+				port = vPort
+			} else if vPort := viper.GetInt("app_port"); vPort != 0 { // For backwards compatibility
+				port = vPort
+			} else if vPort := viper.GetInt("port"); vPort != 0 {
+				port = vPort
 			}
 		}
 
-		if !cmd.Flags().Changed("cert") {
-			if envCert := os.Getenv("SSL_CERT"); envCert != "" {
-				certFile = envCert
-			}
+		if !cmd.Flags().Changed("cert") && viper.GetString("ssl.cert") != "" {
+			certFile = viper.GetString("ssl.cert")
 		}
 
-		if !cmd.Flags().Changed("key") {
-			if envKey := os.Getenv("SSL_KEY"); envKey != "" {
-				keyFile = envKey
-			}
+		if !cmd.Flags().Changed("key") && viper.GetString("ssl.key") != "" {
+			keyFile = viper.GetString("ssl.key")
 		}
 
-		// Auto-enable SSL if cert and key are provided via ENV
+		// Auto-enable SSL if cert and key are provided via config or flags
 		if certFile != "" && keyFile != "" && !cmd.Flags().Changed("ssl") {
-			ssl = true
+			ssl = viper.GetBool("ssl.enabled")
+			if !viper.IsSet("ssl.enabled") {
+				ssl = true
+			}
 		}
 
 		// Connect to Database

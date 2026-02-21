@@ -18,6 +18,7 @@ import (
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v5"
 	echoMiddleware "github.com/labstack/echo/v5/middleware"
+	"github.com/spf13/viper"
 	"gorm.io/gorm"
 )
 
@@ -29,7 +30,11 @@ func StartServer(embeddedFiles embed.FS, port int, db *gorm.DB, ssl bool, certFi
 	e.Use(echoMiddleware.Recover())
 
 	// Session Middleware
-	secret := os.Getenv("SESSION_SECRET")
+	secret := viper.GetString("server.session_secret")
+	if secret == "" {
+		secret = os.Getenv("SESSION_SECRET") // fallback
+	}
+
 	if secret == "" {
 		bytes := make([]byte, 32)
 		if _, err := rand.Read(bytes); err != nil {

@@ -5,6 +5,7 @@ import (
 
 	"go-postfixadmin/internal/models"
 
+	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -16,15 +17,21 @@ func ConnectDB(dsn string, driver string) (*gorm.DB, error) {
 	var err error
 
 	if dsn == "" {
-		dsn = os.Getenv("DATABASE_URL")
+		dsn = viper.GetString("database.url")
+		if dsn == "" {
+			dsn = os.Getenv("DB_URL")
+		}
 	}
 
 	if dsn == "" {
-		dsn = "user:password@tcp(localhost:3306)/postfixadmin?charset=utf8mb4&parseTime=True&loc=Local&multiStatements=true"
+		dsn = "user:password@tcp(localhost:3306)/postfix?charset=utf8mb4&parseTime=True&loc=Local&multiStatements=true"
 	}
 
 	if driver == "" {
-		driver = os.Getenv("DB_DRIVER")
+		driver = viper.GetString("database.driver")
+		if driver == "" {
+			driver = os.Getenv("DB_DRIVER")
+		}
 	}
 
 	if driver == "postgres" {
