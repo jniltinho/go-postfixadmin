@@ -65,23 +65,26 @@ O Go-PostfixAdmin será responsável por gerenciar a estrutura do banco (tabelas
    sudo certbot certonly --standalone -d mail.example.com
    ```
 
-3. **Configurar o Ambiente (.env):**
-   Crie o arquivo `/opt/go-postfixadmin/.env` e adicione as variáveis de ambiente necessárias para o correto funcionamento:
+3. **Configurar o Ambiente (config.toml):**
+   Copie o arquivo de exemplo para `/opt/go-postfixadmin/config.toml` e adicione as configurações necessárias para o correto funcionamento:
    
-   ```env
+   ```toml
+   [database]
    # Configurações do Banco de Dados
-   DATABASE_URL="postfix:sua_senha_segura@tcp(localhost:3306)/postfix?charset=utf8mb4&parseTime=True&loc=Local"
-   DB_DRIVER=mysql
+   url = "postfix:sua_senha_segura@tcp(localhost:3306)/postfix?charset=utf8mb4&parseTime=True&loc=Local"
    
+   [server]
    # Configurações do Servidor Web
-   PORT=8080
+   port = 8080
    
    # Chave Secreta de Sessão (Gere uma string 64-char via: openssl rand -hex 32)
-   SESSION_SECRET=your_super_secret_session_key_here
+   session_secret = "your_super_secret_session_key_here"
    
+   [ssl]
    # (Opcional) Configurações de SSL para servidor standalone seguro
-   SSL_CERT="/etc/letsencrypt/live/mail.example.com/fullchain.pem"
-   SSL_KEY="/etc/letsencrypt/live/mail.example.com/privkey.pem"
+   enabled = true
+   cert = "/etc/letsencrypt/live/mail.example.com/fullchain.pem"
+   key = "/etc/letsencrypt/live/mail.example.com/privkey.pem"
    ```
 
 3. **Executar as Migrations:**

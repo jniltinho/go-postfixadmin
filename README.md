@@ -88,30 +88,30 @@ Após o build, você pode rodar o binário diretamente:
 Ou via Docker:
 
 ```bash
-docker run -p 8080:8080 -e DATABASE_URL="seu-dsn" postfixadmin:latest
+docker run -p 8080:8080 -e DB_URL="seu-dsn" postfixadmin:latest
 ```
 
-### Exemplos de DATABASE_URL
+### Exemplos de DB_URL
 
 **MySQL:**
 ```bash
 # Formato padrão
-DATABASE_URL="user:password@tcp(localhost:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local"
+DB_URL="user:password@tcp(localhost:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local"
 
 # Para uso com importsql (requer multiStatements=true)
-DATABASE_URL="user:password@tcp(localhost:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local&multiStatements=true"
+DB_URL="user:password@tcp(localhost:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local&multiStatements=true"
 ```
 
 **PostgreSQL:**
 ```bash
-DATABASE_URL="host=localhost user=gorm password=gorm dbname=gorm port=9920 sslmode=disable TimeZone=Asia/Shanghai"
+DB_URL="host=localhost user=gorm password=gorm dbname=gorm port=9920 sslmode=disable TimeZone=Asia/Shanghai"
 ```
 
 ### 3. Deploy com Systemd (Linux)
 
 Para implantar a aplicação de forma nativa em um servidor Linux, você pode utilizar o arquivo de serviço do Systemd incluído no projeto.
 
-O arquivo pré-configurado está localizado em `DOCUMENTS/setup/postfixadmin.service`. Ele espera que a aplicação esteja alocada no diretório `/opt/go-postfixadmin` e lerá as variáveis de ambiente de um arquivo `.env` neste mesmo diretório.
+O arquivo pré-configurado está localizado em `DOCUMENTS/setup/postfixadmin.service`. Ele espera que a aplicação esteja alocada no diretório `/opt/go-postfixadmin` e lerá as variáveis de ambiente de um arquivo `config.toml` neste mesmo diretório.
 
 **Instalação do Serviço:**
 

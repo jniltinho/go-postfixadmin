@@ -18,8 +18,8 @@ ExecStart=/opt/go-postfixadmin/postfixadmin server
 Restart=always
 RestartSec=5s
 
-# Carregar variáveis de ambiente do arquivo .env (o '-' ignora se o arquivo não existir)
-EnvironmentFile=-/opt/go-postfixadmin/.env
+# O app carregará nativamente as configurações do arquivo /opt/go-postfixadmin/config.toml
+# Devido a integração com o Viper (Go)
 
 # Configurar saída de logs diretamente para um arquivo
 StandardOutput=append:/opt/go-postfixadmin/postfixadmin.log
