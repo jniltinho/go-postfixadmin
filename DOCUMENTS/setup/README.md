@@ -44,7 +44,7 @@ EXIT;
 O Go-PostfixAdmin será responsável por gerenciar a estrutura do banco (tabelas, domínios, contas, aliases, etc.).
 
 1. **Copiar o Binário e Assets:**
-   Transfira o executável `postfixadmin`, a pasta de `views` e os diretórios estáticos para o servidor (ex: `/opt/go-postfixadmin`).
+   Transfira o executável `postfixadmin` para pasta do servidor (ex: `/opt/go-postfixadmin`).
    
 2. **Configurar o Ambiente (.env):**
    Crie o arquivo `/opt/go-postfixadmin/.env` e adicione as variáveis de ambiente necessárias para o correto funcionamento:
