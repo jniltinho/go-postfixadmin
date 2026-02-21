@@ -204,6 +204,16 @@ sudo chown root:postfix /etc/postfix/sql/*.cf
 
 ## 6. Configurar o Dovecot
 
+### `/etc/dovecot/conf.d/10-ssl.conf` (Recomendado)
+
+Configure o Dovecot para utilizar os mesmos certificados TLS/SSL do Postfix:
+```ini
+ssl = required
+# O sinal '<' antes do caminho diz ao Dovecot para ler o conteúdo do arquivo
+ssl_cert = </etc/letsencrypt/live/mail.example.com/fullchain.pem
+ssl_key = </etc/letsencrypt/live/mail.example.com/privkey.pem
+```
+
 ### `/etc/dovecot/dovecot.conf`
 
 Edite ou acrescente ao arquivo principal:
