@@ -52,7 +52,7 @@ npm install
 ### Compilação
 ```bash
 # Gerar CSS e compilar o binário
-make build
+make build-prod
 
 # Para limpar os arquivos gerados
 make clean
@@ -135,7 +135,7 @@ tail -f /opt/go-postfixadmin/postfixadmin.log
 
 ---
 
-## 📝 Flags da CLI
+## 💻 Flags da CLI
 
 Abaixo estão as flags disponíveis ao executar o binário `./postfixadmin`:
 
@@ -187,11 +187,11 @@ Outras flags disponíveis para `admin`:
 
 ---
 
-## 📝 Comandos úteis do Makefile
+## 💻 Comandos úteis do Makefile
 
 | Comando | Descrição |
 | :--- | :--- |
-| `make build` | Compila o CSS e o binário localmente |
+| `make build-prod` | Compila o CSS e o binário localmente |
 | `make build-docker` | Gera a imagem Docker otimizada |
 | `make run` | Compila e inicia o servidor localmente |
 | `make watch-css` | Inicia o watcher do Tailwind para desenvolvimento UI |
@@ -206,3 +206,9 @@ Outras flags disponíveis para `admin`:
 ![Go-Postfixadmin Login Screen](DOCUMENTS/screenshots/postfixadmin_01.png)
 
 Confira mais imagens na pasta [screenshots](DOCUMENTS/screenshots).
+
+---
+
+## 📖 Guia de Instalação e Configuração
+
+Para obter instruções completas passo a passo sobre como preparar um servidor de e-mail no Ubuntu com Postfix, Dovecot, MySQL e integrá-lo com o Go-PostfixAdmin, consulte nosso [Guia Completo de Setup](DOCUMENTS/setup/README.md).
