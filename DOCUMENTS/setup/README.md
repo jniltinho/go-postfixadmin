@@ -11,6 +11,7 @@ No Ubuntu, atualize os pacotes e instale os serviços básicos necessários:
 ```bash
 sudo apt update && sudo apt upgrade -y
 sudo apt install postfix postfix-mysql dovecot-core dovecot-imapd dovecot-pop3d dovecot-lmtpd dovecot-mysql mysql-server -y
+sudo apt install certbot git curl -y
 ```
 
 Durante a instalação do Postfix, o assistente perguntará o tipo de configuração. Selecione **"Internet Site"** e informe o seu domínio principal (ex: `example.com`).
@@ -43,10 +44,28 @@ EXIT;
 
 O Go-PostfixAdmin será responsável por gerenciar a estrutura do banco (tabelas, domínios, contas, aliases, etc.).
 
-1. **Copiar o Binário e Assets:**
-   Transfira o executável `postfixadmin` para pasta do servidor (ex: `/opt/go-postfixadmin`).
+1. **Obter o Aplicativo:**
+
+   Você pode clonar o repositório orginal ou baixar diretamente o último executável compilado das Releases.
    
-2. **Configurar o Ambiente (.env):**
+   *Baixar o binário e Repositório:*
+   ```bash
+   sudo mkdir -p /opt/go-postfixadmin
+   cd /opt/go-postfixadmin
+   # Substitua a URL abaixo pela URL da última release do seu repositório:
+   sudo curl -L -O https://github.com/jniltinho/go-postfixadmin/releases/latest/download/postfixadmin_X.X.X_linux_amd64.tar.gz
+   sudo git clone https://github.com/jniltinho/go-postfixadmin.git download
+   sudo tar -xzvf postfixadmin_*.tar.gz
+   ```
+   
+2. **Gerar Certificados SSL Iniciais (Certbot):**
+   
+   Antes de configurar as rotas seguras do servidor, gere os certificados primários. Pare qualquer serviço que utilize a porta 80 e rode:
+   ```bash
+   sudo certbot certonly --standalone -d mail.example.com
+   ```
+
+3. **Configurar o Ambiente (.env):**
    Crie o arquivo `/opt/go-postfixadmin/.env` e adicione as variáveis de ambiente necessárias para o correto funcionamento:
    
    ```env
@@ -61,8 +80,8 @@ O Go-PostfixAdmin será responsável por gerenciar a estrutura do banco (tabelas
    SESSION_SECRET=your_super_secret_session_key_here
    
    # (Opcional) Configurações de SSL para servidor standalone seguro
-   # SSL_CERT="/etc/letsencrypt/live/mail.example.com/fullchain.pem"
-   # SSL_KEY="/etc/letsencrypt/live/mail.example.com/privkey.pem"
+   SSL_CERT="/etc/letsencrypt/live/mail.example.com/fullchain.pem"
+   SSL_KEY="/etc/letsencrypt/live/mail.example.com/privkey.pem"
    ```
 
 3. **Executar as Migrations:**
@@ -75,7 +94,7 @@ O Go-PostfixAdmin será responsável por gerenciar a estrutura do banco (tabelas
 4. **Configurar o Serviço do Systemd:**
    Copie o arquivo de serviço (fornecido em `DOCUMENTS/setup/postfixadmin.service`) para o systemd:
    ```bash
-   sudo cp /opt/go-postfixadmin/DOCUMENTS/setup/postfixadmin.service /etc/systemd/system/
+   sudo cp download/DOCUMENTS/setup/postfixadmin.service /etc/systemd/system/
    sudo systemctl daemon-reload
    sudo systemctl enable --now postfixadmin.service
    ```
