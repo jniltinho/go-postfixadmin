@@ -27,9 +27,12 @@ FLUSH PRIVILEGES;
 
 ```bash
 ## Após criar o banco faça:
-export DATABASE_URL="postfix:sua_senha@tcp(localhost:3306)/postfix?charset=utf8mb4&parseTime=True&loc=Local"
+./postfixadmin --generate-config
+
+## Ajuste o arquivo gerado config.toml com a senha salva do banco ("sua_senha")
+## E em seguida rode a migração:
 ./postfixadmin migrate
-## No Binário do Go-PostfixAdmin, ele cria as tabelas automaticamente.
+## O Binário do Go-PostfixAdmin cria as tabelas automaticamente basendo-se no config.toml
 ```
 
 ---
