@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"go-postfixadmin/internal/models"
+	"go-postfixadmin/internal/utils"
 
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/jedib0t/go-pretty/v6/text"
@@ -18,7 +19,9 @@ func FormatQuota(bytes int64) string {
 	if bytes == 0 {
 		return "0 B"
 	}
-	const unit = 1024000 // Using 1024000 as per user preference (base 1000ish or config specific)
+
+	unit := utils.GetQuotaMultiplier()
+
 	if bytes < unit {
 		return fmt.Sprintf("%d B", bytes)
 	}
@@ -48,10 +51,9 @@ func ListAllDomains(db *gorm.DB) {
 		if d.Active {
 			active = "Yes"
 		}
-		// Domain quota stored in MB/units, apply 1024000 * 1024000 for display?
-		// Wait, previous code had: formatQuota(d.Quota * 1024000 * 1024000)
-		// Let's keep that logic.
-		t.AppendRow(table.Row{d.Domain, d.Description, d.Aliases, d.Mailboxes, FormatQuota(d.Quota * 1024000 * 1024000), active, d.Modified.Format("2006-01-02 15:04:05")})
+		// Domain quota stored in MB/units, apply multiplier * multiplier for display?
+		unit := utils.GetQuotaMultiplier()
+		t.AppendRow(table.Row{d.Domain, d.Description, d.Aliases, d.Mailboxes, FormatQuota(d.Quota * unit * unit), active, d.Modified.Format("2006-01-02 15:04:05")})
 	}
 	style := table.StyleDefault
 	style.Format.Footer = text.FormatDefault
@@ -77,8 +79,8 @@ func ListAllMailboxes(db *gorm.DB) {
 		if m.Active {
 			active = "Yes"
 		}
-		// Previous logic: formatQuota(m.Quota * 1024000)
-		t.AppendRow(table.Row{m.Username, m.Name, m.Domain, FormatQuota(m.Quota * 1024000), active, m.Modified.Format("2006-01-02 15:04:05")})
+		unit := utils.GetQuotaMultiplier()
+		t.AppendRow(table.Row{m.Username, m.Name, m.Domain, FormatQuota(m.Quota * unit), active, m.Modified.Format("2006-01-02 15:04:05")})
 
 	}
 	style := table.StyleDefault

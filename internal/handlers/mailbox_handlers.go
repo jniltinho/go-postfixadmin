@@ -1,9 +1,7 @@
 package handlers
 
 import (
-	"crypto/rand"
 	"fmt"
-	"math/big"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -93,12 +91,15 @@ func (h *Handler) ListMailboxes(c *echo.Context) error {
 		domainQuery.Find(&domains)
 	}
 
+	quotaMultiplier := utils.GetQuotaMultiplier()
+
 	return c.Render(http.StatusOK, "mailboxes.html", map[string]interface{}{
-		"Mailboxes":    mailboxes,
-		"Domains":      domains,
-		"DomainFilter": domainFilter, // Para exibir no template
-		"IsSuperAdmin": isSuperAdmin,
-		"SessionUser":  middleware.GetUsername(c),
+		"Mailboxes":       mailboxes,
+		"Domains":         domains,
+		"DomainFilter":    domainFilter, // Para exibir no template
+		"IsSuperAdmin":    isSuperAdmin,
+		"SessionUser":     middleware.GetUsername(c),
+		"QuotaMultiplier": float64(quotaMultiplier),
 	})
 }
 
@@ -169,7 +170,8 @@ func (h *Handler) AddMailbox(c *echo.Context) error {
 	emailOther := c.FormValue("email_other")
 
 	// Parse quota (MB * quota_multiplier)
-	const quotaMultiplier int64 = 1024000
+	quotaMultiplier := utils.GetQuotaMultiplier()
+
 	quota := int64(0)
 	if val := c.FormValue("quota"); val != "" {
 		if parsed, err := strconv.ParseInt(val, 10, 64); err == nil {
@@ -394,9 +396,11 @@ func (h *Handler) EditMailboxForm(c *echo.Context) error {
 		}
 	}
 
+	quotaMultiplier := utils.GetQuotaMultiplier()
+
 	return c.Render(http.StatusOK, "edit_mailbox.html", map[string]interface{}{
 		"Mailbox":      mailbox,
-		"QuotaMB":      mailbox.Quota / 1024000,
+		"QuotaMB":      mailbox.Quota / quotaMultiplier,
 		"IsSuperAdmin": isSuperAdmin,
 		"SessionUser":  loggedInUser,
 	})
@@ -442,7 +446,8 @@ func (h *Handler) EditMailbox(c *echo.Context) error {
 	changePassword := c.FormValue("change_password") == "true"
 
 	// Parse quota (MB * quota_multiplier)
-	const quotaMultiplier int64 = 1024000
+	quotaMultiplier := utils.GetQuotaMultiplier()
+
 	quota := int64(0)
 	if val := c.FormValue("quota"); val != "" {
 		if parsed, err := strconv.ParseInt(val, 10, 64); err == nil {
@@ -583,7 +588,7 @@ func (h *Handler) DeleteMailbox(c *echo.Context) error {
 
 // GeneratePassword API endpoint para gerar senha complexa
 func (h *Handler) GeneratePassword(c *echo.Context) error {
-	password := generateComplexPassword()
+	password := utils.GenerateComplexPassword()
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"password": password,
 	})
@@ -608,47 +613,4 @@ func createMailboxAlias(tx *gorm.DB, username, domain string) error {
 		Active:   true,
 	}
 	return tx.Create(&alias).Error
-}
-
-// generateComplexPassword gera uma senha complexa aleatória
-func generateComplexPassword() string {
-	const (
-		length      = 16
-		upperChars  = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-		lowerChars  = "abcdefghijklmnopqrstuvwxyz"
-		digitChars  = "0123456789"
-		symbolChars = "!@#$%^&*()-_=+[]{}|;:,.<>?"
-		allChars    = upperChars + lowerChars + digitChars + symbolChars
-	)
-
-	password := make([]byte, length)
-
-	// Ensure at least one character from each category
-	password[0] = upperChars[randomInt(len(upperChars))]
-	password[1] = lowerChars[randomInt(len(lowerChars))]
-	password[2] = digitChars[randomInt(len(digitChars))]
-	password[3] = symbolChars[randomInt(len(symbolChars))]
-
-	// Fill the rest with random characters
-	for i := 4; i < length; i++ {
-		password[i] = allChars[randomInt(len(allChars))]
-	}
-
-	// Shuffle the password to avoid predictable patterns
-	for i := range password {
-		j := randomInt(len(password))
-		password[i], password[j] = password[j], password[i]
-	}
-
-	return string(password)
-}
-
-// randomInt gera um número inteiro aleatório entre 0 e max-1
-func randomInt(max int) int {
-	n, err := rand.Int(rand.Reader, big.NewInt(int64(max)))
-	if err != nil {
-		// Fallback to timestamp-based randomness if crypto/rand fails
-		return int(time.Now().UnixNano()) % max
-	}
-	return int(n.Int64())
 }

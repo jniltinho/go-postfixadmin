@@ -64,7 +64,8 @@
                     {{if eq .Quota 0}}
                     <span class="text-sm font-bold text-yellow-600">Unlimited</span>
                     {{else}}
-                    <span class="text-sm font-medium">{{printf "%.0f" (div (float64 .Quota) 1024000.0)}} MB</span>
+                    <span class="text-sm font-medium">{{printf "%.0f" (div (float64 .Quota) $.QuotaMultiplier)}}
+                        MB</span>
                     {{end}}
                 </td>
                 <td class="px-4 py-1 text-center">

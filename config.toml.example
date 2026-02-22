@@ -19,3 +19,9 @@ port = 8080
 # enabled = false
 # cert = "ssl/server.crt"
 # key = "ssl/server.key"
+
+[quota]
+enabled           = false
+domain_quota      = true
+# Bytes per MB: 1024000 or 1048576
+multiplier        = 1024000

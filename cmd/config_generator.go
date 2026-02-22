@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"time"
 )
 
 func generateConfig() {
@@ -27,12 +28,20 @@ port = 8080
 # enabled = false
 # cert = "ssl/server.crt"
 # key = "ssl/server.key"
+
+[quota]
+enabled           = false
+domain_quota      = true
+# Bytes per MB: 1024000 or 1048576
+multiplier        = 1024000
 `
-	err := os.WriteFile("config.toml", []byte(configContent), 0644)
+
+	fileName := fmt.Sprintf("config_%s.toml", time.Now().Format("2006-01-02_150405"))
+	err := os.WriteFile(fileName, []byte(configContent), 0644)
 	if err != nil {
-		fmt.Println("Error writing config.toml:", err)
+		fmt.Printf("Error writing %s: %v\n", fileName, err)
 		os.Exit(1)
 	} else {
-		fmt.Println("Successfully generated config.toml in the current directory.")
+		fmt.Printf("Successfully generated %s in the current directory.\n", fileName)
 	}
 }

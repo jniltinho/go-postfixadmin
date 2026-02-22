@@ -29,6 +29,7 @@ go.work.sum
 # env file
 .env
 config.toml
+config_*.toml
 
 # Docker data
 DOCUMENTS/docker/_dbdata/
