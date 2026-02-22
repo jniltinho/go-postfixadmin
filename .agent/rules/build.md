@@ -8,7 +8,7 @@ trigger: always_on
 This rule applies whenever the agent is tasked with building, running, or testing the Golang application.
 
 ## Instructions
-Before executing any Go-related build or execution commands (such as `go build`, `go run`, or `go test`), you **must** ensure the `DATABASE_URL` environment variable is exported in the terminal session.
+Before executing any Go-related build or execution commands (such as `go build`, `go run`, or `go test`), you **must** ensure the `DB_URL` environment variable is exported in the terminal session.
 
 
 ### Required Command Patterns
