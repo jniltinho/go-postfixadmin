@@ -14,7 +14,7 @@ import (
 // Dashboard exibe a página inicial com estatísticas
 func (h *Handler) Dashboard(c *echo.Context) error {
 	username := middleware.GetUsername(c)
-	allowedDomains, isSuperAdmin, err := utils.GetAllowedDomains(h.DB, username)
+	allowedDomains, isSuperAdmin, err := utils.GetAllowedDomains(h.DB, username, middleware.GetIsSuperAdmin(c))
 	if err != nil {
 		return c.Render(http.StatusInternalServerError, "dashboard.html", map[string]interface{}{
 			"Error": "Failed to check permissions: " + err.Error(),

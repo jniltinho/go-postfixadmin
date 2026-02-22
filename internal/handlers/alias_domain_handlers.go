@@ -26,7 +26,7 @@ func (h *Handler) ListAliasDomains(c *echo.Context) error {
 
 		// Security: Filter by allowed domains
 		username := middleware.GetUsername(c)
-		allowedDomains, isSuper, err := utils.GetAllowedDomains(h.DB, username)
+		allowedDomains, isSuper, err := utils.GetAllowedDomains(h.DB, username, middleware.GetIsSuperAdmin(c))
 		if err != nil {
 			return c.Render(http.StatusInternalServerError, "alias_domains.html", map[string]interface{}{
 				"Error": "Failed to check permissions: " + err.Error(),
@@ -60,7 +60,7 @@ func (h *Handler) AddAliasDomainForm(c *echo.Context) error {
 	if h.DB != nil {
 		// Security: Filter domains
 		username := middleware.GetUsername(c)
-		allowedDomains, isSuper, err := utils.GetAllowedDomains(h.DB, username)
+		allowedDomains, isSuper, err := utils.GetAllowedDomains(h.DB, username, middleware.GetIsSuperAdmin(c))
 		if err != nil {
 			return c.Render(http.StatusInternalServerError, "add_alias_domain.html", map[string]interface{}{"Error": "Permission check failed"})
 		}
@@ -92,7 +92,7 @@ func (h *Handler) AddAliasDomain(c *echo.Context) error {
 
 	// Security: Validate target domain access
 	loggedInUser := middleware.GetUsername(c)
-	allowedDomains, isSuperAdmin, err := utils.GetAllowedDomains(h.DB, loggedInUser)
+	allowedDomains, isSuperAdmin, err := utils.GetAllowedDomains(h.DB, loggedInUser, middleware.GetIsSuperAdmin(c))
 	if err != nil {
 		return renderAddAliasDomainError(c, "Permission check failed", aliasDomain, targetDomain, nil, isSuperAdmin)
 	}
@@ -193,7 +193,7 @@ func (h *Handler) DeleteAliasDomain(c *echo.Context) error {
 	}
 
 	loggedInUser := middleware.GetUsername(c)
-	allowedDomains, isSuperAdmin, err := utils.GetAllowedDomains(h.DB, loggedInUser)
+	allowedDomains, isSuperAdmin, err := utils.GetAllowedDomains(h.DB, loggedInUser, middleware.GetIsSuperAdmin(c))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "Permission check failed"})
 	}
@@ -255,7 +255,7 @@ func (h *Handler) EditAliasDomainForm(c *echo.Context) error {
 
 	if h.DB != nil {
 		username := middleware.GetUsername(c)
-		allowedDomains, isSuper, err := utils.GetAllowedDomains(h.DB, username)
+		allowedDomains, isSuper, err := utils.GetAllowedDomains(h.DB, username, middleware.GetIsSuperAdmin(c))
 		if err != nil {
 			return c.Render(http.StatusInternalServerError, "alias_domains.html", map[string]interface{}{"Error": "Permission check failed"})
 		}
@@ -311,7 +311,7 @@ func (h *Handler) EditAliasDomain(c *echo.Context) error {
 
 	// Security Check
 	loggedInUser := middleware.GetUsername(c)
-	allowedDomains, isSuperAdmin, err := utils.GetAllowedDomains(h.DB, loggedInUser)
+	allowedDomains, isSuperAdmin, err := utils.GetAllowedDomains(h.DB, loggedInUser, middleware.GetIsSuperAdmin(c))
 	if err != nil {
 		return c.Render(http.StatusInternalServerError, "alias_domains.html", map[string]interface{}{"Error": "Permission check failed"})
 	}

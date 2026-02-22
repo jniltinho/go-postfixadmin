@@ -16,6 +16,7 @@ const (
 	UserAuthKey       = "user_authenticated" // Key for user auth
 	UsernameKey       = "username"
 	UserUsernameKey   = "user_username" // Key for user username
+	IsSuperAdminKey   = "is_superadmin"
 	LastActivityKey   = "last_activity"
 	InactivityTimeout = 60 * time.Minute
 )
@@ -109,7 +110,7 @@ func UserAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 }
 
 // SetSession authenticates the admin and sets initial session values
-func SetSession(c *echo.Context, username string) error {
+func SetSession(c *echo.Context, username string, isSuperAdmin bool) error {
 	sess, _ := session.Get(SessionName, c)
 	sess.Options = &sessions.Options{
 		Path:     "/",
@@ -118,6 +119,7 @@ func SetSession(c *echo.Context, username string) error {
 	}
 	sess.Values[AuthKey] = true
 	sess.Values[UsernameKey] = username
+	sess.Values[IsSuperAdminKey] = isSuperAdmin
 	sess.Values[LastActivityKey] = time.Now().Unix()
 	return sess.Save(c.Request(), c.Response())
 }
@@ -146,6 +148,18 @@ func GetUsername(c *echo.Context) string {
 		return username
 	}
 	return ""
+}
+
+// GetIsSuperAdmin retrieves the superadmin flag from the session
+func GetIsSuperAdmin(c *echo.Context) bool {
+	sess, _ := session.Get(SessionName, c)
+	if sess == nil {
+		return false
+	}
+	if isSuper, ok := sess.Values[IsSuperAdminKey].(bool); ok {
+		return isSuper
+	}
+	return false
 }
 
 // GetUser retrieves the user username from the session

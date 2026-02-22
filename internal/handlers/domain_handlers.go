@@ -29,7 +29,7 @@ func (h *Handler) ListDomains(c *echo.Context) error {
 	var displayDomains []DomainDisplay
 
 	username := middleware.GetUsername(c)
-	allowedDomains, isSuperAdmin, err := utils.GetAllowedDomains(h.DB, username)
+	allowedDomains, isSuperAdmin, err := utils.GetAllowedDomains(h.DB, username, middleware.GetIsSuperAdmin(c))
 	if err != nil {
 		return c.Render(http.StatusInternalServerError, "domains.html", map[string]interface{}{
 			"Error": "Failed to check permissions: " + err.Error(),

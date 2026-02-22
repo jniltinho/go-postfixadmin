@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"go-postfixadmin/internal/models"
 
 	"gorm.io/gorm"
@@ -17,11 +18,14 @@ func IsSuperAdmin(db *gorm.DB, username string) (bool, error) {
 
 // GetAllowedDomains returns the list of domains a user is allowed to manage.
 // If the user is a superadmin or has "ALL" in domain_admins, isSuperAdmin returns true.
-func GetAllowedDomains(db *gorm.DB, username string) (domains []string, isSuperAdmin bool, err error) {
+func GetAllowedDomains(db *gorm.DB, username string, isSuperAdmin bool) (domains []string, isSuper bool, err error) {
 	// Check if user is superadmin
-	isSuper, err := IsSuperAdmin(db, username)
-	if err != nil {
-		return nil, false, err
+	isSuper = isSuperAdmin
+	if !isSuper {
+		isSuper, err = IsSuperAdmin(db, username)
+		if err != nil {
+			return nil, false, err
+		}
 	}
 	if isSuper {
 		return nil, true, nil
@@ -43,20 +47,65 @@ func GetAllowedDomains(db *gorm.DB, username string) (domains []string, isSuperA
 	return domains, false, nil
 }
 
-// GetAllMailboxes returns the list of active mailboxes filtered by the user's allowed domains.
-// Superadmins get all active mailboxes, regular admins only get mailboxes from their domains.
-func GetAllMailboxes(db *gorm.DB, username string) (mailboxes []models.Mailbox, isSuperAdmin bool, err error) {
-	allowedDomains, isSuper, err := GetAllowedDomains(db, username)
+// GetActiveDomains returns the list of active domains allowed for a given user.
+// Superadmins get all active domains except "ALL".
+func GetActiveDomains(db *gorm.DB, username string, isSuperAdmin bool) (domains []models.Domain, isSuper bool, err error) {
+	allowedDomains, isSuper, err := GetAllowedDomains(db, username, isSuperAdmin)
 	if err != nil {
 		return nil, false, err
 	}
 
-	query := db.Select("username").Where("active = ?", true).Order("domain ASC")
+	query := db.Where("domain != ? AND active = ?", "ALL", true).Order("domain ASC")
+
+	if !isSuper {
+		if len(allowedDomains) == 0 {
+			return nil, false, nil // No domains allowed
+		}
+		query = query.Where("domain IN ?", allowedDomains)
+	}
+
+	if err := query.Find(&domains).Error; err != nil {
+		return nil, isSuper, err
+	}
+
+	return domains, isSuper, nil
+}
+
+// GetAllMailboxes returns the list of active mailboxes filtered by the user's allowed domains.
+// Superadmins get all active mailboxes, regular admins only get mailboxes from their domains.
+// If domainFilter is provided, it further filters the results, returning an error if a non-superadmin tries to filter by an unauthorized domain.
+func GetAllMailboxes(db *gorm.DB, username string, isSuperAdmin bool, domainFilter string) (mailboxes []models.Mailbox, isSuper bool, err error) {
+	allowedDomains, isSuper, err := GetAllowedDomains(db, username, isSuperAdmin)
+	if err != nil {
+		return nil, false, err
+	}
+
+	query := db.Table("mailbox").Select("mailbox.*").
+		Joins("JOIN domain ON mailbox.domain = domain.domain").
+		Where("domain.active = ?", true).
+		Order("mailbox.domain ASC")
+
 	if !isSuper {
 		if len(allowedDomains) == 0 {
 			return nil, false, nil
 		}
-		query = query.Where("domain IN ?", allowedDomains)
+		query = query.Where("mailbox.domain IN ?", allowedDomains)
+	}
+
+	if domainFilter != "" {
+		if !isSuper {
+			allowed := false
+			for _, d := range allowedDomains {
+				if d == domainFilter {
+					allowed = true
+					break
+				}
+			}
+			if !allowed {
+				return nil, false, fmt.Errorf("access denied to this domain")
+			}
+		}
+		query = query.Where("mailbox.domain = ?", domainFilter)
 	}
 
 	if err := query.Find(&mailboxes).Error; err != nil {

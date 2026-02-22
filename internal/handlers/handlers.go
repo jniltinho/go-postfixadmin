@@ -38,7 +38,7 @@ func (h *Handler) Login(c *echo.Context) error {
 		}
 
 		// Set session
-		if err := middleware.SetSession(c, admin.Username); err != nil {
+		if err := middleware.SetSession(c, admin.Username, admin.Superadmin); err != nil {
 			return c.Render(http.StatusInternalServerError, "login.html", map[string]interface{}{"error": "Failed to create session"})
 		}
 
