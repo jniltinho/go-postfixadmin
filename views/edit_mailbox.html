@@ -5,7 +5,8 @@
 <div class="max-w-6xl mx-auto">
     <div class="mb-8">
         <h2 class="text-4xl font-mono font-black uppercase tracking-tight mb-2">Editar Email</h2>
-        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Update mailbox settings and configuration.
+        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Atualizar configurações da caixa de
+            correio.
         </p>
     </div>
 
@@ -27,29 +28,29 @@
         <div class="bg-white border-4 border-brand-text neo-shadow-sm p-8">
             <h3 class="text-xl font-mono font-black uppercase tracking-tight mb-6 flex items-center">
                 <i data-lucide="mail" class="w-5 h-5 mr-2"></i>
-                Email Account
+                Conta de Email
             </h3>
 
             <div class="space-y-6">
                 <!-- Email Address (Read-only) -->
                 <div>
                     <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
-                        Email Address
+                        Endereço de Email
                     </label>
                     <div class="w-full px-4 py-3 border-2 border-gray-300 bg-gray-50 font-medium font-mono text-lg">
                         {{.Mailbox.Username}}
                     </div>
-                    <p class="text-xs text-gray-500 mt-2">Email address cannot be changed</p>
+                    <p class="text-xs text-gray-500 mt-2">O endereço de email não pode ser alterado</p>
                 </div>
 
                 <!-- Display Name -->
                 <div>
                     <label for="name" class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
-                        Display Name
+                        Nome de Exibição
                     </label>
                     <input type="text" id="name" name="name" placeholder="John Doe" value="{{.Mailbox.Name}}"
                         class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors">
-                    <p class="text-xs text-gray-500 mt-2">Full name displayed in email client</p>
+                    <p class="text-xs text-gray-500 mt-2">Nome completo exibido no cliente de e-mail</p>
                 </div>
 
                 <!-- Active Toggle -->
@@ -131,7 +132,7 @@
             <summary
                 class="p-4 cursor-pointer font-bold uppercase tracking-tight text-sm flex items-center hover:bg-white transition-colors">
                 <i data-lucide="settings" class="w-4 h-4 mr-2"></i>
-                Advanced Settings
+                Configurações Avançadas
                 <i data-lucide="chevron-down" class="w-4 h-4 ml-auto"></i>
             </summary>
 
@@ -160,7 +161,7 @@
                                 .Mailbox.SMTPActive}}checked{{end}}
                                 class="w-6 h-6 border-2 border-brand-text cursor-pointer">
                             <label for="smtp_active" class="ml-3 text-sm font-bold cursor-pointer">
-                                SMTP Active (can send email)
+                                SMTP Active (pode enviar email)
                             </label>
                         </div>
                     </div>
@@ -172,7 +173,7 @@
                 <div>
                     <label for="email_other"
                         class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
-                        Alternative Email
+                        Email Alternativo
                     </label>
                     <input type="email" id="email_other" name="email_other" placeholder="alternative@email.com"
                         value="{{.Mailbox.EmailOther}}"
@@ -186,12 +187,12 @@
             <a href="/mailboxes?domain={{.Mailbox.Domain}}"
                 class="bg-white hover:bg-gray-50 text-brand-text border-2 border-brand-text font-black px-8 py-4 shadow-[2px_2px_0px_#1E293B] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center">
                 <i data-lucide="x" class="w-5 h-5 mr-2"></i>
-                Cancel
+                Cancelar
             </a>
             <button type="submit" id="submitBtn"
                 class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-8 py-4 shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center">
                 <i data-lucide="save" class="w-5 h-5 mr-2"></i>
-                Update Email
+                Atualizar Email
             </button>
         </div>
     </form>

@@ -46,15 +46,13 @@ func (h *Handler) ListMailboxes(c *echo.Context) error {
 		domains, _, _ = utils.GetActiveDomains(h.DB, SessionUser, isSuperAdmin)
 	}
 
-	quotaMultiplier := utils.GetQuotaMultiplier()
-
 	return c.Render(http.StatusOK, "mailboxes.html", map[string]interface{}{
 		"Mailboxes":       mailboxes,
 		"Domains":         domains,
 		"DomainFilter":    domainFilter, // Para exibir no template
 		"IsSuperAdmin":    isSuperAdmin,
 		"SessionUser":     SessionUser,
-		"QuotaMultiplier": float64(quotaMultiplier),
+		"QuotaMultiplier": float64(utils.GetQuotaMultiplier()),
 	})
 }
 

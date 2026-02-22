@@ -1,5 +1,5 @@
-{{define "title"}}Add Mailbox - Go-PostfixAdmin{{end}}
-{{define "breadcrumb"}}Add New Email Account{{end}}
+{{define "title"}}Adicionar Nova Conta de E-mail - Go-PostfixAdmin{{end}}
+{{define "breadcrumb"}}Adicionar Nova Conta de E-mail{{end}}
 
 {{define "content"}}
 <div class="max-w-6xl mx-auto">
@@ -15,7 +15,7 @@
         <div class="flex items-start">
             <i data-lucide="alert-circle" class="w-6 h-6 text-red-600 mr-3 mt-1"></i>
             <div>
-                <h3 class="font-black text-red-600 uppercase tracking-wide mb-1">Error</h3>
+                <h3 class="font-black text-red-600 uppercase tracking-wide mb-1">Erro</h3>
                 <p class="text-sm text-red-700">{{.Error}}</p>
             </div>
         </div>
@@ -67,7 +67,8 @@
 
                 <!-- Full Email Preview -->
                 <div class="bg-gray-50 border-2 border-gray-300 p-4 rounded">
-                    <p class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Full Email Address</p>
+                    <p class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Endereço de Email Completo
+                    </p>
                     <p class="font-mono text-lg font-bold" id="emailPreview">
                         <span id="localPartPreview" class="text-brand-primary">user</span>@<span id="domainPreview"
                             class="text-brand-primary">domain.com</span>
@@ -89,7 +90,7 @@
                     <input type="checkbox" id="active" name="active" value="true" {{if or (not .LocalPart)
                         .Active}}checked{{end}} class="w-6 h-6 border-2 border-brand-text cursor-pointer">
                     <label for="active" class="ml-3 text-sm font-bold cursor-pointer">
-                        Account Active
+                        Conta Ativa
                     </label>
                 </div>
             </div>
@@ -158,7 +159,7 @@
             <summary
                 class="p-4 cursor-pointer font-bold uppercase tracking-tight text-sm flex items-center hover:bg-white transition-colors">
                 <i data-lucide="settings" class="w-4 h-4 mr-2"></i>
-                Advanced Settings
+                Configurações Avançadas
                 <i data-lucide="chevron-down" class="w-4 h-4 ml-auto"></i>
             </summary>
 

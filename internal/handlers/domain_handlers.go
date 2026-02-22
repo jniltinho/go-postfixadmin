@@ -27,9 +27,10 @@ type DomainDisplay struct {
 func (h *Handler) ListDomains(c *echo.Context) error {
 	var domains []models.Domain
 	var displayDomains []DomainDisplay
-
 	username := middleware.GetUsername(c)
-	allowedDomains, isSuperAdmin, err := utils.GetAllowedDomains(h.DB, username, middleware.GetIsSuperAdmin(c))
+	isSuperAdmin := middleware.GetIsSuperAdmin(c)
+
+	allowedDomains, _, err := utils.GetAllowedDomains(h.DB, username, isSuperAdmin)
 	if err != nil {
 		return c.Render(http.StatusInternalServerError, "domains.html", map[string]interface{}{
 			"Error": "Failed to check permissions: " + err.Error(),
@@ -77,11 +78,8 @@ func (h *Handler) ListDomains(c *echo.Context) error {
 func (h *Handler) AddDomainForm(c *echo.Context) error {
 	// Security: Only Superadmins can add domains
 	username := middleware.GetUsername(c)
-	isSuper, err := utils.IsSuperAdmin(h.DB, username)
-	if err != nil {
-		return c.Render(http.StatusInternalServerError, "domains.html", map[string]interface{}{"Error": "Permission check failed"})
-	}
-	if !isSuper {
+	isSuperAdmin := middleware.GetIsSuperAdmin(c)
+	if !isSuperAdmin {
 		return c.Render(http.StatusForbidden, "domains.html", map[string]interface{}{"Error": "Access denied: Only Superadmins can create domains"})
 	}
 	return c.Render(http.StatusOK, "add_domain.html", map[string]interface{}{
@@ -93,8 +91,8 @@ func (h *Handler) AddDomainForm(c *echo.Context) error {
 func (h *Handler) AddDomain(c *echo.Context) error {
 	// Security: Only Superadmins can add domains
 	username := middleware.GetUsername(c)
-	isSuper, err := utils.IsSuperAdmin(h.DB, username)
-	if err != nil || !isSuper {
+	isSuperAdmin := middleware.GetIsSuperAdmin(c)
+	if !isSuperAdmin {
 		return c.Render(http.StatusForbidden, "domains.html", map[string]interface{}{"Error": "Access denied"})
 	}
 
@@ -225,8 +223,8 @@ func (h *Handler) AddDomain(c *echo.Context) error {
 func (h *Handler) EditDomainForm(c *echo.Context) error {
 	// Security: Only Superadmins can edit domains
 	username := middleware.GetUsername(c)
-	isSuper, err := utils.IsSuperAdmin(h.DB, username)
-	if err != nil || !isSuper {
+	isSuperAdmin := middleware.GetIsSuperAdmin(c)
+	if !isSuperAdmin {
 		return c.Render(http.StatusForbidden, "domains.html", map[string]interface{}{"Error": "Access denied: Only Superadmins can edit domains"})
 	}
 
@@ -249,8 +247,8 @@ func (h *Handler) EditDomainForm(c *echo.Context) error {
 func (h *Handler) EditDomain(c *echo.Context) error {
 	// Security: Only Superadmins can edit domains
 	username := middleware.GetUsername(c)
-	isSuper, err := utils.IsSuperAdmin(h.DB, username)
-	if err != nil || !isSuper {
+	isSuperAdmin := middleware.GetIsSuperAdmin(c)
+	if !isSuperAdmin {
 		return c.Render(http.StatusForbidden, "domains.html", map[string]interface{}{"Error": "Access denied"})
 	}
 
@@ -316,7 +314,7 @@ func (h *Handler) EditDomain(c *echo.Context) error {
 	domain.PasswordExpiry = passwordExpiry
 
 	// Use transaction to ensure atomicity (especially for cascading updates)
-	err = h.DB.Transaction(func(tx *gorm.DB) error {
+	err := h.DB.Transaction(func(tx *gorm.DB) error {
 		if activeChanged {
 			// Update all mailboxes for this domain to match the new domain active state
 			if err := tx.Model(&models.Mailbox{}).Where("domain = ?", domain.Domain).Update("active", active).Error; err != nil {
@@ -326,7 +324,6 @@ func (h *Handler) EditDomain(c *echo.Context) error {
 			if err := tx.Model(&models.Alias{}).Where("domain = ?", domain.Domain).Update("active", active).Error; err != nil {
 				return err
 			}
-
 		}
 
 		if err := tx.Save(&domain).Error; err != nil {
@@ -357,8 +354,8 @@ func (h *Handler) EditDomain(c *echo.Context) error {
 func (h *Handler) DeleteDomain(c *echo.Context) error {
 	// Security: Only Superadmins can delete domains
 	username := middleware.GetUsername(c)
-	isSuper, err := utils.IsSuperAdmin(h.DB, username)
-	if err != nil || !isSuper {
+	isSuperAdmin := middleware.GetIsSuperAdmin(c)
+	if !isSuperAdmin {
 		return c.JSON(http.StatusForbidden, map[string]interface{}{"error": "Access denied: Only Superadmins can delete domains"})
 	}
 
