@@ -62,6 +62,10 @@ func RegisterRoutes(e *echo.Echo, h *handlers.Handler) {
 	// API / Utils
 	e.GET("/api/generate-password", h.GeneratePassword)
 
+	// Fetchmail
+	e.GET("/fetchmail/add", h.AddFetchmailGET)
+	e.POST("/fetchmail/add", h.AddFetchmailPOST)
+
 	// User Portal Routes
 	e.GET("/users/login", h.UserLogin)
 	e.POST("/users/login", h.UserLogin)

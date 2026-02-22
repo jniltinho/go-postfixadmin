@@ -326,6 +326,7 @@ func (h *Handler) EditDomain(c *echo.Context) error {
 			if err := tx.Model(&models.Alias{}).Where("domain = ?", domain.Domain).Update("active", active).Error; err != nil {
 				return err
 			}
+
 		}
 
 		if err := tx.Save(&domain).Error; err != nil {
@@ -372,47 +373,8 @@ func (h *Handler) DeleteDomain(c *echo.Context) error {
 		})
 	}
 
-	// Use transaction to ensure atomicity
-	err = h.DB.Transaction(func(tx *gorm.DB) error {
-		// Delete all alias_domain records where alias_domain matches (Source)
-		if err := tx.Where("alias_domain = ?", domainName).Delete(&models.AliasDomain{}).Error; err != nil {
-			return err
-		}
-
-		// Delete all alias_domain records where target_domain matches (Target)
-		if err := tx.Where("target_domain = ?", domainName).Delete(&models.AliasDomain{}).Error; err != nil {
-			return err
-		}
-
-		// Delete all aliases for this domain
-		if err := tx.Where("domain = ?", domainName).Delete(&models.Alias{}).Error; err != nil {
-			return err
-		}
-
-		// Delete all mailboxes for this domain
-		if err := tx.Where("domain = ?", domainName).Delete(&models.Mailbox{}).Error; err != nil {
-			return err
-		}
-
-		// Delete all domain_admins for this domain
-		if err := tx.Where("domain = ?", domainName).Delete(&models.DomainAdmin{}).Error; err != nil {
-			return err
-		}
-
-		// Delete the domain itself
-		if err := tx.Where("domain = ?", domainName).Delete(&models.Domain{}).Error; err != nil {
-			return err
-		}
-
-		// Log Action inside transaction
-		if err := utils.LogAction(tx, username, c.RealIP(), domainName, "delete_domain", domainName); err != nil {
-			return err
-		}
-
-		return nil
-	})
-
-	if err != nil {
+	// Use utility function to delete domain and all associated data
+	if err := utils.DeleteDomain(h.DB, domainName, username, c.RealIP()); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"success": false,
 			"error":   "Failed to delete domain: " + err.Error(),
