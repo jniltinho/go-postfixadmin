@@ -1,7 +1,7 @@
 BINARY_NAME=postfixadmin
 
 DATE=`date +%Y-%m-%d\ %H:%M`
-VERSION=v1.0.3
+VERSION=v1.0.4
 PREFIX=go-postfixadmin/cmd
 LDFLAGS = -X '${PREFIX}.Version=${VERSION}' -X '${PREFIX}.BuildDate=${DATE}'
 FLAGS=-v -ldflags="-s -w ${LDFLAGS}"
