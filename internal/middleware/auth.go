@@ -18,7 +18,7 @@ const (
 	UserUsernameKey   = "user_username" // Key for user username
 	IsSuperAdminKey   = "is_superadmin"
 	LastActivityKey   = "last_activity"
-	InactivityTimeout = 60 * time.Minute
+	InactivityTimeout = 30 * time.Minute
 )
 
 // AuthMiddleware checks for admin session validity and inactivity

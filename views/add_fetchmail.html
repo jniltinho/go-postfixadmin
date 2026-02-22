@@ -159,44 +159,46 @@
                 </div>
 
                 <!-- Checkboxes -->
-                <div class="flex items-center">
-                    <input type="checkbox" id="fetchall" name="fetchall" value="true" {{if .Fetchall}}checked{{end}}
-                        class="w-6 h-6 border-2 border-brand-text cursor-pointer">
-                    <label for="fetchall" class="ml-3 text-sm font-bold cursor-pointer">
-                        Recuperar Todas (novas e antigas)
-                    </label>
-                </div>
+                <div class="flex flex-wrap items-center gap-6">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="fetchall" name="fetchall" value="true" {{if .Fetchall}}checked{{end}}
+                            class="w-6 h-6 border-2 border-brand-text cursor-pointer">
+                        <label for="fetchall" class="ml-3 text-sm font-bold cursor-pointer">
+                            Recuperar Todas (novas e antigas)
+                        </label>
+                    </div>
 
-                <div class="flex items-center">
-                    <input type="checkbox" id="keep" name="keep" value="true" {{if .Keep}}checked{{end}}
-                        class="w-6 h-6 border-2 border-brand-text cursor-pointer">
-                    <label for="keep" class="ml-3 text-sm font-bold cursor-pointer">
-                        Manter mensagens no servidor remoto
-                    </label>
-                </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="keep" name="keep" value="true" {{if .Keep}}checked{{end}}
+                            class="w-6 h-6 border-2 border-brand-text cursor-pointer">
+                        <label for="keep" class="ml-3 text-sm font-bold cursor-pointer">
+                            Manter mensagens no servidor remoto
+                        </label>
+                    </div>
 
-                <div class="flex items-center">
-                    <input type="checkbox" id="usessl" name="usessl" value="true" {{if .UseSSL}}checked{{end}}
-                        class="w-6 h-6 border-2 border-brand-text cursor-pointer">
-                    <label for="usessl" class="ml-3 text-sm font-bold cursor-pointer">
-                        SSL Habilitado
-                    </label>
-                </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="usessl" name="usessl" value="true" {{if .UseSSL}}checked{{end}}
+                            class="w-6 h-6 border-2 border-brand-text cursor-pointer">
+                        <label for="usessl" class="ml-3 text-sm font-bold cursor-pointer">
+                            SSL Habilitado
+                        </label>
+                    </div>
 
-                <div class="flex items-center">
-                    <input type="checkbox" id="sslcertck" name="sslcertck" value="true" {{if .SSLCertCk}}checked{{end}}
-                        class="w-6 h-6 border-2 border-brand-text cursor-pointer">
-                    <label for="sslcertck" class="ml-3 text-sm font-bold cursor-pointer">
-                        SSL Certificate Check
-                    </label>
-                </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="sslcertck" name="sslcertck" value="true" {{if
+                            .SSLCertCk}}checked{{end}} class="w-6 h-6 border-2 border-brand-text cursor-pointer">
+                        <label for="sslcertck" class="ml-3 text-sm font-bold cursor-pointer">
+                            SSL Certificate Check
+                        </label>
+                    </div>
 
-                <div class="flex items-center">
-                    <input type="checkbox" id="active" name="active" value="true" {{if or (not .Mailbox)
-                        .Active}}checked{{end}} class="w-6 h-6 border-2 border-brand-text cursor-pointer">
-                    <label for="active" class="ml-3 text-sm font-bold cursor-pointer">
-                        Habilitado
-                    </label>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="active" name="active" value="true" {{if or (not .Mailbox)
+                            .Active}}checked{{end}} class="w-6 h-6 border-2 border-brand-text cursor-pointer">
+                        <label for="active" class="ml-3 text-sm font-bold cursor-pointer">
+                            Habilitado
+                        </label>
+                    </div>
                 </div>
             </div>
         </div>
