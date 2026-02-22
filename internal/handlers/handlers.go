@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"time"
 
 	"go-postfixadmin/internal/middleware"
 	"go-postfixadmin/internal/models"
@@ -89,7 +90,8 @@ func (h *Handler) Dashboard(c *echo.Context) error {
 
 	var logs []models.Log
 	if h.DB != nil {
-		logQuery := h.DB.Order("timestamp desc").Limit(20)
+		oneMonthAgo := time.Now().AddDate(0, -1, 0)
+		logQuery := h.DB.Order("timestamp desc").Where("timestamp >= ?", oneMonthAgo).Limit(500)
 
 		if !isSuperAdmin {
 			if len(allowedDomains) == 0 {

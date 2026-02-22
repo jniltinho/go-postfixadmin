@@ -303,7 +303,7 @@ func (h *Handler) DeleteUserVacation(c *echo.Context) error {
 
 	tx := h.DB.Begin()
 
-	if err := tx.Model(&models.Vacation{}).Where("email = ?", username).Update("active", false).Error; err != nil {
+	if err := tx.Where("email = ?", username).Delete(&models.Vacation{}).Error; err != nil {
 		tx.Rollback()
 		middleware.SetFlash(c, "error", "Falha ao remover resposta automática")
 		return c.Redirect(http.StatusFound, "/users/vacation")
@@ -313,5 +313,5 @@ func (h *Handler) DeleteUserVacation(c *echo.Context) error {
 
 	tx.Commit()
 	middleware.SetFlash(c, "message", "Resposta automática removida com sucesso")
-	return c.Redirect(http.StatusFound, "/users/vacation")
+	return c.Redirect(http.StatusFound, "/users/dashboard")
 }

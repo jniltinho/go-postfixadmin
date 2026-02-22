@@ -132,10 +132,20 @@ Em caso de urgência, favor contatar <pessoa de contato>.{{end}}</textarea>
 
             <div
                 class="bg-gray-50 -mx-8 -mb-8 mt-8 p-6 px-8 border-t-4 border-brand-text flex flex-col sm:flex-row items-center justify-end space-y-4 sm:space-y-0 sm:space-x-4">
+
                 <a href="/users/dashboard"
-                    class="w-full sm:w-auto px-6 py-3 font-black uppercase tracking-widest text-brand-text bg-white border-2 border-brand-text hover:bg-gray-50 flex justify-center neo-shadow-sm transition-all text-sm">
+                    class="w-full sm:w-auto px-6 py-3 font-black uppercase tracking-widest text-brand-text bg-white border-2 border-brand-text hover:bg-gray-50 flex justify-center neo-shadow-sm transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[3px_3px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none text-sm">
                     Cancelar
                 </a>
+
+                {{if and .Vacation .Vacation.Active}}
+                <button type="button"
+                    onclick="if(confirm('Tem certeza que deseja remover a resposta automática?')) document.getElementById('delete-vacation-form').submit();"
+                    class="w-full sm:w-auto px-6 py-3 font-black uppercase tracking-widest bg-red-600 hover:bg-white hover:text-red-600 text-white border-2 border-brand-text shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none flex items-center justify-center text-sm cursor-pointer">
+                    <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i>
+                    Remover Mensagem
+                </button>
+                {{end}}
 
                 <button type="submit"
                     class="w-full sm:w-auto bg-brand-secondary hover:bg-white hover:text-brand-secondary text-white border-2 border-brand-text font-black px-6 py-3 shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center justify-center text-sm">
@@ -144,6 +154,10 @@ Em caso de urgência, favor contatar <pessoa de contato>.{{end}}</textarea>
                 </button>
             </div>
         </form>
+
+        {{if and .Vacation .Vacation.Active}}
+        <form id="delete-vacation-form" action="/users/vacation/delete" method="POST" class="hidden"></form>
+        {{end}}
     </div>
 </div>
 
