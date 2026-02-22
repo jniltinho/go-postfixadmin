@@ -22,6 +22,8 @@ import (
 	"gorm.io/gorm"
 )
 
+var AppVersion string = "1.0.0"
+
 func StartServer(embeddedFiles embed.FS, port int, db *gorm.DB, ssl bool, certFile, keyFile string) {
 	e := echo.New()
 

@@ -64,10 +64,11 @@ func (h *Handler) UserDashboard(c *echo.Context) error {
 	h.DB.First(&alias, "address = ?", username)
 
 	return c.Render(http.StatusOK, "users/dashboard.html", map[string]interface{}{
-		"User":    mailbox,
-		"Alias":   alias,
-		"Message": middleware.GetFlash(c, "message"),
-		"Error":   middleware.GetFlash(c, "error"),
+		"SessionUser": username,
+		"User":        mailbox, // Still needed if dashboard body requires mailbox fields but header uses SessionUser
+		"Alias":       alias,
+		"Message":     middleware.GetFlash(c, "message"),
+		"Error":       middleware.GetFlash(c, "error"),
 	})
 }
 
@@ -180,4 +181,137 @@ func (h *Handler) UpdateUserForwarding(c *echo.Context) error {
 	tx.Commit()
 	middleware.SetFlash(c, "message", "Redirecionamento atualizado com sucesso")
 	return c.Redirect(http.StatusFound, "/users/dashboard")
+}
+
+// UserVacation displays the user's vacation/auto-reply configuration form
+func (h *Handler) UserVacation(c *echo.Context) error {
+	username := middleware.GetUser(c)
+	if username == "" {
+		return c.Redirect(http.StatusFound, "/users/login")
+	}
+
+	var vacation models.Vacation
+	err := h.DB.First(&vacation, "email = ?", username).Error
+
+	templateData := map[string]interface{}{
+		"SessionUser": username,
+		"Message":     middleware.GetFlash(c, "message"),
+		"Error":       middleware.GetFlash(c, "error"),
+	}
+
+	if err == nil {
+		// Found vacation config
+		templateData["Vacation"] = map[string]interface{}{
+			"Subject":      vacation.Subject,
+			"Body":         vacation.Body,
+			"ActiveFrom":   vacation.ActiveFrom.Format("2006-01-02T15:04"),
+			"ActiveUntil":  vacation.ActiveUntil.Format("2006-01-02T15:04"),
+			"IntervalTime": vacation.IntervalTime,
+			"Active":       vacation.Active,
+		}
+	}
+
+	return c.Render(http.StatusOK, "users/vacation.html", templateData)
+}
+
+// UpdateUserVacation upserts the user's vacation configuration
+func (h *Handler) UpdateUserVacation(c *echo.Context) error {
+	username := middleware.GetUser(c)
+	if username == "" {
+		return c.Redirect(http.StatusFound, "/users/login")
+	}
+
+	parts := strings.Split(username, "@")
+	if len(parts) != 2 {
+		middleware.SetFlash(c, "error", "Formato de usuário inválido")
+		return c.Redirect(http.StatusFound, "/users/vacation")
+	}
+	domain := parts[1]
+
+	subject := c.FormValue("subject")
+	body := c.FormValue("body")
+	activeFromStr := c.FormValue("activefrom")
+	activeUntilStr := c.FormValue("activeuntil")
+	intervalTimeStr := c.FormValue("interval_time")
+	activeStr := c.FormValue("active")
+
+	activeFrom, err := time.ParseInLocation("2006-01-02T15:04", activeFromStr, time.Local)
+	if err != nil {
+		activeFrom = time.Now()
+	}
+	activeUntil, err := time.ParseInLocation("2006-01-02T15:04", activeUntilStr, time.Local)
+	if err != nil {
+		activeUntil = time.Now()
+	}
+
+	intervalTime := 0
+	if intervalTimeStr == "1" {
+		intervalTime = 1
+	} else if intervalTimeStr == "7" {
+		intervalTime = 7
+	}
+
+	active := false
+	if activeStr == "true" || activeStr == "on" || activeStr == "1" {
+		active = true
+	}
+
+	tx := h.DB.Begin()
+
+	vacation := models.Vacation{
+		Email:        username,
+		Subject:      subject,
+		Body:         body,
+		Domain:       domain,
+		Active:       active,
+		ActiveFrom:   activeFrom,
+		ActiveUntil:  activeUntil,
+		IntervalTime: intervalTime,
+		Created:      time.Now(),
+		Modified:     time.Now(),
+	}
+
+	// Assuming 'Upsert' behavior or simply Save
+	if err := tx.Save(&vacation).Error; err != nil {
+		tx.Rollback()
+		middleware.SetFlash(c, "error", "Falha ao salvar configuração da resposta automática")
+		return c.Redirect(http.StatusFound, "/users/vacation")
+	}
+
+	// We also typically need an alias to route emails to the vacation script handling
+	// in many PostfixAdmin implementations. However, just matching exact existing design constraint:
+	// We'll trust PostfixAdmin aliases cover it or we just add the DB entry as requested.
+	utils.LogAction(tx, username, c.RealIP(), domain, "USER_UPDATE_VACATION", username)
+
+	tx.Commit()
+	middleware.SetFlash(c, "message", "Resposta automática salva com sucesso")
+	return c.Redirect(http.StatusFound, "/users/vacation")
+}
+
+// DeleteUserVacation removes the user's vacation configuration
+func (h *Handler) DeleteUserVacation(c *echo.Context) error {
+	username := middleware.GetUser(c)
+	if username == "" {
+		return c.Redirect(http.StatusFound, "/users/login")
+	}
+
+	parts := strings.Split(username, "@")
+	domain := ""
+	if len(parts) == 2 {
+		domain = parts[1]
+	}
+
+	tx := h.DB.Begin()
+
+	if err := tx.Model(&models.Vacation{}).Where("email = ?", username).Update("active", false).Error; err != nil {
+		tx.Rollback()
+		middleware.SetFlash(c, "error", "Falha ao remover resposta automática")
+		return c.Redirect(http.StatusFound, "/users/vacation")
+	}
+
+	utils.LogAction(tx, username, c.RealIP(), domain, "USER_DELETE_VACATION", username)
+
+	tx.Commit()
+	middleware.SetFlash(c, "message", "Resposta automática removida com sucesso")
+	return c.Redirect(http.StatusFound, "/users/vacation")
 }

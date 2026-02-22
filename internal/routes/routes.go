@@ -72,9 +72,26 @@ func RegisterRoutes(e *echo.Echo, h *handlers.Handler) {
 	userGroup.GET("/dashboard", h.UserDashboard)
 	userGroup.POST("/password", h.UpdateUserPassword)
 	userGroup.POST("/forwarding", h.UpdateUserForwarding)
+	userGroup.GET("/vacation", h.UserVacation)
+	userGroup.POST("/vacation", h.UpdateUserVacation)
+	userGroup.POST("/vacation/delete", h.DeleteUserVacation)
 
 	// Root Redirect
 	e.GET("/", func(c *echo.Context) error {
 		return c.Redirect(http.StatusMovedPermanently, "/dashboard")
+	})
+
+	// Catch-all route for unknown pages (404)
+	e.Any("/*", func(c *echo.Context) error {
+		// If User is logged in
+		if middleware.GetUser(c) != "" {
+			return c.Redirect(http.StatusFound, "/users/dashboard")
+		}
+		// If Admin is logged in
+		if middleware.GetUsername(c) != "" {
+			return c.Redirect(http.StatusFound, "/dashboard")
+		}
+		// Otherwise standard 404
+		return echo.ErrNotFound
 	})
 }

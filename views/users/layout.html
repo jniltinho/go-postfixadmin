@@ -28,18 +28,20 @@
     <!-- Header -->
     <header class="h-14 bg-white border-b-2 border-brand-text flex items-center justify-between px-8 z-10">
         <div class="flex items-center">
-            <div
-                class="w-10 h-10 bg-brand-secondary border-2 border-brand-text neo-shadow-subtle flex items-center justify-center mr-3">
+            <a href="/users/dashboard"
+                class="w-10 h-10 bg-brand-secondary border-2 border-brand-text neo-shadow-subtle flex items-center justify-center mr-3 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#1E293B] transition-all cursor-pointer">
                 <i data-lucide="user" class="text-white w-5 h-5"></i>
-            </div>
-            <h1 class="text-xl font-mono font-bold tracking-tight">Portal do Usuário</h1>
+            </a>
+            <a href="/users/dashboard"
+                class="text-xl font-mono font-bold tracking-tight hover:text-brand-primary transition-colors">Portal do
+                Usuário</a>
         </div>
 
         <div class="flex items-center space-x-4">
-            {{if .User}}
+            {{if .SessionUser}}
             <div class="flex items-center space-x-3">
                 <div class="text-right">
-                    <p class="text-xs font-black uppercase text-brand-text tracking-tight">{{.User.Username}}</p>
+                    <p class="text-xs font-black uppercase text-brand-text tracking-tight">{{.SessionUser}}</p>
                     <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">USUÁRIO</p>
                 </div>
                 <div
@@ -66,7 +68,7 @@
     <footer class="bg-white border-t-2 border-brand-text">
         <div class="py-4 px-8 text-center">
             <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                &copy; 2026 Go-Postfixadmin. v1.0.0
+                &copy; 2026 Go-Postfixadmin. {{version}}
             </p>
         </div>
     </footer>

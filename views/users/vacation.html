@@ -1,0 +1,197 @@
+{{define "title"}}Resposta Automática - Go-PostfixAdmin{{end}}
+
+{{define "content"}}
+<div class="max-w-6xl mx-auto">
+    <div class="mb-10">
+        <h2 class="text-4xl font-mono font-black uppercase tracking-tight mb-2 flex items-center">
+            <i data-lucide="plane-takeoff" class="w-8 h-8 mr-3"></i>
+            Resposta Automática
+        </h2>
+        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Configure sua mensagem de ausência
+            temporária.</p>
+    </div>
+
+    {{if .Error}}
+    <div
+        class="mb-4 bg-red-50 border-2 border-red-600 px-4 py-3 flex items-center flash-message transition-opacity duration-500">
+        <i data-lucide="alert-circle" class="w-5 h-5 text-red-600 mr-3 shrink-0"></i>
+        <span class="text-sm font-bold text-red-700">{{.Error}}</span>
+    </div>
+    {{end}}
+
+    {{if .Message}}
+    <div
+        class="mb-4 bg-green-50 border-2 border-green-600 px-4 py-3 flex items-center flash-message transition-opacity duration-500">
+        <i data-lucide="check-circle" class="w-5 h-5 text-green-600 mr-3 shrink-0"></i>
+        <span class="text-sm font-bold text-green-700">{{.Message}}</span>
+    </div>
+    {{end}}
+
+    <div class="bg-white border-4 border-brand-text neo-shadow-sm p-8">
+        <h3 class="text-xl font-mono font-black uppercase tracking-tight mb-6 flex items-center">
+            <i data-lucide="message-square-dashed" class="w-5 h-5 mr-2"></i>
+            Configuração de Resposta Automática
+        </h3>
+
+        <form action="/users/vacation" method="POST" class="space-y-6">
+
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Data de Início -->
+                <div>
+                    <label for="activefrom"
+                        class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
+                        Início em
+                    </label>
+                    <div class="relative group">
+                        <div
+                            class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-brand-primary transition-colors">
+                            <i data-lucide="calendar" class="w-5 h-5"></i>
+                        </div>
+                        <input type="datetime-local" id="activefrom" name="activefrom"
+                            value="{{if .Vacation}}{{ .Vacation.ActiveFrom }}{{end}}" required
+                            class="w-full pl-11 pr-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors date-input">
+                    </div>
+                </div>
+
+                <!-- Data de Término -->
+                <div>
+                    <label for="activeuntil"
+                        class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
+                        Término em
+                    </label>
+                    <div class="relative group">
+                        <div
+                            class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-brand-primary transition-colors">
+                            <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                        </div>
+                        <input type="datetime-local" id="activeuntil" name="activeuntil"
+                            value="{{if .Vacation}}{{ .Vacation.ActiveUntil }}{{end}}" required
+                            class="w-full pl-11 pr-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors date-input">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Intervalo de Resposta -->
+            <div>
+                <label for="interval_time"
+                    class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
+                    Opção de resposta
+                </label>
+                <div class="relative group">
+                    <select id="interval_time" name="interval_time"
+                        class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors appearance-none bg-white">
+                        <option value="0" {{if and .Vacation (eq .Vacation.IntervalTime 0)}}selected{{end}}>Reply once
+                        </option>
+                        <option value="1" {{if and .Vacation (eq .Vacation.IntervalTime 1)}}selected{{end}}>Reply every
+                            day</option>
+                        <option value="7" {{if and .Vacation (eq .Vacation.IntervalTime 7)}}selected{{end}}>Reply every
+                            7 days</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-brand-text">
+                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assunto -->
+            <div>
+                <label for="subject" class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
+                    Assunto
+                </label>
+                <div class="relative group">
+                    <input type="text" id="subject" name="subject"
+                        value="{{if .Vacation}}{{.Vacation.Subject}}{{else}}Ausente{{end}}" required
+                        class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors">
+                </div>
+            </div>
+
+            <!-- Corpo da Mensagem -->
+            <div>
+                <label for="body" class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
+                    Corpo da Mensagem
+                </label>
+                <div class="relative group">
+                    <textarea id="body" name="body" rows="6" required
+                        class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors resize-y"
+                        placeholder="Estarei ausente de <data> até <data>. Em caso de urgência, favor contatar <pessoa de contato>.">{{if .Vacation}}{{.Vacation.Body}}{{else}}Estarei ausente de <data> até <data>.
+Em caso de urgência, favor contatar <pessoa de contato>.{{end}}</textarea>
+                </div>
+            </div>
+
+            <!-- Status Ativo -->
+            <div class="flex items-center space-x-3 border-2 border-brand-text p-4">
+                <input type="checkbox" id="active" name="active" value="true"
+                    class="w-6 h-6 border-2 border-brand-text text-brand-primary focus:ring-brand-primary focus:ring-2 cursor-pointer"
+                    {{if or (not .Vacation) .Vacation.Active}}checked{{end}}>
+                <label for="active"
+                    class="text-sm font-black uppercase tracking-widest text-brand-text cursor-pointer flex-1">
+                    Ativar Resposta Automática
+                </label>
+            </div>
+
+            <div
+                class="bg-gray-50 -mx-8 -mb-8 mt-8 p-6 px-8 border-t-4 border-brand-text flex flex-col sm:flex-row items-center justify-end space-y-4 sm:space-y-0 sm:space-x-4">
+                <a href="/users/dashboard"
+                    class="w-full sm:w-auto px-6 py-3 font-black uppercase tracking-widest text-brand-text bg-white border-2 border-brand-text hover:bg-gray-50 flex justify-center neo-shadow-sm transition-all text-sm">
+                    Cancelar
+                </a>
+
+                <button type="submit"
+                    class="w-full sm:w-auto bg-brand-secondary hover:bg-white hover:text-brand-secondary text-white border-2 border-brand-text font-black px-6 py-3 shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center justify-center text-sm">
+                    <i data-lucide="save" class="w-4 h-4 mr-2"></i>
+                    Editar / Definir Mensagem
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Auto-dismiss flash messages
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.flash-message').forEach(function (el) {
+            setTimeout(function () {
+                el.style.opacity = '0';
+                setTimeout(function () {
+                    el.remove();
+                }, 500);
+            }, 5000);
+        });
+
+        // Auto-fill dates with current date/time if empty
+        const now = new Date();
+        // Format to YYYY-MM-DDThh:mm (which datetime-local expects)
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        const formattedDate = now.toISOString().slice(0, 16);
+
+        const activeCheckbox = document.getElementById('active');
+        const isActive = activeCheckbox ? activeCheckbox.checked : true;
+
+        const activeFromInput = document.getElementById('activefrom');
+        if (!activeFromInput.value || !isActive) {
+            activeFromInput.value = formattedDate;
+        }
+
+        const activeUntilInput = document.getElementById('activeuntil');
+        if (!activeUntilInput.value || !isActive) {
+            // Set default end date to tomorrow or a week later if desired. 
+            // Setting to same day for now per request "date and time of today".
+            activeUntilInput.value = formattedDate;
+        }
+
+        // Add event listener to update dates if user unchecks/checks the active box
+        if (activeCheckbox) {
+            activeCheckbox.addEventListener('change', function () {
+                if (!this.checked) {
+                    const currentNow = new Date();
+                    currentNow.setMinutes(currentNow.getMinutes() - currentNow.getTimezoneOffset());
+                    const currentFormattedDate = currentNow.toISOString().slice(0, 16);
+                    activeFromInput.value = currentFormattedDate;
+                    activeUntilInput.value = currentFormattedDate;
+                }
+            });
+        }
+    });
+</script>
+{{end}}

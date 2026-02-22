@@ -42,8 +42,9 @@ func (t *Template) Render(c *echo.Context, w io.Writer, name string, data any) e
 // templateFuncMap returns the custom template functions used across all templates.
 func templateFuncMap() template.FuncMap {
 	return template.FuncMap{
-		"mul": func(a, b float64) float64 { return a * b },
-		"div": func(a, b float64) float64 { return a / b },
+		"version": func() string { return AppVersion },
+		"mul":     func(a, b float64) float64 { return a * b },
+		"div":     func(a, b float64) float64 { return a / b },
 		"float64": func(i any) float64 {
 			switch v := i.(type) {
 			case int:
@@ -90,7 +91,7 @@ func loadTemplates(embeddedFiles embed.FS) (*Template, error) {
 	funcMap := templateFuncMap()
 
 	layout := "views/layout.html"
-	userLayout := "views/user_layout.html"
+	userLayout := "views/users/layout.html"
 
 	err := fs.WalkDir(embeddedFiles, "views", func(filePath string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -101,7 +102,7 @@ func loadTemplates(embeddedFiles embed.FS) (*Template, error) {
 		}
 
 		name := d.Name()
-		if name == "layout.html" || name == "user_layout.html" {
+		if filePath == "views/layout.html" || filePath == "views/users/layout.html" {
 			return nil
 		}
 

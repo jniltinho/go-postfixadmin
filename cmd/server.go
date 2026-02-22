@@ -56,6 +56,7 @@ var serverCmd = &cobra.Command{
 		}
 
 		slog.Info("Starting Go-Postfixadmin...")
+		server.AppVersion = Version
 		server.StartServer(EmbeddedFiles, port, db, ssl, certFile, keyFile)
 	},
 }
