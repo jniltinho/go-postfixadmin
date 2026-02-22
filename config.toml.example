@@ -25,3 +25,31 @@ enabled           = false
 domain_quota      = true
 # Bytes per MB: 1024000 or 1048576
 multiplier        = 1024000
+
+[vacation]
+enabled        = "YES"
+# Autoreply domain — must match Postfix transport_maps entry.
+# This domain does NOT need real DNS; it must not be used for normal mail.
+domain         = "autoreply.change-this-to-your.domain.tld"
+# Allow users to control their own vacation settings
+control        = "YES"
+# Allow domain admins to edit user vacation settings
+control_admin  = "YES"
+
+# Reply frequency options: seconds => PALANG key
+# 0 = reply only once; 1 = reply to every mail
+[vacation.choice_of_reply]
+0        = "reply_once"
+604800   = "reply_once_per_week"   # 60*60*24*7
+
+[alias]
+edit_alias          = "YES"
+alias_control       = "YES"
+alias_control_admin = "YES"
+special_alias_control = "NO"
+alias_domain        = "YES"
+
+[transport]
+enabled  = "NO"
+options  = ["virtual", "local", "relay"]
+default  = "virtual"
