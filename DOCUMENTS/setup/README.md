@@ -101,7 +101,7 @@ O Go-PostfixAdmin será responsável por gerenciar a estrutura do banco (tabelas
 
    [quota]
    # Bytes per MB: 1024000 or 1048576
-   multiplier        = 1024000
+   multiplier = 1024000
    ```
 
 3. **Executar as Migrations:**
