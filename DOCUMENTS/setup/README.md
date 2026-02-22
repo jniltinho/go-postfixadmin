@@ -1,12 +1,12 @@
-# Guia de Instalação: Servidor de E-mail (Ubuntu) + Go-PostfixAdmin
+# Installation Guide: Email Server (Ubuntu) + Go-PostfixAdmin
 
-Este guia passo a passo ensina como preparar um servidor de e-mail completo no Ubuntu utilizando **Postfix**, **Dovecot**, **MySQL** e gerenciar tudo através do **Go-PostfixAdmin**.
+This step-by-step guide teaches you how to prepare a complete email server on Ubuntu using **Postfix**, **Dovecot**, **MySQL**, and how to manage everything via **Go-PostfixAdmin**.
 
 ---
 
-## 1. Atualizar o Sistema e Instalar Dependências
+## 1. Update the System and Install Dependencies
 
-No Ubuntu, atualize os pacotes e instale os serviços básicos necessários:
+On Ubuntu, update your packages and install the necessary basic services:
 
 ```bash
 sudo apt update && sudo apt upgrade -y
@@ -14,87 +14,87 @@ sudo apt install postfix postfix-mysql dovecot-core dovecot-imapd dovecot-pop3d 
 sudo apt install certbot git curl -y
 ```
 
-Durante a instalação do Postfix, o assistente perguntará o tipo de configuração. Selecione **"Internet Site"** e informe o seu domínio principal (ex: `example.com`).
+During Postfix installation, the wizard will ask for the configuration type. Select **"Internet Site"** and enter your main domain (e.g., `example.com`).
 
 ---
 
-## 2. Configurar o Banco de Dados MySQL
+## 2. Configure the MySQL Database
 
-Acesse o console do MySQL:
+Access the MySQL console:
 
 ```bash
 sudo mysql
 ```
 
-Execute os comandos abaixo para criar o banco de dados e o usuário que o Postfix, Dovecot e o Go-PostfixAdmin usarão:
+Run the commands below to create the database and the user that Postfix, Dovecot, and Go-PostfixAdmin will use:
 
 ```sql
 CREATE DATABASE postfix;
-CREATE USER 'postfix'@'localhost' IDENTIFIED BY 'sua_senha_segura';
+CREATE USER 'postfix'@'localhost' IDENTIFIED BY 'your_secure_password';
 GRANT ALL ON postfix.* TO 'postfix'@'localhost';
 FLUSH PRIVILEGES;
 EXIT;
 ```
 
-> **Nota:** Lembre-se de substituir `sua_senha_segura` por uma senha forte em todos os passos deste guia.
+> **Note:** Remember to replace `your_secure_password` with a strong password in all steps of this guide.
 
 ---
 
-## 3. Instalar e Configurar o Go-PostfixAdmin
+## 3. Install and Configure Go-PostfixAdmin
 
-O Go-PostfixAdmin será responsável por gerenciar a estrutura do banco (tabelas, domínios, contas, aliases, etc.).
+Go-PostfixAdmin will manage the database structure (tables, domains, accounts, aliases, etc.).
 
-1. **Obter o Aplicativo:**
+1. **Get the Application:**
 
-   Você pode clonar o repositório orginal ou baixar diretamente o último executável compilado das Releases.
+   You can clone the original repository or directly download the latest compiled executable from the Releases page.
    
-   *Baixar o binário e Repositório:*
+   *Download binary and Repository:*
    ```bash
    sudo mkdir -p /opt/go-postfixadmin
    cd /opt/go-postfixadmin
-   # Substitua a URL abaixo pela URL da última release do seu repositório:
+   # Replace the URL below with the latest release URL from your repository:
    sudo curl -L -O https://github.com/jniltinho/go-postfixadmin/releases/latest/download/postfixadmin_X.X.X_linux_amd64.tar.gz
    sudo git clone https://github.com/jniltinho/go-postfixadmin.git download
    sudo tar -xzvf postfixadmin_*.tar.gz
    ```
    
-2. **Gerar Certificados SSL Iniciais (Certbot):**
+2. **Generate Initial SSL Certificates (Certbot):**
    
-   Antes de configurar as rotas seguras do servidor, gere os certificados primários. Pare qualquer serviço que utilize a porta 80 e rode:
+   Before configuring secure server routes, generate the primary certificates. Stop any service using port 80 and run:
    ```bash
    sudo certbot certonly --standalone -d mail.example.com
    ```
 
-3. **Configurar o Ambiente (config.toml):**
-   Você pode gerar um arquivo de configuração padrão rodando o comando nativo da CLI ou copiar o arquivo de exemplo.
+3. **Configure the Environment (config.toml):**
+   You can generate a default config file using the native CLI command or copy the example file.
    
-   *Gerando via CLI:*
+   *Generating via CLI:*
    ```bash
    cd /opt/go-postfixadmin
    ./postfixadmin --generate-config
    ```
 
-   *Ou copiando o exemplo:*
+   *Or copying the example:*
    ```bash
    cp download/config.toml.example /opt/go-postfixadmin/config.toml
    ```
 
-   Após isso, edite o arquivo gerado (`config*.toml`) ou copiado e adicione as configurações de banco e sessão necessárias para o correto funcionamento:
+   After that, edit the generated (`config*.toml`) or copied file and add the necessary database and session settings to make it work properly:
    
    ```toml
    [database]
-   # Configurações do Banco de Dados
-   url = "postfix:sua_senha_segura@tcp(localhost:3306)/postfix?charset=utf8mb4&parseTime=True&loc=Local"
+   # Database Configuration
+   url = "postfix:your_secure_password@tcp(localhost:3306)/postfix?charset=utf8mb4&parseTime=True&loc=Local"
    
    [server]
-   # Configurações do Servidor Web para SSL use port 443
+   # Web Server Configuration. For SSL use port 443
    port = 8080
    
-   # Chave Secreta de Sessão (Gere uma string 64-char via: openssl rand -hex 32)
+   # Secret Session Key (Generate a 64-char string via: openssl rand -hex 32)
    session_secret = "your_super_secret_session_key_here"
    
    [ssl]
-   # (Opcional) Configurações de SSL para servidor standalone seguro
+   # (Optional) SSL Settings for standalone secure server
    enabled = true
    cert = "/etc/letsencrypt/live/mail.example.com/fullchain.pem"
    key = "/etc/letsencrypt/live/mail.example.com/privkey.pem"
@@ -104,40 +104,40 @@ O Go-PostfixAdmin será responsável por gerenciar a estrutura do banco (tabelas
    multiplier = 1024000
    ```
 
-3. **Executar as Migrations:**
-   Antes de iniciar o serviço, crie as tabelas necessárias rodando as migrations:
+3. **Run Migrations:**
+   Before starting the service, create the necessary tables by running migrations:
    ```bash
    cd /opt/go-postfixadmin
    ./postfixadmin migrate
    ```
 
-4. **Configurar o Serviço do Systemd:**
-   Copie o arquivo de serviço (fornecido em `DOCUMENTS/setup/postfixadmin.service`) para o systemd:
+4. **Configure the Systemd Service:**
+   Copy the service file (provided in `DOCUMENTS/setup/postfixadmin.service`) to systemd:
    ```bash
    sudo cp download/DOCUMENTS/setup/postfixadmin.service /etc/systemd/system/
    sudo systemctl daemon-reload
    sudo systemctl enable --now postfixadmin.service
    ```
-   *Verifique os logs com: `tail -f /opt/go-postfixadmin/postfixadmin.log`*
+   *Check the logs with: `tail -f /opt/go-postfixadmin/postfixadmin.log`*
 
 ---
 
-## 4. Configurar o Postfix (`/etc/postfix/main.cf`)
+## 4. Configure Postfix (`/etc/postfix/main.cf`)
 
-Faça um backup do arquivo original:
+Back up the original file:
 ```bash
 sudo cp /etc/postfix/main.cf /etc/postfix/main.cf.bkp
 ```
 
-Edite o `/etc/postfix/main.cf` e altere/adicione as seguintes entradas:
+Edit `/etc/postfix/main.cf` and change/add the following entries:
 
 ```ini
-# Domínio e hostname (Ajuste para a sua realidade)
+# Domain and hostname (Adjust to your reality)
 myhostname = mail.example.com
 mydomain   = example.com
 myorigin   = $mydomain
 
-# Virtual mailboxes (Integração com MySQL via Go-PostfixAdmin)
+# Virtual mailboxes (MySQL Integration via Go-PostfixAdmin)
 virtual_mailbox_base    = /var/vmail
 virtual_mailbox_domains = proxy:mysql:/etc/postfix/sql/mysql_virtual_domains_maps.cf
 virtual_mailbox_maps    = proxy:mysql:/etc/postfix/sql/mysql_virtual_mailbox_maps.cf,
@@ -146,20 +146,20 @@ virtual_alias_maps      = proxy:mysql:/etc/postfix/sql/mysql_virtual_alias_maps.
                           proxy:mysql:/etc/postfix/sql/mysql_virtual_alias_domain_maps.cf,
                           proxy:mysql:/etc/postfix/sql/mysql_virtual_alias_domain_catchall_maps.cf
 
-# UID/GID do usuário vmail (criaremos a seguir)
+# UID/GID of the vmail user (we will create this later)
 virtual_uid_maps = static:1001
 virtual_gid_maps = static:1001
 
-# Entrega via Dovecot LMTP
+# Delivery via Dovecot LMTP
 virtual_transport = lmtp:unix:private/dovecot-lmtp
 
-# SASL via Dovecot (Autenticação)
+# SASL via Dovecot (Authentication)
 smtpd_sasl_type           = dovecot
 smtpd_sasl_path           = private/auth
 smtpd_sasl_auth_enable    = yes
 smtpd_recipient_restrictions = permit_sasl_authenticated, permit_mynetworks, reject_unauth_destination
 
-# TLS (Recomendado via Let's Encrypt - configure os caminhos corretos)
+# TLS (Recommended via Let's Encrypt - configure the correct paths)
 # smtpd_tls_cert_file = /etc/letsencrypt/live/mail.example.com/fullchain.pem
 # smtpd_tls_key_file  = /etc/letsencrypt/live/mail.example.com/privkey.pem
 # smtpd_use_tls       = yes
@@ -168,21 +168,21 @@ smtpd_recipient_restrictions = permit_sasl_authenticated, permit_mynetworks, rej
 
 ---
 
-## 5. Mapeamentos SQL para o Postfix
+## 5. SQL Maps for Postfix
 
-Crie os arquivos de consulta SQL no diretório abaixo e garanta as permissões adequadas:
+Create the SQL query files in the directory below and ensure proper permissions:
 
 ```bash
 sudo mkdir -p /etc/postfix/sql
 sudo chown root:postfix /etc/postfix/sql
 ```
 
-> **Atenção:** Em todos os arquivos abaixo, substitua `sua_senha_segura` para a senha configurada no MySQL.
+> **Warning:** In all the files below, replace `your_secure_password` with the password configured in MySQL.
 
 ### `/etc/postfix/sql/mysql_virtual_domains_maps.cf`
 ```ini
 user     = postfix
-password = sua_senha_segura
+password = your_secure_password
 hosts    = localhost
 dbname   = postfix
 query    = SELECT domain FROM domain WHERE domain='%s' AND active='1'
@@ -191,7 +191,7 @@ query    = SELECT domain FROM domain WHERE domain='%s' AND active='1'
 ### `/etc/postfix/sql/mysql_virtual_mailbox_maps.cf`
 ```ini
 user     = postfix
-password = sua_senha_segura
+password = your_secure_password
 hosts    = localhost
 dbname   = postfix
 query    = SELECT maildir FROM mailbox WHERE username='%s' AND active='1'
@@ -200,7 +200,7 @@ query    = SELECT maildir FROM mailbox WHERE username='%s' AND active='1'
 ### `/etc/postfix/sql/mysql_virtual_alias_maps.cf`
 ```ini
 user     = postfix
-password = sua_senha_segura
+password = your_secure_password
 hosts    = localhost
 dbname   = postfix
 query    = SELECT goto FROM alias WHERE address='%s' AND active='1'
@@ -209,7 +209,7 @@ query    = SELECT goto FROM alias WHERE address='%s' AND active='1'
 ### `/etc/postfix/sql/mysql_virtual_alias_domain_maps.cf`
 ```ini
 user     = postfix
-password = sua_senha_segura
+password = your_secure_password
 hosts    = localhost
 dbname   = postfix
 query    = SELECT goto FROM alias,alias_domain WHERE alias_domain.alias_domain='%d' AND alias.address=CONCAT('%u','@',alias_domain.target_domain) AND alias.active='1' AND alias_domain.active='1'
@@ -218,7 +218,7 @@ query    = SELECT goto FROM alias,alias_domain WHERE alias_domain.alias_domain='
 ### `/etc/postfix/sql/mysql_virtual_alias_domain_catchall_maps.cf`
 ```ini
 user     = postfix
-password = sua_senha_segura
+password = your_secure_password
 hosts    = localhost
 dbname   = postfix
 query    = SELECT goto FROM alias,alias_domain WHERE alias_domain.alias_domain='%d' AND alias.address=CONCAT('@',alias_domain.target_domain) AND alias.active='1' AND alias_domain.active='1'
@@ -227,13 +227,13 @@ query    = SELECT goto FROM alias,alias_domain WHERE alias_domain.alias_domain='
 ### `/etc/postfix/sql/mysql_virtual_alias_domain_mailbox_maps.cf`
 ```ini
 user     = postfix
-password = sua_senha_segura
+password = your_secure_password
 hosts    = localhost
 dbname   = postfix
 query    = SELECT maildir FROM mailbox,alias_domain WHERE alias_domain.alias_domain='%d' AND mailbox.username=CONCAT('%u','@',alias_domain.target_domain) AND mailbox.active='1' AND alias_domain.active='1'
 ```
 
-Proteja os arquivos:
+Protect the files:
 ```bash
 sudo chmod 640 /etc/postfix/sql/*.cf
 sudo chown root:postfix /etc/postfix/sql/*.cf
@@ -241,35 +241,35 @@ sudo chown root:postfix /etc/postfix/sql/*.cf
 
 ---
 
-## 6. Configurar o Dovecot
+## 6. Configure Dovecot
 
-### `/etc/dovecot/conf.d/10-ssl.conf` (Recomendado)
+### `/etc/dovecot/conf.d/10-ssl.conf` (Recommended)
 
-Configure o Dovecot para utilizar os mesmos certificados TLS/SSL do Postfix:
+Configure Dovecot to use the same TLS/SSL certificates as Postfix:
 ```ini
 ssl = required
-# O sinal '<' antes do caminho diz ao Dovecot para ler o conteúdo do arquivo
+# The '<' sign before the path tells Dovecot to read the file's contents
 ssl_cert = </etc/letsencrypt/live/mail.example.com/fullchain.pem
 ssl_key = </etc/letsencrypt/live/mail.example.com/privkey.pem
 ```
 
 ### `/etc/dovecot/dovecot.conf`
 
-Edite ou acrescente ao arquivo principal:
+Edit or append to the main file:
 ```ini
 protocols = imap lmtp pop3
 
-# Caminho para os e-mails
+# Path to emails
 mail_location = maildir:/var/vmail/%d/%n/Maildir
 
-# Usuário de sistema para entrega (vmail mapeado com UID/GID 1001)
+# System user for delivery (vmail mapped with UID/GID 1001)
 mail_uid = 1001
 mail_gid = 1001
 ```
 
 ### `/etc/dovecot/conf.d/10-auth.conf`
 
-Configure os mecanismos de autenticação e inclua a integração com MySQL:
+Configure authentication mechanisms and include MySQL integration:
 ```ini
 auth_mechanisms = plain login
 !include auth-sql.conf.ext
@@ -277,7 +277,7 @@ auth_mechanisms = plain login
 
 ### `/etc/dovecot/conf.d/auth-sql.conf.ext`
 
-Habilite a consulta SQL para usuários e senhas:
+Enable SQL query for users and passwords:
 ```ini
 passdb {
   driver = sql
@@ -291,33 +291,33 @@ userdb {
 
 ### `/etc/dovecot/dovecot-sql.conf.ext`
 
-Configuração de conexão e queries para o Dovecot:
+Connection and query settings for Dovecot:
 ```ini
 driver  = mysql
-connect = host=localhost dbname=postfix user=postfix password=sua_senha_segura
+connect = host=localhost dbname=postfix user=postfix password=your_secure_password
 
-# O default_pass_scheme deve corresponder ao formato de hash do Go-PostfixAdmin
+# The default_pass_scheme must match the hash format of Go-PostfixAdmin
 default_pass_scheme = BLF-CRYPT
 
-# Consulta de validação de senha
+# Password validation query
 password_query = \
   SELECT username AS user, password \
   FROM mailbox WHERE username='%u' AND active='1'
 
-# Consulta de diretório home e cotas
+# Home directory and quotas query
 user_query = \
   SELECT CONCAT('/var/vmail/', maildir) AS home, \
          1001 AS uid, 1001 AS gid, \
          CONCAT('*:bytes=', quota) AS quota_rule \
   FROM mailbox WHERE username='%u' AND active='1'
 
-# Atualização de quota usada em tempo real
+# Real-time used quota update
 iterate_query = SELECT username AS user FROM mailbox WHERE active='1'
 ```
 
 ### `/etc/dovecot/conf.d/10-master.conf`
 
-Configure os sockets de comunicação com o Postfix:
+Configure communication sockets with Postfix:
 ```ini
 service lmtp {
   unix_listener /var/spool/postfix/private/dovecot-lmtp {
@@ -338,9 +338,9 @@ service auth {
 
 ---
 
-## 7. Criar o Usuário e Diretório de E-mails
+## 7. Create the User and Email Directory
 
-Crie o usuário de sistema `vmail` (Virtual Mail) que será dono de todos os arquivos de caixas de correio:
+Create the `vmail` (Virtual Mail) system user, which will own all mailbox files:
 
 ```bash
 sudo groupadd -g 1001 vmail
@@ -350,22 +350,22 @@ sudo chown -R vmail:vmail /var/vmail
 
 ---
 
-## 8. Reiniciar e Validar Serviços
+## 8. Restart and Validate Services
 
-Após realizar todas as configurações, reinicie os serviços para aplicar as mudanças:
+After making all configurations, restart the services to apply changes:
 
 ```bash
 sudo systemctl restart postfix dovecot
 sudo systemctl enable postfix dovecot
 ```
 
-Valide se o suporte ao MySQL foi reconhecido pelo Postfix:
+Validate if MySQL support was recognized by Postfix:
 ```bash
 postconf -m | grep mysql
-# A saída deve listar "mysql"
+# The output should list "mysql"
 ```
 
-Valide a entrega de e-mails observando os logs do sistema:
+Validate email delivery by strictly observing system logs:
 ```bash
 sudo tail -f /var/log/mail.log
 ```
