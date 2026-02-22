@@ -1,14 +1,14 @@
-{{define "title"}}Resposta Automática - Go-PostfixAdmin{{end}}
+{{define "title"}}Auto-Reply - Go-PostfixAdmin{{end}}
 
 {{define "content"}}
 <div class="max-w-6xl mx-auto">
     <div class="mb-10">
         <h2 class="text-4xl font-mono font-black uppercase tracking-tight mb-2 flex items-center">
             <i data-lucide="plane-takeoff" class="w-8 h-8 mr-3"></i>
-            Resposta Automática
+            Auto-Reply
         </h2>
-        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Configure sua mensagem de ausência
-            temporária.</p>
+        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Configure your temporary out-of-office
+            message.</p>
     </div>
 
     {{if .Error}}
@@ -30,18 +30,18 @@
     <div class="bg-white border-4 border-brand-text neo-shadow-sm p-8">
         <h3 class="text-xl font-mono font-black uppercase tracking-tight mb-6 flex items-center">
             <i data-lucide="message-square-dashed" class="w-5 h-5 mr-2"></i>
-            Configuração de Resposta Automática
+            Auto-Reply Configuration
         </h3>
 
         <form action="/users/vacation" method="POST" class="space-y-6">
 
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Data de Início -->
+                <!-- Start Date -->
                 <div>
                     <label for="activefrom"
                         class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
-                        Início em
+                        Start Date
                     </label>
                     <div class="relative group">
                         <div
@@ -54,11 +54,11 @@
                     </div>
                 </div>
 
-                <!-- Data de Término -->
+                <!-- End Date -->
                 <div>
                     <label for="activeuntil"
                         class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
-                        Término em
+                        End Date
                     </label>
                     <div class="relative group">
                         <div
@@ -72,11 +72,11 @@
                 </div>
             </div>
 
-            <!-- Intervalo de Resposta -->
+            <!-- Reply Interval -->
             <div>
                 <label for="interval_time"
                     class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
-                    Opção de resposta
+                    Reply Option
                 </label>
                 <div class="relative group">
                     <select id="interval_time" name="interval_time"
@@ -94,39 +94,39 @@
                 </div>
             </div>
 
-            <!-- Assunto -->
+            <!-- Subject -->
             <div>
                 <label for="subject" class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
-                    Assunto
+                    Subject
                 </label>
                 <div class="relative group">
                     <input type="text" id="subject" name="subject"
-                        value="{{if .Vacation}}{{.Vacation.Subject}}{{else}}Ausente{{end}}" required
+                        value="{{if .Vacation}}{{.Vacation.Subject}}{{else}}Out of Office{{end}}" required
                         class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors">
                 </div>
             </div>
 
-            <!-- Corpo da Mensagem -->
+            <!-- Message Body -->
             <div>
                 <label for="body" class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
-                    Corpo da Mensagem
+                    Message Body
                 </label>
                 <div class="relative group">
                     <textarea id="body" name="body" rows="6" required
                         class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors resize-y"
-                        placeholder="Estarei ausente de <data> até <data>. Em caso de urgência, favor contatar <pessoa de contato>.">{{if .Vacation}}{{.Vacation.Body}}{{else}}Estarei ausente de <data> até <data>.
-Em caso de urgência, favor contatar <pessoa de contato>.{{end}}</textarea>
+                        placeholder="I will be out of the office from <date> to <date>. In case of urgency, please contact <contact person>.">{{if .Vacation}}{{.Vacation.Body}}{{else}}I will be out of the office from <date> to <date>.
+In case of urgency, please contact <contact person>.{{end}}</textarea>
                 </div>
             </div>
 
-            <!-- Status Ativo -->
+            <!-- Active Status -->
             <div class="flex items-center space-x-3 border-2 border-brand-text p-4">
                 <input type="checkbox" id="active" name="active" value="true"
                     class="w-6 h-6 border-2 border-brand-text text-brand-primary focus:ring-brand-primary focus:ring-2 cursor-pointer"
                     {{if or (not .Vacation) .Vacation.Active}}checked{{end}}>
                 <label for="active"
                     class="text-sm font-black uppercase tracking-widest text-brand-text cursor-pointer flex-1">
-                    Ativar Resposta Automática
+                    Ativar Auto-Reply
                 </label>
             </div>
 
@@ -135,22 +135,22 @@ Em caso de urgência, favor contatar <pessoa de contato>.{{end}}</textarea>
 
                 <a href="/users/dashboard"
                     class="w-full sm:w-auto px-6 py-3 font-black uppercase tracking-widest text-brand-text bg-white border-2 border-brand-text hover:bg-gray-50 flex justify-center neo-shadow-sm transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[3px_3px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none text-sm">
-                    Cancelar
+                    Cancel
                 </a>
 
                 {{if and .Vacation .Vacation.Active}}
                 <button type="button"
-                    onclick="if(confirm('Tem certeza que deseja remover a resposta automática?')) document.getElementById('delete-vacation-form').submit();"
+                    onclick="if(confirm('Are you sure you want to remove the auto-reply?')) document.getElementById('delete-vacation-form').submit();"
                     class="w-full sm:w-auto px-6 py-3 font-black uppercase tracking-widest bg-red-600 hover:bg-white hover:text-red-600 text-white border-2 border-brand-text shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none flex items-center justify-center text-sm cursor-pointer">
                     <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i>
-                    Remover Mensagem
+                    Remove Message
                 </button>
                 {{end}}
 
                 <button type="submit"
                     class="w-full sm:w-auto bg-brand-secondary hover:bg-white hover:text-brand-secondary text-white border-2 border-brand-text font-black px-6 py-3 shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center justify-center text-sm">
                     <i data-lucide="save" class="w-4 h-4 mr-2"></i>
-                    Editar / Definir Mensagem
+                    Edit / Set Message
                 </button>
             </div>
         </form>

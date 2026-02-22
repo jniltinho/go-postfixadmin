@@ -1,11 +1,11 @@
 {{define "title"}}Edit Alias Domain - Go-PostfixAdmin{{end}}
-{{define "breadcrumb"}}Editar Alias Domain{{end}}
+{{define "breadcrumb"}}Edit Alias Domain{{end}}
 
 {{define "content"}}
 <div class="max-w-6xl mx-auto">
     <div class="mb-8">
-        <h2 class="text-4xl font-mono font-black uppercase tracking-tight mb-2">Editar Alias Domain</h2>
-        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Edite as configurações do Alias Domain.</p>
+        <h2 class="text-4xl font-mono font-black uppercase tracking-tight mb-2">Edit Alias Domain</h2>
+        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Edit the Alias Domain settings.</p>
     </div>
 
     {{if .Error}}
@@ -24,7 +24,7 @@
         <div class="bg-white border-4 border-brand-text neo-shadow-sm p-8">
             <h3 class="text-xl font-mono font-black uppercase tracking-tight mb-6 flex items-center">
                 <i data-lucide="info" class="w-5 h-5 mr-2"></i>
-                Informações do Alias Domain
+                Alias Domain Information
             </h3>
 
             <div class="space-y-6">
@@ -38,7 +38,7 @@
                         <input type="text" id="alias_domain" value="{{.AliasDomain.AliasDomain}}" disabled
                             class="w-full px-4 py-3 border-2 border-gray-300 bg-gray-100 font-medium text-gray-500 cursor-not-allowed">
                         <p class="text-xs text-gray-400 mt-2">
-                            O domínio de origem não pode ser alterado.
+                            The source domain cannot be changed.
                         </p>
                     </div>
 
@@ -46,19 +46,19 @@
                     <div>
                         <label for="target_domain"
                             class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
-                            Target Domain (Destino) <span class="text-red-500">*</span>
+                            Target Domain (Destination) <span class="text-red-500">*</span>
                         </label>
                         <select id="target_domain" name="target_domain" required
                             class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors bg-white appearance-none cursor-pointer">
-                            <option value="" disabled {{if not .AliasDomain.TargetDomain}}selected{{end}}>Selecione o
-                                domínio de destino</option>
+                            <option value="" disabled {{if not .AliasDomain.TargetDomain}}selected{{end}}>Select the
+                                destination domain</option>
                             {{range .Domains}}
                             <option value="{{.Domain}}" {{if eq $.AliasDomain.TargetDomain .Domain}}selected{{end}}>
                                 {{.Domain}}</option>
                             {{end}}
                         </select>
                         <p class="text-xs text-gray-500 mt-2">
-                            O domínio para onde os emails serão entregues.
+                            The domain where emails will be delivered.
                         </p>
                     </div>
                 </div>
@@ -68,7 +68,7 @@
                     <input type="checkbox" id="active" name="active" value="true" {{if
                         .AliasDomain.Active}}checked{{end}} class="w-6 h-6 border-2 border-brand-text cursor-pointer">
                     <label for="active" class="ml-3 text-sm font-bold cursor-pointer">
-                        Ativo
+                        Active
                     </label>
                 </div>
             </div>
@@ -79,12 +79,12 @@
             <a href="/alias-domains"
                 class="bg-white hover:bg-gray-50 text-brand-text border-2 border-brand-text font-black px-8 py-4 shadow-[2px_2px_0px_#1E293B] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center">
                 <i data-lucide="x" class="w-5 h-5 mr-2"></i>
-                Cancelar
+                Cancel
             </a>
             <button type="submit"
                 class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-8 py-4 shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center">
                 <i data-lucide="save" class="w-5 h-5 mr-2"></i>
-                Salvar Alterações
+                Save Changes
             </button>
         </div>
     </form>

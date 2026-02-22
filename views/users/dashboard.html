@@ -1,12 +1,12 @@
-{{define "title"}}Painel do Usuário - Go-PostfixAdmin{{end}}
+{{define "title"}}User Dashboard - Go-PostfixAdmin{{end}}
 
 
 {{define "content"}}
 <div class="max-w-6xl mx-auto">
     <div class="mb-10">
-        <h2 class="text-4xl font-mono font-black uppercase tracking-tight mb-2">Minha Conta</h2>
-        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Gerencie sua senha e configurações de
-            redirecionamento.</p>
+        <h2 class="text-4xl font-mono font-black uppercase tracking-tight mb-2">My Account</h2>
+        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Manage your password and forwarding
+            settings.</p>
     </div>
 
     {{if .Error}}
@@ -39,10 +39,10 @@
                 </div>
             </div>
             <div>
-                <a href="/users/vacation" title="Configure uma mensagem de ausente ou outra resposta automática."
+                <a href="/users/vacation" title="Configure an out-of-office message or other auto-reply."
                     class="bg-brand-secondary hover:bg-white hover:text-brand-secondary text-white border-2 border-brand-text font-black px-6 py-3 shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center justify-center text-center text-sm w-full sm:w-auto">
                     <i data-lucide="plane-takeoff" class="w-5 h-5 mr-2"></i>
-                    Configurar Ausência
+                    Configure Vacation
                 </a>
             </div>
         </div>
@@ -53,30 +53,30 @@
         <div class="bg-white border-4 border-brand-text neo-shadow-sm p-8">
             <h3 class="text-xl font-mono font-black uppercase tracking-tight mb-6 flex items-center">
                 <i data-lucide="corner-up-right" class="w-5 h-5 mr-2"></i>
-                Configurar Redirecionamento
+                Configure Forwarding
             </h3>
-            <p class="text-xs text-gray-500 mb-6">Configure para onde seus e-mails devem ser entregues. Insira um
-                endereço
-                por linha.</p>
+            <p class="text-xs text-gray-500 mb-6">Configure where your emails should be delivered. Enter one
+                address
+                per line.</p>
 
             <form action="/users/forwarding" method="POST" class="space-y-6">
                 <div>
                     <label for="forwarding"
                         class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
-                        Encaminhar Para
+                        Forward To
                     </label>
                     <textarea id="forwarding" name="forwarding" rows="4" placeholder="destinatario@example.com"
                         class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors resize-y">{{if .Alias.Goto}}{{commaToNewlines .Alias.Goto}}{{else}}{{.User.Username}}{{end}}</textarea>
                     <p class="text-xs text-gray-500 mt-2">
-                        Para receber localmente e encaminhar, inclua seu próprio endereço na lista.
-                        <br>Para desativar o redirecionamento, deixe apenas o seu endereço.
+                        To receive locally and forward, include your own address in the list.
+                        <br>To disable forwarding, just leave your own address.
                     </p>
                 </div>
 
                 <button type="submit" id="saveForwardingBtn"
                     class="w-full bg-brand-secondary hover:bg-white hover:text-brand-secondary text-white border-2 border-brand-text font-black py-4 shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center justify-center">
                     <i data-lucide="save" class="w-5 h-5 mr-2"></i>
-                    Salvar Redirecionamento
+                    Save Forwarding
                 </button>
             </form>
         </div>
@@ -85,15 +85,15 @@
         <div class="bg-white border-4 border-brand-text neo-shadow-sm p-8">
             <h3 class="text-xl font-mono font-black uppercase tracking-tight mb-6 flex items-center">
                 <i data-lucide="key" class="w-5 h-5 mr-2"></i>
-                Alterar Senha
+                Change Password
             </h3>
-            <p class="text-xs text-gray-500 mb-6">Atualize a senha da sua caixa de correio.</p>
+            <p class="text-xs text-gray-500 mb-6">Update your mailbox password.</p>
 
             <form action="/users/password" method="POST" class="space-y-6" id="passwordForm">
                 <div>
                     <label for="current_password"
                         class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
-                        Senha Atual <span class="text-red-500">*</span>
+                        Current Password <span class="text-red-500">*</span>
                     </label>
                     <div class="relative group">
                         <div
@@ -101,7 +101,7 @@
                             <i data-lucide="lock" class="w-5 h-5"></i>
                         </div>
                         <input type="password" name="current_password" id="current_password" required
-                            placeholder="Sua senha atual"
+                            placeholder="Your current password"
                             class="w-full pl-11 pr-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors">
                     </div>
                 </div>
@@ -112,12 +112,12 @@
                         <div class="flex items-center mb-2 h-7">
                             <label for="new_password"
                                 class="block text-xs font-black uppercase tracking-widest text-brand-text">
-                                Nova Senha <span class="text-red-500">*</span>
+                                New Password <span class="text-red-500">*</span>
                             </label>
                         </div>
                         <div class="relative">
                             <input type="password" id="new_password" name="new_password" required minlength="8"
-                                placeholder="Mín. 8 caracteres"
+                                placeholder="Min. 8 characters"
                                 class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors pr-12">
                             <button type="button" onclick="togglePassword('new_password')"
                                 class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary transition-colors cursor-pointer">
@@ -130,17 +130,17 @@
                         <div class="flex items-center justify-between mb-2 h-7">
                             <label for="confirm_password"
                                 class="block text-xs font-black uppercase tracking-widest text-brand-text">
-                                Confirmar Senha <span class="text-red-500">*</span>
+                                Confirm Password <span class="text-red-500">*</span>
                             </label>
-                            <button type="button" onclick="generatePassword()" title="Precisa de uma senha forte?"
+                            <button type="button" onclick="generatePassword()" title="Need a strong password?"
                                 class="bg-brand-secondary hover:bg-white hover:text-brand-secondary text-white text-[10px] font-black px-3 py-1 border-2 border-brand-text shadow-[1px_1px_0px_#1E3A8A] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[2px_2px_0px_#1E3A8A] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center">
                                 <i data-lucide="wand-2" class="w-3 h-3 mr-1"></i>
-                                Gerar
+                                Generate
                             </button>
                         </div>
                         <div class="relative">
                             <input type="password" id="confirm_password" name="confirm_password" required minlength="8"
-                                placeholder="Repita a nova senha"
+                                placeholder="Repeat new password"
                                 class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors pr-12">
                             <button type="button" onclick="togglePassword('confirm_password')"
                                 class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary transition-colors cursor-pointer">
@@ -154,7 +154,7 @@
                 <!-- Password Strength Meter -->
                 <div id="strengthMeter" class="hidden">
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-black uppercase tracking-widest text-brand-text">Força</span>
+                        <span class="text-xs font-black uppercase tracking-widest text-brand-text">Strength</span>
                         <span id="strengthText" class="text-xs font-bold uppercase tracking-wider"></span>
                     </div>
                     <div class="h-2 bg-gray-200 border-2 border-brand-text overflow-hidden">
@@ -165,7 +165,7 @@
                 <button type="submit" id="submitBtn"
                     class="w-full bg-brand-cta hover:bg-white hover:text-brand-cta text-white border-2 border-brand-text font-black py-4 shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center justify-center">
                     <i data-lucide="shield" class="w-5 h-5 mr-2"></i>
-                    Alterar Senha
+                    Change Password
                 </button>
             </form>
         </div>
@@ -222,7 +222,7 @@
             lucide.createIcons();
         } catch (error) {
             console.error('Failed to generate password:', error);
-            alert('Falha ao gerar senha. Tente novamente.');
+            alert('Failed to generate password. Please try again.');
         }
     }
     function checkPasswordStrength() {
@@ -250,16 +250,16 @@
         if (/[^a-zA-Z0-9]/.test(password)) strength += 15;
 
         if (strength < 40) {
-            strengthLabel = 'Fraca';
+            strengthLabel = 'Weak';
             color = '#DC2626';
         } else if (strength < 60) {
-            strengthLabel = 'Regular';
+            strengthLabel = 'Average';
             color = '#F59E0B';
         } else if (strength < 80) {
-            strengthLabel = 'Boa';
+            strengthLabel = 'Good';
             color = '#10B981';
         } else {
-            strengthLabel = 'Forte';
+            strengthLabel = 'Strong';
             color = '#059669';
         }
 
@@ -284,12 +284,12 @@
         indicator.classList.remove('hidden');
 
         if (password === confirm) {
-            indicator.textContent = '✓ Senhas conferem';
+            indicator.textContent = '✓ Passwords match';
             indicator.className = 'text-xs mt-2 font-bold text-green-600';
             submitBtn.disabled = false;
             submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
         } else {
-            indicator.textContent = '✗ Senhas não conferem';
+            indicator.textContent = '✗ Passwords do not match';
             indicator.className = 'text-xs mt-2 font-bold text-red-600';
             submitBtn.disabled = true;
             submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
@@ -313,13 +313,13 @@
 
         if (password.length < 8) {
             e.preventDefault();
-            alert('A senha deve ter pelo menos 8 caracteres');
+            alert('The password must be at least 8 characters long');
             return false;
         }
 
         if (password !== confirm) {
             e.preventDefault();
-            alert('As senhas não conferem');
+            alert('Passwords do not match');
             return false;
         }
     });

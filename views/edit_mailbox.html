@@ -1,12 +1,11 @@
-{{define "title"}}Editar Email - Go-PostfixAdmin{{end}}
-{{define "breadcrumb"}}Editar Email{{end}}
+{{define "title"}}Edit Email Account - Go-PostfixAdmin{{end}}
+{{define "breadcrumb"}}Edit Email Account{{end}}
 
 {{define "content"}}
 <div class="max-w-6xl mx-auto">
     <div class="mb-8">
-        <h2 class="text-4xl font-mono font-black uppercase tracking-tight mb-2">Editar Email</h2>
-        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Atualizar configurações da caixa de
-            correio.
+        <h2 class="text-4xl font-mono font-black uppercase tracking-tight mb-2">Edit Email Account</h2>
+        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Update mailbox settings.
         </p>
     </div>
 
@@ -28,29 +27,29 @@
         <div class="bg-white border-4 border-brand-text neo-shadow-sm p-8">
             <h3 class="text-xl font-mono font-black uppercase tracking-tight mb-6 flex items-center">
                 <i data-lucide="mail" class="w-5 h-5 mr-2"></i>
-                Conta de Email
+                Email Account
             </h3>
 
             <div class="space-y-6">
                 <!-- Email Address (Read-only) -->
                 <div>
                     <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
-                        Endereço de Email
+                        Email Address
                     </label>
                     <div class="w-full px-4 py-3 border-2 border-gray-300 bg-gray-50 font-medium font-mono text-lg">
                         {{.Mailbox.Username}}
                     </div>
-                    <p class="text-xs text-gray-500 mt-2">O endereço de email não pode ser alterado</p>
+                    <p class="text-xs text-gray-500 mt-2">The email address cannot be changed</p>
                 </div>
 
                 <!-- Display Name -->
                 <div>
                     <label for="name" class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
-                        Nome de Exibição
+                        Display Name
                     </label>
                     <input type="text" id="name" name="name" placeholder="John Doe" value="{{.Mailbox.Name}}"
                         class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors">
-                    <p class="text-xs text-gray-500 mt-2">Nome completo exibido no cliente de e-mail</p>
+                    <p class="text-xs text-gray-500 mt-2">Full name displayed in the email client</p>
                 </div>
 
                 <!-- Active Toggle -->
@@ -58,7 +57,7 @@
                     <input type="checkbox" id="active" name="active" value="true" {{if .Mailbox.Active}}checked{{end}}
                         class="w-6 h-6 border-2 border-brand-text cursor-pointer">
                     <label for="active" class="ml-3 text-sm font-bold cursor-pointer">
-                        Habilitado
+                        Enabled
                     </label>
                 </div>
             </div>
@@ -69,7 +68,7 @@
             <summary
                 class="p-4 cursor-pointer font-bold uppercase tracking-tight text-sm flex items-center hover:bg-white transition-colors">
                 <i data-lucide="key" class="w-4 h-4 mr-2"></i>
-                ALTERAR SENHA (Opcional)
+                CHANGE PASSWORD (Optional)
                 <i data-lucide="chevron-down" class="w-4 h-4 ml-auto"></i>
             </summary>
 
@@ -83,7 +82,7 @@
                     <div>
                         <div class="relative">
                             <input type="password" id="password" name="password" minlength="8"
-                                placeholder="Nova senha (mín. 8 caracteres)"
+                                placeholder="New password (min 8 characters)"
                                 class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors pr-12">
                             <button type="button" onclick="togglePassword('password')"
                                 class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary transition-colors">
@@ -97,17 +96,17 @@
                         <div class="flex gap-2">
                             <div class="relative flex-1">
                                 <input type="password" id="password_confirm" name="password_confirm" minlength="8"
-                                    placeholder="Repita a nova senha"
+                                    placeholder="Repeat new password"
                                     class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors pr-12">
                                 <button type="button" onclick="togglePassword('password_confirm')"
                                     class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary transition-colors">
                                     <i data-lucide="eye" class="w-5 h-5"></i>
                                 </button>
                             </div>
-                            <button type="button" onclick="generatePassword()" title="Gerar senha forte"
+                            <button type="button" onclick="generatePassword()" title="Generate strong password"
                                 class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-black px-4 border-2 border-brand-text shadow-[2px_2px_0px_#1E293B] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center gap-1">
                                 <i data-lucide="wand-2" class="w-4 h-4"></i>
-                                GERAR
+                                GENERATE
                             </button>
                         </div>
                         <p id="matchIndicator" class="text-xs mt-2 hidden"></p>
@@ -117,7 +116,7 @@
                 <!-- Password Strength Meter -->
                 <div id="strengthMeter" class="hidden">
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-black uppercase tracking-widest text-brand-text">Força</span>
+                        <span class="text-xs font-black uppercase tracking-widest text-brand-text">Strength</span>
                         <span id="strengthText" class="text-xs font-bold uppercase tracking-wider"></span>
                     </div>
                     <div class="h-2 bg-gray-200 border-2 border-brand-text overflow-hidden">
@@ -132,7 +131,7 @@
             <summary
                 class="p-4 cursor-pointer font-bold uppercase tracking-tight text-sm flex items-center hover:bg-white transition-colors">
                 <i data-lucide="settings" class="w-4 h-4 mr-2"></i>
-                Configurações Avançadas
+                Advanced Settings
                 <i data-lucide="chevron-down" class="w-4 h-4 ml-auto"></i>
             </summary>
 
@@ -147,7 +146,7 @@
                         </label>
                         <input type="number" id="quota" name="quota" min="0" value="{{.QuotaMB}}"
                             class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors">
-                        <p class="text-xs text-gray-500 mt-2">Limite de armazenamento (0 = ilimitado)</p>
+                        <p class="text-xs text-gray-500 mt-2">Storage limit (0 = unlimited)</p>
                     </div>
 
                     <!-- SMTP Active -->
@@ -161,7 +160,7 @@
                                 .Mailbox.SMTPActive}}checked{{end}}
                                 class="w-6 h-6 border-2 border-brand-text cursor-pointer">
                             <label for="smtp_active" class="ml-3 text-sm font-bold cursor-pointer">
-                                SMTP Ativo (pode enviar email)
+                                SMTP Active (can send email)
                             </label>
                         </div>
                     </div>
@@ -173,7 +172,7 @@
                 <div>
                     <label for="email_other"
                         class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
-                        Email Alternativo
+                        Alternative Email
                     </label>
                     <input type="email" id="email_other" name="email_other" placeholder="alternative@email.com"
                         value="{{.Mailbox.EmailOther}}"
@@ -187,12 +186,12 @@
             <a href="/mailboxes?domain={{.Mailbox.Domain}}"
                 class="bg-white hover:bg-gray-50 text-brand-text border-2 border-brand-text font-black px-8 py-4 shadow-[2px_2px_0px_#1E293B] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center">
                 <i data-lucide="x" class="w-5 h-5 mr-2"></i>
-                Cancelar
+                Cancel
             </a>
             <button type="submit" id="submitBtn"
                 class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-8 py-4 shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center">
                 <i data-lucide="save" class="w-5 h-5 mr-2"></i>
-                Atualizar Email
+                Update Email Account
             </button>
         </div>
     </form>
