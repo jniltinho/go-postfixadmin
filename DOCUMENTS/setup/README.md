@@ -66,7 +66,20 @@ O Go-PostfixAdmin será responsável por gerenciar a estrutura do banco (tabelas
    ```
 
 3. **Configurar o Ambiente (config.toml):**
-   Copie o arquivo de exemplo para `/opt/go-postfixadmin/config.toml` e adicione as configurações necessárias para o correto funcionamento:
+   Você pode gerar um arquivo de configuração padrão rodando o comando nativo da CLI ou copiar o arquivo de exemplo.
+   
+   *Gerando via CLI:*
+   ```bash
+   cd /opt/go-postfixadmin
+   ./postfixadmin --generate-config
+   ```
+
+   *Ou copiando o exemplo:*
+   ```bash
+   cp download/config.toml.example /opt/go-postfixadmin/config.toml
+   ```
+
+   Após isso, edite o arquivo gerado (`config*.toml`) ou copiado e adicione as configurações de banco e sessão necessárias para o correto funcionamento:
    
    ```toml
    [database]
@@ -74,7 +87,7 @@ O Go-PostfixAdmin será responsável por gerenciar a estrutura do banco (tabelas
    url = "postfix:sua_senha_segura@tcp(localhost:3306)/postfix?charset=utf8mb4&parseTime=True&loc=Local"
    
    [server]
-   # Configurações do Servidor Web
+   # Configurações do Servidor Web para SSL use port 443
    port = 8080
    
    # Chave Secreta de Sessão (Gere uma string 64-char via: openssl rand -hex 32)
@@ -85,6 +98,10 @@ O Go-PostfixAdmin será responsável por gerenciar a estrutura do banco (tabelas
    enabled = true
    cert = "/etc/letsencrypt/live/mail.example.com/fullchain.pem"
    key = "/etc/letsencrypt/live/mail.example.com/privkey.pem"
+
+   [quota]
+   # Bytes per MB: 1024000 or 1048576
+   multiplier        = 1024000
    ```
 
 3. **Executar as Migrations:**
