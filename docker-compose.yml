@@ -1,0 +1,34 @@
+services:
+  mysql:
+    image: mysql:8
+    container_name: postfixadmin-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: postfix
+      MYSQL_USER: postfix
+      MYSQL_PASSWORD: postfixpassword
+    ports:
+      - "3306:3319"
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postfixadmin:
+    image: jniltinho/go-postfixadmin:latest
+    container_name: postfixadmin-app
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DRIVER: mysql
+      DB_URL: postfix:postfixpassword@tcp(mysql:3306)/postfix?charset=utf8mb4&parseTime=True&loc=Local&multiStatements=true
+      ADMIN_EMAIL: admin@example.com
+      ADMIN_PASSWORD: adminpassword
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./config.toml:/app/config.toml

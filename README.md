@@ -75,6 +75,26 @@ This command runs a multi-stage build that:
 3.  Compresses the binary with `upx`.
 4.  Generates a final image based on Alpine Linux.
 
+### 3. Quick Start with Docker Compose
+
+The fastest way to get a full environment running (MySQL 8 + Go-Postfixadmin).
+
+**Requirements:** Docker and Docker Compose installed.
+
+```bash
+make build-docker
+docker-compose up
+```
+
+This will:
+- Start a MySQL 8 container.
+- Build and start the Go-Postfixadmin container.
+- **Automatically** wait for the DB to be ready.
+- **Automatically** run database migrations.
+- **Automatically** create an initial superadmin (default: `admin@example.com` / `adminpassword`).
+
+You can customize the environment variables and port mappings in the `docker-compose.yml` file.
+
 ---
 
 ## 🚀 Execution

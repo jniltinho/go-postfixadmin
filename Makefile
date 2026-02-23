@@ -58,7 +58,12 @@ certs:
 
 build-docker:
 	@echo "Building Docker image..."
-	docker build --no-cache --progress=plain -t $(BINARY_NAME):latest .
+	docker build --no-cache --progress=plain -t jniltinho/go-postfixadmin:latest .
+
+build-docker-prod:
+	@echo "Building Go application..."
+	CGO_ENABLED=0 go build -o $(BINARY_NAME) ${FLAGS}
+
 
 help:
 	@echo "Makefile commands:"
