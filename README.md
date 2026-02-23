@@ -9,13 +9,14 @@ Professional Email Administration System built with Go, Echo, and Tailwind CSS.
 *   **Modern Design**: Clean and responsive interface built with Tailwind CSS.
 *   **Security**: Strong password hashing and protection against common attacks.
 *   **Integrated CLI**: Command-line tools for automation and access recovery.
+*   **Internationalization (i18n)**: Native support for Portuguese (PT), English (EN), and Spanish (ES) with dynamic locale loading.
 
 
 ## 🛠 Development Tools
 
 To compile the project locally (without Docker), you will need to install the following tools:
 
-1.  **Go (v1.26 or higher)**: Main language of the project.
+1.  **Go (v1.21 or higher)**: Main language of the project.
     *   [Download Go](https://go.dev/dl/)
 2.  **Node.js (v20 or higher)**: Required for CSS processing with Tailwind.
     *   [Download Node.js](https://nodejs.org/)
