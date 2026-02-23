@@ -5,56 +5,87 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/BurntSushi/toml"
-	"github.com/nicksnyder/go-i18n/v2/i18n"
-	"golang.org/x/text/language"
+	"github.com/leonelquinteros/gotext"
 )
 
-var bundle *i18n.Bundle
+// locales maps language codes to their parsed PO objects.
+var locales map[string]*gotext.Po
 
-// Init initializes the i18n bundle by loading all TOML locale files from the embedded FS.
+// Init initializes the i18n system by loading all PO locale files from the embedded FS.
 func Init(fs embed.FS) {
-	bundle = i18n.NewBundle(language.BrazilianPortuguese)
-	bundle.RegisterUnmarshalFunc("toml", toml.Unmarshal)
+	locales = make(map[string]*gotext.Po)
 
-	// Dynamically load all .toml files in the locales directory
-	files, err := fs.ReadDir("locales")
+	// Scan for language directories inside locales/
+	dirs, err := fs.ReadDir("locales")
 	if err != nil {
 		slog.Error("Failed to read locales directory", "error", err)
 		return
 	}
 
-	for _, file := range files {
-		if file.IsDir() || !strings.HasSuffix(file.Name(), ".toml") {
+	for _, dir := range dirs {
+		if !dir.IsDir() {
 			continue
 		}
 
-		filePath := "locales/" + file.Name()
-		_, err = bundle.LoadMessageFileFS(fs, filePath)
+		lang := dir.Name()
+		poPath := "locales/" + lang + "/default.po"
+
+		data, err := fs.ReadFile(poPath)
 		if err != nil {
-			slog.Warn("Failed to load locale file", "file", filePath, "error", err)
-		} else {
-			slog.Debug("Loaded locale file", "file", filePath)
+			slog.Debug("No PO file found for language", "lang", lang, "path", poPath)
+			continue
 		}
+
+		po := gotext.NewPo()
+		po.Parse(data)
+		locales[lang] = po
+		slog.Debug("Loaded locale", "lang", lang, "path", poPath)
 	}
+
+	slog.Info("Loaded locales", "count", len(locales))
 }
 
 // Translate returns the localized string for a given message ID and language.
 func Translate(lang, messageID string, templateData map[string]any) string {
-	if bundle == nil {
+	if locales == nil {
 		return messageID
 	}
 
-	localizer := i18n.NewLocalizer(bundle, lang)
-	msg, err := localizer.Localize(&i18n.LocalizeConfig{
-		MessageID:    messageID,
-		TemplateData: templateData,
-	})
+	// Normalize language code: "pt" -> "pt_BR"
+	normalizedLang := normalizeLang(lang)
 
-	if err != nil {
-		// slog.Debug("Translation not found", "msgID", messageID, "lang", lang)
+	po, ok := locales[normalizedLang]
+	if !ok {
+		// Fallback: try the short code directly
+		po, ok = locales[lang]
+		if !ok {
+			return messageID
+		}
+	}
+
+	translated := po.Get(messageID) //nolint:govet
+	if translated == "" || translated == messageID {
+		// If no translation found, return the message ID
 		return messageID
 	}
 
-	return msg
+	// Handle template data (e.g., {{.Error}} -> actual value)
+	for key, val := range templateData {
+		placeholder := "{{." + key + "}}"
+		if v, ok := val.(string); ok {
+			translated = strings.ReplaceAll(translated, placeholder, v)
+		}
+	}
+
+	return translated
+}
+
+// normalizeLang converts short language codes to their full locale codes.
+func normalizeLang(lang string) string {
+	switch lang {
+	case "pt":
+		return "pt_BR"
+	default:
+		return lang
+	}
 }

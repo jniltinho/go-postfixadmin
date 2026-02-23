@@ -1,0 +1,1137 @@
+# es translations
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: es\n"
+
+msgid "Vacation_Title"
+msgstr "Respuesta Automática"
+
+msgid "Vacation_Subtitle"
+msgstr "Configure su mensaje temporal de fuera de la oficina."
+
+msgid "Vacation_Error"
+msgstr "Error: {{.Error}}"
+
+msgid "Vacation_Success"
+msgstr "Éxito: {{.Message}}"
+
+msgid "Vacation_ConfigTitle"
+msgstr "Configuración de Respuesta Automática"
+
+msgid "Vacation_StartDate"
+msgstr "Fecha de Inicio"
+
+msgid "Vacation_EndDate"
+msgstr "Fecha de Fin"
+
+msgid "Vacation_ReplyOption"
+msgstr "Opción de Respuesta"
+
+msgid "Vacation_ReplyOnce"
+msgstr "Responder una vez"
+
+msgid "Vacation_ReplyEveryDay"
+msgstr "Responder todos los días"
+
+msgid "Vacation_ReplyEvery7Days"
+msgstr "Responder cada 7 días"
+
+msgid "Vacation_Subject"
+msgstr "Asunto"
+
+msgid "Vacation_Subject_Placeholder"
+msgstr "Fuera de la oficina"
+
+msgid "Vacation_MessageBody"
+msgstr "Cuerpo del Mensaje"
+
+msgid "Vacation_MessageBody_Placeholder"
+msgstr "Estaré fuera de la oficina desde el <date> hasta el <date>.\nEn caso de urgencia, por favor contacte a <contact person>."
+
+msgid "Vacation_Active"
+msgstr "Activar Respuesta Automática"
+
+msgid "Vacation_CancelBtn"
+msgstr "Cancelar"
+
+msgid "Vacation_RemoveBtn"
+msgstr "Eliminar Mensaje"
+
+msgid "Vacation_RemoveConfirm"
+msgstr "¿Está seguro de que desea eliminar la respuesta automática?"
+
+msgid "Vacation_SaveBtn"
+msgstr "Editar / Establecer Mensaje"
+
+msgid "Login_Title"
+msgstr "Iniciar Sesión"
+
+msgid "Login_AdminSubtitle"
+msgstr "Administración de Correo Profesional"
+
+msgid "Login_Username"
+msgstr "Usuario"
+
+msgid "Login_UsernamePlaceholder"
+msgstr "admin@dominio.com"
+
+msgid "Login_Password"
+msgstr "Contraseña"
+
+msgid "Login_PasswordPlaceholder"
+msgstr "••••••••"
+
+msgid "Authenticate"
+msgstr "Autenticar"
+
+msgid "Login_UserLinkText1"
+msgstr "Los usuarios deben "
+
+msgid "Login_UserLinkText2"
+msgstr "hacer clic aquí"
+
+msgid "Login_UserLinkText3"
+msgstr " para acceder a la sección de usuarios."
+
+msgid "Login_SecureSystem"
+msgstr "Sistema de Acceso Administrativo Seguro"
+
+msgid "UserLogin_Title"
+msgstr "Inicio de Sesión de Usuario"
+
+msgid "UserLogin_Subtitle"
+msgstr "Portal de Usuario"
+
+msgid "UserLogin_Email"
+msgstr "Correo electrónico"
+
+msgid "UserLogin_EmailPlaceholder"
+msgstr "usuario@dominio.com"
+
+msgid "UserLogin_LoginBtn"
+msgstr "Entrar"
+
+msgid "UserLogin_AccessPortal"
+msgstr "Portal de Acceso de Usuario"
+
+msgid "DashboardAdmin_Title"
+msgstr "Panel de Control"
+
+msgid "DashboardAdmin_Overview"
+msgstr "Resumen"
+
+msgid "DashboardAdmin_OverviewDesc"
+msgstr "Monitoreo de su infraestructura de servidor de correo."
+
+msgid "DashboardAdmin_DomainsTitle"
+msgstr "Activos"
+
+msgid "DashboardAdmin_DomainsSubtitle"
+msgstr "Dominios Totales"
+
+msgid "DashboardAdmin_DomainsLabel"
+msgstr "disponibles"
+
+msgid "DashboardAdmin_MailboxesTitle"
+msgstr "En Uso"
+
+msgid "DashboardAdmin_MailboxesSubtitle"
+msgstr "Cuentas de Correo"
+
+msgid "DashboardAdmin_MailboxesLabel"
+msgstr "cuentas"
+
+msgid "DashboardAdmin_NewDomain"
+msgstr "¿Nuevo Dominio?"
+
+msgid "DashboardAdmin_NewDomainDesc"
+msgstr "Cree un nuevo dominio en segundos."
+
+msgid "DashboardAdmin_AddDomainBtn"
+msgstr "Agregar Dominio"
+
+msgid "DashboardAdmin_AddDomainDisabled"
+msgstr "Solo los Superadministradores pueden crear dominios"
+
+msgid "DashboardAdmin_NewEmail"
+msgstr "¿Nuevo Correo?"
+
+msgid "DashboardAdmin_NewEmailDesc"
+msgstr "Cree una nueva cuenta en segundos."
+
+msgid "DashboardAdmin_AddEmailBtn"
+msgstr "Agregar Correo"
+
+msgid "DashboardAdmin_RecentActivity"
+msgstr "Actividad Reciente"
+
+msgid "DashboardAdmin_ViewLogs"
+msgstr "Ver registros"
+
+msgid "DashboardAdmin_TblDateTime"
+msgstr "Fecha/Hora"
+
+msgid "DashboardAdmin_TblAdmin"
+msgstr "Administrador"
+
+msgid "DashboardAdmin_TblDomain"
+msgstr "Dominio"
+
+msgid "DashboardAdmin_TblAction"
+msgstr "Acción"
+
+msgid "DashboardAdmin_TblDesc"
+msgstr "Descripción"
+
+msgid "DashboardAdmin_NoActivity"
+msgstr "No se encontró actividad reciente"
+
+msgid "DashboardUser_Title"
+msgstr "Panel de Usuario"
+
+msgid "DashboardUser_MyAccount"
+msgstr "Mi Cuenta"
+
+msgid "DashboardUser_MyAccountDesc"
+msgstr "Gestione su contraseña y configuración de reenvío."
+
+msgid "DashboardUser_ConfigureVacation"
+msgstr "Configurar Vacaciones"
+
+msgid "DashboardUser_ForwardingTitle"
+msgstr "Configurar Reenvío"
+
+msgid "DashboardUser_ForwardingDesc"
+msgstr "Configure dónde deben entregarse sus correos. Ingrese una dirección por línea."
+
+msgid "DashboardUser_ForwardTo"
+msgstr "Reenviar a"
+
+msgid "DashboardUser_ForwardToPlaceholder"
+msgstr "destinatario@ejemplo.com"
+
+msgid "DashboardUser_ForwardingHelp1"
+msgstr "Para recibir localmente y reenviar, incluya su propia dirección en la lista."
+
+msgid "DashboardUser_ForwardingHelp2"
+msgstr "Para desactivar el reenvío, simplemente deje su propia dirección."
+
+msgid "DashboardUser_SaveForwarding"
+msgstr "Guardar Reenvío"
+
+msgid "DashboardUser_PasswordTitle"
+msgstr "Cambiar Contraseña"
+
+msgid "DashboardUser_PasswordDesc"
+msgstr "Actualice la contraseña de su buzón."
+
+msgid "DashboardUser_CurrentPassword"
+msgstr "Contraseña Actual"
+
+msgid "DashboardUser_CurrentPasswordPlaceholder"
+msgstr "Su contraseña actual"
+
+msgid "DashboardUser_NewPassword"
+msgstr "Nueva Contraseña"
+
+msgid "DashboardUser_NewPasswordPlaceholder"
+msgstr "Min. 8 caracteres"
+
+msgid "DashboardUser_ConfirmPassword"
+msgstr "Confirmar Contraseña"
+
+msgid "DashboardUser_ConfirmPasswordPlaceholder"
+msgstr "Repita la nueva contraseña"
+
+msgid "DashboardUser_Generate"
+msgstr "Generar"
+
+msgid "DashboardUser_GenerateHelp"
+msgstr "¿Necesita una contraseña fuerte?"
+
+msgid "DashboardUser_Strength"
+msgstr "Fuerza"
+
+msgid "DashboardUser_ChangePasswordBtn"
+msgstr "Cambiar Contraseña"
+
+msgid "Layout_System"
+msgstr "Sistema"
+
+msgid "Layout_Overview"
+msgstr "Resumen"
+
+msgid "Layout_Admin"
+msgstr "Admin"
+
+msgid "Layout_SuperAdmin"
+msgstr "SUPERADMIN"
+
+msgid "Layout_Logout"
+msgstr "Cerrar Sesión"
+
+msgid "LayoutAdmin_Dashboard"
+msgstr "Panel"
+
+msgid "LayoutAdmin_Mailboxes"
+msgstr "Buzones"
+
+msgid "LayoutAdmin_Aliases"
+msgstr "Alias"
+
+msgid "LayoutAdmin_MyDomains"
+msgstr "Mis Dominios"
+
+msgid "LayoutAdmin_DomainAliases"
+msgstr "Alias de Dominio"
+
+msgid "LayoutAdmin_SettingsHeader"
+msgstr "Configuración"
+
+msgid "LayoutAdmin_Administrators"
+msgstr "Administradores"
+
+msgid "LayoutAdmin_Fetchmail"
+msgstr "Fetchmail"
+
+msgid "LayoutAdmin_Settings"
+msgstr "Ajustes"
+
+msgid "LayoutUser_UserPortal"
+msgstr "Portal de Usuario"
+
+msgid "LayoutUser_User"
+msgstr "USUARIO"
+
+msgid "Domains_Title"
+msgstr "Dominios"
+
+msgid "Domains_Subtitle"
+msgstr "Gestione y monitoree sus dominios de correo registrados."
+
+msgid "Domains_AddDomainBtn"
+msgstr "Agregar Dominio"
+
+msgid "Domains_TblDomain"
+msgstr "Dominio"
+
+msgid "Domains_TblDescription"
+msgstr "Descripción"
+
+msgid "Domains_TblAliases"
+msgstr "Alias"
+
+msgid "Domains_TblMailboxes"
+msgstr "Cuentas de Correo"
+
+msgid "Domains_TblBackupMX"
+msgstr "MX de Respaldo"
+
+msgid "Domains_TblActive"
+msgstr "Activo"
+
+msgid "Domains_TblModified"
+msgstr "Modificado"
+
+msgid "Domains_TblPassExpires"
+msgstr "Contraseña Expira"
+
+msgid "Domains_Yes"
+msgstr "Sí"
+
+msgid "Domains_No"
+msgstr "No"
+
+msgid "Domains_Edit"
+msgstr "Editar"
+
+msgid "Domains_Delete"
+msgstr "Eliminar"
+
+msgid "Domains_ReadOnly"
+msgstr "Solo Lectura"
+
+msgid "Domains_NoDomainsFound"
+msgstr "No se encontraron dominios."
+
+msgid "Domains_AlertNoMailboxes"
+msgstr "El dominio \"${domainName}\" no tiene buzones registrados."
+
+msgid "Domains_AlertDeleteConfirm"
+msgstr "¿Está seguro de que desea eliminar el dominio \"${domainName}\"?\n\nADVERTENCIA: ¡Todos los alias y buzones asociados también serán eliminados!"
+
+msgid "Domains_AlertDeleteSuccess"
+msgstr "¡Dominio eliminado con éxito!"
+
+msgid "Domains_AlertDeleteError"
+msgstr "Error al eliminar el dominio: "
+
+msgid "Domains_AlertRequestError"
+msgstr "Error de solicitud: "
+
+msgid "Domains_AddTitle"
+msgstr "Agregar Nuevo Dominio"
+
+msgid "Domains_AddSubtitle"
+msgstr "Registre un nuevo dominio de correo en el sistema."
+
+msgid "Domains_EditTitle"
+msgstr "Editar Dominio"
+
+msgid "Domains_EditSubtitle"
+msgstr "Actualizar configuración del dominio de correo."
+
+msgid "Domains_ErrorTitle"
+msgstr "Error"
+
+msgid "Domains_InfoTitle"
+msgstr "Información Básica"
+
+msgid "Domains_LblDomain"
+msgstr "Nombre de Dominio"
+
+msgid "Domains_PhDomain"
+msgstr "ejemplo.com"
+
+msgid "Domains_HelpDomain"
+msgstr "Ingrese un nombre de dominio válido (ej. ejemplo.com)"
+
+msgid "Domains_HelpDomainEdit"
+msgstr "El nombre de dominio no se puede cambiar"
+
+msgid "Domains_LblDescription"
+msgstr "Descripción"
+
+msgid "Domains_PhDescription"
+msgstr "Descripción opcional para este dominio"
+
+msgid "Domains_LblActive"
+msgstr "Dominio Activo"
+
+msgid "Domains_AdvancedTitle"
+msgstr "Configuración Avanzada"
+
+msgid "Domains_LblAliases"
+msgstr "Límite de Alias"
+
+msgid "Domains_HelpAliases"
+msgstr "Número máximo de alias (0 = ilimitado)"
+
+msgid "Domains_LblMailboxes"
+msgstr "Límite de Buzones"
+
+msgid "Domains_HelpMailboxes"
+msgstr "Número máximo de buzones (0 = ilimitado)"
+
+msgid "Domains_LblQuota"
+msgstr "Límite de Cuota (MB)"
+
+msgid "Domains_LblQuotaEdit"
+msgstr "Cuota del Dominio (MB)"
+
+msgid "Domains_HelpQuota"
+msgstr "Límite máximo de cuota en MB (0 = ilimitado)"
+
+msgid "Domains_HelpQuotaEdit"
+msgstr "Cuota máxima en MB (0 = ilimitado)"
+
+msgid "Domains_LblPasswordExpiry"
+msgstr "Expiración de Contraseña (días)"
+
+msgid "Domains_HelpPasswordExpiry"
+msgstr "Expiración de contraseña en días (vacío = nunca)"
+
+msgid "Domains_LblBackupMx"
+msgstr "Habilitar MX de Respaldo"
+
+msgid "Domains_HelpBackupMx"
+msgstr "Usar este servidor como intercambiador de correo de respaldo"
+
+msgid "Domains_HelpBackupMxEdit"
+msgstr "Usar este servidor como servidor de correo de respaldo"
+
+msgid "Domains_BtnCancel"
+msgstr "Cancelar"
+
+msgid "Domains_BtnSave"
+msgstr "Guardar Dominio"
+
+msgid "Domains_BtnUpdate"
+msgstr "Actualizar Dominio"
+
+msgid "Mailboxes_Title"
+msgstr "Cuentas de Correo"
+
+msgid "Mailboxes_Subtitle"
+msgstr "Gestione sus cuentas de correo"
+
+msgid "Mailboxes_AddMailboxBtn"
+msgstr "Agregar Cuenta de Correo"
+
+msgid "Mailboxes_FilterDomain"
+msgstr "Filtrar por Dominio:"
+
+msgid "Mailboxes_AllDomains"
+msgstr "Todos los Dominios"
+
+msgid "Mailboxes_ClearFilter"
+msgstr "Limpiar Filtro"
+
+msgid "Mailboxes_TblEmail"
+msgstr "Correo"
+
+msgid "Mailboxes_TblName"
+msgstr "Nombre"
+
+msgid "Mailboxes_TblDomain"
+msgstr "Dominio"
+
+msgid "Mailboxes_TblQuota"
+msgstr "Cuota"
+
+msgid "Mailboxes_TblActive"
+msgstr "Activo"
+
+msgid "Mailboxes_TblModified"
+msgstr "Modificado"
+
+msgid "Mailboxes_Unlimited"
+msgstr "Ilimitado"
+
+msgid "Mailboxes_Yes"
+msgstr "Sí"
+
+msgid "Mailboxes_No"
+msgstr "No"
+
+msgid "Mailboxes_Edit"
+msgstr "Editar"
+
+msgid "Mailboxes_Delete"
+msgstr "Eliminar"
+
+msgid "Mailboxes_NoMailboxesFound"
+msgstr "No se encontraron cuentas de correo."
+
+msgid "Mailboxes_AlertDeleteConfirm"
+msgstr "¿Está seguro de que desea eliminar el buzón \"${username}\"?"
+
+msgid "Mailboxes_AlertDeleteSuccess"
+msgstr "¡Buzón eliminado con éxito!"
+
+msgid "Mailboxes_AlertDeleteError"
+msgstr "Error al eliminar la cuenta: "
+
+msgid "Mailboxes_AlertRequestError"
+msgstr "Error de solicitud: "
+
+msgid "Mailboxes_AddTitle"
+msgstr "Agregar Nueva Cuenta de Correo"
+
+msgid "Mailboxes_AddSubtitle"
+msgstr "Cree un nuevo buzón para la entrega de correo."
+
+msgid "Mailboxes_EditTitle"
+msgstr "Editar Cuenta de Correo"
+
+msgid "Mailboxes_EditSubtitle"
+msgstr "Actualizar configuración del buzón."
+
+msgid "Mailboxes_ErrorTitle"
+msgstr "Error"
+
+msgid "Mailboxes_InfoTitle"
+msgstr "Cuenta de Correo"
+
+msgid "Mailboxes_LblUsername"
+msgstr "Nombre de usuario"
+
+msgid "Mailboxes_PhUsername"
+msgstr "usuario"
+
+msgid "Mailboxes_HelpUsername"
+msgstr "Parte antes de @ (mínimo 4 caracteres, solo minúsculas)"
+
+msgid "Mailboxes_HelpUsernameTitle"
+msgstr "Mínimo 4 caracteres, solo minúsculas"
+
+msgid "Mailboxes_LblDomain"
+msgstr "Dominio"
+
+msgid "Mailboxes_PhSelectDomain"
+msgstr "Seleccione un dominio..."
+
+msgid "Mailboxes_HelpDomain"
+msgstr "Parte después de @"
+
+msgid "Mailboxes_LblEmailAddress"
+msgstr "Dirección de Correo"
+
+msgid "Mailboxes_HelpEmailAddressEdit"
+msgstr "La dirección de correo no se puede cambiar"
+
+msgid "Mailboxes_LblFullEmailPreview"
+msgstr "Dirección de Correo Completa"
+
+msgid "Mailboxes_LblDisplayName"
+msgstr "Nombre a Mostrar"
+
+msgid "Mailboxes_PhDisplayName"
+msgstr "Juan Pérez"
+
+msgid "Mailboxes_HelpDisplayName"
+msgstr "Nombre completo mostrado en el cliente de correo"
+
+msgid "Mailboxes_LblActive"
+msgstr "Cuenta Activa"
+
+msgid "Mailboxes_LblEnabled"
+msgstr "Habilitado"
+
+msgid "Mailboxes_PwdTitle"
+msgstr "CONTRASEÑA"
+
+msgid "Mailboxes_PwdChangeTitle"
+msgstr "CAMBIAR CONTRASEÑA (Opcional)"
+
+msgid "Mailboxes_PhNewPwd"
+msgstr "Nueva contraseña (mín. 8 caracteres)"
+
+msgid "Mailboxes_PhRepeatPwd"
+msgstr "Repita la nueva contraseña"
+
+msgid "Mailboxes_BtnGenerate"
+msgstr "GENERAR"
+
+msgid "Mailboxes_PwdStrength"
+msgstr "Fuerza de la Contraseña"
+
+msgid "Mailboxes_PwdStrengthShort"
+msgstr "Fuerza"
+
+msgid "Mailboxes_AdvancedTitle"
+msgstr "Configuración Avanzada"
+
+msgid "Mailboxes_LblQuota"
+msgstr "Cuota (MB)"
+
+msgid "Mailboxes_HelpQuota"
+msgstr "Límite de almacenamiento (0 = ilimitado)"
+
+msgid "Mailboxes_LblStatus"
+msgstr "Estado"
+
+msgid "Mailboxes_LblSmtpActive"
+msgstr "SMTP Activo (puede enviar correo)"
+
+msgid "Mailboxes_LblAlternativeEmail"
+msgstr "Correo Alternativo"
+
+msgid "Mailboxes_PhAlternativeEmail"
+msgstr "alternativo@correo.com"
+
+msgid "Mailboxes_BtnCancel"
+msgstr "Cancelar"
+
+msgid "Mailboxes_BtnSave"
+msgstr "Guardar Cuenta de Correo"
+
+msgid "Mailboxes_BtnUpdate"
+msgstr "Actualizar Cuenta de Correo"
+
+msgid "Mailboxes_JsPwdGenFail"
+msgstr "Error al generar la contraseña. Por favor, inténtelo de nuevo."
+
+msgid "Mailboxes_JsPwdWeak"
+msgstr "Débil"
+
+msgid "Mailboxes_JsPwdFair"
+msgstr "Aceptable"
+
+msgid "Mailboxes_JsPwdGood"
+msgstr "Buena"
+
+msgid "Mailboxes_JsPwdStrong"
+msgstr "Fuerte"
+
+msgid "Mailboxes_JsPwdMatchOk"
+msgstr "✓ Las contraseñas coinciden"
+
+msgid "Mailboxes_JsPwdMatchFail"
+msgstr "✗ Las contraseñas no coinciden"
+
+msgid "Mailboxes_JsErrUsernameLen"
+msgstr "El nombre de usuario debe tener al menos 4 caracteres"
+
+msgid "Mailboxes_JsErrPwdLen"
+msgstr "La contraseña debe tener al menos 8 caracteres"
+
+msgid "Mailboxes_JsErrPwdMatch"
+msgstr "Las contraseñas no coinciden"
+
+msgid "Aliases_Title"
+msgstr "Alias"
+
+msgid "Aliases_Subtitle"
+msgstr "Gestione los reenvíos de correo y alias."
+
+msgid "Aliases_AddAliasBtn"
+msgstr "Agregar Alias"
+
+msgid "Aliases_FilterDomain"
+msgstr "Filtrar por Dominio:"
+
+msgid "Aliases_AllDomains"
+msgstr "Todos los Dominios"
+
+msgid "Aliases_ClearFilter"
+msgstr "Limpiar Filtro"
+
+msgid "Aliases_TblAlias"
+msgstr "Alias"
+
+msgid "Aliases_TblTo"
+msgstr "Para"
+
+msgid "Aliases_TblDomain"
+msgstr "Dominio"
+
+msgid "Aliases_TblActive"
+msgstr "Activo"
+
+msgid "Aliases_TblModified"
+msgstr "Modificado"
+
+msgid "Aliases_Yes"
+msgstr "Sí"
+
+msgid "Aliases_No"
+msgstr "No"
+
+msgid "Aliases_Edit"
+msgstr "Editar"
+
+msgid "Aliases_Delete"
+msgstr "Eliminar"
+
+msgid "Aliases_NoAliasesFound"
+msgstr "No se encontraron alias."
+
+msgid "Aliases_AlertDeleteConfirm"
+msgstr "¿Está seguro de que desea eliminar el alias \"${address}\"?"
+
+msgid "Aliases_AlertDeleteSuccess"
+msgstr "¡Alias eliminado con éxito!"
+
+msgid "Aliases_AlertDeleteError"
+msgstr "Error al eliminar el alias: "
+
+msgid "Aliases_AlertRequestError"
+msgstr "Error de solicitud: "
+
+msgid "Aliases_AddTitle"
+msgstr "Agregar Nuevo Alias"
+
+msgid "Aliases_AddSubtitle"
+msgstr "Cree un nuevo alias (reenvío) para su dominio."
+
+msgid "Aliases_EditTitle"
+msgstr "Editar Alias"
+
+msgid "Aliases_EditSubtitle"
+msgstr "Actualizar la configuración del alias."
+
+msgid "Aliases_ErrorTitle"
+msgstr "Error"
+
+msgid "Aliases_InfoTitle"
+msgstr "Información del Alias"
+
+msgid "Aliases_LblAliasAddress"
+msgstr "Dirección del Alias"
+
+msgid "Aliases_LblAlias"
+msgstr "Alias"
+
+msgid "Aliases_PhAlias"
+msgstr "alias"
+
+msgid "Aliases_HelpAlias"
+msgstr "Ingrese el prefijo antes de @. Use \"*\" para un alias catch-all."
+
+msgid "Aliases_LblDomain"
+msgstr "Dominio"
+
+msgid "Aliases_PhSelectDomain"
+msgstr "Seleccione un dominio"
+
+msgid "Aliases_LblTo"
+msgstr "Para (Destinatarios)"
+
+msgid "Aliases_PhTo"
+msgstr "destinatario@ejemplo.com"
+
+msgid "Aliases_HelpTo"
+msgstr "Ingrese una o más direcciones de correo. Una entrada por línea.<br>Para crear un alias global, ingrese \"*\" en el campo Alias.<br>Para reenviar de un dominio a otro, use \"*@dominio.tld\" en el campo Para (verifique la configuración específica de Postfix)."
+
+msgid "Aliases_HelpToEdit"
+msgstr "Ingrese una o más direcciones de correo. Una dirección por línea."
+
+msgid "Aliases_HelpAddressEdit"
+msgstr "La dirección del alias no se puede cambiar. Para renombrarla, elimínela y cree un nuevo alias."
+
+msgid "Aliases_LblActive"
+msgstr "Activo"
+
+msgid "Aliases_BtnCancel"
+msgstr "Cancelar"
+
+msgid "Aliases_BtnCreate"
+msgstr "Crear Alias"
+
+msgid "Aliases_BtnSave"
+msgstr "Guardar Cambios"
+
+msgid "AliasDomains_Title"
+msgstr "Alias de Dominio"
+
+msgid "AliasDomains_Subtitle"
+msgstr "Gestione alias de dominio (reenvío de dominio)."
+
+msgid "AliasDomains_AddAliasDomainBtn"
+msgstr "Agregar Alias de Dominio"
+
+msgid "AliasDomains_TblAliasDomain"
+msgstr "Alias de Dominio"
+
+msgid "AliasDomains_TblTargetDomain"
+msgstr "Dominio de Destino"
+
+msgid "AliasDomains_TblActive"
+msgstr "Activo"
+
+msgid "AliasDomains_TblModified"
+msgstr "Modificado"
+
+msgid "AliasDomains_Yes"
+msgstr "Sí"
+
+msgid "AliasDomains_No"
+msgstr "No"
+
+msgid "AliasDomains_Edit"
+msgstr "Editar"
+
+msgid "AliasDomains_Delete"
+msgstr "Eliminar"
+
+msgid "AliasDomains_NoAliasDomainsFound"
+msgstr "No se encontraron alias de dominio."
+
+msgid "AliasDomains_AlertDeleteConfirm"
+msgstr "¿Está seguro de que desea eliminar el alias de dominio \"${aliasDomain}\"?"
+
+msgid "AliasDomains_AlertDeleteSuccess"
+msgstr "¡Alias de dominio eliminado con éxito!"
+
+msgid "AliasDomains_AlertDeleteError"
+msgstr "Error al eliminar el alias de dominio: "
+
+msgid "AliasDomains_AlertRequestError"
+msgstr "Error de solicitud: "
+
+msgid "AliasDomains_AddTitle"
+msgstr "Agregar Nuevo Alias de Dominio"
+
+msgid "AliasDomains_AddSubtitle"
+msgstr "Cree un reenvío completo de dominio."
+
+msgid "AliasDomains_EditTitle"
+msgstr "Editar Alias de Dominio"
+
+msgid "AliasDomains_EditSubtitle"
+msgstr "Editar la configuración del Alias de Dominio."
+
+msgid "AliasDomains_ErrorTitle"
+msgstr "Error"
+
+msgid "AliasDomains_InfoTitle"
+msgstr "Información del Alias de Dominio"
+
+msgid "AliasDomains_LblAliasDomain"
+msgstr "Alias de Dominio"
+
+msgid "AliasDomains_PhSelectSource"
+msgstr "Seleccione el dominio de origen"
+
+msgid "AliasDomains_HelpAliasDomainAdd"
+msgstr "El dominio que será reenviado."
+
+msgid "AliasDomains_HelpAliasDomainEdit"
+msgstr "El dominio de origen no se puede cambiar."
+
+msgid "AliasDomains_LblTargetDomain"
+msgstr "Dominio de Destino"
+
+msgid "AliasDomains_PhSelectTarget"
+msgstr "Seleccione el dominio de destino"
+
+msgid "AliasDomains_HelpTargetDomain"
+msgstr "El dominio donde se entregarán los correos."
+
+msgid "AliasDomains_LblActive"
+msgstr "Activo"
+
+msgid "AliasDomains_BtnCancel"
+msgstr "Cancelar"
+
+msgid "AliasDomains_BtnCreate"
+msgstr "Crear Alias de Dominio"
+
+msgid "AliasDomains_BtnSave"
+msgstr "Guardar Cambios"
+
+msgid "Admins_Title"
+msgstr "Administradores"
+
+msgid "Admins_Subtitle"
+msgstr "Gestione los administradores del sistema."
+
+msgid "Admins_AddAdminBtn"
+msgstr "Agregar Administrador"
+
+msgid "Admins_TblAdmin"
+msgstr "Administrador"
+
+msgid "Admins_TblDomains"
+msgstr "Dominios"
+
+msgid "Admins_TblActive"
+msgstr "Activo"
+
+msgid "Admins_TblModified"
+msgstr "Modificado"
+
+msgid "Admins_SuperAdmin"
+msgstr "Super Administrador"
+
+msgid "Admins_Yes"
+msgstr "Sí"
+
+msgid "Admins_No"
+msgstr "No"
+
+msgid "Admins_Edit"
+msgstr "Editar"
+
+msgid "Admins_Delete"
+msgstr "Eliminar"
+
+msgid "Admins_NoAdminsFound"
+msgstr "No se encontraron administradores."
+
+msgid "Admins_AlertDeleteConfirm"
+msgstr "¿Está seguro de que desea eliminar al administrador \"${username}\"?"
+
+msgid "Admins_AlertDeleteSuccess"
+msgstr "¡Administrador eliminado con éxito!"
+
+msgid "Admins_AlertDeleteError"
+msgstr "Error al eliminar al administrador: "
+
+msgid "Admins_AlertRequestError"
+msgstr "Error de solicitud: "
+
+msgid "Admins_AddTitle"
+msgstr "Agregar Administrador"
+
+msgid "Admins_AddSubtitle"
+msgstr "Cree un nuevo administrador para gestionar el sistema."
+
+msgid "Admins_EditTitle"
+msgstr "Editar Administrador"
+
+msgid "Admins_EditSubtitle"
+msgstr "Actualizar la configuración del administrador."
+
+msgid "Admins_ErrorTitle"
+msgstr "Error"
+
+msgid "Admins_DetailsTitle"
+msgstr "Detalles del Administrador"
+
+msgid "Admins_LblUsername"
+msgstr "Nombre de usuario (Correo)"
+
+msgid "Admins_PhUsername"
+msgstr "admin@ejemplo.com"
+
+msgid "Admins_LblEnabled"
+msgstr "Habilitado"
+
+msgid "Admins_LblSuperAdmin"
+msgstr "Super Administrador"
+
+msgid "Admins_TitleSuperAdmin"
+msgstr "Los superadministradores tienen acceso a todos los dominios y pueden gestionar otros administradores."
+
+msgid "Admins_PwdTitle"
+msgstr "CONTRASEÑA"
+
+msgid "Admins_PwdChangeTitle"
+msgstr "CAMBIAR CONTRASEÑA (Opcional)"
+
+msgid "Admins_PhNewPwd"
+msgstr "Nueva contraseña (mín. 8 caracteres)"
+
+msgid "Admins_PhRepeatPwd"
+msgstr "Repita la nueva contraseña"
+
+msgid "Admins_BtnGenerate"
+msgstr "GENERAR"
+
+msgid "Admins_DomainsTitle"
+msgstr "Dominios"
+
+msgid "Admins_DomainsSubtitle"
+msgstr "Seleccione los dominios que este administrador puede gestionar."
+
+msgid "Admins_DomainsNone"
+msgstr "No hay dominios disponibles."
+
+msgid "Admins_BtnCancel"
+msgstr "Cancelar"
+
+msgid "Admins_BtnSaveNew"
+msgstr "Guardar Administrador"
+
+msgid "Admins_BtnSaveChanges"
+msgstr "Guardar Cambios"
+
+msgid "Admins_EditLblAdmin"
+msgstr "Administrador"
+
+msgid "Admins_EditUsernameHelp"
+msgstr "El nombre de usuario no se puede cambiar"
+
+msgid "Admins_JsPwdMinLen"
+msgstr "La contraseña debe tener al menos 8 caracteres de largo"
+
+msgid "Admins_JsPwdNoMatch"
+msgstr "Las contraseñas no coinciden"
+
+msgid "Admins_JsPwdGenFail"
+msgstr "Error al generar la contraseña. Por favor, inténtelo de nuevo."
+
+msgid "Admins_JsPwdWeak"
+msgstr "Débil"
+
+msgid "Admins_JsPwdMedium"
+msgstr "Aceptable"
+
+msgid "Admins_JsPwdGood"
+msgstr "Buena"
+
+msgid "Admins_JsPwdStrong"
+msgstr "Fuerte"
+
+msgid "Admins_JsPwdMatchOk"
+msgstr "✓ Las contraseñas coinciden"
+
+msgid "Admins_JsPwdMatchFail"
+msgstr "✗ Las contraseñas no coinciden"
+
+msgid "Admins_JsPwdStrength"
+msgstr "Fuerza de la Contraseña"
+
+msgid "Fetchmail_AddTitle"
+msgstr "Agregar Fetchmail"
+
+msgid "Fetchmail_AddSubtitle"
+msgstr "Configure la recuperación de mensajes desde cuentas externas."
+
+msgid "Fetchmail_ErrorTitle"
+msgstr "Error"
+
+msgid "Fetchmail_SectionAccount"
+msgstr "Configuración de Cuenta"
+
+msgid "Fetchmail_LblAccount"
+msgstr "Cuenta"
+
+msgid "Fetchmail_PhSelectAccount"
+msgstr "Seleccione una cuenta..."
+
+msgid "Fetchmail_HelpAccount"
+msgstr "Cuenta de correo local"
+
+msgid "Fetchmail_LblServer"
+msgstr "Servidor"
+
+msgid "Fetchmail_HelpServer"
+msgstr "Servidor remoto"
+
+msgid "Fetchmail_LblPort"
+msgstr "Puerto"
+
+msgid "Fetchmail_HelpPort"
+msgstr "Puerto remoto (0: predeterminado)"
+
+msgid "Fetchmail_LblAuth"
+msgstr "Autenticación"
+
+msgid "Fetchmail_HelpAuth"
+msgstr "Casi siempre 'password'"
+
+msgid "Fetchmail_LblUsername"
+msgstr "Nombre de usuario"
+
+msgid "Fetchmail_HelpUsername"
+msgstr "Nombre de usuario remoto"
+
+msgid "Fetchmail_LblPassword"
+msgstr "Contraseña"
+
+msgid "Fetchmail_HelpPassword"
+msgstr "Contraseña remota"
+
+msgid "Fetchmail_LblFolder"
+msgstr "Carpeta"
+
+msgid "Fetchmail_HelpFolder"
+msgstr "Carpeta remota"
+
+msgid "Fetchmail_PollTime"
+msgstr "Tiempo de consulta"
+
+msgid "Fetchmail_HelpPoll"
+msgstr "Revisar cada ... minutos"
+
+msgid "Fetchmail_LblProtocol"
+msgstr "Protocolo"
+
+msgid "Fetchmail_HelpProtocol"
+msgstr "Protocolo a usar"
+
+msgid "Fetchmail_LblFetchAll"
+msgstr "Recuperar Todo (nuevos y antiguos)"
+
+msgid "Fetchmail_LblKeep"
+msgstr "Mantener mensajes en el servidor remoto"
+
+msgid "Fetchmail_LblUseSSL"
+msgstr "Habilitar SSL"
+
+msgid "Fetchmail_LblSslCertCk"
+msgstr "Verificación de Certificado SSL"
+
+msgid "Fetchmail_LblEnabled"
+msgstr "Habilitado"
+
+msgid "Fetchmail_BtnCancel"
+msgstr "Cancelar"
+
+msgid "Fetchmail_BtnCreate"
+msgstr "Crear Nuevo Registro"
+

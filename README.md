@@ -9,7 +9,7 @@ Professional Email Administration System built with Go, Echo, and Tailwind CSS.
 *   **Modern Design**: Clean and responsive interface built with Tailwind CSS.
 *   **Security**: Strong password hashing and protection against common attacks.
 *   **Integrated CLI**: Command-line tools for automation and access recovery.
-*   **Internationalization (i18n)**: Native support for Portuguese (PT), English (EN), and Spanish (ES) with dynamic locale loading.
+*   **Internationalization (i18n)**: Multi-language support (PT, EN, ES) powered by [gotext](https://github.com/leonelquinteros/gotext) with GNU Gettext `.po` files and dynamic locale loading.
 
 
 ## 🛠 Development Tools

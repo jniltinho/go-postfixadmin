@@ -1,0 +1,1137 @@
+# en translations
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: en\n"
+
+msgid "Vacation_Title"
+msgstr "Auto-Reply"
+
+msgid "Vacation_Subtitle"
+msgstr "Configure your temporary out-of-office message."
+
+msgid "Vacation_Error"
+msgstr "Error: {{.Error}}"
+
+msgid "Vacation_Success"
+msgstr "Success: {{.Message}}"
+
+msgid "Vacation_ConfigTitle"
+msgstr "Auto-Reply Configuration"
+
+msgid "Vacation_StartDate"
+msgstr "Start Date"
+
+msgid "Vacation_EndDate"
+msgstr "End Date"
+
+msgid "Vacation_ReplyOption"
+msgstr "Reply Option"
+
+msgid "Vacation_ReplyOnce"
+msgstr "Reply once"
+
+msgid "Vacation_ReplyEveryDay"
+msgstr "Reply every day"
+
+msgid "Vacation_ReplyEvery7Days"
+msgstr "Reply every 7 days"
+
+msgid "Vacation_Subject"
+msgstr "Subject"
+
+msgid "Vacation_Subject_Placeholder"
+msgstr "Out of Office"
+
+msgid "Vacation_MessageBody"
+msgstr "Message Body"
+
+msgid "Vacation_MessageBody_Placeholder"
+msgstr "I will be out of the office from <date> to <date>.\nIn case of urgency, please contact <contact person>."
+
+msgid "Vacation_Active"
+msgstr "Activate Auto-Reply"
+
+msgid "Vacation_CancelBtn"
+msgstr "Cancel"
+
+msgid "Vacation_RemoveBtn"
+msgstr "Remove Message"
+
+msgid "Vacation_RemoveConfirm"
+msgstr "Are you sure you want to remove the auto-reply?"
+
+msgid "Vacation_SaveBtn"
+msgstr "Edit / Set Message"
+
+msgid "Login_Title"
+msgstr "Login"
+
+msgid "Login_AdminSubtitle"
+msgstr "Professional Email Administration"
+
+msgid "Login_Username"
+msgstr "Username"
+
+msgid "Login_UsernamePlaceholder"
+msgstr "admin@domain.com"
+
+msgid "Login_Password"
+msgstr "Password"
+
+msgid "Login_PasswordPlaceholder"
+msgstr "••••••••"
+
+msgid "Authenticate"
+msgstr "Authenticate"
+
+msgid "Login_UserLinkText1"
+msgstr "Users should "
+
+msgid "Login_UserLinkText2"
+msgstr "click here"
+
+msgid "Login_UserLinkText3"
+msgstr " to access the user section."
+
+msgid "Login_SecureSystem"
+msgstr "Secure Administrative Access System"
+
+msgid "UserLogin_Title"
+msgstr "User Login"
+
+msgid "UserLogin_Subtitle"
+msgstr "User Portal"
+
+msgid "UserLogin_Email"
+msgstr "E-mail"
+
+msgid "UserLogin_EmailPlaceholder"
+msgstr "user@domain.com"
+
+msgid "UserLogin_LoginBtn"
+msgstr "Login"
+
+msgid "UserLogin_AccessPortal"
+msgstr "User Access Portal"
+
+msgid "DashboardAdmin_Title"
+msgstr "Dashboard"
+
+msgid "DashboardAdmin_Overview"
+msgstr "Overview"
+
+msgid "DashboardAdmin_OverviewDesc"
+msgstr "Monitoring your Email server infrastructure."
+
+msgid "DashboardAdmin_DomainsTitle"
+msgstr "Active"
+
+msgid "DashboardAdmin_DomainsSubtitle"
+msgstr "Total Domains"
+
+msgid "DashboardAdmin_DomainsLabel"
+msgstr "available"
+
+msgid "DashboardAdmin_MailboxesTitle"
+msgstr "In Use"
+
+msgid "DashboardAdmin_MailboxesSubtitle"
+msgstr "Email Accounts"
+
+msgid "DashboardAdmin_MailboxesLabel"
+msgstr "accounts"
+
+msgid "DashboardAdmin_NewDomain"
+msgstr "New Domain?"
+
+msgid "DashboardAdmin_NewDomainDesc"
+msgstr "Create a new domain in seconds."
+
+msgid "DashboardAdmin_AddDomainBtn"
+msgstr "Add Domain"
+
+msgid "DashboardAdmin_AddDomainDisabled"
+msgstr "Only Superadmins can create domains"
+
+msgid "DashboardAdmin_NewEmail"
+msgstr "New Email?"
+
+msgid "DashboardAdmin_NewEmailDesc"
+msgstr "Create a new account in seconds."
+
+msgid "DashboardAdmin_AddEmailBtn"
+msgstr "Add Email"
+
+msgid "DashboardAdmin_RecentActivity"
+msgstr "Recent Activity"
+
+msgid "DashboardAdmin_ViewLogs"
+msgstr "View logs"
+
+msgid "DashboardAdmin_TblDateTime"
+msgstr "Date/Time"
+
+msgid "DashboardAdmin_TblAdmin"
+msgstr "Administrator"
+
+msgid "DashboardAdmin_TblDomain"
+msgstr "Domain"
+
+msgid "DashboardAdmin_TblAction"
+msgstr "Action"
+
+msgid "DashboardAdmin_TblDesc"
+msgstr "Description"
+
+msgid "DashboardAdmin_NoActivity"
+msgstr "No recent activity found"
+
+msgid "DashboardUser_Title"
+msgstr "User Dashboard"
+
+msgid "DashboardUser_MyAccount"
+msgstr "My Account"
+
+msgid "DashboardUser_MyAccountDesc"
+msgstr "Manage your password and forwarding settings."
+
+msgid "DashboardUser_ConfigureVacation"
+msgstr "Configure Vacation"
+
+msgid "DashboardUser_ForwardingTitle"
+msgstr "Configure Forwarding"
+
+msgid "DashboardUser_ForwardingDesc"
+msgstr "Configure where your emails should be delivered. Enter one address per line."
+
+msgid "DashboardUser_ForwardTo"
+msgstr "Forward To"
+
+msgid "DashboardUser_ForwardToPlaceholder"
+msgstr "destinatario@example.com"
+
+msgid "DashboardUser_ForwardingHelp1"
+msgstr "To receive locally and forward, include your own address in the list."
+
+msgid "DashboardUser_ForwardingHelp2"
+msgstr "To disable forwarding, just leave your own address."
+
+msgid "DashboardUser_SaveForwarding"
+msgstr "Save Forwarding"
+
+msgid "DashboardUser_PasswordTitle"
+msgstr "Change Password"
+
+msgid "DashboardUser_PasswordDesc"
+msgstr "Update your mailbox password."
+
+msgid "DashboardUser_CurrentPassword"
+msgstr "Current Password"
+
+msgid "DashboardUser_CurrentPasswordPlaceholder"
+msgstr "Your current password"
+
+msgid "DashboardUser_NewPassword"
+msgstr "New Password"
+
+msgid "DashboardUser_NewPasswordPlaceholder"
+msgstr "Min. 8 characters"
+
+msgid "DashboardUser_ConfirmPassword"
+msgstr "Confirm Password"
+
+msgid "DashboardUser_ConfirmPasswordPlaceholder"
+msgstr "Repeat new password"
+
+msgid "DashboardUser_Generate"
+msgstr "Generate"
+
+msgid "DashboardUser_GenerateHelp"
+msgstr "Need a strong password?"
+
+msgid "DashboardUser_Strength"
+msgstr "Strength"
+
+msgid "DashboardUser_ChangePasswordBtn"
+msgstr "Change Password"
+
+msgid "Layout_System"
+msgstr "System"
+
+msgid "Layout_Overview"
+msgstr "Overview"
+
+msgid "Layout_Admin"
+msgstr "Admin"
+
+msgid "Layout_SuperAdmin"
+msgstr "SUPERADMIN"
+
+msgid "Layout_Logout"
+msgstr "Logout"
+
+msgid "LayoutAdmin_Dashboard"
+msgstr "Dashboard"
+
+msgid "LayoutAdmin_Mailboxes"
+msgstr "Mailboxes"
+
+msgid "LayoutAdmin_Aliases"
+msgstr "Aliases"
+
+msgid "LayoutAdmin_MyDomains"
+msgstr "My Domains"
+
+msgid "LayoutAdmin_DomainAliases"
+msgstr "Domain Aliases"
+
+msgid "LayoutAdmin_SettingsHeader"
+msgstr "Settings"
+
+msgid "LayoutAdmin_Administrators"
+msgstr "Administrators"
+
+msgid "LayoutAdmin_Fetchmail"
+msgstr "Fetchmail"
+
+msgid "LayoutAdmin_Settings"
+msgstr "Settings"
+
+msgid "LayoutUser_UserPortal"
+msgstr "User Portal"
+
+msgid "LayoutUser_User"
+msgstr "USER"
+
+msgid "Domains_Title"
+msgstr "Domains"
+
+msgid "Domains_Subtitle"
+msgstr "Manage and monitor your registered email domains."
+
+msgid "Domains_AddDomainBtn"
+msgstr "Add Domain"
+
+msgid "Domains_TblDomain"
+msgstr "Domain"
+
+msgid "Domains_TblDescription"
+msgstr "Description"
+
+msgid "Domains_TblAliases"
+msgstr "Aliases"
+
+msgid "Domains_TblMailboxes"
+msgstr "Email Accounts"
+
+msgid "Domains_TblBackupMX"
+msgstr "Backup MX"
+
+msgid "Domains_TblActive"
+msgstr "Active"
+
+msgid "Domains_TblModified"
+msgstr "Modified"
+
+msgid "Domains_TblPassExpires"
+msgstr "Pass Expires"
+
+msgid "Domains_Yes"
+msgstr "Yes"
+
+msgid "Domains_No"
+msgstr "No"
+
+msgid "Domains_Edit"
+msgstr "Edit"
+
+msgid "Domains_Delete"
+msgstr "Delete"
+
+msgid "Domains_ReadOnly"
+msgstr "Read Only"
+
+msgid "Domains_NoDomainsFound"
+msgstr "No domains found."
+
+msgid "Domains_AlertNoMailboxes"
+msgstr "The domain \"${domainName}\" has no registered mailboxes."
+
+msgid "Domains_AlertDeleteConfirm"
+msgstr "Are you sure you want to delete the domain \"${domainName}\"?\n\nWARNING: All associated aliases and mailboxes will also be deleted!"
+
+msgid "Domains_AlertDeleteSuccess"
+msgstr "Domain deleted successfully!"
+
+msgid "Domains_AlertDeleteError"
+msgstr "Error deleting domain: "
+
+msgid "Domains_AlertRequestError"
+msgstr "Request error: "
+
+msgid "Domains_AddTitle"
+msgstr "Add New Domain"
+
+msgid "Domains_AddSubtitle"
+msgstr "Register a new email domain in the system."
+
+msgid "Domains_EditTitle"
+msgstr "Edit Domain"
+
+msgid "Domains_EditSubtitle"
+msgstr "Update email domain configuration."
+
+msgid "Domains_ErrorTitle"
+msgstr "Error"
+
+msgid "Domains_InfoTitle"
+msgstr "Basic Information"
+
+msgid "Domains_LblDomain"
+msgstr "Domain Name"
+
+msgid "Domains_PhDomain"
+msgstr "example.com"
+
+msgid "Domains_HelpDomain"
+msgstr "Enter a valid domain name (e.g., example.com)"
+
+msgid "Domains_HelpDomainEdit"
+msgstr "The domain name cannot be changed"
+
+msgid "Domains_LblDescription"
+msgstr "Description"
+
+msgid "Domains_PhDescription"
+msgstr "Optional description for this domain"
+
+msgid "Domains_LblActive"
+msgstr "Active Domain"
+
+msgid "Domains_AdvancedTitle"
+msgstr "Advanced Settings"
+
+msgid "Domains_LblAliases"
+msgstr "Alias Limit"
+
+msgid "Domains_HelpAliases"
+msgstr "Maximum number of aliases (0 = unlimited)"
+
+msgid "Domains_LblMailboxes"
+msgstr "Mailbox Limit"
+
+msgid "Domains_HelpMailboxes"
+msgstr "Maximum number of mailboxes (0 = unlimited)"
+
+msgid "Domains_LblQuota"
+msgstr "Quota Limit (MB)"
+
+msgid "Domains_LblQuotaEdit"
+msgstr "Domain Quota (MB)"
+
+msgid "Domains_HelpQuota"
+msgstr "Maximum quota limit in MB (0 = unlimited)"
+
+msgid "Domains_HelpQuotaEdit"
+msgstr "Maximum quota in MB (0 = unlimited)"
+
+msgid "Domains_LblPasswordExpiry"
+msgstr "Password Expiry (days)"
+
+msgid "Domains_HelpPasswordExpiry"
+msgstr "Password expiry in days (empty = never)"
+
+msgid "Domains_LblBackupMx"
+msgstr "Enable Backup MX"
+
+msgid "Domains_HelpBackupMx"
+msgstr "Use this server as a backup mail exchanger"
+
+msgid "Domains_HelpBackupMxEdit"
+msgstr "Use this server as a backup email server"
+
+msgid "Domains_BtnCancel"
+msgstr "Cancel"
+
+msgid "Domains_BtnSave"
+msgstr "Save Domain"
+
+msgid "Domains_BtnUpdate"
+msgstr "Update Domain"
+
+msgid "Mailboxes_Title"
+msgstr "Email Accounts"
+
+msgid "Mailboxes_Subtitle"
+msgstr "Manage your email accounts"
+
+msgid "Mailboxes_AddMailboxBtn"
+msgstr "Add Email Account"
+
+msgid "Mailboxes_FilterDomain"
+msgstr "Filter by Domain:"
+
+msgid "Mailboxes_AllDomains"
+msgstr "All Domains"
+
+msgid "Mailboxes_ClearFilter"
+msgstr "Clear Filter"
+
+msgid "Mailboxes_TblEmail"
+msgstr "Email"
+
+msgid "Mailboxes_TblName"
+msgstr "Name"
+
+msgid "Mailboxes_TblDomain"
+msgstr "Domain"
+
+msgid "Mailboxes_TblQuota"
+msgstr "Quota"
+
+msgid "Mailboxes_TblActive"
+msgstr "Active"
+
+msgid "Mailboxes_TblModified"
+msgstr "Modified"
+
+msgid "Mailboxes_Unlimited"
+msgstr "Unlimited"
+
+msgid "Mailboxes_Yes"
+msgstr "Yes"
+
+msgid "Mailboxes_No"
+msgstr "No"
+
+msgid "Mailboxes_Edit"
+msgstr "Edit"
+
+msgid "Mailboxes_Delete"
+msgstr "Delete"
+
+msgid "Mailboxes_NoMailboxesFound"
+msgstr "No Email Accounts found."
+
+msgid "Mailboxes_AlertDeleteConfirm"
+msgstr "Are you sure you want to delete the mailbox \"${username}\"?"
+
+msgid "Mailboxes_AlertDeleteSuccess"
+msgstr "Mailbox deleted successfully!"
+
+msgid "Mailboxes_AlertDeleteError"
+msgstr "Error deleting account: "
+
+msgid "Mailboxes_AlertRequestError"
+msgstr "Request error: "
+
+msgid "Mailboxes_AddTitle"
+msgstr "Add New Email Account"
+
+msgid "Mailboxes_AddSubtitle"
+msgstr "Create a new mailbox for email delivery."
+
+msgid "Mailboxes_EditTitle"
+msgstr "Edit Email Account"
+
+msgid "Mailboxes_EditSubtitle"
+msgstr "Update mailbox settings."
+
+msgid "Mailboxes_ErrorTitle"
+msgstr "Error"
+
+msgid "Mailboxes_InfoTitle"
+msgstr "Email Account"
+
+msgid "Mailboxes_LblUsername"
+msgstr "Username"
+
+msgid "Mailboxes_PhUsername"
+msgstr "user"
+
+msgid "Mailboxes_HelpUsername"
+msgstr "Part before @ (minimum 4 characters, lowercase only)"
+
+msgid "Mailboxes_HelpUsernameTitle"
+msgstr "Minimum 4 characters, lowercase only"
+
+msgid "Mailboxes_LblDomain"
+msgstr "Domain"
+
+msgid "Mailboxes_PhSelectDomain"
+msgstr "Select a domain..."
+
+msgid "Mailboxes_HelpDomain"
+msgstr "Part after @"
+
+msgid "Mailboxes_LblEmailAddress"
+msgstr "Email Address"
+
+msgid "Mailboxes_HelpEmailAddressEdit"
+msgstr "The email address cannot be changed"
+
+msgid "Mailboxes_LblFullEmailPreview"
+msgstr "Full Email Address"
+
+msgid "Mailboxes_LblDisplayName"
+msgstr "Display Name"
+
+msgid "Mailboxes_PhDisplayName"
+msgstr "John Doe"
+
+msgid "Mailboxes_HelpDisplayName"
+msgstr "Full name displayed in the email client"
+
+msgid "Mailboxes_LblActive"
+msgstr "Active Account"
+
+msgid "Mailboxes_LblEnabled"
+msgstr "Enabled"
+
+msgid "Mailboxes_PwdTitle"
+msgstr "PASSWORD"
+
+msgid "Mailboxes_PwdChangeTitle"
+msgstr "CHANGE PASSWORD (Optional)"
+
+msgid "Mailboxes_PhNewPwd"
+msgstr "New password (min 8 characters)"
+
+msgid "Mailboxes_PhRepeatPwd"
+msgstr "Repeat new password"
+
+msgid "Mailboxes_BtnGenerate"
+msgstr "GENERATE"
+
+msgid "Mailboxes_PwdStrength"
+msgstr "Password Strength"
+
+msgid "Mailboxes_PwdStrengthShort"
+msgstr "Strength"
+
+msgid "Mailboxes_AdvancedTitle"
+msgstr "Advanced Settings"
+
+msgid "Mailboxes_LblQuota"
+msgstr "Quota (MB)"
+
+msgid "Mailboxes_HelpQuota"
+msgstr "Storage limit (0 = unlimited)"
+
+msgid "Mailboxes_LblStatus"
+msgstr "Status"
+
+msgid "Mailboxes_LblSmtpActive"
+msgstr "SMTP Active (can send email)"
+
+msgid "Mailboxes_LblAlternativeEmail"
+msgstr "Alternative Email"
+
+msgid "Mailboxes_PhAlternativeEmail"
+msgstr "alternative@email.com"
+
+msgid "Mailboxes_BtnCancel"
+msgstr "Cancel"
+
+msgid "Mailboxes_BtnSave"
+msgstr "Save Email Account"
+
+msgid "Mailboxes_BtnUpdate"
+msgstr "Update Email Account"
+
+msgid "Mailboxes_JsPwdGenFail"
+msgstr "Failed to generate password. Please try again."
+
+msgid "Mailboxes_JsPwdWeak"
+msgstr "Weak"
+
+msgid "Mailboxes_JsPwdFair"
+msgstr "Fair"
+
+msgid "Mailboxes_JsPwdGood"
+msgstr "Good"
+
+msgid "Mailboxes_JsPwdStrong"
+msgstr "Strong"
+
+msgid "Mailboxes_JsPwdMatchOk"
+msgstr "✓ Passwords match"
+
+msgid "Mailboxes_JsPwdMatchFail"
+msgstr "✗ Passwords do not match"
+
+msgid "Mailboxes_JsErrUsernameLen"
+msgstr "Username must be at least 4 characters"
+
+msgid "Mailboxes_JsErrPwdLen"
+msgstr "Password must be at least 8 characters"
+
+msgid "Mailboxes_JsErrPwdMatch"
+msgstr "Passwords do not match"
+
+msgid "Aliases_Title"
+msgstr "Aliases"
+
+msgid "Aliases_Subtitle"
+msgstr "Manage email forwarders and aliases."
+
+msgid "Aliases_AddAliasBtn"
+msgstr "Add Alias"
+
+msgid "Aliases_FilterDomain"
+msgstr "Filter by Domain:"
+
+msgid "Aliases_AllDomains"
+msgstr "All Domains"
+
+msgid "Aliases_ClearFilter"
+msgstr "Clear Filter"
+
+msgid "Aliases_TblAlias"
+msgstr "Alias"
+
+msgid "Aliases_TblTo"
+msgstr "To"
+
+msgid "Aliases_TblDomain"
+msgstr "Domain"
+
+msgid "Aliases_TblActive"
+msgstr "Active"
+
+msgid "Aliases_TblModified"
+msgstr "Modified"
+
+msgid "Aliases_Yes"
+msgstr "Yes"
+
+msgid "Aliases_No"
+msgstr "No"
+
+msgid "Aliases_Edit"
+msgstr "Edit"
+
+msgid "Aliases_Delete"
+msgstr "Delete"
+
+msgid "Aliases_NoAliasesFound"
+msgstr "No aliases found."
+
+msgid "Aliases_AlertDeleteConfirm"
+msgstr "Are you sure you want to delete the alias \"${address}\"?"
+
+msgid "Aliases_AlertDeleteSuccess"
+msgstr "Alias deleted successfully!"
+
+msgid "Aliases_AlertDeleteError"
+msgstr "Error deleting alias: "
+
+msgid "Aliases_AlertRequestError"
+msgstr "Request error: "
+
+msgid "Aliases_AddTitle"
+msgstr "Add New Alias"
+
+msgid "Aliases_AddSubtitle"
+msgstr "Create a new alias (forwarder) for your domain."
+
+msgid "Aliases_EditTitle"
+msgstr "Edit Alias"
+
+msgid "Aliases_EditSubtitle"
+msgstr "Update the alias configuration."
+
+msgid "Aliases_ErrorTitle"
+msgstr "Error"
+
+msgid "Aliases_InfoTitle"
+msgstr "Alias Information"
+
+msgid "Aliases_LblAliasAddress"
+msgstr "Alias Address"
+
+msgid "Aliases_LblAlias"
+msgstr "Alias"
+
+msgid "Aliases_PhAlias"
+msgstr "alias"
+
+msgid "Aliases_HelpAlias"
+msgstr "Enter the prefix before @. Use \"*\" for a catch-all alias."
+
+msgid "Aliases_LblDomain"
+msgstr "Domain"
+
+msgid "Aliases_PhSelectDomain"
+msgstr "Select a domain"
+
+msgid "Aliases_LblTo"
+msgstr "To (Recipients)"
+
+msgid "Aliases_PhTo"
+msgstr "recipient@example.com"
+
+msgid "Aliases_HelpTo"
+msgstr "Enter one or more email addresses. One entry per line.<br>To create a global alias, enter \"*\" in the Alias field.<br>To forward from one domain to another, use \"*@domain.tld\" in the To field (check specific Postfix configuration)."
+
+msgid "Aliases_HelpToEdit"
+msgstr "Enter one or more email addresses. One address per line."
+
+msgid "Aliases_HelpAddressEdit"
+msgstr "The alias address cannot be changed. To rename it, delete and create a new alias."
+
+msgid "Aliases_LblActive"
+msgstr "Active"
+
+msgid "Aliases_BtnCancel"
+msgstr "Cancel"
+
+msgid "Aliases_BtnCreate"
+msgstr "Create Alias"
+
+msgid "Aliases_BtnSave"
+msgstr "Save Changes"
+
+msgid "AliasDomains_Title"
+msgstr "Alias Domains"
+
+msgid "AliasDomains_Subtitle"
+msgstr "Manage alias domains (domain forwarding)."
+
+msgid "AliasDomains_AddAliasDomainBtn"
+msgstr "Add Alias Domain"
+
+msgid "AliasDomains_TblAliasDomain"
+msgstr "Alias Domain"
+
+msgid "AliasDomains_TblTargetDomain"
+msgstr "Target Domain"
+
+msgid "AliasDomains_TblActive"
+msgstr "Active"
+
+msgid "AliasDomains_TblModified"
+msgstr "Modified"
+
+msgid "AliasDomains_Yes"
+msgstr "Yes"
+
+msgid "AliasDomains_No"
+msgstr "No"
+
+msgid "AliasDomains_Edit"
+msgstr "Edit"
+
+msgid "AliasDomains_Delete"
+msgstr "Delete"
+
+msgid "AliasDomains_NoAliasDomainsFound"
+msgstr "No alias domains found."
+
+msgid "AliasDomains_AlertDeleteConfirm"
+msgstr "Are you sure you want to delete the alias domain \"${aliasDomain}\"?"
+
+msgid "AliasDomains_AlertDeleteSuccess"
+msgstr "Alias domain deleted successfully!"
+
+msgid "AliasDomains_AlertDeleteError"
+msgstr "Error deleting alias domain: "
+
+msgid "AliasDomains_AlertRequestError"
+msgstr "Request error: "
+
+msgid "AliasDomains_AddTitle"
+msgstr "Add New Alias Domain"
+
+msgid "AliasDomains_AddSubtitle"
+msgstr "Create a full domain forwarder."
+
+msgid "AliasDomains_EditTitle"
+msgstr "Edit Alias Domain"
+
+msgid "AliasDomains_EditSubtitle"
+msgstr "Edit the Alias Domain settings."
+
+msgid "AliasDomains_ErrorTitle"
+msgstr "Error"
+
+msgid "AliasDomains_InfoTitle"
+msgstr "Alias Domain Information"
+
+msgid "AliasDomains_LblAliasDomain"
+msgstr "Alias Domain"
+
+msgid "AliasDomains_PhSelectSource"
+msgstr "Select the source domain"
+
+msgid "AliasDomains_HelpAliasDomainAdd"
+msgstr "The domain that will be forwarded."
+
+msgid "AliasDomains_HelpAliasDomainEdit"
+msgstr "The source domain cannot be changed."
+
+msgid "AliasDomains_LblTargetDomain"
+msgstr "Target Domain (Destination)"
+
+msgid "AliasDomains_PhSelectTarget"
+msgstr "Select the destination domain"
+
+msgid "AliasDomains_HelpTargetDomain"
+msgstr "The domain where emails will be delivered."
+
+msgid "AliasDomains_LblActive"
+msgstr "Active"
+
+msgid "AliasDomains_BtnCancel"
+msgstr "Cancel"
+
+msgid "AliasDomains_BtnCreate"
+msgstr "Create Alias Domain"
+
+msgid "AliasDomains_BtnSave"
+msgstr "Save Changes"
+
+msgid "Admins_Title"
+msgstr "Administrators"
+
+msgid "Admins_Subtitle"
+msgstr "Manage system administrators."
+
+msgid "Admins_AddAdminBtn"
+msgstr "Add Administrator"
+
+msgid "Admins_TblAdmin"
+msgstr "Administrator"
+
+msgid "Admins_TblDomains"
+msgstr "Domains"
+
+msgid "Admins_TblActive"
+msgstr "Active"
+
+msgid "Admins_TblModified"
+msgstr "Modified"
+
+msgid "Admins_SuperAdmin"
+msgstr "Super Administrator"
+
+msgid "Admins_Yes"
+msgstr "Yes"
+
+msgid "Admins_No"
+msgstr "No"
+
+msgid "Admins_Edit"
+msgstr "Edit"
+
+msgid "Admins_Delete"
+msgstr "Delete"
+
+msgid "Admins_NoAdminsFound"
+msgstr "No administrators found."
+
+msgid "Admins_AlertDeleteConfirm"
+msgstr "Are you sure you want to delete the administrator \"${username}\"?"
+
+msgid "Admins_AlertDeleteSuccess"
+msgstr "Administrator deleted successfully!"
+
+msgid "Admins_AlertDeleteError"
+msgstr "Error deleting administrator: "
+
+msgid "Admins_AlertRequestError"
+msgstr "Request error: "
+
+msgid "Admins_AddTitle"
+msgstr "Add Administrator"
+
+msgid "Admins_AddSubtitle"
+msgstr "Create a new administrator to manage the system."
+
+msgid "Admins_EditTitle"
+msgstr "Edit Administrator"
+
+msgid "Admins_EditSubtitle"
+msgstr "Update the administrator settings."
+
+msgid "Admins_ErrorTitle"
+msgstr "Error"
+
+msgid "Admins_DetailsTitle"
+msgstr "Administrator Details"
+
+msgid "Admins_LblUsername"
+msgstr "Username (Email)"
+
+msgid "Admins_PhUsername"
+msgstr "admin@example.com"
+
+msgid "Admins_LblEnabled"
+msgstr "Enabled"
+
+msgid "Admins_LblSuperAdmin"
+msgstr "Super Administrator"
+
+msgid "Admins_TitleSuperAdmin"
+msgstr "Super admins have access to all domains and can manage other administrators."
+
+msgid "Admins_PwdTitle"
+msgstr "PASSWORD"
+
+msgid "Admins_PwdChangeTitle"
+msgstr "CHANGE PASSWORD (Optional)"
+
+msgid "Admins_PhNewPwd"
+msgstr "New password (min. 8 characters)"
+
+msgid "Admins_PhRepeatPwd"
+msgstr "Repeat new password"
+
+msgid "Admins_BtnGenerate"
+msgstr "GENERATE"
+
+msgid "Admins_DomainsTitle"
+msgstr "Domains"
+
+msgid "Admins_DomainsSubtitle"
+msgstr "Select the domains this administrator can manage."
+
+msgid "Admins_DomainsNone"
+msgstr "No domains available."
+
+msgid "Admins_BtnCancel"
+msgstr "Cancel"
+
+msgid "Admins_BtnSaveNew"
+msgstr "Save Administrator"
+
+msgid "Admins_BtnSaveChanges"
+msgstr "Save Changes"
+
+msgid "Admins_EditLblAdmin"
+msgstr "Administrator"
+
+msgid "Admins_EditUsernameHelp"
+msgstr "The username cannot be changed"
+
+msgid "Admins_JsPwdMinLen"
+msgstr "The password must be at least 8 characters long"
+
+msgid "Admins_JsPwdNoMatch"
+msgstr "Passwords do not match"
+
+msgid "Admins_JsPwdGenFail"
+msgstr "Failed to generate password. Please try again."
+
+msgid "Admins_JsPwdWeak"
+msgstr "Weak"
+
+msgid "Admins_JsPwdMedium"
+msgstr "Fair"
+
+msgid "Admins_JsPwdGood"
+msgstr "Good"
+
+msgid "Admins_JsPwdStrong"
+msgstr "Strong"
+
+msgid "Admins_JsPwdMatchOk"
+msgstr "✓ Passwords match"
+
+msgid "Admins_JsPwdMatchFail"
+msgstr "✗ Passwords do not match"
+
+msgid "Admins_JsPwdStrength"
+msgstr "Password Strength"
+
+msgid "Fetchmail_AddTitle"
+msgstr "Add Fetchmail"
+
+msgid "Fetchmail_AddSubtitle"
+msgstr "Configure message retrieval from external accounts."
+
+msgid "Fetchmail_ErrorTitle"
+msgstr "Error"
+
+msgid "Fetchmail_SectionAccount"
+msgstr "Account Settings"
+
+msgid "Fetchmail_LblAccount"
+msgstr "Account"
+
+msgid "Fetchmail_PhSelectAccount"
+msgstr "Select an account..."
+
+msgid "Fetchmail_HelpAccount"
+msgstr "Local email account"
+
+msgid "Fetchmail_LblServer"
+msgstr "Server"
+
+msgid "Fetchmail_HelpServer"
+msgstr "Remote server"
+
+msgid "Fetchmail_LblPort"
+msgstr "Port"
+
+msgid "Fetchmail_HelpPort"
+msgstr "Remote port (0: default)"
+
+msgid "Fetchmail_LblAuth"
+msgstr "Authentication"
+
+msgid "Fetchmail_HelpAuth"
+msgstr "Almost always 'password'"
+
+msgid "Fetchmail_LblUsername"
+msgstr "Username"
+
+msgid "Fetchmail_HelpUsername"
+msgstr "Remote username"
+
+msgid "Fetchmail_LblPassword"
+msgstr "Password"
+
+msgid "Fetchmail_HelpPassword"
+msgstr "Remote password"
+
+msgid "Fetchmail_LblFolder"
+msgstr "Folder"
+
+msgid "Fetchmail_HelpFolder"
+msgstr "Remote folder"
+
+msgid "Fetchmail_LblPoll"
+msgstr "Poll Time"
+
+msgid "Fetchmail_HelpPoll"
+msgstr "Check every ... minutes"
+
+msgid "Fetchmail_LblProtocol"
+msgstr "Protocol"
+
+msgid "Fetchmail_HelpProtocol"
+msgstr "Protocol to use"
+
+msgid "Fetchmail_LblFetchAll"
+msgstr "Fetch All (new and old)"
+
+msgid "Fetchmail_LblKeep"
+msgstr "Keep messages on remote server"
+
+msgid "Fetchmail_LblUseSSL"
+msgstr "Enable SSL"
+
+msgid "Fetchmail_LblSslCertCk"
+msgstr "SSL Certificate Check"
+
+msgid "Fetchmail_LblEnabled"
+msgstr "Enabled"
+
+msgid "Fetchmail_BtnCancel"
+msgstr "Cancel"
+
+msgid "Fetchmail_BtnCreate"
+msgstr "Create New Record"
+
