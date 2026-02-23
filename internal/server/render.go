@@ -31,7 +31,7 @@ func (t *Template) Render(c *echo.Context, w io.Writer, name string, data any) e
 	lang := "pt"
 
 	// 1. Check for cookie
-	if cookie, err := c.Cookie("lang"); err == nil && (cookie.Value == "en" || cookie.Value == "pt") {
+	if cookie, err := c.Cookie("lang"); err == nil && (cookie.Value == "en" || cookie.Value == "pt" || cookie.Value == "es") {
 		lang = cookie.Value
 	} else {
 		// 2. Fallback to Accept-Language header

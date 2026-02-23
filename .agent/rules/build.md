@@ -23,9 +23,3 @@ Before executing any Go-related build or execution commands (such as `go build`,
   `./postfixadmin server`
 
 ---
-
-### Pro-Tip: Persistent Local Environment
-If a `.env` file exists, use `source .env` or prefix commands with `env $(cat .env | xargs)` before execution to ensure all variables are loaded correctly.
-
-## Exceptions
-If the `DATABASE_URL` is already defined in a local `.env` file and the project uses a loader (like `godotenv`), verify if the export is still necessary. Otherwise, prioritize the manual export as defined above.

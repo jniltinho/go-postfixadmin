@@ -58,7 +58,7 @@ func (h *Handler) Logout(c *echo.Context) error {
 // SetLanguage define o idioma da interface através de um cookie
 func (h *Handler) SetLanguage(c *echo.Context) error {
 	lang := c.Param("code")
-	if lang != "en" && lang != "pt" {
+	if lang != "en" && lang != "pt" && lang != "es" {
 		lang = "pt"
 	}
 
