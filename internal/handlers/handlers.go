@@ -7,6 +7,8 @@ import (
 	"go-postfixadmin/internal/models"
 	"go-postfixadmin/internal/utils"
 
+	"time"
+
 	"github.com/labstack/echo/v5"
 	"gorm.io/gorm"
 )
@@ -51,4 +53,28 @@ func (h *Handler) Login(c *echo.Context) error {
 func (h *Handler) Logout(c *echo.Context) error {
 	middleware.ClearSession(c)
 	return c.Redirect(http.StatusFound, "/login")
+}
+
+// SetLanguage define o idioma da interface através de um cookie
+func (h *Handler) SetLanguage(c *echo.Context) error {
+	lang := c.Param("code")
+	if lang != "en" && lang != "pt" {
+		lang = "pt"
+	}
+
+	cookie := &http.Cookie{
+		Name:     "lang",
+		Value:    lang,
+		Path:     "/",
+		Expires:  time.Now().Add(24 * 365 * time.Hour), // 1 ano
+		HttpOnly: true,
+	}
+	c.SetCookie(cookie)
+
+	// Redireciona de volta para a página anterior ou dashboard
+	referer := c.Request().Header.Get("Referer")
+	if referer == "" {
+		referer = "/dashboard"
+	}
+	return c.Redirect(http.StatusFound, referer)
 }

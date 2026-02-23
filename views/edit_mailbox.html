@@ -1,11 +1,12 @@
-{{define "title"}}Edit Email Account - Go-PostfixAdmin{{end}}
-{{define "breadcrumb"}}Edit Email Account{{end}}
+{{define "title"}}{{ T $.Lang `Mailboxes_EditTitle` }} - Go-PostfixAdmin{{end}}
+{{define "breadcrumb"}}{{ T $.Lang `Mailboxes_EditTitle` }}{{end}}
 
 {{define "content"}}
 <div class="max-w-6xl mx-auto">
     <div class="mb-8">
-        <h2 class="text-4xl font-mono font-black uppercase tracking-tight mb-2">Edit Email Account</h2>
-        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Update mailbox settings.
+        <h2 class="text-4xl font-mono font-black uppercase tracking-tight mb-2">{{ T $.Lang `Mailboxes_EditTitle` }}
+        </h2>
+        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">{{ T $.Lang `Mailboxes_EditSubtitle` }}
         </p>
     </div>
 
@@ -14,7 +15,8 @@
         <div class="flex items-start">
             <i data-lucide="alert-circle" class="w-6 h-6 text-red-600 mr-3 mt-1"></i>
             <div>
-                <h3 class="font-black text-red-600 uppercase tracking-wide mb-1">Error</h3>
+                <h3 class="font-black text-red-600 uppercase tracking-wide mb-1">{{ T $.Lang `Mailboxes_ErrorTitle` }}
+                </h3>
                 <p class="text-sm text-red-700">{{.Error}}</p>
             </div>
         </div>
@@ -27,29 +29,30 @@
         <div class="bg-white border-4 border-brand-text neo-shadow-sm p-8">
             <h3 class="text-xl font-mono font-black uppercase tracking-tight mb-6 flex items-center">
                 <i data-lucide="mail" class="w-5 h-5 mr-2"></i>
-                Email Account
+                {{ T $.Lang `Mailboxes_InfoTitle` }}
             </h3>
 
             <div class="space-y-6">
                 <!-- Email Address (Read-only) -->
                 <div>
                     <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
-                        Email Address
+                        {{ T $.Lang `Mailboxes_LblEmailAddress` }}
                     </label>
                     <div class="w-full px-4 py-3 border-2 border-gray-300 bg-gray-50 font-medium font-mono text-lg">
                         {{.Mailbox.Username}}
                     </div>
-                    <p class="text-xs text-gray-500 mt-2">The email address cannot be changed</p>
+                    <p class="text-xs text-gray-500 mt-2">{{ T $.Lang `Mailboxes_HelpEmailAddressEdit` }}</p>
                 </div>
 
                 <!-- Display Name -->
                 <div>
                     <label for="name" class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
-                        Display Name
+                        {{ T $.Lang `Mailboxes_LblDisplayName` }}
                     </label>
-                    <input type="text" id="name" name="name" placeholder="John Doe" value="{{.Mailbox.Name}}"
+                    <input type="text" id="name" name="name" placeholder="{{ T $.Lang `Mailboxes_PhDisplayName` }}"
+                        value="{{.Mailbox.Name}}"
                         class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors">
-                    <p class="text-xs text-gray-500 mt-2">Full name displayed in the email client</p>
+                    <p class="text-xs text-gray-500 mt-2">{{ T $.Lang `Mailboxes_HelpDisplayName` }}</p>
                 </div>
 
                 <!-- Active Toggle -->
@@ -57,7 +60,7 @@
                     <input type="checkbox" id="active" name="active" value="true" {{if .Mailbox.Active}}checked{{end}}
                         class="w-6 h-6 border-2 border-brand-text cursor-pointer">
                     <label for="active" class="ml-3 text-sm font-bold cursor-pointer">
-                        Enabled
+                        {{ T $.Lang `Mailboxes_LblEnabled` }}
                     </label>
                 </div>
             </div>
@@ -68,7 +71,7 @@
             <summary
                 class="p-4 cursor-pointer font-bold uppercase tracking-tight text-sm flex items-center hover:bg-white transition-colors">
                 <i data-lucide="key" class="w-4 h-4 mr-2"></i>
-                CHANGE PASSWORD (Optional)
+                {{ T $.Lang `Mailboxes_PwdChangeTitle` }}
                 <i data-lucide="chevron-down" class="w-4 h-4 ml-auto"></i>
             </summary>
 
@@ -82,7 +85,7 @@
                     <div>
                         <div class="relative">
                             <input type="password" id="password" name="password" minlength="8"
-                                placeholder="New password (min 8 characters)"
+                                placeholder="{{ T $.Lang `Mailboxes_PhNewPwd` }}"
                                 class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors pr-12">
                             <button type="button" onclick="togglePassword('password')"
                                 class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary transition-colors">
@@ -96,7 +99,7 @@
                         <div class="flex gap-2">
                             <div class="relative flex-1">
                                 <input type="password" id="password_confirm" name="password_confirm" minlength="8"
-                                    placeholder="Repeat new password"
+                                    placeholder="{{ T $.Lang `Mailboxes_PhRepeatPwd` }}"
                                     class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors pr-12">
                                 <button type="button" onclick="togglePassword('password_confirm')"
                                     class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary transition-colors">
@@ -106,7 +109,7 @@
                             <button type="button" onclick="generatePassword()" title="Generate strong password"
                                 class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-black px-4 border-2 border-brand-text shadow-[2px_2px_0px_#1E293B] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center gap-1">
                                 <i data-lucide="wand-2" class="w-4 h-4"></i>
-                                GENERATE
+                                {{ T $.Lang `Mailboxes_BtnGenerate` }}
                             </button>
                         </div>
                         <p id="matchIndicator" class="text-xs mt-2 hidden"></p>
@@ -116,7 +119,8 @@
                 <!-- Password Strength Meter -->
                 <div id="strengthMeter" class="hidden">
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-black uppercase tracking-widest text-brand-text">Strength</span>
+                        <span class="text-xs font-black uppercase tracking-widest text-brand-text">{{ T $.Lang
+                            `Mailboxes_PwdStrengthShort` }}</span>
                         <span id="strengthText" class="text-xs font-bold uppercase tracking-wider"></span>
                     </div>
                     <div class="h-2 bg-gray-200 border-2 border-brand-text overflow-hidden">
@@ -131,7 +135,7 @@
             <summary
                 class="p-4 cursor-pointer font-bold uppercase tracking-tight text-sm flex items-center hover:bg-white transition-colors">
                 <i data-lucide="settings" class="w-4 h-4 mr-2"></i>
-                Advanced Settings
+                {{ T $.Lang `Mailboxes_AdvancedTitle` }}
                 <i data-lucide="chevron-down" class="w-4 h-4 ml-auto"></i>
             </summary>
 
@@ -142,25 +146,25 @@
                     <div>
                         <label for="quota"
                             class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
-                            Quota (MB)
+                            {{ T $.Lang `Mailboxes_LblQuota` }}
                         </label>
                         <input type="number" id="quota" name="quota" min="0" value="{{.QuotaMB}}"
                             class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors">
-                        <p class="text-xs text-gray-500 mt-2">Storage limit (0 = unlimited)</p>
+                        <p class="text-xs text-gray-500 mt-2">{{ T $.Lang `Mailboxes_HelpQuota` }}</p>
                     </div>
 
                     <!-- SMTP Active -->
                     <div>
                         <label
                             class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2 invisible">
-                            Status
+                            {{ T $.Lang `Mailboxes_LblStatus` }}
                         </label>
                         <div class="flex items-center h-[52px]">
                             <input type="checkbox" id="smtp_active" name="smtp_active" value="true" {{if
                                 .Mailbox.SMTPActive}}checked{{end}}
                                 class="w-6 h-6 border-2 border-brand-text cursor-pointer">
                             <label for="smtp_active" class="ml-3 text-sm font-bold cursor-pointer">
-                                SMTP Active (can send email)
+                                {{ T $.Lang `Mailboxes_LblSmtpActive` }}
                             </label>
                         </div>
                     </div>
@@ -172,10 +176,10 @@
                 <div>
                     <label for="email_other"
                         class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
-                        Alternative Email
+                        {{ T $.Lang `Mailboxes_LblAlternativeEmail` }}
                     </label>
-                    <input type="email" id="email_other" name="email_other" placeholder="alternative@email.com"
-                        value="{{.Mailbox.EmailOther}}"
+                    <input type="email" id="email_other" name="email_other"
+                        placeholder="{{ T $.Lang `Mailboxes_PhAlternativeEmail` }}" value="{{.Mailbox.EmailOther}}"
                         class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors">
                 </div>
             </div>
@@ -186,12 +190,12 @@
             <a href="/mailboxes?domain={{.Mailbox.Domain}}"
                 class="bg-white hover:bg-gray-50 text-brand-text border-2 border-brand-text font-black px-8 py-4 shadow-[2px_2px_0px_#1E293B] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center">
                 <i data-lucide="x" class="w-5 h-5 mr-2"></i>
-                Cancel
+                {{ T $.Lang `Mailboxes_BtnCancel` }}
             </a>
             <button type="submit" id="submitBtn"
                 class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-8 py-4 shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center">
                 <i data-lucide="save" class="w-5 h-5 mr-2"></i>
-                Update Email Account
+                {{ T $.Lang `Mailboxes_BtnUpdate` }}
             </button>
         </div>
     </form>
@@ -247,7 +251,7 @@
             checkPasswordMatch();
         } catch (error) {
             console.error('Failed to generate password:', error);
-            alert('Failed to generate password. Please try again.');
+            alert(`{{ T $.Lang "Mailboxes_JsPwdGenFail" }}`);
         }
     }
 
@@ -279,16 +283,16 @@
 
         // Determine label and color
         if (strength < 40) {
-            strengthLabel = 'Weak';
+            strengthLabel = `{{ T $.Lang "Mailboxes_JsPwdWeak" }}`;
             color = '#DC2626'; // red-600
         } else if (strength < 60) {
-            strengthLabel = 'Fair';
+            strengthLabel = `{{ T $.Lang "Mailboxes_JsPwdFair" }}`;
             color = '#F59E0B'; // amber-500
         } else if (strength < 80) {
-            strengthLabel = 'Good';
+            strengthLabel = `{{ T $.Lang "Mailboxes_JsPwdGood" }}`;
             color = '#10B981'; // green-500
         } else {
-            strengthLabel = 'Strong';
+            strengthLabel = `{{ T $.Lang "Mailboxes_JsPwdStrong" }}`;
             color = '#059669'; // green-600
         }
 
@@ -313,12 +317,12 @@
         indicator.classList.remove('hidden');
 
         if (password === confirm) {
-            indicator.textContent = '✓ Passwords match';
+            indicator.textContent = `{{ T $.Lang "Mailboxes_JsPwdMatchOk" }}`;
             indicator.className = 'text-xs mt-2 font-bold text-green-600';
             submitBtn.disabled = false;
             submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
         } else {
-            indicator.textContent = '✗ Passwords do not match';
+            indicator.textContent = `{{ T $.Lang "Mailboxes_JsPwdMatchFail" }}`;
             indicator.className = 'text-xs mt-2 font-bold text-red-600';
             submitBtn.disabled = true;
             submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
@@ -347,13 +351,13 @@
 
             if (password.length < 8) {
                 e.preventDefault();
-                alert('Password must be at least 8 characters');
+                alert(`{{ T $.Lang "Mailboxes_JsErrPwdLen" }}`);
                 return false;
             }
 
             if (password !== confirm) {
                 e.preventDefault();
-                alert('Passwords do not match');
+                alert(`{{ T $.Lang "Mailboxes_JsErrPwdMatch" }}`);
                 return false;
             }
         }

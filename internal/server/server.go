@@ -11,6 +11,7 @@ import (
 	"os"
 
 	"go-postfixadmin/internal/handlers"
+	"go-postfixadmin/internal/i18n"
 	"go-postfixadmin/internal/middleware"
 	"go-postfixadmin/internal/routes"
 
@@ -52,6 +53,7 @@ func StartServer(embeddedFiles embed.FS, port int, db *gorm.DB, ssl bool, certFi
 	e.Use(middleware.AuthMiddleware)
 
 	// Template Rendering
+	i18n.Init(embeddedFiles)
 	t, err := loadTemplates(embeddedFiles)
 	if err != nil {
 		slog.Error("Failed to load templates", "error", err)

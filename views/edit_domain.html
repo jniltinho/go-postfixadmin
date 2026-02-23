@@ -1,11 +1,11 @@
-{{define "title"}}Edit Domain - Go-PostfixAdmin{{end}}
-{{define "breadcrumb"}}Edit Domain{{end}}
+{{define "title"}}{{ T $.Lang `Domains_EditTitle` }} - Go-PostfixAdmin{{end}}
+{{define "breadcrumb"}}{{ T $.Lang `Domains_EditTitle` }}{{end}}
 
 {{define "content"}}
 <div class="max-w-6xl mx-auto">
     <div class="mb-8">
-        <h2 class="text-4xl font-mono font-black uppercase tracking-tight mb-2">Edit Domain</h2>
-        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Update email domain configuration.</p>
+        <h2 class="text-4xl font-mono font-black uppercase tracking-tight mb-2">{{ T $.Lang `Domains_EditTitle` }}</h2>
+        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">{{ T $.Lang `Domains_EditSubtitle` }}</p>
     </div>
 
     {{if .Error}}
@@ -13,7 +13,8 @@
         <div class="flex items-start">
             <i data-lucide="alert-circle" class="w-6 h-6 text-red-600 mr-3 mt-1"></i>
             <div>
-                <h3 class="font-black text-red-600 uppercase tracking-wide mb-1">Error</h3>
+                <h3 class="font-black text-red-600 uppercase tracking-wide mb-1">{{ T $.Lang `Domains_ErrorTitle` }}
+                </h3>
                 <p class="text-sm text-red-700">{{.Error}}</p>
             </div>
         </div>
@@ -25,27 +26,27 @@
         <div class="bg-white border-4 border-brand-text neo-shadow-sm p-8">
             <h3 class="text-xl font-mono font-black uppercase tracking-tight mb-6 flex items-center">
                 <i data-lucide="info" class="w-5 h-5 mr-2"></i>
-                Basic Information
+                {{ T $.Lang `Domains_InfoTitle` }}
             </h3>
 
             <div class="space-y-6">
                 <!-- Domain Name (Readonly) -->
                 <div>
                     <label for="domain" class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
-                        Domain Name
+                        {{ T $.Lang `Domains_LblDomain` }}
                     </label>
                     <input type="text" id="domain" name="domain" value="{{.Domain.Domain}}" readonly
                         class="w-full px-4 py-3 border-2 border-gray-300 bg-gray-100 text-gray-600 font-medium cursor-not-allowed">
-                    <p class="text-xs text-gray-500 mt-2">The domain name cannot be changed</p>
+                    <p class="text-xs text-gray-500 mt-2">{{ T $.Lang `Domains_HelpDomainEdit` }}</p>
                 </div>
 
                 <!-- Description -->
                 <div>
                     <label for="description"
                         class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
-                        Description
+                        {{ T $.Lang `Domains_LblDescription` }}
                     </label>
-                    <input id="description" name="description" placeholder="Optional description for this domain"
+                    <input id="description" name="description" placeholder="{{ T $.Lang `Domains_PhDescription` }}"
                         class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors resize-none"
                         value="{{.Domain.Description}}">
                 </div>
@@ -55,7 +56,7 @@
                     <input type="checkbox" id="active" name="active" value="true" {{if .Domain.Active}}checked{{end}}
                         class="w-6 h-6 border-2 border-brand-text cursor-pointer">
                     <label for="active" class="ml-3 text-sm font-bold cursor-pointer">
-                        Active Domain
+                        {{ T $.Lang `Domains_LblActive` }}
                     </label>
                 </div>
             </div>
@@ -66,7 +67,7 @@
             <summary
                 class="p-4 cursor-pointer font-bold uppercase tracking-tight text-sm flex items-center hover:bg-white transition-colors">
                 <i data-lucide="settings" class="w-4 h-4 mr-2"></i>
-                Advanced Settings
+                {{ T $.Lang `Domains_AdvancedTitle` }}
                 <i data-lucide="chevron-down" class="w-4 h-4 ml-auto"></i>
             </summary>
 
@@ -76,45 +77,45 @@
                     <div>
                         <label for="aliases"
                             class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
-                            Alias Limit
+                            {{ T $.Lang `Domains_LblAliases` }}
                         </label>
                         <input type="number" id="aliases" name="aliases" min="0" value="{{.Domain.Aliases}}"
                             class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors">
-                        <p class="text-xs text-gray-500 mt-2">Maximum number of aliases (0 = unlimited)</p>
+                        <p class="text-xs text-gray-500 mt-2">{{ T $.Lang `Domains_HelpAliases` }}</p>
                     </div>
 
                     <!-- Mailboxes Limit -->
                     <div>
                         <label for="mailboxes"
                             class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
-                            Mailbox Limit
+                            {{ T $.Lang `Domains_LblMailboxes` }}
                         </label>
                         <input type="number" id="mailboxes" name="mailboxes" min="0" value="{{.Domain.Mailboxes}}"
                             class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors">
-                        <p class="text-xs text-gray-500 mt-2">Maximum number of mailboxes (0 = unlimited)</p>
+                        <p class="text-xs text-gray-500 mt-2">{{ T $.Lang `Domains_HelpMailboxes` }}</p>
                     </div>
 
                     <!-- Quota Limit -->
                     <div>
                         <label for="quota"
                             class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
-                            Domain Quota (MB)
+                            {{ T $.Lang `Domains_LblQuotaEdit` }}
                         </label>
                         <input type="number" id="quota" name="quota" min="0" value="{{.Domain.Quota}}"
                             class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors">
-                        <p class="text-xs text-gray-500 mt-2">Maximum quota in MB (0 = unlimited)</p>
+                        <p class="text-xs text-gray-500 mt-2">{{ T $.Lang `Domains_HelpQuotaEdit` }}</p>
                     </div>
 
                     <!-- Password Expiry -->
                     <div>
                         <label for="password_expiry"
                             class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
-                            Password Expiry (days)
+                            {{ T $.Lang `Domains_LblPasswordExpiry` }}
                         </label>
                         <input type="number" id="password_expiry" name="password_expiry" min="0"
                             value="{{if .Domain.PasswordExpiry}}{{.Domain.PasswordExpiry}}{{end}}" placeholder="365"
                             class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors">
-                        <p class="text-xs text-gray-500 mt-2">Password expiry in days (empty = never)</p>
+                        <p class="text-xs text-gray-500 mt-2">{{ T $.Lang `Domains_HelpPasswordExpiry` }}</p>
                     </div>
                 </div>
 
@@ -123,9 +124,9 @@
                     <input type="checkbox" id="backupmx" name="backupmx" value="true" {{if
                         .Domain.BackupMX}}checked{{end}} class="w-6 h-6 border-2 border-brand-text cursor-pointer">
                     <label for="backupmx" class="ml-3 text-sm font-bold cursor-pointer">
-                        Enable Backup MX
+                        {{ T $.Lang `Domains_LblBackupMx` }}
                     </label>
-                    <p class="ml-auto text-xs text-gray-500">Use this server as a backup email server</p>
+                    <p class="ml-auto text-xs text-gray-500">{{ T $.Lang `Domains_HelpBackupMxEdit` }}</p>
                 </div>
             </div>
         </details>
@@ -135,12 +136,12 @@
             <a href="/domains"
                 class="bg-white hover:bg-gray-50 text-brand-text border-2 border-brand-text font-black px-8 py-4 shadow-[2px_2px_0px_#1E293B] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center">
                 <i data-lucide="x" class="w-5 h-5 mr-2"></i>
-                Cancel
+                {{ T $.Lang `Domains_BtnCancel` }}
             </a>
             <button type="submit"
                 class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-8 py-4 shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center">
                 <i data-lucide="save" class="w-5 h-5 mr-2"></i>
-                Update Domain
+                {{ T $.Lang `Domains_BtnUpdate` }}
             </button>
         </div>
     </form>

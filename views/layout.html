@@ -41,53 +41,54 @@
                     class="flex items-center py-3 px-4 border-2 border-transparent font-bold transition-all group hover:border-brand-text hover:bg-brand-primary/10">
                     <i data-lucide="layout-dashboard"
                         class="w-5 h-5 mr-3 text-gray-400 group-hover:text-brand-text transition-colors"></i>
-                    Dashboard
+                    {{ T $.Lang `LayoutAdmin_Dashboard` }}
                 </a>
                 <a href="/mailboxes"
                     class="flex items-center py-3 px-4 border-2 border-transparent font-bold transition-all group hover:border-brand-text hover:bg-brand-primary/10">
                     <i data-lucide="mail"
                         class="w-5 h-5 mr-3 text-gray-400 group-hover:text-brand-text transition-colors"></i>
-                    Mailboxes
+                    {{ T $.Lang `LayoutAdmin_Mailboxes` }}
                 </a>
                 <a href="/aliases"
                     class="flex items-center py-3 px-4 border-2 border-transparent font-bold transition-all group hover:border-brand-text hover:bg-brand-primary/10">
                     <i data-lucide="corner-up-right"
                         class="w-5 h-5 mr-3 text-gray-400 group-hover:text-brand-text transition-colors"></i>
-                    Aliases
+                    {{ T $.Lang `LayoutAdmin_Aliases` }}
                 </a>
                 <a href="/domains"
                     class="flex items-center py-3 px-4 border-2 border-transparent font-bold transition-all group hover:border-brand-text hover:bg-brand-primary/10">
                     <i data-lucide="globe"
                         class="w-5 h-5 mr-3 text-gray-400 group-hover:text-brand-text transition-colors"></i>
-                    My Domains
+                    {{ T $.Lang `LayoutAdmin_MyDomains` }}
                 </a>
                 <a href="/alias-domains"
                     class="flex items-center py-3 px-4 border-2 border-transparent font-bold transition-all group hover:border-brand-text hover:bg-brand-primary/10">
                     <i data-lucide="arrow-right-circle"
                         class="w-5 h-5 mr-3 text-gray-400 group-hover:text-brand-text transition-colors"></i>
-                    Domain Aliases
+                    {{ T $.Lang `LayoutAdmin_DomainAliases` }}
                 </a>
                 <div class="pt-4 pb-2 px-4">
-                    <p class="text-[10px] uppercase font-black uppercase tracking-widest text-gray-400">Settings
+                    <p class="text-[10px] uppercase font-black uppercase tracking-widest text-gray-400">{{ T $.Lang
+                        `LayoutAdmin_SettingsHeader` }}
                     </p>
                 </div>
                 <a href="/admins"
                     class="flex items-center py-3 px-4 border-2 border-transparent font-bold transition-all group hover:border-brand-text hover:bg-brand-primary/10">
                     <i data-lucide="users"
                         class="w-5 h-5 mr-3 text-gray-400 group-hover:text-brand-text transition-colors"></i>
-                    Administrators
+                    {{ T $.Lang `LayoutAdmin_Administrators` }}
                 </a>
                 <a href="/fetchmail/add"
                     class="flex items-center py-3 px-4 border-2 border-transparent font-bold transition-all group hover:border-brand-text hover:bg-brand-primary/10">
                     <i data-lucide="download-cloud"
                         class="w-5 h-5 mr-3 text-gray-400 group-hover:text-brand-text transition-colors"></i>
-                    Fetchmail
+                    {{ T $.Lang `LayoutAdmin_Fetchmail` }}
                 </a>
                 <a href="#"
                     class="flex items-center py-3 px-4 border-2 border-transparent font-bold transition-all group hover:border-brand-text hover:bg-brand-primary/10">
                     <i data-lucide="settings"
                         class="w-5 h-5 mr-3 text-gray-400 group-hover:text-brand-text transition-colors"></i>
-                    Settings
+                    {{ T $.Lang `LayoutAdmin_Settings` }}
                 </a>
             </nav>
 
@@ -99,18 +100,27 @@
             <!-- Header -->
             <header class="h-14 bg-white border-b-2 border-brand-text flex items-center justify-between px-8 z-10">
                 <div class="flex items-center text-xs font-black uppercase tracking-widest text-gray-400">
-                    <span>System</span>
+                    <span>{{ T $.Lang `Layout_System` }}</span>
                     <i data-lucide="chevron-right" class="w-4 h-4 mx-2"></i>
-                    <span class="text-brand-text">{{block "breadcrumb" .}}Overview{{end}}</span>
+                    <span class="text-brand-text">{{block "breadcrumb" .}}{{ T $.Lang `Layout_Overview` }}{{end}}</span>
                 </div>
 
                 <div class="flex items-center space-x-4">
+                    <!-- Language Switcher -->
+                    <div class="flex items-center space-x-2 mr-2">
+                        <a href="/lang/pt"
+                            class="px-2 py-1 text-[10px] font-black border-2 transition-all uppercase tracking-widest {{if eq $.Lang `pt` }}bg-brand-primary text-white border-brand-text shadow-[1px_1px_0px_#1E293B]{{else}}bg-white text-gray-400 border-gray-200 hover:border-brand-text hover:text-brand-text{{end}}">PT</a>
+                        <a href="/lang/en"
+                            class="px-2 py-1 text-[10px] font-black border-2 transition-all uppercase tracking-widest {{if eq $.Lang `en` }}bg-brand-primary text-white border-brand-text shadow-[1px_1px_0px_#1E293B]{{else}}bg-white text-gray-400 border-gray-200 hover:border-brand-text hover:text-brand-text{{end}}">EN</a>
+                    </div>
+
                     <div class="flex items-center space-x-3">
                         <div class="text-right">
                             <p class="text-xs font-black uppercase text-brand-text tracking-tight">{{if
-                                .SessionUser}}{{.SessionUser}}{{else}}Admin{{end}}</p>
+                                .SessionUser}}{{.SessionUser}}{{else}}{{ T $.Lang `Layout_Admin` }}{{end}}</p>
                             <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{if
-                                .IsSuperAdmin}}SUPERADMIN{{else}}ADMIN{{end}}</p>
+                                .IsSuperAdmin}}{{ T $.Lang `Layout_SuperAdmin` }}{{else}}{{ T $.Lang `Layout_Admin`
+                                }}{{end}}</p>
                         </div>
                         <div
                             class="w-10 h-10 border-2 border-brand-text bg-brand-primary flex items-center justify-center text-white font-black">
@@ -121,7 +131,7 @@
                     <a href="/login"
                         class="flex items-center py-2 px-4 border-2 border-transparent font-bold text-red-500 hover:border-red-500 hover:bg-red-50 transition-all">
                         <i data-lucide="log-out" class="w-5 h-5 mr-2"></i>
-                        Logout
+                        {{ T $.Lang `Layout_Logout` }}
                     </a>
                 </div>
             </header>

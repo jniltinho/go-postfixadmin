@@ -1,10 +1,11 @@
-{{define "title"}}Dashboard - Go-PostfixAdmin{{end}}
-{{define "breadcrumb"}}Dashboard{{end}}
+{{define "title"}}{{ T $.Lang `DashboardAdmin_Title` }} - Go-PostfixAdmin{{end}}
+{{define "breadcrumb"}}{{ T $.Lang `DashboardAdmin_Title` }}{{end}}
 
 {{define "content"}}
 <div class="mb-12">
-    <h2 class="text-4xl font-mono font-black uppercase tracking-tight mb-2">Overview</h2>
-    <p class="text-gray-500 font-bold uppercase text-xs tracking-widest">Monitoring your Email server infrastructure.
+    <h2 class="text-4xl font-mono font-black uppercase tracking-tight mb-2">{{ T $.Lang `DashboardAdmin_Overview` }}
+    </h2>
+    <p class="text-gray-500 font-bold uppercase text-xs tracking-widest">{{ T $.Lang `DashboardAdmin_OverviewDesc` }}
     </p>
 </div>
 
@@ -20,10 +21,12 @@
             <span
                 class="text-xs font-black text-white bg-green-500 border-2 border-brand-text px-3 py-1 uppercase tracking-widest min-w-[70px] text-center">Active</span>
         </div>
-        <p class="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Total Domains</p>
+        <p class="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">{{ T $.Lang
+            `DashboardAdmin_DomainsSubtitle` }}</p>
         <div class="flex items-baseline space-x-2">
             <h3 class="text-5xl font-mono font-black text-brand-text">{{.DomainCount}}</h3>
-            <span class="text-xs font-bold uppercase text-gray-400 tracking-tighter">available</span>
+            <span class="text-xs font-bold uppercase text-gray-400 tracking-tighter">{{ T $.Lang
+                `DashboardAdmin_DomainsLabel` }}</span>
         </div>
     </div>
 
@@ -39,10 +42,12 @@
                 class="text-xs font-black text-white bg-green-500 border-2 border-brand-text px-3 py-1 uppercase tracking-widest whitespace-nowrap min-w-[70px] text-center">In
                 Use</span>
         </div>
-        <p class="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Email Accounts</p>
+        <p class="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">{{ T $.Lang
+            `DashboardAdmin_MailboxesSubtitle` }}</p>
         <div class="flex items-baseline space-x-2">
             <h3 class="text-5xl font-mono font-black text-brand-text">{{.MailboxCount}}</h3>
-            <span class="text-xs font-bold uppercase text-gray-400 tracking-tighter">accounts</span>
+            <span class="text-xs font-bold uppercase text-gray-400 tracking-tighter">{{ T $.Lang
+                `DashboardAdmin_MailboxesLabel` }}</span>
         </div>
     </div>
 
@@ -50,20 +55,21 @@
     <div
         class="bg-brand-cta border-2 border-brand-text p-8 text-white flex flex-col justify-between shadow-[3px_3px_0px_#1E293B]">
         <div>
-            <h3 class="text-xl font-black uppercase tracking-tight mb-2">New Domain?</h3>
-            <p class="text-white font-bold text-xs uppercase tracking-wide mb-6">Create a new domain in seconds.</p>
+            <h3 class="text-xl font-black uppercase tracking-tight mb-2">{{ T $.Lang `DashboardAdmin_NewDomain` }}</h3>
+            <p class="text-white font-bold text-xs uppercase tracking-wide mb-6">{{ T $.Lang
+                `DashboardAdmin_NewDomainDesc` }}</p>
         </div>
         {{if .IsSuperAdmin}}
         <a href="/domains/add"
             class="w-full bg-white text-brand-text border-2 border-brand-text font-black py-4 text-center shadow-[2px_2px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[3px_3px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none flex items-center justify-center group uppercase tracking-widest text-sm">
-            <span>Add Domain</span>
+            <span>{{ T $.Lang `DashboardAdmin_AddDomainBtn` }}</span>
             <i data-lucide="plus-circle" class="w-5 h-5 ml-2"></i>
         </a>
         {{else}}
         <button disabled
             class="w-full bg-gray-300 text-gray-500 border-2 border-gray-400 font-black py-4 text-center flex items-center justify-center cursor-not-allowed uppercase tracking-widest text-sm"
-            title="Only Superadmins can create domains">
-            <span>Add Domain</span>
+            title="{{ T $.Lang `DashboardAdmin_AddDomainDisabled` }}">
+            <span>{{ T $.Lang `DashboardAdmin_AddDomainBtn` }}</span>
             <i data-lucide="lock" class="w-5 h-5 ml-2"></i>
         </button>
         {{end}}
@@ -73,12 +79,13 @@
     <div
         class="bg-brand-primary border-2 border-brand-text p-8 text-white flex flex-col justify-between shadow-[3px_3px_0px_#1E293B]">
         <div>
-            <h3 class="text-xl font-black uppercase tracking-tight mb-2">New Email?</h3>
-            <p class="text-white font-bold text-xs uppercase tracking-wide mb-6">Create a new account in seconds.</p>
+            <h3 class="text-xl font-black uppercase tracking-tight mb-2">{{ T $.Lang `DashboardAdmin_NewEmail` }}</h3>
+            <p class="text-white font-bold text-xs uppercase tracking-wide mb-6">{{ T $.Lang
+                `DashboardAdmin_NewEmailDesc` }}</p>
         </div>
         <a href="/mailboxes/add"
             class="w-full bg-white text-brand-text border-2 border-brand-text font-black py-4 text-center shadow-[2px_2px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[3px_3px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none flex items-center justify-center group uppercase tracking-widest text-sm">
-            <span>Add Email</span>
+            <span>{{ T $.Lang `DashboardAdmin_AddEmailBtn` }}</span>
             <i data-lucide="plus-circle" class="w-5 h-5 ml-2"></i>
         </a>
     </div>
@@ -87,21 +94,21 @@
 <div class="mt-12">
     <div class="bg-white border-2 border-brand-text p-8 neo-shadow-sm">
         <div class="flex items-center justify-between mb-8">
-            <h3 class="text-xl font-black uppercase tracking-widest">Recent Activity</h3>
+            <h3 class="text-xl font-black uppercase tracking-widest">{{ T $.Lang `DashboardAdmin_RecentActivity` }}</h3>
             <button
                 class="text-brand-primary font-black uppercase tracking-widest text-xs flex items-center hover:underline cursor-pointer">
-                View logs <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
+                {{ T $.Lang `DashboardAdmin_ViewLogs` }} <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
             </button>
         </div>
         <div class="overflow-x-auto max-h-64 overflow-y-auto custom-scrollbar">
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="border-b-2 border-brand-text text-sm uppercase tracking-wide text-gray-500">
-                        <th class="py-2 px-2 font-black">Date/Time</th>
-                        <th class="py-2 px-2 font-black">Administrator</th>
-                        <th class="py-2 px-2 font-black">Domain</th>
-                        <th class="py-2 px-2 font-black">Action</th>
-                        <th class="py-2 px-2 font-black">Description</th>
+                        <th class="py-2 px-2 font-black">{{ T $.Lang `DashboardAdmin_TblDateTime` }}</th>
+                        <th class="py-2 px-2 font-black">{{ T $.Lang `DashboardAdmin_TblAdmin` }}</th>
+                        <th class="py-2 px-2 font-black">{{ T $.Lang `DashboardAdmin_TblDomain` }}</th>
+                        <th class="py-2 px-2 font-black">{{ T $.Lang `DashboardAdmin_TblAction` }}</th>
+                        <th class="py-2 px-2 font-black">{{ T $.Lang `DashboardAdmin_TblDesc` }}</th>
                     </tr>
                 </thead>
                 <tbody class="text-sm font-medium text-gray-700">
@@ -119,7 +126,7 @@
                     {{else}}
                     <tr>
                         <td colspan="5" class="py-8 text-center text-gray-400 font-bold uppercase tracking-widest">
-                            No recent activity found</td>
+                            {{ T $.Lang `DashboardAdmin_NoActivity` }}</td>
                     </tr>
                     {{end}}
                 </tbody>

@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Go-PostfixAdmin</title>
+    <title>{{ T $.Lang `Login_Title` }} - Go-PostfixAdmin</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <script src="/static/js/lucide.min.js"></script>
     <style>
@@ -26,6 +26,13 @@
 
 <body
     class="bg-brand-background font-sans text-brand-text min-h-screen flex items-start justify-center p-6 pt-[5vh] dot-pattern">
+    <!-- Floating Language Switcher -->
+    <div class="fixed top-6 right-6 flex items-center space-x-2">
+        <a href="/lang/pt"
+            class="px-2 py-1 text-[10px] font-black border-2 transition-all uppercase tracking-widest {{if eq $.Lang `pt` }}bg-brand-primary text-white border-brand-text shadow-[1px_1px_0px_#1E293B]{{else}}bg-white text-gray-400 border-gray-200 hover:border-brand-text hover:text-brand-text{{end}}">PT</a>
+        <a href="/lang/en"
+            class="px-2 py-1 text-[10px] font-black border-2 transition-all uppercase tracking-widest {{if eq $.Lang `en` }}bg-brand-primary text-white border-brand-text shadow-[1px_1px_0px_#1E293B]{{else}}bg-white text-gray-400 border-gray-200 hover:border-brand-text hover:text-brand-text{{end}}">EN</a>
+    </div>
     <div class="w-full max-w-md">
         <!-- Brand Header -->
         <div class="text-center mb-8">
@@ -34,12 +41,12 @@
                 <i data-lucide="mail" class="text-white w-8 h-8"></i>
             </div>
             <h1 class="text-4xl font-mono font-bold tracking-tight text-brand-text mb-2">Go-PostfixAdmin</h1>
-            <p class="text-gray-500 font-medium">Professional Email Administration</p>
+            <p class="text-gray-500 font-medium">{{ T $.Lang `Login_AdminSubtitle` }}</p>
         </div>
 
         <!-- Square Card -->
         <div class="bg-white border-2 border-brand-text p-8 neo-shadow">
-            <h2 class="text-xl font-bold mb-6 uppercase tracking-widest">Login</h2>
+            <h2 class="text-xl font-bold mb-6 uppercase tracking-widest">{{ T $.Lang `Login_Title` }}</h2>
 
             {{if .error}}
             <div class="bg-red-50 border-2 border-red-500 text-red-700 p-4 mb-6 flex items-start">
@@ -50,25 +57,29 @@
 
             <form action="/login" method="POST" class="space-y-6">
                 <div>
-                    <label class="block text-sm font-bold mb-2 uppercase tracking-wide">Username</label>
+                    <label class="block text-sm font-bold mb-2 uppercase tracking-wide">{{ T $.Lang `Login_Username`
+                        }}</label>
                     <div class="relative group">
                         <div
                             class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-brand-primary transition-colors">
                             <i data-lucide="user" class="w-5 h-5"></i>
                         </div>
-                        <input type="text" name="username" required placeholder="admin@domain.com"
+                        <input type="text" name="username" required
+                            placeholder="{{ T $.Lang `Login_UsernamePlaceholder` }}"
                             class="w-full pl-11 pr-4 py-3 bg-white border-2 border-brand-text focus:border-brand-primary focus:shadow-[4px_4px_0px_#3B82F6] outline-none transition-all placeholder:text-gray-400">
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-bold mb-2 uppercase tracking-wide">Password</label>
+                    <label class="block text-sm font-bold mb-2 uppercase tracking-wide">{{ T $.Lang `Login_Password`
+                        }}</label>
                     <div class="relative group">
                         <div
                             class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-brand-primary transition-colors">
                             <i data-lucide="lock" class="w-5 h-5"></i>
                         </div>
-                        <input type="password" name="password" required placeholder="••••••••"
+                        <input type="password" name="password" required
+                            placeholder="{{ T $.Lang `Login_PasswordPlaceholder` }}"
                             class="w-full pl-11 pr-4 py-3 bg-white border-2 border-brand-text focus:border-brand-primary focus:shadow-[4px_4px_0px_#3B82F6] outline-none transition-all placeholder:text-gray-400">
                     </div>
                 </div>
@@ -76,7 +87,7 @@
                 <div class="pt-2">
                     <button type="submit"
                         class="w-full bg-brand-primary hover:bg-white hover:text-brand-primary border-2 border-brand-text text-white font-bold py-4 shadow-[3px_3px_0px_#1E293B] transform active:translate-x-1 active:translate-y-1 active:shadow-none transition-all flex items-center justify-center group cursor-pointer uppercase tracking-widest">
-                        <span>Authenticate</span>
+                        <span>{{ T $.Lang `Login_AuthenticateBtn` }}</span>
                         <i data-lucide="arrow-right"
                             class="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform"></i>
                     </button>
@@ -85,11 +96,12 @@
 
             <div class="mt-8 pt-6 border-t-2 border-gray-100 text-center space-y-3">
                 <p class="text-xs text-gray-500">
-                    Users should <a href="/users/login" class="text-brand-primary font-bold hover:underline">click
-                        here</a> to access the user section.
+                    {{ T $.Lang `Login_UserLinkText1` }}<a href="/users/login"
+                        class="text-brand-primary font-bold hover:underline">{{ T $.Lang `Login_UserLinkText2` }}</a>{{
+                    T $.Lang `Login_UserLinkText3` }}
                 </p>
                 <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                    Secure Administrative Access System
+                    {{ T $.Lang `Login_SecureSystem` }}
                 </p>
             </div>
         </div>

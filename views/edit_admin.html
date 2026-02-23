@@ -1,21 +1,20 @@
-{{define "title"}}Edit Administrator - Go-PostfixAdmin{{end}}
-{{define "breadcrumb"}}Edit Administrator{{end}}
+{{define "title"}}{{ T $.Lang `Admins_EditTitle` }} - Go-PostfixAdmin{{end}}
+{{define "breadcrumb"}}{{ T $.Lang `Admins_EditTitle` }}{{end}}
 
 {{define "content"}}
 <div class="max-w-6xl mx-auto">
     <div class="mb-8">
-        <h2 class="text-4xl font-mono font-black uppercase tracking-tight mb-2">Edit Administrator</h2>
-        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Update the administrator settings.
-        </p>
+        <h2 class="text-4xl font-mono font-black uppercase tracking-tight mb-2">{{ T $.Lang `Admins_EditTitle` }}</h2>
+        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">{{ T $.Lang `Admins_EditSubtitle` }}</p>
     </div>
 
-    {{if .Errorr}}
+    {{if .Error}}
     <div class="mb-6 bg-red-50 border-4 border-red-600 neo-shadow-sm p-6">
         <div class="flex items-start">
             <i data-lucide="alert-circle" class="w-6 h-6 text-red-600 mr-3 mt-1"></i>
             <div>
-                <h3 class="font-black text-red-600 uppercase tracking-wide mb-1">Error</h3>
-                <p class="text-sm text-red-700">{{.Errorr}}</p>
+                <h3 class="font-black text-red-600 uppercase tracking-wide mb-1">{{ T $.Lang `Admins_ErrorTitle` }}</h3>
+                <p class="text-sm text-red-700">{{.Error}}</p>
             </div>
         </div>
     </div>
@@ -27,19 +26,19 @@
         <div class="bg-white border-4 border-brand-text neo-shadow-sm p-8">
             <h3 class="text-xl font-mono font-black uppercase tracking-tight mb-6 flex items-center">
                 <i data-lucide="user" class="w-5 h-5 mr-2"></i>
-                Administrator Details
+                {{ T $.Lang `Admins_DetailsTitle` }}
             </h3>
 
             <div class="space-y-6">
                 <!-- Username (Read-only) -->
                 <div>
                     <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
-                        Administrator
+                        {{ T $.Lang `Admins_EditLblAdmin` }}
                     </label>
                     <div class="w-full px-4 py-3 border-2 border-gray-300 bg-gray-50 font-medium font-mono text-lg">
                         {{.Admin.Username}}
                     </div>
-                    <p class="text-xs text-gray-500 mt-2">The username cannot be changed</p>
+                    <p class="text-xs text-gray-500 mt-2">{{ T $.Lang `Admins_EditUsernameHelp` }}</p>
                 </div>
 
                 <!-- Options Grid -->
@@ -51,7 +50,7 @@
                             class="w-6 h-6 border-2 border-brand-text cursor-pointer {{if not .IsSuperAdmin}}opacity-50 cursor-not-allowed{{end}}">
                         <label for="active"
                             class="ml-3 text-sm font-bold cursor-pointer {{if not .IsSuperAdmin}}opacity-50 cursor-not-allowed{{end}}">
-                            Enabled
+                            {{ T $.Lang `Admins_LblEnabled` }}
                         </label>
                         {{if not .IsSuperAdmin}}
                         <input type="hidden" name="active" value="{{.Admin.Active}}">
@@ -59,8 +58,7 @@
                     </div>
 
                     <!-- Superadmin -->
-                    <div class="flex items-center" {{if
-                        .IsSuperAdmin}}title="Super admins have access to all domains and can manage other administrators."
+                    <div class="flex items-center" {{if .IsSuperAdmin}}title="{{ T $.Lang `Admins_TitleSuperAdmin` }}"
                         {{end}}>
                         <input type="checkbox" id="superadmin" name="superadmin" value="true" {{if
                             .Admin.Superadmin}}checked{{end}} {{if not .IsSuperAdmin}}disabled{{end}}
@@ -68,7 +66,7 @@
                             onchange="toggleDomains()">
                         <label for="superadmin"
                             class="ml-3 text-sm font-bold cursor-pointer {{if not .IsSuperAdmin}}cursor-not-allowed opacity-50{{end}}">
-                            Super Administrator
+                            {{ T $.Lang `Admins_LblSuperAdmin` }}
                         </label>
                     </div>
                 </div>
@@ -80,7 +78,7 @@
             <summary
                 class="p-4 cursor-pointer font-bold uppercase tracking-tight text-sm flex items-center hover:bg-white transition-colors">
                 <i data-lucide="key" class="w-4 h-4 mr-2"></i>
-                CHANGE PASSWORD (Optional)
+                {{ T $.Lang `Admins_PwdChangeTitle` }}
                 <i data-lucide="chevron-down" class="w-4 h-4 ml-auto"></i>
             </summary>
 
@@ -94,7 +92,7 @@
                     <div>
                         <div class="relative">
                             <input type="password" id="password" name="password" minlength="8"
-                                placeholder="New password (min. 8 characters)"
+                                placeholder="{{ T $.Lang `Admins_PhNewPwd` }}"
                                 class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors pr-12">
                             <button type="button" onclick="togglePassword('password')"
                                 class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary transition-colors">
@@ -108,7 +106,7 @@
                         <div class="flex gap-2">
                             <div class="relative flex-1">
                                 <input type="password" id="password_confirm" name="password_confirm" minlength="8"
-                                    placeholder="Repeat new password"
+                                    placeholder="{{ T $.Lang `Admins_PhRepeatPwd` }}"
                                     class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors pr-12">
                                 <button type="button" onclick="togglePassword('password_confirm')"
                                     class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary transition-colors">
@@ -118,7 +116,7 @@
                             <button type="button" onclick="generatePassword()" title="Generate strong password"
                                 class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-black px-4 border-2 border-brand-text shadow-[2px_2px_0px_#1E293B] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center gap-1">
                                 <i data-lucide="wand-2" class="w-4 h-4"></i>
-                                GENERATE
+                                {{ T $.Lang `Admins_BtnGenerate` }}
                             </button>
                         </div>
                         <p id="matchIndicator" class="text-xs mt-2 hidden"></p>
@@ -128,7 +126,8 @@
                 <!-- Password Strength Meter -->
                 <div id="strengthMeter" class="hidden">
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-black uppercase tracking-widest text-brand-text">Strength</span>
+                        <span class="text-xs font-black uppercase tracking-widest text-brand-text">{{ T $.Lang
+                            `Admins_JsStrengthShort` }}</span>
                         <span id="strengthText" class="text-xs font-bold uppercase tracking-wider"></span>
                     </div>
                     <div class="h-2 bg-gray-200 border-2 border-brand-text overflow-hidden">
@@ -145,11 +144,11 @@
             class="bg-white border-4 border-brand-text neo-shadow-sm p-8 {{if or .Admin.Superadmin (not .IsSuperAdmin)}}opacity-50 pointer-events-none{{end}}">
             <h3 class="text-xl font-mono font-black uppercase tracking-tight mb-6 flex items-center">
                 <i data-lucide="globe" class="w-5 h-5 mr-2"></i>
-                Domains
+                {{ T $.Lang `Admins_DomainsTitle` }}
             </h3>
 
-            <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">Select the domains this
-                administrator can manage.</p>
+            <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">{{ T $.Lang
+                `Admins_DomainsSubtitle` }}</p>
 
             <div
                 class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto p-4 border-2 border-gray-100 bg-gray-50">
@@ -164,7 +163,7 @@
                     </label>
                 </div>
                 {{else}}
-                <div class="col-span-full text-center text-gray-500 py-4">No domains available.</div>
+                <div class="col-span-full text-center text-gray-500 py-4">{{ T $.Lang `Admins_DomainsNone` }}</div>
                 {{end}}
             </div>
         </div>
@@ -174,12 +173,12 @@
             <a href="/admins"
                 class="bg-white hover:bg-gray-50 text-brand-text border-2 border-brand-text font-black px-8 py-4 shadow-[2px_2px_0px_#1E293B] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center">
                 <i data-lucide="x" class="w-5 h-5 mr-2"></i>
-                Cancel
+                {{ T $.Lang `Admins_BtnCancel` }}
             </a>
             <button type="submit"
                 class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-8 py-4 shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center">
                 <i data-lucide="save" class="w-5 h-5 mr-2"></i>
-                Save Changes
+                {{ T $.Lang `Admins_BtnSaveChanges` }}
             </button>
         </div>
     </form>
@@ -244,16 +243,16 @@
 
         // Determine label and color
         if (strength < 40) {
-            strengthLabel = 'Weak';
+            strengthLabel = `{{ T $.Lang "Admins_JsPwdWeak" }}`;
             color = '#DC2626'; // red-600
         } else if (strength < 60) {
-            strengthLabel = 'Medium';
+            strengthLabel = `{{ T $.Lang "Admins_JsPwdMedium" }}`;
             color = '#F59E0B'; // amber-500
         } else if (strength < 80) {
-            strengthLabel = 'Good';
+            strengthLabel = `{{ T $.Lang "Admins_JsPwdGood" }}`;
             color = '#10B981'; // green-500
         } else {
-            strengthLabel = 'Strong';
+            strengthLabel = `{{ T $.Lang "Admins_JsPwdStrong" }}`;
             color = '#059669'; // green-600
         }
 
@@ -293,7 +292,7 @@
             checkPasswordMatch();
         } catch (error) {
             console.error('Failed to generate password:', error);
-            alert('Failed to generate password. Please try again.');
+            alert(`{{ T $.Lang "Admins_JsPwdGenFail" }}`);
         }
     }
 
@@ -312,12 +311,12 @@
         indicator.classList.remove('hidden');
 
         if (password === confirm) {
-            indicator.textContent = '✓ Passwords match';
+            indicator.textContent = `{{ T $.Lang "Admins_JsPwdMatchOk" }}`;
             indicator.className = 'text-xs mt-2 font-bold text-green-600';
             //submitBtn.disabled = false;
             //submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
         } else {
-            indicator.textContent = '✗ Passwords do not match';
+            indicator.textContent = `{{ T $.Lang "Admins_JsPwdMatchFail" }}`;
             indicator.className = 'text-xs mt-2 font-bold text-red-600';
             //submitBtn.disabled = true;
             //submitBtn.classList.add('opacity-50', 'cursor-not-allowed');

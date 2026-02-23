@@ -10,6 +10,8 @@ import (
 	"path"
 	"strings"
 
+	"go-postfixadmin/internal/i18n"
+
 	"github.com/labstack/echo/v5"
 )
 
@@ -25,23 +27,51 @@ func (t *Template) Render(c *echo.Context, w io.Writer, name string, data any) e
 		return echo.NewHTTPError(http.StatusInternalServerError, "Template not found: "+name)
 	}
 
-	// Standalone login pages (no layout)
+	// Determine client language
+	lang := "pt"
+
+	// 1. Check for cookie
+	if cookie, err := c.Cookie("lang"); err == nil && (cookie.Value == "en" || cookie.Value == "pt") {
+		lang = cookie.Value
+	} else {
+		// 2. Fallback to Accept-Language header
+		accept := c.Request().Header.Get("Accept-Language")
+		if strings.HasPrefix(strings.ToLower(accept), "en") {
+			lang = "en"
+		}
+	}
+
+	var viewData any = data
+	if data == nil {
+		viewData = map[string]any{"Lang": lang}
+	} else if m, ok := data.(map[string]any); ok {
+		m["Lang"] = lang
+		viewData = m
+	} else if m, ok := data.(map[string]interface{}); ok {
+		m["Lang"] = lang
+		viewData = m
+	}
+
+	// Determine layout
+	layout := "base"
 	if name == "login.html" || name == "users/login.html" {
-		return tmpl.ExecuteTemplate(w, name, data)
+		layout = name
+	} else if len(name) > 6 && name[:6] == "users/" {
+		layout = "user_base"
 	}
 
-	// User portal pages use user_base layout
-	if len(name) > 6 && name[:6] == "users/" {
-		return tmpl.ExecuteTemplate(w, "user_base", data)
-	}
-
-	// Admin pages use base layout
-	return tmpl.ExecuteTemplate(w, "base", data)
+	return tmpl.ExecuteTemplate(w, layout, viewData)
 }
 
 // templateFuncMap returns the custom template functions used across all templates.
 func templateFuncMap() template.FuncMap {
 	return template.FuncMap{
+		"T": func(lang, messageID string) string {
+			return i18n.Translate(lang, messageID, nil)
+		},
+		"TData": func(lang, messageID string, templateData map[string]interface{}) string {
+			return i18n.Translate(lang, messageID, templateData)
+		},
 		"version": func() string { return AppVersion },
 		"mul":     func(a, b float64) float64 { return a * b },
 		"div":     func(a, b float64) float64 { return a / b },
@@ -78,6 +108,9 @@ func templateFuncMap() template.FuncMap {
 				}
 			}
 			return strings.Join(trimmed, "\n")
+		},
+		"unescapeHTML": func(s string) template.HTML {
+			return template.HTML(s)
 		},
 	}
 }
