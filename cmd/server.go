@@ -25,8 +25,6 @@ var serverCmd = &cobra.Command{
 		if !cmd.Flags().Changed("port") {
 			if vPort := viper.GetInt("server.port"); vPort != 0 {
 				port = vPort
-			} else if vPort := viper.GetInt("app_port"); vPort != 0 { // For backwards compatibility
-				port = vPort
 			} else if vPort := viper.GetInt("port"); vPort != 0 {
 				port = vPort
 			}
