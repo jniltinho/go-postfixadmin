@@ -117,17 +117,14 @@ docker run -p 8080:8080 -e DB_URL="your-dsn" postfixadmin:latest
 ```bash
 # Standard format
 DB_URL="user:password@tcp(localhost:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local"
-
-# For use with importsql (requires multiStatements=true)
-DB_URL="user:password@tcp(localhost:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local&multiStatements=true"
 ```
 
 **PostgreSQL:**
 ```bash
-DB_URL="host=localhost user=gorm password=gorm dbname=gorm port=9920 sslmode=disable TimeZone=Asia/Shanghai"
+DB_URL="host=localhost user=gorm password=gorm dbname=gorm port=9920 sslmode=disable TimeZone=America/Sao_Paulo"
 ```
 
-### 3. Deployment with Systemd (Linux)
+### 4. Deployment with Systemd (Linux)
 
 To deploy the application natively on a Linux server, you can use the included Systemd service file.
 
