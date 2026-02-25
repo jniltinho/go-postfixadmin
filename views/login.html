@@ -50,10 +50,18 @@
         <div class="bg-white border-2 border-brand-text p-8 neo-shadow">
             <h2 class="text-xl font-bold mb-6 uppercase tracking-widest">{{ T $.Lang `Login_Title` }}</h2>
 
-            {{if .error}}
-            <div class="bg-red-50 border-2 border-red-500 text-red-700 p-4 mb-6 flex items-start">
-                <i data-lucide="alert-circle" class="w-5 h-5 mr-3 shrink-0"></i>
-                <span class="text-sm font-bold uppercase tracking-tight">{{.error}}</span>
+            {{if .errorKey}}
+            <div id="error-alert"
+                class="error-alert bg-red-50 border-2 border-red-500 text-red-700 p-4 mb-6 flex items-start justify-between">
+                <div class="flex items-start">
+                    <i data-lucide="alert-circle" class="w-5 h-5 mr-3 shrink-0 mt-0.5"></i>
+                    <span class="text-sm font-bold uppercase tracking-tight">{{ T $.Lang .errorKey }}</span>
+                </div>
+                <button type="button" onclick="dismissError()"
+                    class="ml-4 shrink-0 text-red-400 hover:text-red-700 transition-colors cursor-pointer"
+                    aria-label="Fechar">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
             </div>
             {{end}}
 
@@ -114,8 +122,11 @@
         </p>
     </div>
 
+    <script src="/static/js/alerts.js"></script>
     <script>
         lucide.createIcons();
+
+        window.dismissError = fadeAlert('#error-alert');
     </script>
 </body>
 

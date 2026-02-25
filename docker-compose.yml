@@ -6,7 +6,7 @@ services:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: postfix
       MYSQL_USER: postfix
-      MYSQL_PASSWORD: postfixpassword
+      MYSQL_PASSWORD: postfixPassword
     ports:
       - "3306:3319"
     healthcheck:
@@ -25,10 +25,10 @@ services:
       DB_HOST: mysql
       DB_PORT: 3306
       DB_DRIVER: mysql
-      DB_URL: postfix:postfixpassword@tcp(mysql:3306)/postfix?charset=utf8mb4&parseTime=True&loc=Local&multiStatements=true
+      DB_URL: postfix:postfixPassword@tcp(mysql:3306)/postfix?charset=utf8mb4&parseTime=True&loc=Local&multiStatements=true
       ADMIN_EMAIL: admin@example.com
       ADMIN_PASSWORD: adminpassword
     ports:
       - "8080:8080"
     volumes:
-      - ./config.toml:/app/config.toml
+      - ./config.toml.example:/app/config.toml

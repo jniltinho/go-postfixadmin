@@ -21,20 +21,20 @@ func (h *Handler) UserLogin(c *echo.Context) error {
 		var mailbox models.Mailbox
 
 		if h.DB == nil {
-			return c.Render(http.StatusServiceUnavailable, "users/login.html", map[string]interface{}{"error": "Database connection unavailable"})
+			return c.Render(http.StatusServiceUnavailable, "users/login.html", map[string]interface{}{"errorKey": "Login_ErrDbUnavailable"})
 		}
 
 		if err := h.DB.Where("username = ? AND active = ?", username, true).First(&mailbox).Error; err != nil {
-			return c.Render(http.StatusUnauthorized, "users/login.html", map[string]interface{}{"error": "Invalid credentials"})
+			return c.Render(http.StatusUnauthorized, "users/login.html", map[string]interface{}{"errorKey": "Login_ErrInvalidCredentials"})
 		}
 
 		match, err := utils.CheckPassword(password, mailbox.Password)
 		if err != nil || !match {
-			return c.Render(http.StatusUnauthorized, "users/login.html", map[string]interface{}{"error": "Invalid credentials"})
+			return c.Render(http.StatusUnauthorized, "users/login.html", map[string]interface{}{"errorKey": "Login_ErrInvalidCredentials"})
 		}
 
 		if err := middleware.SetUserSession(c, mailbox.Username); err != nil {
-			return c.Render(http.StatusInternalServerError, "users/login.html", map[string]interface{}{"error": "Failed to create session"})
+			return c.Render(http.StatusInternalServerError, "users/login.html", map[string]interface{}{"errorKey": "Login_ErrSession"})
 		}
 
 		return c.Redirect(http.StatusFound, "/users/dashboard")

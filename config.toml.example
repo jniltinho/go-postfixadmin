@@ -2,7 +2,7 @@
 
 [database]
 # Format: user:password@tcp(host:port)/dbname?args
-url = "postfix:postfixPassword@tcp(localhost:3306)/postfix?charset=utf8mb4&parseTime=True&loc=Local"
+url = "postfix:postfixPassword@tcp(mysql:3306)/postfix?charset=utf8mb4&parseTime=True&loc=Local"
 # driver = "mysql" # mysql or postgres (default: mysql)
 
 [server]

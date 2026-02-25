@@ -97,6 +97,15 @@ msgstr " para acessar a seção do usuário."
 msgid "Login_SecureSystem"
 msgstr "Sistema Seguro de Acesso Administrativo"
 
+msgid "Login_ErrInvalidCredentials"
+msgstr "Credenciais inválidas"
+
+msgid "Login_ErrDbUnavailable"
+msgstr "Conexão com banco de dados indisponível"
+
+msgid "Login_ErrSession"
+msgstr "Falha ao criar sessão. Tente novamente."
+
 msgid "UserLogin_Title"
 msgstr "Login de Usuário"
 
@@ -268,7 +277,7 @@ msgstr "Admin"
 msgid "Layout_SuperAdmin"
 msgstr "SUPERADMIN"
 
-msgid "Layout_Logout"
+msgid "Logout"
 msgstr "Sair"
 
 msgid "LayoutAdmin_Dashboard"

@@ -97,6 +97,15 @@ msgstr " to access the user section."
 msgid "Login_SecureSystem"
 msgstr "Secure Administrative Access System"
 
+msgid "Login_ErrInvalidCredentials"
+msgstr "Invalid credentials"
+
+msgid "Login_ErrDbUnavailable"
+msgstr "Database connection unavailable"
+
+msgid "Login_ErrSession"
+msgstr "Failed to create session. Please try again."
+
 msgid "UserLogin_Title"
 msgstr "User Login"
 
@@ -268,7 +277,7 @@ msgstr "Admin"
 msgid "Layout_SuperAdmin"
 msgstr "SUPERADMIN"
 
-msgid "Layout_Logout"
+msgid "Logout"
 msgstr "Logout"
 
 msgid "LayoutAdmin_Dashboard"

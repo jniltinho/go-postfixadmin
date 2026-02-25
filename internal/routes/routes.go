@@ -11,67 +11,74 @@ import (
 
 // RegisterRoutes registers all the application routes
 func RegisterRoutes(e *echo.Echo, h *handlers.Handler) {
-	// Auth Routes
+	// Public Auth Routes (no middleware needed)
 	e.GET("/login", h.Login)
 	e.POST("/login", h.Login)
 	e.GET("/logout", h.Logout)
 
-	// Dashboard
-	e.GET("/dashboard", h.Dashboard)
-
-	// Domains
-	e.GET("/domains", h.ListDomains)
-	e.GET("/domains/add", h.AddDomainForm)
-	e.POST("/domains/add", h.AddDomain)
-	e.GET("/domains/edit/:domain", h.EditDomainForm)
-	e.POST("/domains/edit/:domain", h.EditDomain)
-	e.DELETE("/domains/delete/:domain", h.DeleteDomain)
-
-	// Mailboxes
-	e.GET("/mailboxes", h.ListMailboxes)
-	e.GET("/mailboxes/add", h.AddMailboxForm)
-	e.POST("/mailboxes/add", h.AddMailbox)
-	e.GET("/mailboxes/edit/:username", h.EditMailboxForm)
-	e.POST("/mailboxes/edit/:username", h.EditMailbox)
-	e.DELETE("/mailboxes/delete/:username", h.DeleteMailbox)
-
-	// Admins
-	e.GET("/admins", h.ListAdmins)
-	e.GET("/admins/add", h.AddAdminForm)
-	e.POST("/admins/add", h.AddAdmin)
-	e.GET("/admins/edit/:username", h.EditAdminForm)
-	e.POST("/admins/edit/:username", h.EditAdmin)
-	e.DELETE("/admins/delete/:username", h.DeleteAdmin)
-
-	// Aliases
-	e.GET("/aliases", h.ListAliases)
-	e.GET("/aliases/add", h.AddAliasForm)
-	e.POST("/aliases/add", h.AddAlias)
-	e.GET("/aliases/edit/:address", h.EditAliasForm)
-	e.POST("/aliases/edit/:address", h.EditAlias)
-	e.DELETE("/aliases/delete/:address", h.DeleteAlias)
-
-	// Alias Domains
-	e.GET("/alias-domains", h.ListAliasDomains)
-	e.GET("/alias-domains/add", h.AddAliasDomainForm)
-	e.POST("/alias-domains/add", h.AddAliasDomain)
-	e.GET("/alias-domains/edit/:alias_domain", h.EditAliasDomainForm)
-	e.POST("/alias-domains/edit/:alias_domain", h.EditAliasDomain)
-	e.DELETE("/alias-domains/delete/:alias_domain", h.DeleteAliasDomain)
-
-	// API / Utils
-	e.GET("/api/generate-password", h.GeneratePassword)
+	// Static files and utils (public)
 	e.GET("/lang/:code", h.SetLanguage)
 
-	// Fetchmail
-	e.GET("/fetchmail/add", h.AddFetchmailGET)
-	e.POST("/fetchmail/add", h.AddFetchmailPOST)
+	// Protected Admin Routes
+	adminGroup := e.Group("")
+	adminGroup.Use(middleware.AuthMiddleware)
 
-	// User Portal Routes
+	// Dashboard
+	adminGroup.GET("/dashboard", h.Dashboard)
+
+	// API Routes
+	adminGroup.GET("/api/generate-password", h.GeneratePassword)
+
+	// Domains
+	adminGroup.GET("/domains", h.ListDomains)
+	adminGroup.GET("/domains/add", h.AddDomainForm)
+	adminGroup.POST("/domains/add", h.AddDomain)
+	adminGroup.GET("/domains/edit/:domain", h.EditDomainForm)
+	adminGroup.POST("/domains/edit/:domain", h.EditDomain)
+	adminGroup.DELETE("/domains/delete/:domain", h.DeleteDomain)
+
+	// Mailboxes
+	adminGroup.GET("/mailboxes", h.ListMailboxes)
+	adminGroup.GET("/mailboxes/add", h.AddMailboxForm)
+	adminGroup.POST("/mailboxes/add", h.AddMailbox)
+	adminGroup.GET("/mailboxes/edit/:username", h.EditMailboxForm)
+	adminGroup.POST("/mailboxes/edit/:username", h.EditMailbox)
+	adminGroup.DELETE("/mailboxes/delete/:username", h.DeleteMailbox)
+
+	// Admins
+	adminGroup.GET("/admins", h.ListAdmins)
+	adminGroup.GET("/admins/add", h.AddAdminForm)
+	adminGroup.POST("/admins/add", h.AddAdmin)
+	adminGroup.GET("/admins/edit/:username", h.EditAdminForm)
+	adminGroup.POST("/admins/edit/:username", h.EditAdmin)
+	adminGroup.DELETE("/admins/delete/:username", h.DeleteAdmin)
+
+	// Aliases
+	adminGroup.GET("/aliases", h.ListAliases)
+	adminGroup.GET("/aliases/add", h.AddAliasForm)
+	adminGroup.POST("/aliases/add", h.AddAlias)
+	adminGroup.GET("/aliases/edit/:address", h.EditAliasForm)
+	adminGroup.POST("/aliases/edit/:address", h.EditAlias)
+	adminGroup.DELETE("/aliases/delete/:address", h.DeleteAlias)
+
+	// Alias Domains
+	adminGroup.GET("/alias-domains", h.ListAliasDomains)
+	adminGroup.GET("/alias-domains/add", h.AddAliasDomainForm)
+	adminGroup.POST("/alias-domains/add", h.AddAliasDomain)
+	adminGroup.GET("/alias-domains/edit/:alias_domain", h.EditAliasDomainForm)
+	adminGroup.POST("/alias-domains/edit/:alias_domain", h.EditAliasDomain)
+	adminGroup.DELETE("/alias-domains/delete/:alias_domain", h.DeleteAliasDomain)
+
+	// Fetchmail
+	adminGroup.GET("/fetchmail/add", h.AddFetchmailGET)
+	adminGroup.POST("/fetchmail/add", h.AddFetchmailPOST)
+
+	// User Portal Routes (public)
 	e.GET("/users/login", h.UserLogin)
 	e.POST("/users/login", h.UserLogin)
 	e.GET("/users/logout", h.UserLogout)
 
+	// Protected User Portal Routes
 	userGroup := e.Group("/users")
 	userGroup.Use(middleware.UserAuthMiddleware)
 	userGroup.GET("/dashboard", h.UserDashboard)

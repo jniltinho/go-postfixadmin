@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v5"
+	"github.com/spf13/viper"
 )
 
 const (
@@ -25,7 +26,7 @@ const (
 func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c *echo.Context) error {
 		// Skip check for login page and static assets
-		if c.Path() == "/login" || c.Path() == "/static/*" || c.Path() == "/users/login" || c.Path() == "/users/logout" {
+		if c.Path() == "/login" || c.Path() == "/static/*" || c.Path() == "/users/login" || c.Path() == "/users/logout" || c.Path() == "/lang/:code" {
 			return next(c)
 		}
 
@@ -116,6 +117,8 @@ func SetSession(c *echo.Context, username string, isSuperAdmin bool) error {
 		Path:     "/",
 		MaxAge:   86400 * 7, // 7 days
 		HttpOnly: true,
+		Secure:   viper.GetBool("server.ssl"),
+		SameSite: http.SameSiteLaxMode,
 	}
 	sess.Values[AuthKey] = true
 	sess.Values[UsernameKey] = username
@@ -131,6 +134,8 @@ func SetUserSession(c *echo.Context, username string) error {
 		Path:     "/",
 		MaxAge:   86400 * 7, // 7 days
 		HttpOnly: true,
+		Secure:   viper.GetBool("server.ssl"),
+		SameSite: http.SameSiteLaxMode,
 	}
 	sess.Values[UserAuthKey] = true
 	sess.Values[UserUsernameKey] = username
@@ -177,22 +182,33 @@ func GetUser(c *echo.Context) string {
 // ClearSession removes the admin session
 func ClearSession(c *echo.Context) error {
 	sess, _ := session.Get(SessionName, c)
-	// Clear all values in the session
+	// Reset options first to ensure MaxAge=-1 is applied even if Options was nil
+	sess.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+	}
+
+	// Clear all session values
 	for key := range sess.Values {
 		delete(sess.Values, key)
 	}
-	sess.Options.MaxAge = -1
 	return sess.Save(c.Request(), c.Response())
 }
 
 // ClearUserSession removes the user session
 func ClearUserSession(c *echo.Context) error {
 	sess, _ := session.Get(UserSessionName, c)
-	// Clear all values in the session
+	// Reset options first to ensure MaxAge=-1 is applied even if Options was nil
+	sess.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+	}
+	// Clear all session values
 	for key := range sess.Values {
 		delete(sess.Values, key)
 	}
-	sess.Options.MaxAge = -1
 	return sess.Save(c.Request(), c.Response())
 }
 

@@ -12,7 +12,6 @@ import (
 
 	"go-postfixadmin/internal/handlers"
 	"go-postfixadmin/internal/i18n"
-	"go-postfixadmin/internal/middleware"
 	"go-postfixadmin/internal/routes"
 
 	"github.com/gorilla/sessions"
@@ -39,18 +38,15 @@ func StartServer(embeddedFiles embed.FS, port int, db *gorm.DB, ssl bool, certFi
 	}
 
 	if secret == "" {
+		slog.Warn("session_secret not configured — sessions will be invalidated on server restart!")
 		bytes := make([]byte, 32)
 		if _, err := rand.Read(bytes); err != nil {
 			secret = "9a048f79e88e35de37dc2c43c1fa002f358f92957a7690e60109cfe8a65178e0"
 		} else {
 			secret = hex.EncodeToString(bytes)
-			slog.Info("Generated random session secret", "secret", secret)
 		}
 	}
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte(secret))))
-
-	// Auth Middleware
-	e.Use(middleware.AuthMiddleware)
 
 	// Template Rendering
 	i18n.Init(embeddedFiles)
