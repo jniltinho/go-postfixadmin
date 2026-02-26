@@ -32,21 +32,21 @@
 
             <div class="space-y-6">
                 <!-- Conta + Servidor (2 cols) -->
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label for="mailbox"
                             class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
                             {{ T $.Lang `Fetchmail_LblAccount` }} <span class="text-red-500">*</span>
                         </label>
                         <select id="mailbox" name="mailbox" required
-                            class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors cursor-pointer">
+                            class="w-full h-[52px] px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors cursor-pointer">
                             <option value="">{{ T $.Lang `Fetchmail_PhSelectAccount` }}</option>
                             {{range .Mailboxes}}
                             <option value="{{.Username}}" {{if eq $.Mailbox .Username}}selected{{end}}>{{.Username}}
                             </option>
                             {{end}}
                         </select>
-                        <p class="text-xs text-gray-500 mt-2">{{ T $.Lang `Fetchmail_HelpAccount` }}</p>
+                        <p class="text-xs text-gray-400 mt-2">{{ T $.Lang `Fetchmail_HelpAccount` }}</p>
                     </div>
                     <div>
                         <label for="src_server"
@@ -54,13 +54,13 @@
                             {{ T $.Lang `Fetchmail_LblServer` }}
                         </label>
                         <input type="text" id="src_server" name="src_server" value="{{.SrcServer}}"
-                            class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors">
-                        <p class="text-xs text-gray-500 mt-2">{{ T $.Lang `Fetchmail_HelpServer` }}</p>
+                            class="w-full h-[52px] px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors">
+                        <p class="text-xs text-gray-400 mt-2">{{ T $.Lang `Fetchmail_HelpServer` }}</p>
                     </div>
                 </div>
 
                 <!-- Port + Autenticação (2 cols) -->
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label for="src_port"
                             class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
@@ -68,8 +68,8 @@
                         </label>
                         <input type="number" id="src_port" name="src_port"
                             value="{{if .SrcPort}}{{.SrcPort}}{{else}}0{{end}}" min="0" placeholder="0"
-                            class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors">
-                        <p class="text-xs text-gray-500 mt-2">{{ T $.Lang `Fetchmail_HelpPort` }}</p>
+                            class="w-full h-[52px] px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors">
+                        <p class="text-xs text-gray-400 mt-2">{{ T $.Lang `Fetchmail_HelpPort` }}</p>
                     </div>
                     <div>
                         <label for="src_auth"
@@ -77,7 +77,7 @@
                             {{ T $.Lang `Fetchmail_LblAuth` }}
                         </label>
                         <select id="src_auth" name="src_auth"
-                            class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors cursor-pointer">
+                            class="w-full h-[52px] px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors cursor-pointer">
                             <option value="password" {{if eq .SrcAuth "password" }}selected{{end}}>password</option>
                             <option value="kerberos_v5" {{if eq .SrcAuth "kerberos_v5" }}selected{{end}}>kerberos_v5
                             </option>
@@ -92,7 +92,7 @@
                             <option value="ssh" {{if eq .SrcAuth "ssh" }}selected{{end}}>ssh</option>
                             <option value="any" {{if eq .SrcAuth "any" }}selected{{end}}>any</option>
                         </select>
-                        <p class="text-xs text-gray-500 mt-2">{{ T $.Lang `Fetchmail_HelpAuth` }}</p>
+                        <p class="text-xs text-gray-400 mt-2">{{ T $.Lang `Fetchmail_HelpAuth` }}</p>
                     </div>
                 </div>
 
@@ -104,8 +104,8 @@
                             {{ T $.Lang `Fetchmail_LblUsername` }}
                         </label>
                         <input type="text" id="src_user" name="src_user" value="{{.SrcUser}}"
-                            class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors">
-                        <p class="text-xs text-gray-500 mt-2">{{ T $.Lang `Fetchmail_HelpUsername` }}</p>
+                            class="w-full h-[52px] px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors">
+                        <p class="text-xs text-gray-400 mt-2">{{ T $.Lang `Fetchmail_HelpUsername` }}</p>
                     </div>
                     <div>
                         <label for="src_password"
@@ -113,21 +113,21 @@
                             {{ T $.Lang `Fetchmail_LblPassword` }}
                         </label>
                         <input type="password" id="src_password" name="src_password" value="{{.SrcPassword}}"
-                            class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors">
-                        <p class="text-xs text-gray-500 mt-2">{{ T $.Lang `Fetchmail_HelpPassword` }}</p>
+                            class="w-full h-[52px] px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors">
+                        <p class="text-xs text-gray-400 mt-2">{{ T $.Lang `Fetchmail_HelpPassword` }}</p>
                     </div>
                 </div>
 
                 <!-- Diretório + Checar (2 cols) -->
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label for="src_folder"
                             class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
                             {{ T $.Lang `Fetchmail_LblFolder` }}
                         </label>
                         <input type="text" id="src_folder" name="src_folder" value="{{.SrcFolder}}"
-                            class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors">
-                        <p class="text-xs text-gray-500 mt-2">{{ T $.Lang `Fetchmail_HelpFolder` }}</p>
+                            class="w-full h-[52px] px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors">
+                        <p class="text-xs text-gray-400 mt-2">{{ T $.Lang `Fetchmail_HelpFolder` }}</p>
                     </div>
                     <div>
                         <label for="poll_time"
@@ -136,26 +136,28 @@
                         </label>
                         <input type="number" id="poll_time" name="poll_time"
                             value="{{if .PollTime}}{{.PollTime}}{{else}}10{{end}}" min="1"
-                            class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors">
-                        <p class="text-xs text-gray-500 mt-2">{{ T $.Lang `Fetchmail_HelpPoll` }}</p>
+                            class="w-full h-[52px] px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors">
+                        <p class="text-xs text-gray-400 mt-2">{{ T $.Lang `Fetchmail_HelpPoll` }}</p>
                     </div>
                 </div>
 
                 <!-- Protocolo (full width) -->
-                <div>
-                    <label for="protocol"
-                        class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
-                        {{ T $.Lang `Fetchmail_LblProtocol` }}
-                    </label>
-                    <select id="protocol" name="protocol"
-                        class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors cursor-pointer">
-                        <option value="POP3" {{if eq .Protocol "POP3" }}selected{{end}}>POP3</option>
-                        <option value="IMAP" {{if eq .Protocol "IMAP" }}selected{{end}}>IMAP</option>
-                        <option value="POP2" {{if eq .Protocol "POP2" }}selected{{end}}>POP2</option>
-                        <option value="ETRN" {{if eq .Protocol "ETRN" }}selected{{end}}>ETRN</option>
-                        <option value="AUTO" {{if eq .Protocol "AUTO" }}selected{{end}}>AUTO</option>
-                    </select>
-                    <p class="text-xs text-gray-500 mt-2">{{ T $.Lang `Fetchmail_HelpProtocol` }}</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="protocol"
+                            class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
+                            {{ T $.Lang `Fetchmail_LblProtocol` }}
+                        </label>
+                        <select id="protocol" name="protocol"
+                            class="w-full h-[52px] px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors cursor-pointer">
+                            <option value="POP3" {{if eq .Protocol "POP3" }}selected{{end}}>POP3</option>
+                            <option value="IMAP" {{if eq .Protocol "IMAP" }}selected{{end}}>IMAP</option>
+                            <option value="POP2" {{if eq .Protocol "POP2" }}selected{{end}}>POP2</option>
+                            <option value="ETRN" {{if eq .Protocol "ETRN" }}selected{{end}}>ETRN</option>
+                            <option value="AUTO" {{if eq .Protocol "AUTO" }}selected{{end}}>AUTO</option>
+                        </select>
+                        <p class="text-xs text-gray-400 mt-2">{{ T $.Lang `Fetchmail_HelpProtocol` }}</p>
+                    </div>
                 </div>
 
                 <!-- Checkboxes -->
