@@ -20,92 +20,61 @@ const (
 	InactivityTimeout = 30 * time.Minute
 )
 
-// AuthMiddleware checks for admin session validity and inactivity
-func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c *echo.Context) error {
-		// Skip check for login page and static assets
-		if c.Path() == "/login" || c.Path() == "/static/*" || c.Path() == "/users/login" || c.Path() == "/users/logout" || c.Path() == "/lang/:code" {
+// baseAuthMiddleware provides a generic authentication middleware generator
+func baseAuthMiddleware(sessionName, loginPath string) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c *echo.Context) error {
+
+			// Skip check for login page and static assets
+			if c.Path() == "/login" || c.Path() == "/static/*" || c.Path() == "/users/login" || c.Path() == "/users/logout" || c.Path() == "/lang/:code" {
+				return next(c)
+			}
+
+			// Prevent browser caching of protected pages
+			c.Response().Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+			c.Response().Header().Set("Pragma", "no-cache")
+			c.Response().Header().Set("Expires", "0")
+
+			sess, _ := session.Get(sessionName, c)
+			if sess == nil {
+				return c.Redirect(http.StatusFound, loginPath)
+			}
+
+			// Check if authenticated
+			auth, ok := sess.Values[AuthKey].(bool)
+			if !ok || !auth {
+				return c.Redirect(http.StatusFound, loginPath)
+			}
+
+			// Check inactivity
+			lastActivity, ok := sess.Values[LastActivityKey].(int64)
+			if ok {
+				lastActivityTime := time.Unix(lastActivity, 0)
+				if time.Since(lastActivityTime) > InactivityTimeout {
+					// Session expired
+					sess.Options.MaxAge = -1
+					sess.Save(c.Request(), c.Response())
+					return c.Redirect(http.StatusFound, loginPath+"?expired=true")
+				}
+			}
+
+			// Update last activity
+			sess.Values[LastActivityKey] = time.Now().Unix()
+			sess.Save(c.Request(), c.Response())
+
 			return next(c)
 		}
-
-		// Prevent browser caching of protected pages
-		c.Response().Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
-		c.Response().Header().Set("Pragma", "no-cache")
-		c.Response().Header().Set("Expires", "0")
-
-		sess, _ := session.Get(SessionName, c)
-		if sess == nil {
-			return c.Redirect(http.StatusFound, "/login")
-		}
-
-		// Check if authenticated
-		auth, ok := sess.Values[AuthKey].(bool)
-		if !ok || !auth {
-			return c.Redirect(http.StatusFound, "/login")
-		}
-
-		// Check inactivity
-		lastActivity, ok := sess.Values[LastActivityKey].(int64)
-		if ok {
-			lastActivityTime := time.Unix(lastActivity, 0)
-			if time.Since(lastActivityTime) > InactivityTimeout {
-				// Session expired
-				sess.Options.MaxAge = -1
-				sess.Save(c.Request(), c.Response())
-				return c.Redirect(http.StatusFound, "/login?expired=true")
-			}
-		}
-
-		// Update last activity
-		sess.Values[LastActivityKey] = time.Now().Unix()
-		sess.Save(c.Request(), c.Response())
-
-		return next(c)
 	}
+}
+
+// AuthMiddleware checks for admin session validity and inactivity
+func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return baseAuthMiddleware(SessionName, "/login")(next)
 }
 
 // UserAuthMiddleware checks for user session validity and inactivity
 func UserAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c *echo.Context) error {
-		// Skip check for login page and static assets
-		if c.Path() == "/users/login" || c.Path() == "/static/*" {
-			return next(c)
-		}
-
-		// Prevent browser caching of protected pages
-		c.Response().Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
-		c.Response().Header().Set("Pragma", "no-cache")
-		c.Response().Header().Set("Expires", "0")
-
-		sess, _ := session.Get(UserSessionName, c)
-		if sess == nil {
-			return c.Redirect(http.StatusFound, "/users/login")
-		}
-
-		// Check if authenticated
-		auth, ok := sess.Values[AuthKey].(bool)
-		if !ok || !auth {
-			return c.Redirect(http.StatusFound, "/users/login")
-		}
-
-		// Check inactivity
-		lastActivity, ok := sess.Values[LastActivityKey].(int64)
-		if ok {
-			lastActivityTime := time.Unix(lastActivity, 0)
-			if time.Since(lastActivityTime) > InactivityTimeout {
-				// Session expired
-				sess.Options.MaxAge = -1
-				sess.Save(c.Request(), c.Response())
-				return c.Redirect(http.StatusFound, "/users/login?expired=true")
-			}
-		}
-
-		// Update last activity
-		sess.Values[LastActivityKey] = time.Now().Unix()
-		sess.Save(c.Request(), c.Response())
-
-		return next(c)
-	}
+	return baseAuthMiddleware(UserSessionName, "/users/login")(next)
 }
 
 // SetSession authenticates and sets initial session values
