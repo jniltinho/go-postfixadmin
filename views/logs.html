@@ -1,0 +1,208 @@
+{{define "title"}}{{ T $.Lang `Logs_Title` }} - Go-PostfixAdmin{{end}}
+{{define "breadcrumb"}}{{ T $.Lang `Logs_Title` }}{{end}}
+
+{{define "content"}}
+<div class="mb-12 flex justify-between items-end">
+    <div>
+        <h2 class="text-4xl font-mono font-black uppercase tracking-tight mb-2">{{ T $.Lang `Logs_Title` }}</h2>
+        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">{{ T $.Lang `Logs_Subtitle` }}</p>
+    </div>
+</div>
+
+
+
+<div class="bg-white border-2 border-brand-text overflow-hidden pt-4 pb-1">
+    <div class="overflow-x-auto">
+        <table id="logsTable" class="w-full text-left border-collapse border-2 border-brand-text">
+            <thead class="bg-brand-primary text-white border-b-2 border-brand-text">
+                <tr>
+                    <th class="px-4 py-4 text-left text-xs font-black uppercase tracking-widest text-white">{{ T $.Lang
+                        `Logs_TblDateTime` }}
+                    </th>
+                    <th class="px-4 py-4 text-left text-xs font-black uppercase tracking-widest text-white">{{ T $.Lang
+                        `Logs_TblAdmin` }}
+                    </th>
+                    <th class="px-4 py-4 text-left text-xs font-black uppercase tracking-widest text-white">{{ T $.Lang
+                        `Logs_TblDomain` }}
+                    </th>
+                    <th class="px-4 py-4 text-left text-xs font-black uppercase tracking-widest text-white">{{ T $.Lang
+                        `Logs_TblAction` }}
+                    </th>
+                    <th class="px-4 py-4 text-left text-xs font-black uppercase tracking-widest text-white">{{ T $.Lang
+                        `Logs_TblDesc` }}
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 text-sm">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- DataTables -->
+<link rel="stylesheet" type="text/css" href="/static/css/jquery.dataTables.min.css" />
+<script type="text/javascript" src="/static/js/jquery.dataTables.min.js"></script>
+
+<style>
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter {
+        margin-bottom: 16px;
+    }
+
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_info {
+        padding-left: 6px;
+        /* Alinha com o px-4 da tabela */
+    }
+
+    .dataTables_wrapper .dataTables_filter,
+    .dataTables_wrapper .dataTables_paginate {
+        padding-right: 6px;
+        /* Alinha com o px-4 da tabela */
+    }
+
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+        margin-top: 4px;
+        margin-bottom: 0px;
+        font-size: 0.75rem;
+        /* ~12px to match text-xs */
+    }
+
+    .dataTables_wrapper .dataTables_length select,
+    .dataTables_wrapper .dataTables_filter input {
+        border: 2px solid #1E293B;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0;
+        outline: none;
+    }
+
+    .dataTables_wrapper .dataTables_length select:focus,
+    .dataTables_wrapper .dataTables_filter input:focus {
+        border-color: #2563EB;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        border: 2px solid transparent !important;
+        border-radius: 0 !important;
+        font-weight: 900;
+        text-transform: uppercase;
+        margin: 0 2px !important;
+        /* Espaçamento entre os botões */
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+        background: #2563EB !important;
+        color: white !important;
+        border: 2px solid #1E293B !important;
+        /* Removida a sombra pesada aqui: box-shadow: 2px 2px 0px #1E293B; */
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        background: #f3f4f6 !important;
+        color: #1E293B !important;
+        border: 2px solid #1E293B !important;
+    }
+
+    table.dataTable thead th {
+        border-bottom: 4px solid #1E293B !important;
+        vertical-align: middle;
+        padding-right: 24px;
+        /* Space for sorting icons */
+    }
+
+    table.dataTable.no-footer {
+        border-bottom: 4px solid #1E293B !important;
+    }
+
+    table.dataTable {
+        border-left: 4px solid #1E293B !important;
+        border-right: 4px solid #1E293B !important;
+        border-top: 4px solid #1E293B !important;
+    }
+
+    table.dataTable tbody tr.even {
+        background-color: #f9fafb;
+    }
+
+    table.dataTable tbody tr:hover {
+        background-color: #f3f4f6;
+    }
+</style>
+
+<script>
+    $(document).ready(function () {
+        var dtLang = {};
+        var currentLang = "{{$.Lang}}";
+        if (currentLang === "pt" || currentLang === "pt_BR") {
+            dtLang = {
+                "sEmptyTable": "Nenhum registro encontrado",
+                "sInfo": "Mostrando de _START_ até _END_ de _TOTAL_ registros",
+                "sInfoEmpty": "Mostrando 0 até 0 de 0 registros",
+                "sInfoFiltered": "(Filtrados de _MAX_ registros)",
+                "sInfoPostFix": "",
+                "sInfoThousands": ".",
+                "sLengthMenu": "_MENU_ resultados por página",
+                "sLoadingRecords": "Carregando...",
+                "sProcessing": "Processando...",
+                "sZeroRecords": "Nenhum registro encontrado",
+                "sSearch": "Pesquisar:",
+                "oPaginate": {
+                    "sNext": "Próximo",
+                    "sPrevious": "Anterior",
+                    "sFirst": "Primeiro",
+                    "sLast": "Último"
+                },
+                "oAria": {
+                    "sSortAscending": ": Ordenar colunas de forma ascendente",
+                    "sSortDescending": ": Ordenar colunas de forma descendente"
+                }
+            };
+        } else if (currentLang === "es") {
+            dtLang = {
+                "sProcessing": "Procesando...",
+                "sLengthMenu": "Mostrar _MENU_ registros",
+                "sZeroRecords": "No se encontraron resultados",
+                "sEmptyTable": "Ningún dato disponible en esta tabla",
+                "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                "sSearch": "Buscar:",
+                "oPaginate": {
+                    "sFirst": "Primero",
+                    "sLast": "Último",
+                    "sNext": "Siguiente",
+                    "sPrevious": "Anterior"
+                },
+            };
+        }
+
+        var table = $('#logsTable').DataTable({
+            "processing": true,
+            "serverSide": true,
+            "ajax": {
+                "url": "/api/logs",
+                "type": "GET"
+            },
+            "columns": [
+                { "data": "timestamp", "className": "text-gray-600 font-medium text-xs" },
+                { "data": "username", "className": "text-gray-600 font-medium text-xs" },
+                { "data": "domain", "className": "text-gray-600 font-medium text-xs" },
+                { "data": "action", "className": "uppercase text-xs font-black" },
+                { "data": "data", "className": "text-gray-600 font-medium text-xs" }
+            ],
+            "order": [[0, "desc"]],
+            "language": dtLang,
+            "pageLength": 10,
+            "drawCallback": function (settings) {
+                // Re-initialize Lucide icons when data redraws
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+            }
+        });
+
+    });
+</script>
+{{end}}

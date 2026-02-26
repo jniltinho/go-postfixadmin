@@ -29,6 +29,10 @@ func RegisterRoutes(e *echo.Echo, h *handlers.Handler) {
 	// Dashboard
 	adminGroup.GET("/dashboard", h.Dashboard)
 
+	// Logs
+	adminGroup.GET("/logs", h.Logs)
+	adminGroup.GET("/api/logs", h.LogsData)
+
 	// Domains
 	adminGroup.GET("/domains", h.ListDomains)
 	adminGroup.GET("/domains/add", h.AddDomainForm)

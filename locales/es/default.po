@@ -1171,3 +1171,47 @@ msgstr "Cancelar"
 msgid "Fetchmail_BtnCreate"
 msgstr "Crear Nuevo Registro"
 
+msgid "Logs_Title"
+msgstr "Registros del Sistema"
+
+msgid "Logs_Subtitle"
+msgstr "Historial completo de todas las acciones del sistema y administrativas."
+
+msgid "Logs_FilterAdmin"
+msgstr "Administrador"
+
+msgid "Logs_FilterAdminPlaceholder"
+msgstr "admin@dominio.com"
+
+msgid "Logs_FilterDomain"
+msgstr "Dominio"
+
+msgid "Logs_FilterDomainPlaceholder"
+msgstr "ejemplo.com"
+
+msgid "Logs_FilterAction"
+msgstr "Acción"
+
+msgid "Logs_FilterActionPlaceholder"
+msgstr "LOGIN, CREATE_MAILBOX, etc"
+
+msgid "Logs_ApplyFilters"
+msgstr "Aplicar Filtros"
+
+msgid "Logs_TblDateTime"
+msgstr "Fecha/Hora"
+
+msgid "Logs_TblAdmin"
+msgstr "Administrador"
+
+msgid "Logs_TblDomain"
+msgstr "Dominio"
+
+msgid "Logs_TblAction"
+msgstr "Acción"
+
+msgid "Logs_TblDesc"
+msgstr "Descripción"
+
+msgid "LayoutAdmin_Logs"
+msgstr "Registros"
