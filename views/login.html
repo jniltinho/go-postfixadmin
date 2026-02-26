@@ -123,12 +123,11 @@
         </p>
     </div>
 
-    <script src="/static/js/alerts.js"></script>
     <script src="/static/js/app.js"></script>
     <script>
         $(function () {
             lucide.createIcons();
-            window.dismissError = fadeAlert('#error-alert');
+            window.dismissError = App.fadeAlert('#error-alert');
         });
     </script>
 </body>

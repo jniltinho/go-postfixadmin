@@ -1,0 +1,82 @@
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter {
+    margin-bottom: 2px;
+}
+
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_info {
+    padding-left: 5px;
+    /* Alinha com o px-4 da tabela */
+}
+
+.dataTables_wrapper .dataTables_filter,
+.dataTables_wrapper .dataTables_paginate {
+    padding-right: 5px;
+    /* Alinha com o px-4 da tabela */
+}
+
+.dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_paginate {
+    margin-top: 4px;
+    margin-bottom: 0px;
+    font-size: 0.75rem;
+    /* ~12px to match text-xs */
+}
+
+.dataTables_wrapper .dataTables_length select,
+.dataTables_wrapper .dataTables_filter input {
+    border: 2px solid #1E293B;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0;
+    outline: none;
+}
+
+.dataTables_wrapper .dataTables_length select:focus,
+.dataTables_wrapper .dataTables_filter input:focus {
+    border-color: #2563EB;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    border: 2px solid transparent !important;
+    border-radius: 0 !important;
+    font-weight: 900;
+    text-transform: uppercase;
+    margin: 0 2px !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+    background: #2563EB !important;
+    color: white !important;
+    border: 2px solid #1E293B !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: #f3f4f6 !important;
+    color: #1E293B !important;
+    border: 2px solid #1E293B !important;
+}
+
+table.dataTable thead th {
+    border-bottom: 4px solid #1E293B !important;
+    vertical-align: middle;
+    padding-right: 24px;
+}
+
+table.dataTable.no-footer {
+    border-bottom: 4px solid #1E293B !important;
+}
+
+table.dataTable {
+    border-left: 4px solid #1E293B !important;
+    border-right: 4px solid #1E293B !important;
+    border-top: 4px solid #1E293B !important;
+}
+
+table.dataTable tbody tr.even {
+    background-color: #f9fafb;
+}
+
+table.dataTable tbody tr:hover {
+    background-color: #f3f4f6;
+}

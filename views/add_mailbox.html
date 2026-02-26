@@ -10,7 +10,7 @@
     </div>
 
     {{if .Error}}
-    <div class="mb-6 bg-red-50 border-4 border-red-600 neo-shadow-sm p-6">
+    <div class="mb-6 bg-red-50 border-4 border-red-600 neo-shadow-sm p-6 flash-message" style="opacity: 0;">
         <div class="flex items-start">
             <i data-lucide="alert-circle" class="w-6 h-6 text-red-600 mr-3 mt-1"></i>
             <div>
@@ -260,6 +260,7 @@
     };
 
     $(function () {
+        App.fadeAlert('.flash-message', { delay: 4000 });
         // Force lowercase on username input
         $('#local_part').on('input', function () {
             $(this).val($(this).val().toLowerCase());

@@ -92,47 +92,45 @@
 </div>
 
 <div class="mt-12">
-    <div class="bg-white border-2 border-brand-text p-8 neo-shadow-sm">
-        <div class="flex items-center justify-between mb-8">
+    <div class="bg-white border-2 border-brand-text p-2 neo-shadow-sm">
+        <div class="flex items-center justify-between mb-4">
             <h3 class="text-xl font-black uppercase tracking-widest">{{ T $.Lang `DashboardAdmin_RecentActivity` }}</h3>
             <a href="/logs"
                 class="text-brand-primary font-black uppercase tracking-widest text-xs flex items-center hover:underline cursor-pointer">
                 {{ T $.Lang `DashboardAdmin_ViewLogs` }} <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
             </a>
         </div>
-        <div class="overflow-x-auto max-h-64 overflow-y-auto custom-scrollbar">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="border-b-2 border-brand-text text-sm uppercase tracking-wide text-gray-500">
-                        <th class="py-2 px-2 font-black">{{ T $.Lang `DashboardAdmin_TblDateTime` }}</th>
-                        <th class="py-2 px-2 font-black">{{ T $.Lang `DashboardAdmin_TblAdmin` }}</th>
-                        <th class="py-2 px-2 font-black">{{ T $.Lang `DashboardAdmin_TblDomain` }}</th>
-                        <th class="py-2 px-2 font-black">{{ T $.Lang `DashboardAdmin_TblAction` }}</th>
-                        <th class="py-2 px-2 font-black">{{ T $.Lang `DashboardAdmin_TblDesc` }}</th>
+        <div class="overflow-x-auto">
+            <table id="logsTable" class="w-full text-left border-collapse border-2 border-brand-text">
+                <thead class="bg-brand-primary text-white border-b-2 border-brand-text">
+                    <tr>
+                        <th class="text-left text-xs font-black uppercase tracking-widest text-white py-2 px-4">{{ T
+                            $.Lang `DashboardAdmin_TblDateTime` }}</th>
+                        <th class="text-left text-xs font-black uppercase tracking-widest text-white py-2 px-4">{{ T
+                            $.Lang `DashboardAdmin_TblAdmin` }}</th>
+                        <th class="text-left text-xs font-black uppercase tracking-widest text-white py-2 px-4">{{ T
+                            $.Lang `DashboardAdmin_TblDomain` }}</th>
+                        <th class="text-left text-xs font-black uppercase tracking-widest text-white py-2 px-4">{{ T
+                            $.Lang `DashboardAdmin_TblAction` }}</th>
+                        <th class="text-left text-xs font-black uppercase tracking-widest text-white py-2 px-4">{{ T
+                            $.Lang `DashboardAdmin_TblDesc` }}</th>
                     </tr>
                 </thead>
-                <tbody class="text-sm font-medium text-gray-700">
-                    {{if .Logs}}
-                    {{range .Logs}}
-                    <tr
-                        class="border-b border-gray-100 even:bg-gray-50 odd:bg-white hover:bg-gray-100 transition-colors">
-                        <td class="py-1 px-2 whitespace-nowrap text-xs font-bold text-gray-500">{{.Timestamp.Format
-                            "2006-01-02 15:04:05"}}</td>
-                        <td class="py-1 px-2 text-brand-primary font-bold">{{.Username}}</td>
-                        <td class="py-1 px-2 text-gray-600">{{.Domain}}</td>
-                        <td class="py-1 px-2 uppercase text-xs font-black tracking-wide">{{.Action}}</td>
-                        <td class="py-1 px-2 text-gray-600 font-mono text-xs">{{.Data}}</td>
-                    </tr>
-                    {{end}}
-                    {{else}}
-                    <tr>
-                        <td colspan="5" class="py-8 text-center text-gray-400 font-bold uppercase tracking-widest">
-                            {{ T $.Lang `DashboardAdmin_NoActivity` }}</td>
-                    </tr>
-                    {{end}}
+                <tbody class="divide-y divide-gray-200 text-sm">
                 </tbody>
             </table>
         </div>
     </div>
 </div>
+
+<!-- DataTables -->
+<link rel="stylesheet" type="text/css" href="/static/css/jquery.dataTables.min.css" />
+<script type="text/javascript" src="/static/js/jquery.dataTables.min.js"></script>
+
+<link rel="stylesheet" type="text/css" href="/static/css/logs-datatable.css" />
+
+<script>
+    window.AppLang = "{{$.Lang}}";
+</script>
+<script type="text/javascript" src="/static/js/logs-datatable.js"></script>
 {{end}}

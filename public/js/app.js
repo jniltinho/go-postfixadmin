@@ -157,18 +157,51 @@ var App = (function ($) {
         });
     }
 
-    // ─── Auto-dismiss Flash Messages ─────────────────────────────
-    function initFlashMessages(selector, delay) {
-        var sel = selector || '.flash-message';
-        var ms = delay || 5000;
+    // ─── Auto-dismiss Flash Messages (FadeAlert) ─────────────────
+    var ALERT_DEFAULT_DELAY = 4000;
+    var ALERT_FADE_IN_MS = 300;
+    var ALERT_FADE_OUT_MS = 500;
 
+    function fadeAlert(target, opts) {
+        var $el = (typeof target === 'string') ? $(target) : $(target);
+        if (!$el.length) return;
+
+        var delay = (opts && opts.delay !== undefined) ? opts.delay : ALERT_DEFAULT_DELAY;
+        var auto = (opts && opts.auto !== undefined) ? opts.auto : true;
+
+        // Fade-in
+        $el.css({
+            opacity: '0',
+            transform: 'translateY(-8px)',
+            transition: 'opacity ' + ALERT_FADE_IN_MS + 'ms ease, transform ' + ALERT_FADE_IN_MS + 'ms ease'
+        });
+
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+                $el.css({ opacity: '1', transform: 'translateY(0)' });
+            });
+        });
+
+        function dismiss() {
+            $el.css({
+                transition: 'opacity ' + ALERT_FADE_OUT_MS + 'ms ease',
+                opacity: '0',
+                pointerEvents: 'none'
+            });
+            setTimeout(function () { $el.remove(); }, ALERT_FADE_OUT_MS);
+        }
+
+        if (auto && delay > 0) {
+            setTimeout(dismiss, delay);
+        }
+
+        return dismiss;
+    }
+
+    function flashMessages(selector, opts) {
+        var sel = selector || '.flash-message';
         $(sel).each(function () {
-            var $el = $(this);
-            setTimeout(function () {
-                $el.animate({ opacity: 0 }, 500, function () {
-                    $el.remove();
-                });
-            }, ms);
+            fadeAlert(this, opts);
         });
     }
 
@@ -286,7 +319,8 @@ var App = (function ($) {
         checkPasswordMatch: checkPasswordMatch,
         generatePassword: generatePassword,
         confirmDeleteResource: confirmDeleteResource,
-        initFlashMessages: initFlashMessages,
+        fadeAlert: fadeAlert,
+        flashMessages: flashMessages,
         checkPasswordChangeIntention: checkPasswordChangeIntention,
         updateEmailPreview: updateEmailPreview,
         validateEmail: validateEmail,
