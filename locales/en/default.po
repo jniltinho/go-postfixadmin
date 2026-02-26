@@ -1177,24 +1177,6 @@ msgstr "System Logs"
 msgid "Logs_Subtitle"
 msgstr "Complete history of all administrative and system actions."
 
-msgid "Logs_FilterAdmin"
-msgstr "Administrator"
-
-msgid "Logs_FilterAdminPlaceholder"
-msgstr "admin@domain.com"
-
-msgid "Logs_FilterDomain"
-msgstr "Domain"
-
-msgid "Logs_FilterDomainPlaceholder"
-msgstr "example.com"
-
-msgid "Logs_FilterAction"
-msgstr "Action"
-
-msgid "Logs_FilterActionPlaceholder"
-msgstr "LOGIN, CREATE_MAILBOX, etc"
-
 msgid "Logs_ApplyFilters"
 msgstr "Apply Filters"
 
