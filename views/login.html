@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ T $.Lang `Login_Title` }} - Go-PostfixAdmin</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <script src="/static/js/jquery-4.0.0.min.js"></script>
     <script src="/static/js/lucide.min.js"></script>
     <style>
         .dot-pattern {
@@ -123,10 +124,12 @@
     </div>
 
     <script src="/static/js/alerts.js"></script>
+    <script src="/static/js/app.js"></script>
     <script>
-        lucide.createIcons();
-
-        window.dismissError = fadeAlert('#error-alert');
+        $(function () {
+            lucide.createIcons();
+            window.dismissError = fadeAlert('#error-alert');
+        });
     </script>
 </body>
 

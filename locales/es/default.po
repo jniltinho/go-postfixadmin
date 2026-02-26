@@ -265,6 +265,33 @@ msgstr "Fuerza"
 msgid "DashboardUser_ChangePasswordBtn"
 msgstr "Cambiar Contraseña"
 
+msgid "DashboardUser_JsPwdGenFail"
+msgstr "Error al generar la contraseña. Por favor, inténtelo de nuevo."
+
+msgid "DashboardUser_JsPwdWeak"
+msgstr "Débil"
+
+msgid "DashboardUser_JsPwdMedium"
+msgstr "Regular"
+
+msgid "DashboardUser_JsPwdGood"
+msgstr "Buena"
+
+msgid "DashboardUser_JsPwdStrong"
+msgstr "Fuerte"
+
+msgid "DashboardUser_JsPwdMatchOk"
+msgstr "✓ Las contraseñas coinciden"
+
+msgid "DashboardUser_JsPwdMatchFail"
+msgstr "✗ Las contraseñas no coinciden"
+
+msgid "DashboardUser_JsPwdMinLen"
+msgstr "La contraseña debe tener al menos 8 caracteres"
+
+msgid "DashboardUser_JsPwdNoMatch"
+msgstr "Las contraseñas no coinciden"
+
 msgid "Layout_System"
 msgstr "Sistema"
 

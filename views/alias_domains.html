@@ -86,30 +86,16 @@
 
 <script>
     function confirmDelete(aliasDomain) {
-        if (!confirm(`{{ T $.Lang "AliasDomains_AlertDeleteConfirm" }}`)) {
-            return;
-        }
-
-        const encodedAliasDomain = encodeURIComponent(aliasDomain);
-
-        fetch(`/alias-domains/delete/${encodedAliasDomain}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
+        App.confirmDeleteResource({
+            url: '/alias-domains/delete/' + encodeURIComponent(aliasDomain),
+            replacements: { aliasDomain: aliasDomain },
+            msgs: {
+                confirm: `{{ T $.Lang "AliasDomains_AlertDeleteConfirm" }}`,
+                success: `{{ T $.Lang "AliasDomains_AlertDeleteSuccess" }}`,
+                error: `{{ T $.Lang "AliasDomains_AlertDeleteError" }}`,
+                requestError: `{{ T $.Lang "AliasDomains_AlertRequestError" }}`
             }
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(`{{ T $.Lang "AliasDomains_AlertDeleteSuccess" }}`);
-                    window.location.reload();
-                } else {
-                    alert(`{{ T $.Lang "AliasDomains_AlertDeleteError" }}` + (data.error || 'Unknown error'));
-                }
-            })
-            .catch(error => {
-                alert(`{{ T $.Lang "AliasDomains_AlertRequestError" }}` + error);
-            });
+        });
     }
 </script>
 {{end}}

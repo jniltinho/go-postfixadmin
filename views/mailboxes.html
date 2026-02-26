@@ -117,28 +117,16 @@
 
 <script>
     function confirmDeleteMailbox(username) {
-        if (!confirm(`{{ T $.Lang "Mailboxes_AlertDeleteConfirm" }}`)) {
-            return;
-        }
-
-        fetch(`/mailboxes/delete/${encodeURIComponent(username)}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
+        App.confirmDeleteResource({
+            url: '/mailboxes/delete/' + encodeURIComponent(username),
+            replacements: { username: username },
+            msgs: {
+                confirm: `{{ T $.Lang "Mailboxes_AlertDeleteConfirm" }}`,
+                success: `{{ T $.Lang "Mailboxes_AlertDeleteSuccess" }}`,
+                error: `{{ T $.Lang "Mailboxes_AlertDeleteError" }}`,
+                requestError: `{{ T $.Lang "Mailboxes_AlertRequestError" }}`
             }
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(`{{ T $.Lang "Mailboxes_AlertDeleteSuccess" }}`);
-                    window.location.reload();
-                } else {
-                    alert(`{{ T $.Lang "Mailboxes_AlertDeleteError" }}` + data.error);
-                }
-            })
-            .catch(error => {
-                alert(`{{ T $.Lang "Mailboxes_AlertRequestError" }}` + error);
-            });
+        });
     }
 </script>
 {{end}}

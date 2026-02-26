@@ -109,34 +109,16 @@
 
 <script>
     function confirmDelete(address) {
-        if (!confirm(`{{ T $.Lang "Aliases_AlertDeleteConfirm" }}`)) {
-            return;
-        }
-
-        // We need to encode the address because it contains special characters like @
-        // But some servers/frameworks might have issues even with encoding in URL path
-        // Echo should handle it if valid URL encoded.
-        // If Address contains /, it must be double encoded or handled carefully.
-        const encodedAddress = encodeURIComponent(address);
-
-        fetch(`/aliases/delete/${encodedAddress}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
+        App.confirmDeleteResource({
+            url: '/aliases/delete/' + encodeURIComponent(address),
+            replacements: { address: address },
+            msgs: {
+                confirm: `{{ T $.Lang "Aliases_AlertDeleteConfirm" }}`,
+                success: `{{ T $.Lang "Aliases_AlertDeleteSuccess" }}`,
+                error: `{{ T $.Lang "Aliases_AlertDeleteError" }}`,
+                requestError: `{{ T $.Lang "Aliases_AlertRequestError" }}`
             }
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(`{{ T $.Lang "Aliases_AlertDeleteSuccess" }}`);
-                    window.location.reload();
-                } else {
-                    alert(`{{ T $.Lang "Aliases_AlertDeleteError" }}` + (data.error || 'Unknown error'));
-                }
-            })
-            .catch(error => {
-                alert(`{{ T $.Lang "Aliases_AlertRequestError" }}` + error);
-            });
+        });
     }
 </script>
 {{end}}

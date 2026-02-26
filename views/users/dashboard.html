@@ -177,186 +177,93 @@
 </div>
 
 <script>
-    // Auto-dismiss flash messages
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('.flash-message').forEach(function (el) {
-            setTimeout(function () {
-                el.style.opacity = '0';
-                setTimeout(function () {
-                    el.remove();
-                }, 500);
-            }, 5000);
-        });
-    });
-
-    // Toggle password visibility
-    function togglePassword(fieldId) {
-        const field = document.getElementById(fieldId);
-        const icon = event.currentTarget.querySelector('i');
-
-        if (field.type === 'password') {
-            field.type = 'text';
-            icon.setAttribute('data-lucide', 'eye-off');
-        } else {
-            field.type = 'password';
-            icon.setAttribute('data-lucide', 'eye');
-        }
-        lucide.createIcons();
-    }
-
-    // Generate strong password
-    async function generatePassword() {
-        try {
-            const response = await fetch('/api/generate-password');
-            const data = await response.json();
-
-            document.getElementById('new_password').value = data.password;
-            document.getElementById('confirm_password').value = data.password;
-
-            // Show password so user can see/copy it
-            document.getElementById('new_password').type = 'text';
-            document.getElementById('confirm_password').type = 'text';
-
-            // Trigger validation updates
-            checkPasswordStrength();
-            checkPasswordMatch();
-
-            lucide.createIcons();
-        } catch (error) {
-            console.error('Failed to generate password:', error);
-            alert('Failed to generate password. Please try again.');
-        }
-    }
-    function checkPasswordStrength() {
-        const password = document.getElementById('new_password').value;
-        const meter = document.getElementById('strengthMeter');
-        const bar = document.getElementById('strengthBar');
-        const text = document.getElementById('strengthText');
-
-        if (password.length === 0) {
-            meter.classList.add('hidden');
-            return;
-        }
-
-        meter.classList.remove('hidden');
-
-        let strength = 0;
-        let strengthLabel = '';
-        let color = '';
-
-        if (password.length >= 8) strength += 25;
-        if (password.length >= 12) strength += 15;
-        if (/[a-z]/.test(password)) strength += 15;
-        if (/[A-Z]/.test(password)) strength += 15;
-        if (/[0-9]/.test(password)) strength += 15;
-        if (/[^a-zA-Z0-9]/.test(password)) strength += 15;
-
-        if (strength < 40) {
-            strengthLabel = 'Weak';
-            color = '#DC2626';
-        } else if (strength < 60) {
-            strengthLabel = 'Average';
-            color = '#F59E0B';
-        } else if (strength < 80) {
-            strengthLabel = 'Good';
-            color = '#10B981';
-        } else {
-            strengthLabel = 'Strong';
-            color = '#059669';
-        }
-
-        bar.style.width = strength + '%';
-        bar.style.backgroundColor = color;
-        text.textContent = strengthLabel;
-        text.style.color = color;
-    }
-
-    // Check password match
-    function checkPasswordMatch() {
-        const password = document.getElementById('new_password').value;
-        const confirm = document.getElementById('confirm_password').value;
-        const indicator = document.getElementById('matchIndicator');
-        const submitBtn = document.getElementById('submitBtn');
-
-        if (confirm.length === 0) {
-            indicator.classList.add('hidden');
-            return;
-        }
-
-        indicator.classList.remove('hidden');
-
-        if (password === confirm) {
-            indicator.textContent = '✓ Passwords match';
-            indicator.className = 'text-xs mt-2 font-bold text-green-600';
-            submitBtn.disabled = false;
-            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-        } else {
-            indicator.textContent = '✗ Passwords do not match';
-            indicator.className = 'text-xs mt-2 font-bold text-red-600';
-            submitBtn.disabled = true;
-            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
-        }
-    }
-
-    // Event listeners
-    document.getElementById('new_password').addEventListener('input', function () {
-        checkPasswordStrength();
-        checkPasswordMatch();
-    });
-
-    document.getElementById('confirm_password').addEventListener('input', function () {
-        checkPasswordMatch();
-    });
-
-    // Form validation
-    document.getElementById('passwordForm').addEventListener('submit', function (e) {
-        const password = document.getElementById('new_password').value;
-        const confirm = document.getElementById('confirm_password').value;
-
-        if (password.length < 8) {
-            e.preventDefault();
-            alert('The password must be at least 8 characters long');
-            return false;
-        }
-
-        if (password !== confirm) {
-            e.preventDefault();
-            alert('Passwords do not match');
-            return false;
-        }
-    });
-
-    // Forwarding textarea validation
-    const fwdTextarea = document.getElementById('forwarding');
-    const fwdBtn = document.getElementById('saveForwardingBtn');
-
-    function validateEmail(email) {
-        return String(email)
-            .toLowerCase()
-            .match(
-                /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-            );
-    }
-
-    function checkForwarding() {
-        const lines = fwdTextarea.value.trim().split('\n').filter(line => line.trim() !== '');
-        const empty = lines.length === 0;
-        const allValid = lines.every(line => validateEmail(line.trim()));
-
-        fwdBtn.disabled = empty || !allValid;
-        if (empty || !allValid) {
-            fwdBtn.classList.add('opacity-50', 'cursor-not-allowed');
-            if (lines.length > 0 && !allValid) {
-                fwdTextarea.classList.add('border-red-500');
-            } else {
-                fwdTextarea.classList.remove('border-red-500');
+    function togglePassword(fieldId) { App.togglePassword(fieldId, event.currentTarget); }
+    function generatePassword() {
+        App.generatePassword({
+            passwordId: 'new_password',
+            confirmId: 'confirm_password',
+            failMsg: `{{ T $.Lang "DashboardUser_JsPwdGenFail" }}`,
+            onSuccess: function () {
+                $('#new_password').attr('type', 'text');
+                $('#confirm_password').attr('type', 'text');
+                App.checkPasswordStrength(_strengthOpts);
+                App.checkPasswordMatch(_matchOpts);
+                lucide.createIcons();
             }
-        } else {
-            fwdBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-            fwdTextarea.classList.remove('border-red-500');
-        }
+        });
     }
-    fwdTextarea.addEventListener('input', checkForwarding);
-    checkForwarding();
+
+    var _strengthOpts = {
+        passwordId: 'new_password', meterId: 'strengthMeter',
+        barId: 'strengthBar', textId: 'strengthText',
+        labels: {
+            weak: `{{ T $.Lang "DashboardUser_JsPwdWeak" }}`,
+            medium: `{{ T $.Lang "DashboardUser_JsPwdMedium" }}`,
+            good: `{{ T $.Lang "DashboardUser_JsPwdGood" }}`,
+            strong: `{{ T $.Lang "DashboardUser_JsPwdStrong" }}`
+        }
+    };
+    var _matchOpts = {
+        passwordId: 'new_password', confirmId: 'confirm_password',
+        indicatorId: 'matchIndicator', submitBtnId: 'submitBtn',
+        labels: {
+            match: `{{ T $.Lang "DashboardUser_JsPwdMatchOk" }}`,
+            noMatch: `{{ T $.Lang "DashboardUser_JsPwdMatchFail" }}`
+        }
+    };
+
+    $(function () {
+        // Auto-dismiss flash messages
+        App.initFlashMessages();
+
+        // Password form
+        App.initPasswordForm({
+            passwordId: 'new_password', confirmId: 'confirm_password',
+            meterId: 'strengthMeter', barId: 'strengthBar', textId: 'strengthText',
+            indicatorId: 'matchIndicator', submitBtnId: 'submitBtn',
+            formId: 'passwordForm',
+            labels: {
+                weak: `{{ T $.Lang "DashboardUser_JsPwdWeak" }}`,
+                medium: `{{ T $.Lang "DashboardUser_JsPwdMedium" }}`,
+                good: `{{ T $.Lang "DashboardUser_JsPwdGood" }}`,
+                strong: `{{ T $.Lang "DashboardUser_JsPwdStrong" }}`,
+                match: `{{ T $.Lang "DashboardUser_JsPwdMatchOk" }}`,
+                noMatch: `{{ T $.Lang "DashboardUser_JsPwdMatchFail" }}`
+            },
+            validationMsgs: {
+                minLen: `{{ T $.Lang "DashboardUser_JsPwdMinLen" }}`,
+                noMatch: `{{ T $.Lang "DashboardUser_JsPwdNoMatch" }}`
+            }
+        });
+
+        // Forwarding textarea validation
+        var $fwdTextarea = $('#forwarding');
+        var $fwdBtn = $('#saveForwardingBtn');
+
+        function checkForwarding() {
+            var lines = $fwdTextarea.val().trim().split('\n').filter(function (line) {
+                return line.trim() !== '';
+            });
+            var empty = lines.length === 0;
+            var allValid = lines.every(function (line) {
+                return App.validateEmail(line.trim());
+            });
+
+            $fwdBtn.prop('disabled', empty || !allValid);
+            if (empty || !allValid) {
+                $fwdBtn.addClass('opacity-50 cursor-not-allowed');
+                if (lines.length > 0 && !allValid) {
+                    $fwdTextarea.addClass('border-red-500');
+                } else {
+                    $fwdTextarea.removeClass('border-red-500');
+                }
+            } else {
+                $fwdBtn.removeClass('opacity-50 cursor-not-allowed');
+                $fwdTextarea.removeClass('border-red-500');
+            }
+        }
+        $fwdTextarea.on('input', checkForwarding);
+        checkForwarding();
+    });
 </script>
 {{end}}

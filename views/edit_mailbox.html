@@ -203,164 +203,58 @@
 </div>
 
 <script>
-    // Auto-detect password change intention
-    function checkPasswordChangeIntention() {
-        const password = document.getElementById('password').value;
-        const confirm = document.getElementById('password_confirm').value;
-        const changePasswordInput = document.getElementById('change_password');
-
-        if (password.length > 0 || confirm.length > 0) {
-            changePasswordInput.value = "true";
-            document.getElementById('password').required = true;
-            document.getElementById('password_confirm').required = true;
-        } else {
-            changePasswordInput.value = "false";
-            document.getElementById('password').required = false;
-            document.getElementById('password_confirm').required = false;
-            document.getElementById('strengthMeter').classList.add('hidden');
-            document.getElementById('matchIndicator').classList.add('hidden');
-        }
-    }
-
-    // Toggle password visibility
-    function togglePassword(fieldId) {
-        const field = document.getElementById(fieldId);
-        const icon = event.currentTarget.querySelector('i');
-
-        if (field.type === 'password') {
-            field.type = 'text';
-            icon.setAttribute('data-lucide', 'eye-off');
-        } else {
-            field.type = 'password';
-            icon.setAttribute('data-lucide', 'eye');
-        }
-        lucide.createIcons();
-    }
-
-    // Generate complex password
-    async function generatePassword() {
-        try {
-            const response = await fetch('/api/generate-password');
-            const data = await response.json();
-
-            document.getElementById('password').value = data.password;
-            document.getElementById('password_confirm').value = data.password;
-
-            // Trigger validation updates
-            checkPasswordStrength();
-            checkPasswordMatch();
-        } catch (error) {
-            console.error('Failed to generate password:', error);
-            alert(`{{ T $.Lang "Mailboxes_JsPwdGenFail" }}`);
-        }
-    }
-
-    // Check password strength
-    function checkPasswordStrength() {
-        const password = document.getElementById('password').value;
-        const meter = document.getElementById('strengthMeter');
-        const bar = document.getElementById('strengthBar');
-        const text = document.getElementById('strengthText');
-
-        if (password.length === 0) {
-            meter.classList.add('hidden');
-            return;
-        }
-
-        meter.classList.remove('hidden');
-
-        let strength = 0;
-        let strengthLabel = '';
-        let color = '';
-
-        // Calculate strength
-        if (password.length >= 8) strength += 25;
-        if (password.length >= 12) strength += 15;
-        if (/[a-z]/.test(password)) strength += 15;
-        if (/[A-Z]/.test(password)) strength += 15;
-        if (/[0-9]/.test(password)) strength += 15;
-        if (/[^a-zA-Z0-9]/.test(password)) strength += 15;
-
-        // Determine label and color
-        if (strength < 40) {
-            strengthLabel = `{{ T $.Lang "Mailboxes_JsPwdWeak" }}`;
-            color = '#DC2626'; // red-600
-        } else if (strength < 60) {
-            strengthLabel = `{{ T $.Lang "Mailboxes_JsPwdFair" }}`;
-            color = '#F59E0B'; // amber-500
-        } else if (strength < 80) {
-            strengthLabel = `{{ T $.Lang "Mailboxes_JsPwdGood" }}`;
-            color = '#10B981'; // green-500
-        } else {
-            strengthLabel = `{{ T $.Lang "Mailboxes_JsPwdStrong" }}`;
-            color = '#059669'; // green-600
-        }
-
-        bar.style.width = strength + '%';
-        bar.style.backgroundColor = color;
-        text.textContent = strengthLabel;
-        text.style.color = color;
-    }
-
-    // Check password match
-    function checkPasswordMatch() {
-        const password = document.getElementById('password').value;
-        const confirm = document.getElementById('password_confirm').value;
-        const indicator = document.getElementById('matchIndicator');
-        const submitBtn = document.getElementById('submitBtn');
-
-        if (confirm.length === 0) {
-            indicator.classList.add('hidden');
-            return;
-        }
-
-        indicator.classList.remove('hidden');
-
-        if (password === confirm) {
-            indicator.textContent = `{{ T $.Lang "Mailboxes_JsPwdMatchOk" }}`;
-            indicator.className = 'text-xs mt-2 font-bold text-green-600';
-            submitBtn.disabled = false;
-            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-        } else {
-            indicator.textContent = `{{ T $.Lang "Mailboxes_JsPwdMatchFail" }}`;
-            indicator.className = 'text-xs mt-2 font-bold text-red-600';
-            submitBtn.disabled = true;
-            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
-        }
-    }
-
-    // Event listeners for password validation
-    document.getElementById('password').addEventListener('input', function () {
-        checkPasswordChangeIntention();
-        checkPasswordStrength();
-        checkPasswordMatch();
-    });
-
-    document.getElementById('password_confirm').addEventListener('input', function () {
-        checkPasswordChangeIntention();
-        checkPasswordMatch();
-    });
-
-    // Form validation
-    document.getElementById('mailboxForm').addEventListener('submit', function (e) {
-        const changePassword = document.getElementById('change_password').value === "true";
-
-        if (changePassword) {
-            const password = document.getElementById('password').value;
-            const confirm = document.getElementById('password_confirm').value;
-
-            if (password.length < 8) {
-                e.preventDefault();
-                alert(`{{ T $.Lang "Mailboxes_JsErrPwdLen" }}`);
-                return false;
+    function togglePassword(fieldId) { App.togglePassword(fieldId, event.currentTarget); }
+    function generatePassword() {
+        App.generatePassword({
+            passwordId: 'password',
+            confirmId: 'password_confirm',
+            failMsg: `{{ T $.Lang "Mailboxes_JsPwdGenFail" }}`,
+            onSuccess: function () {
+                App.checkPasswordStrength(_strengthOpts);
+                App.checkPasswordMatch(_matchOpts);
             }
+        });
+    }
 
-            if (password !== confirm) {
-                e.preventDefault();
-                alert(`{{ T $.Lang "Mailboxes_JsErrPwdMatch" }}`);
-                return false;
-            }
+    var _strengthOpts = {
+        passwordId: 'password', meterId: 'strengthMeter',
+        barId: 'strengthBar', textId: 'strengthText',
+        labels: {
+            weak: `{{ T $.Lang "Mailboxes_JsPwdWeak" }}`,
+            medium: `{{ T $.Lang "Mailboxes_JsPwdFair" }}`,
+            good: `{{ T $.Lang "Mailboxes_JsPwdGood" }}`,
+            strong: `{{ T $.Lang "Mailboxes_JsPwdStrong" }}`
         }
+    };
+    var _matchOpts = {
+        passwordId: 'password', confirmId: 'password_confirm',
+        indicatorId: 'matchIndicator', submitBtnId: 'submitBtn',
+        labels: {
+            match: `{{ T $.Lang "Mailboxes_JsPwdMatchOk" }}`,
+            noMatch: `{{ T $.Lang "Mailboxes_JsPwdMatchFail" }}`
+        }
+    };
+
+    $(function () {
+        App.initPasswordForm({
+            passwordId: 'password', confirmId: 'password_confirm',
+            meterId: 'strengthMeter', barId: 'strengthBar', textId: 'strengthText',
+            indicatorId: 'matchIndicator', submitBtnId: 'submitBtn',
+            formId: 'mailboxForm',
+            changeInputId: 'change_password',
+            labels: {
+                weak: `{{ T $.Lang "Mailboxes_JsPwdWeak" }}`,
+                medium: `{{ T $.Lang "Mailboxes_JsPwdFair" }}`,
+                good: `{{ T $.Lang "Mailboxes_JsPwdGood" }}`,
+                strong: `{{ T $.Lang "Mailboxes_JsPwdStrong" }}`,
+                match: `{{ T $.Lang "Mailboxes_JsPwdMatchOk" }}`,
+                noMatch: `{{ T $.Lang "Mailboxes_JsPwdMatchFail" }}`
+            },
+            validationMsgs: {
+                minLen: `{{ T $.Lang "Mailboxes_JsErrPwdLen" }}`,
+                noMatch: `{{ T $.Lang "Mailboxes_JsErrPwdMatch" }}`
+            }
+        });
     });
 </script>
 {{end}}

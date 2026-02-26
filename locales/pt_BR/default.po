@@ -265,6 +265,33 @@ msgstr "Força"
 msgid "DashboardUser_ChangePasswordBtn"
 msgstr "Alterar Senha"
 
+msgid "DashboardUser_JsPwdGenFail"
+msgstr "Falha ao gerar a senha. Tente novamente."
+
+msgid "DashboardUser_JsPwdWeak"
+msgstr "Fraca"
+
+msgid "DashboardUser_JsPwdMedium"
+msgstr "Razoável"
+
+msgid "DashboardUser_JsPwdGood"
+msgstr "Boa"
+
+msgid "DashboardUser_JsPwdStrong"
+msgstr "Forte"
+
+msgid "DashboardUser_JsPwdMatchOk"
+msgstr "✓ As senhas coincidem"
+
+msgid "DashboardUser_JsPwdMatchFail"
+msgstr "✗ As senhas não coincidem"
+
+msgid "DashboardUser_JsPwdMinLen"
+msgstr "A senha deve ter pelo menos 8 caracteres"
+
+msgid "DashboardUser_JsPwdNoMatch"
+msgstr "As senhas não coincidem"
+
 msgid "Layout_System"
 msgstr "Sistema"
 

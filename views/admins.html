@@ -91,28 +91,16 @@
 
 <script>
     function confirmDelete(username) {
-        if (!confirm(`{{ T $.Lang "Admins_AlertDeleteConfirm" }}`)) {
-            return;
-        }
-
-        fetch(`/admins/delete/${username}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
+        App.confirmDeleteResource({
+            url: '/admins/delete/' + encodeURIComponent(username),
+            replacements: { username: username },
+            msgs: {
+                confirm: `{{ T $.Lang "Admins_AlertDeleteConfirm" }}`,
+                success: `{{ T $.Lang "Admins_AlertDeleteSuccess" }}`,
+                error: `{{ T $.Lang "Admins_AlertDeleteError" }}`,
+                requestError: `{{ T $.Lang "Admins_AlertRequestError" }}`
             }
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(`{{ T $.Lang "Admins_AlertDeleteSuccess" }}`);
-                    window.location.reload();
-                } else {
-                    alert(`{{ T $.Lang "Admins_AlertDeleteError" }}` + (data.error || 'Unknown error'));
-                }
-            })
-            .catch(error => {
-                alert(`{{ T $.Lang "Admins_AlertRequestError" }}` + error);
-            });
+        });
     }
 </script>
 {{end}}

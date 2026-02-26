@@ -161,50 +161,38 @@
 </div>
 
 <script>
-    // Auto-dismiss flash messages
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('.flash-message').forEach(function (el) {
-            setTimeout(function () {
-                el.style.opacity = '0';
-                setTimeout(function () {
-                    el.remove();
-                }, 500);
-            }, 5000);
-        });
+    $(function () {
+        // Auto-dismiss flash messages
+        App.initFlashMessages();
 
         // Auto-fill dates with current date/time if empty
-        const now = new Date();
-        // Format to YYYY-MM-DDThh:mm (which datetime-local expects)
+        var now = new Date();
         now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-        const formattedDate = now.toISOString().slice(0, 16);
+        var formattedDate = now.toISOString().slice(0, 16);
 
-        const activeCheckbox = document.getElementById('active');
-        const isActive = activeCheckbox ? activeCheckbox.checked : true;
+        var $activeCheckbox = $('#active');
+        var isActive = $activeCheckbox.length ? $activeCheckbox.is(':checked') : true;
 
-        const activeFromInput = document.getElementById('activefrom');
-        if (!activeFromInput.value || !isActive) {
-            activeFromInput.value = formattedDate;
+        var $activeFromInput = $('#activefrom');
+        if (!$activeFromInput.val() || !isActive) {
+            $activeFromInput.val(formattedDate);
         }
 
-        const activeUntilInput = document.getElementById('activeuntil');
-        if (!activeUntilInput.value || !isActive) {
-            // Set default end date to tomorrow or a week later if desired. 
-            // Setting to same day for now per request "date and time of today".
-            activeUntilInput.value = formattedDate;
+        var $activeUntilInput = $('#activeuntil');
+        if (!$activeUntilInput.val() || !isActive) {
+            $activeUntilInput.val(formattedDate);
         }
 
         // Add event listener to update dates if user unchecks/checks the active box
-        if (activeCheckbox) {
-            activeCheckbox.addEventListener('change', function () {
-                if (!this.checked) {
-                    const currentNow = new Date();
-                    currentNow.setMinutes(currentNow.getMinutes() - currentNow.getTimezoneOffset());
-                    const currentFormattedDate = currentNow.toISOString().slice(0, 16);
-                    activeFromInput.value = currentFormattedDate;
-                    activeUntilInput.value = currentFormattedDate;
-                }
-            });
-        }
+        $activeCheckbox.on('change', function () {
+            if (!$(this).is(':checked')) {
+                var currentNow = new Date();
+                currentNow.setMinutes(currentNow.getMinutes() - currentNow.getTimezoneOffset());
+                var currentFormattedDate = currentNow.toISOString().slice(0, 16);
+                $activeFromInput.val(currentFormattedDate);
+                $activeUntilInput.val(currentFormattedDate);
+            }
+        });
     });
 </script>
 {{end}}

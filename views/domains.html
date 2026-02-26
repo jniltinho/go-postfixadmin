@@ -139,36 +139,24 @@
 <script>
     function viewDomainMailboxes(domainName, mailboxCount) {
         if (mailboxCount === 0) {
-            alert(`{{ T $.Lang "Domains_AlertNoMailboxes" }}`);
+            var msg = `{{ T $.Lang "Domains_AlertNoMailboxes" }}`.split('${domainName}').join(domainName);
+            alert(msg);
             return;
         }
-
-        window.location.href = `/mailboxes?domain=${encodeURIComponent(domainName)}`;
+        window.location.href = '/mailboxes?domain=' + encodeURIComponent(domainName);
     }
 
     function confirmDelete(domainName) {
-        if (!confirm(`{{ T $.Lang "Domains_AlertDeleteConfirm" }}`)) {
-            return;
-        }
-
-        fetch(`/domains/delete/${domainName}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
+        App.confirmDeleteResource({
+            url: '/domains/delete/' + encodeURIComponent(domainName),
+            replacements: { domainName: domainName },
+            msgs: {
+                confirm: `{{ T $.Lang "Domains_AlertDeleteConfirm" }}`,
+                success: `{{ T $.Lang "Domains_AlertDeleteSuccess" }}`,
+                error: `{{ T $.Lang "Domains_AlertDeleteError" }}`,
+                requestError: `{{ T $.Lang "Domains_AlertRequestError" }}`
             }
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(`{{ T $.Lang "Domains_AlertDeleteSuccess" }}`);
-                    window.location.reload();
-                } else {
-                    alert(`{{ T $.Lang "Domains_AlertDeleteError" }}` + data.error);
-                }
-            })
-            .catch(error => {
-                alert(`{{ T $.Lang "Domains_AlertRequestError" }}` + error);
-            });
+        });
     }
 </script>
 {{end}}

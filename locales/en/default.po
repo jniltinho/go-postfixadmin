@@ -265,6 +265,33 @@ msgstr "Strength"
 msgid "DashboardUser_ChangePasswordBtn"
 msgstr "Change Password"
 
+msgid "DashboardUser_JsPwdGenFail"
+msgstr "Failed to generate password. Please try again."
+
+msgid "DashboardUser_JsPwdWeak"
+msgstr "Weak"
+
+msgid "DashboardUser_JsPwdMedium"
+msgstr "Average"
+
+msgid "DashboardUser_JsPwdGood"
+msgstr "Good"
+
+msgid "DashboardUser_JsPwdStrong"
+msgstr "Strong"
+
+msgid "DashboardUser_JsPwdMatchOk"
+msgstr "✓ Passwords match"
+
+msgid "DashboardUser_JsPwdMatchFail"
+msgstr "✗ Passwords do not match"
+
+msgid "DashboardUser_JsPwdMinLen"
+msgstr "The password must be at least 8 characters long"
+
+msgid "DashboardUser_JsPwdNoMatch"
+msgstr "Passwords do not match"
+
 msgid "Layout_System"
 msgstr "System"
 
