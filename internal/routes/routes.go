@@ -96,11 +96,11 @@ func RegisterRoutes(e *echo.Echo, h *handlers.Handler) {
 	// Catch-all route for unknown pages (404)
 	e.Any("/*", func(c *echo.Context) error {
 		// If User is logged in
-		if middleware.GetUser(c) != "" {
+		if middleware.GetUsername(c, middleware.UserSessionName) != "" {
 			return c.Redirect(http.StatusFound, "/users/dashboard")
 		}
 		// If Admin is logged in
-		if middleware.GetUsername(c) != "" {
+		if middleware.GetUsername(c, middleware.SessionName) != "" {
 			return c.Redirect(http.StatusFound, "/dashboard")
 		}
 		// Otherwise standard 404

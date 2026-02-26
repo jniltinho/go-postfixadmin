@@ -15,7 +15,7 @@ import (
 
 // AddFetchmailGET renders the form to create a new fetchmail entry
 func (h *Handler) AddFetchmailGET(c *echo.Context) error {
-	username := middleware.GetUsername(c)
+	username := middleware.GetUsername(c, middleware.SessionName)
 	mailboxes, isSuper, err := utils.GetAllMailboxes(h.DB, username, middleware.GetIsSuperAdmin(c), "")
 	if err != nil {
 		slog.Error("Failed to fetch mailboxes", "error", err)
@@ -63,7 +63,7 @@ func (h *Handler) AddFetchmailPOST(c *echo.Context) error {
 
 	// For domain, we extract it from the mailbox (assuming mailbox is an email address user@domain.com)
 	var domainStr *string
-	username := middleware.GetUsername(c) // Admin username
+	username := middleware.GetUsername(c, middleware.SessionName) // Admin username
 
 	// Create Fetchmail object
 	newFetchmail := models.Fetchmail{
@@ -120,7 +120,7 @@ func (h *Handler) AddFetchmailPOST(c *echo.Context) error {
 
 // Helper to re-render form with error state
 func renderFetchmailFormWithError(c *echo.Context, h *Handler, errorMsg string) error {
-	username := middleware.GetUsername(c)
+	username := middleware.GetUsername(c, middleware.SessionName)
 	mailboxes, isSuper, _ := utils.GetAllMailboxes(h.DB, username, middleware.GetIsSuperAdmin(c), "")
 
 	pollTime, _ := strconv.Atoi(c.FormValue("poll_time"))

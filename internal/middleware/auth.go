@@ -14,9 +14,7 @@ const (
 	SessionName       = "session"
 	UserSessionName   = "user_session" // New session for users
 	AuthKey           = "authenticated"
-	UserAuthKey       = "user_authenticated" // Key for user auth
 	UsernameKey       = "username"
-	UserUsernameKey   = "user_username" // Key for user username
 	IsSuperAdminKey   = "is_superadmin"
 	LastActivityKey   = "last_activity"
 	InactivityTimeout = 30 * time.Minute
@@ -85,7 +83,7 @@ func UserAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		// Check if authenticated
-		auth, ok := sess.Values[UserAuthKey].(bool)
+		auth, ok := sess.Values[AuthKey].(bool)
 		if !ok || !auth {
 			return c.Redirect(http.StatusFound, "/users/login")
 		}
@@ -110,9 +108,9 @@ func UserAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-// SetSession authenticates the admin and sets initial session values
-func SetSession(c *echo.Context, username string, isSuperAdmin bool) error {
-	sess, _ := session.Get(SessionName, c)
+// SetSession authenticates and sets initial session values
+func SetSession(c *echo.Context, sessionName string, username string, isSuperAdmin bool) error {
+	sess, _ := session.Get(sessionName, c)
 	sess.Options = &sessions.Options{
 		Path:     "/",
 		MaxAge:   86400 * 7, // 7 days
@@ -122,30 +120,16 @@ func SetSession(c *echo.Context, username string, isSuperAdmin bool) error {
 	}
 	sess.Values[AuthKey] = true
 	sess.Values[UsernameKey] = username
-	sess.Values[IsSuperAdminKey] = isSuperAdmin
-	sess.Values[LastActivityKey] = time.Now().Unix()
-	return sess.Save(c.Request(), c.Response())
-}
-
-// SetUserSession authenticates the user and sets initial session values
-func SetUserSession(c *echo.Context, username string) error {
-	sess, _ := session.Get(UserSessionName, c)
-	sess.Options = &sessions.Options{
-		Path:     "/",
-		MaxAge:   86400 * 7, // 7 days
-		HttpOnly: true,
-		Secure:   viper.GetBool("server.ssl"),
-		SameSite: http.SameSiteLaxMode,
+	if sessionName == SessionName {
+		sess.Values[IsSuperAdminKey] = isSuperAdmin
 	}
-	sess.Values[UserAuthKey] = true
-	sess.Values[UserUsernameKey] = username
 	sess.Values[LastActivityKey] = time.Now().Unix()
 	return sess.Save(c.Request(), c.Response())
 }
 
-// GetUsername retrieves the admin username from the session
-func GetUsername(c *echo.Context) string {
-	sess, _ := session.Get(SessionName, c)
+// GetUsername retrieves the username from the specified session
+func GetUsername(c *echo.Context, sessionName string) string {
+	sess, _ := session.Get(sessionName, c)
 	if sess == nil {
 		return ""
 	}
@@ -167,21 +151,9 @@ func GetIsSuperAdmin(c *echo.Context) bool {
 	return false
 }
 
-// GetUser retrieves the user username from the session
-func GetUser(c *echo.Context) string {
-	sess, _ := session.Get(UserSessionName, c)
-	if sess == nil {
-		return ""
-	}
-	if username, ok := sess.Values[UserUsernameKey].(string); ok {
-		return username
-	}
-	return ""
-}
-
-// ClearSession removes the admin session
-func ClearSession(c *echo.Context) error {
-	sess, _ := session.Get(SessionName, c)
+// ClearSession removes a session by its name
+func ClearSession(c *echo.Context, sessionName string) error {
+	sess, _ := session.Get(sessionName, c)
 	// Reset options first to ensure MaxAge=-1 is applied even if Options was nil
 	sess.Options = &sessions.Options{
 		Path:     "/",
@@ -189,22 +161,6 @@ func ClearSession(c *echo.Context) error {
 		HttpOnly: true,
 	}
 
-	// Clear all session values
-	for key := range sess.Values {
-		delete(sess.Values, key)
-	}
-	return sess.Save(c.Request(), c.Response())
-}
-
-// ClearUserSession removes the user session
-func ClearUserSession(c *echo.Context) error {
-	sess, _ := session.Get(UserSessionName, c)
-	// Reset options first to ensure MaxAge=-1 is applied even if Options was nil
-	sess.Options = &sessions.Options{
-		Path:     "/",
-		MaxAge:   -1,
-		HttpOnly: true,
-	}
 	// Clear all session values
 	for key := range sess.Values {
 		delete(sess.Values, key)

@@ -40,7 +40,7 @@ func (h *Handler) Login(c *echo.Context) error {
 		}
 
 		// Set session
-		if err := middleware.SetSession(c, admin.Username, admin.Superadmin); err != nil {
+		if err := middleware.SetSession(c, middleware.SessionName, admin.Username, admin.Superadmin); err != nil {
 			return c.Render(http.StatusInternalServerError, "login.html", map[string]interface{}{"errorKey": "Login_ErrSession"})
 		}
 
@@ -51,7 +51,7 @@ func (h *Handler) Login(c *echo.Context) error {
 
 // Logout encerra a sessão
 func (h *Handler) Logout(c *echo.Context) error {
-	middleware.ClearSession(c)
+	middleware.ClearSession(c, middleware.SessionName)
 	return c.Redirect(http.StatusFound, "/login")
 }
 

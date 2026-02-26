@@ -20,7 +20,7 @@ type AdminData struct {
 // ListAdmins displays the list of administrators
 func (h *Handler) ListAdmins(c *echo.Context) error {
 	// Security: Superadmins see all, Admins see only themselves
-	username := middleware.GetUsername(c)
+	username := middleware.GetUsername(c, middleware.SessionName)
 	isSuper, err := utils.IsSuperAdmin(h.DB, username)
 	if err != nil {
 		return c.Render(http.StatusInternalServerError, "dashboard.html", map[string]interface{}{"Error": "Permission check failed"})
@@ -75,7 +75,7 @@ func (h *Handler) ListAdmins(c *echo.Context) error {
 // AddAdminForm displays the form to add a new administrator
 func (h *Handler) AddAdminForm(c *echo.Context) error {
 	// Security: Only Superadmins
-	username := middleware.GetUsername(c)
+	username := middleware.GetUsername(c, middleware.SessionName)
 	isSuper, err := utils.IsSuperAdmin(h.DB, username)
 	if err != nil || !isSuper {
 		return c.Render(http.StatusForbidden, "admins.html", map[string]interface{}{"Error": "Access denied"})
@@ -97,7 +97,7 @@ func (h *Handler) AddAdminForm(c *echo.Context) error {
 // AddAdmin processes the creation of a new administrator
 func (h *Handler) AddAdmin(c *echo.Context) error {
 	// Security: Only Superadmins
-	loggedInUser := middleware.GetUsername(c)
+	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
 	isSuper, err := utils.IsSuperAdmin(h.DB, loggedInUser)
 	if err != nil || !isSuper {
 		return c.Render(http.StatusForbidden, "admins.html", map[string]interface{}{"Error": "Access denied"})
@@ -209,14 +209,14 @@ func (h *Handler) renderAddAdminError(c *echo.Context, errorMsg, username string
 		"Username":     username,
 		"Domains":      domains,
 		"IsSuperAdmin": true,
-		"SessionUser":  middleware.GetUsername(c),
+		"SessionUser":  middleware.GetUsername(c, middleware.SessionName),
 	})
 }
 
 // DeleteAdmin handles the deletion of an administrator
 func (h *Handler) DeleteAdmin(c *echo.Context) error {
 	// Security: Only Superadmins
-	loggedInUser := middleware.GetUsername(c)
+	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
 	isSuper, err := utils.IsSuperAdmin(h.DB, loggedInUser)
 	if err != nil || !isSuper {
 		return c.JSON(http.StatusForbidden, map[string]interface{}{"error": "Access denied"})
@@ -278,7 +278,7 @@ func (h *Handler) DeleteAdmin(c *echo.Context) error {
 // EditAdminForm displays the form to edit an administrator
 func (h *Handler) EditAdminForm(c *echo.Context) error {
 	// Security: Superadmins OR Self
-	loggedInUser := middleware.GetUsername(c)
+	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
 	isSuper, err := utils.IsSuperAdmin(h.DB, loggedInUser)
 	if err != nil {
 		return c.Render(http.StatusForbidden, "admins.html", map[string]interface{}{"Error": "Permission check failed"})
@@ -335,7 +335,7 @@ func (h *Handler) EditAdminForm(c *echo.Context) error {
 // EditAdmin processes the update of an administrator
 func (h *Handler) EditAdmin(c *echo.Context) error {
 	// Security: Superadmins OR Self
-	loggedInUser := middleware.GetUsername(c)
+	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
 	isSuper, err := utils.IsSuperAdmin(h.DB, loggedInUser)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "Permission check failed"})

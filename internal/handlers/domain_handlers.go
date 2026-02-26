@@ -27,7 +27,7 @@ type DomainDisplay struct {
 func (h *Handler) ListDomains(c *echo.Context) error {
 	var domains []models.Domain
 	var displayDomains []DomainDisplay
-	username := middleware.GetUsername(c)
+	username := middleware.GetUsername(c, middleware.SessionName)
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
 
 	allowedDomains, _, err := utils.GetAllowedDomains(h.DB, username, isSuperAdmin)
@@ -77,7 +77,7 @@ func (h *Handler) ListDomains(c *echo.Context) error {
 // AddDomainForm exibe o formulário de adicionar domínio
 func (h *Handler) AddDomainForm(c *echo.Context) error {
 	// Security: Only Superadmins can add domains
-	username := middleware.GetUsername(c)
+	username := middleware.GetUsername(c, middleware.SessionName)
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
 	if !isSuperAdmin {
 		return c.Render(http.StatusForbidden, "domains.html", map[string]interface{}{"Error": "Access denied: Only Superadmins can create domains"})
@@ -90,7 +90,7 @@ func (h *Handler) AddDomainForm(c *echo.Context) error {
 // AddDomain processa a criação de um novo domínio
 func (h *Handler) AddDomain(c *echo.Context) error {
 	// Security: Only Superadmins can add domains
-	username := middleware.GetUsername(c)
+	username := middleware.GetUsername(c, middleware.SessionName)
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
 	if !isSuperAdmin {
 		return c.Render(http.StatusForbidden, "domains.html", map[string]interface{}{"Error": "Access denied"})
@@ -222,7 +222,7 @@ func (h *Handler) AddDomain(c *echo.Context) error {
 // EditDomainForm exibe o formulário de edição de domínio
 func (h *Handler) EditDomainForm(c *echo.Context) error {
 	// Security: Only Superadmins can edit domains
-	username := middleware.GetUsername(c)
+	username := middleware.GetUsername(c, middleware.SessionName)
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
 	if !isSuperAdmin {
 		return c.Render(http.StatusForbidden, "domains.html", map[string]interface{}{"Error": "Access denied: Only Superadmins can edit domains"})
@@ -246,7 +246,7 @@ func (h *Handler) EditDomainForm(c *echo.Context) error {
 // EditDomain processa a edição de um domínio existente
 func (h *Handler) EditDomain(c *echo.Context) error {
 	// Security: Only Superadmins can edit domains
-	username := middleware.GetUsername(c)
+	username := middleware.GetUsername(c, middleware.SessionName)
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
 	if !isSuperAdmin {
 		return c.Render(http.StatusForbidden, "domains.html", map[string]interface{}{"Error": "Access denied"})
@@ -353,7 +353,7 @@ func (h *Handler) EditDomain(c *echo.Context) error {
 // DeleteDomain remove um domínio e todos os dados associados (aliases e mailboxes)
 func (h *Handler) DeleteDomain(c *echo.Context) error {
 	// Security: Only Superadmins can delete domains
-	username := middleware.GetUsername(c)
+	username := middleware.GetUsername(c, middleware.SessionName)
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
 	if !isSuperAdmin {
 		return c.JSON(http.StatusForbidden, map[string]interface{}{"error": "Access denied: Only Superadmins can delete domains"})

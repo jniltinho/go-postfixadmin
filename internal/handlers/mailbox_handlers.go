@@ -21,7 +21,7 @@ import (
 func (h *Handler) ListMailboxes(c *echo.Context) error {
 	domainFilter := c.QueryParam("domain") // Query parameter opcional
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
-	SessionUser := middleware.GetUsername(c)
+	SessionUser := middleware.GetUsername(c, middleware.SessionName)
 
 	var mailboxes []models.Mailbox
 
@@ -60,7 +60,7 @@ func (h *Handler) ListMailboxes(c *echo.Context) error {
 func (h *Handler) AddMailboxForm(c *echo.Context) error {
 	var domains []models.Domain
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
-	SessionUser := middleware.GetUsername(c)
+	SessionUser := middleware.GetUsername(c, middleware.SessionName)
 
 	if h.DB != nil {
 		// Security: Filter domains
@@ -84,7 +84,7 @@ func (h *Handler) AddMailbox(c *echo.Context) error {
 	localPart := strings.ToLower(strings.TrimSpace(c.FormValue("local_part")))
 	domain := strings.TrimSpace(c.FormValue("domain"))
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
-	SessionUser := middleware.GetUsername(c)
+	SessionUser := middleware.GetUsername(c, middleware.SessionName)
 
 	// Security: Validate domain access
 	allowedDomains, _, err := utils.GetAllowedDomains(h.DB, SessionUser, isSuperAdmin)
@@ -321,7 +321,7 @@ func (h *Handler) EditMailboxForm(c *echo.Context) error {
 	}
 
 	// Security: Check permission
-	SessionUser := middleware.GetUsername(c)
+	SessionUser := middleware.GetUsername(c, middleware.SessionName)
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
 	allowedDomains, _, err := utils.GetAllowedDomains(h.DB, SessionUser, isSuperAdmin)
 	if err != nil {
@@ -353,7 +353,7 @@ func (h *Handler) EditMailboxForm(c *echo.Context) error {
 // EditMailbox processa a edição de um mailbox existente
 func (h *Handler) EditMailbox(c *echo.Context) error {
 	username, _ := url.PathUnescape(c.Param("username"))
-	SessionUser := middleware.GetUsername(c)
+	SessionUser := middleware.GetUsername(c, middleware.SessionName)
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
 
 	// Find existing mailbox
@@ -480,7 +480,7 @@ func (h *Handler) DeleteMailbox(c *echo.Context) error {
 	}
 
 	// Security: Check permission
-	SessionUser := middleware.GetUsername(c)
+	SessionUser := middleware.GetUsername(c, middleware.SessionName)
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
 	allowedDomains, _, err := utils.GetAllowedDomains(h.DB, SessionUser, isSuperAdmin)
 	if err != nil {

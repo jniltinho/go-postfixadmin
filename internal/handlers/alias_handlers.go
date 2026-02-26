@@ -29,7 +29,7 @@ func (h *Handler) ListAliases(c *echo.Context) error {
 			Order("alias.address ASC")
 
 		// Security: Filter by allowed domains
-		username := middleware.GetUsername(c)
+		username := middleware.GetUsername(c, middleware.SessionName)
 		allowedDomains, isSuper, err := utils.GetAllowedDomains(h.DB, username, middleware.GetIsSuperAdmin(c))
 		if err != nil {
 			return c.Render(http.StatusInternalServerError, "aliases.html", map[string]interface{}{
@@ -93,7 +93,7 @@ func (h *Handler) ListAliases(c *echo.Context) error {
 		domainQuery := h.DB.Where("domain != ?", "ALL").Where("active = ?", true).Order("domain ASC")
 		if !isSuperAdmin {
 			// Reuse allowedDomains from earlier
-			allowedDomains, _, err := utils.GetAllowedDomains(h.DB, middleware.GetUsername(c), middleware.GetIsSuperAdmin(c))
+			allowedDomains, _, err := utils.GetAllowedDomains(h.DB, middleware.GetUsername(c, middleware.SessionName), middleware.GetIsSuperAdmin(c))
 			if err == nil {
 				if len(allowedDomains) == 0 {
 					domainQuery = domainQuery.Where("1 = 0")
@@ -110,7 +110,7 @@ func (h *Handler) ListAliases(c *echo.Context) error {
 		"Domains":      domains,
 		"DomainFilter": domainFilter,
 		"IsSuperAdmin": isSuperAdmin,
-		"SessionUser":  middleware.GetUsername(c),
+		"SessionUser":  middleware.GetUsername(c, middleware.SessionName),
 	})
 }
 
@@ -121,7 +121,7 @@ func (h *Handler) AddAliasForm(c *echo.Context) error {
 
 	if h.DB != nil {
 		// Security: Filter domains
-		username := middleware.GetUsername(c)
+		username := middleware.GetUsername(c, middleware.SessionName)
 		allowedDomains, isSuper, err := utils.GetAllowedDomains(h.DB, username, middleware.GetIsSuperAdmin(c))
 		if err != nil {
 			return c.Render(http.StatusInternalServerError, "add_alias.html", map[string]interface{}{"Error": "Permission check failed"})
@@ -142,7 +142,7 @@ func (h *Handler) AddAliasForm(c *echo.Context) error {
 	return c.Render(http.StatusOK, "add_alias.html", map[string]interface{}{
 		"Domains":      domains,
 		"IsSuperAdmin": isSuperAdmin,
-		"SessionUser":  middleware.GetUsername(c),
+		"SessionUser":  middleware.GetUsername(c, middleware.SessionName),
 	})
 }
 
@@ -155,7 +155,7 @@ func (h *Handler) AddAlias(c *echo.Context) error {
 	active := c.FormValue("active") == "true"
 
 	// Security: Validate domain access
-	loggedInUser := middleware.GetUsername(c)
+	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
 	allowedDomains, isSuperAdmin, err := utils.GetAllowedDomains(h.DB, loggedInUser, middleware.GetIsSuperAdmin(c))
 	if err != nil {
 		return renderAddAliasError(c, "Permission check failed", localPart, domain, gotoRaw, nil, isSuperAdmin)
@@ -274,7 +274,7 @@ func (h *Handler) AddAlias(c *echo.Context) error {
 	}
 
 	// Log Action
-	if err := utils.LogAction(h.DB, middleware.GetUsername(c), c.RealIP(), domain, "create_alias", address); err != nil {
+	if err := utils.LogAction(h.DB, middleware.GetUsername(c, middleware.SessionName), c.RealIP(), domain, "create_alias", address); err != nil {
 		fmt.Printf("Failed to log create_alias: %v\n", err)
 	}
 
@@ -293,7 +293,7 @@ func (h *Handler) EditAliasForm(c *echo.Context) error {
 	}
 
 	// Security: Check permission
-	loggedInUser := middleware.GetUsername(c)
+	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
 	allowedDomains, isSuperAdmin, err := utils.GetAllowedDomains(h.DB, loggedInUser, middleware.GetIsSuperAdmin(c))
 	if err != nil {
 		return c.Render(http.StatusInternalServerError, "add_alias.html", map[string]interface{}{"Error": "Permission check failed"})
@@ -333,7 +333,7 @@ func (h *Handler) EditAlias(c *echo.Context) error {
 	}
 
 	// Security: Check permission
-	loggedInUser := middleware.GetUsername(c)
+	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
 	allowedDomains, isSuperAdmin, err := utils.GetAllowedDomains(h.DB, loggedInUser, middleware.GetIsSuperAdmin(c))
 	if err != nil {
 		return c.Render(http.StatusInternalServerError, "edit_alias.html", map[string]interface{}{"Error": "Permission check failed"})
@@ -402,7 +402,7 @@ func (h *Handler) EditAlias(c *echo.Context) error {
 	}
 
 	// Log Action
-	if err := utils.LogAction(h.DB, middleware.GetUsername(c), c.RealIP(), alias.Domain, "edit_alias", address); err != nil {
+	if err := utils.LogAction(h.DB, middleware.GetUsername(c, middleware.SessionName), c.RealIP(), alias.Domain, "edit_alias", address); err != nil {
 		fmt.Printf("Failed to log edit_alias: %v\n", err)
 	}
 
@@ -424,7 +424,7 @@ func (h *Handler) DeleteAlias(c *echo.Context) error {
 	}
 
 	// Security: Check permission (Pre-check)
-	loggedInUser := middleware.GetUsername(c)
+	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
 	allowedDomains, isSuperAdmin, err := utils.GetAllowedDomains(h.DB, loggedInUser, middleware.GetIsSuperAdmin(c))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "Permission check failed"})
@@ -473,7 +473,7 @@ func (h *Handler) DeleteAlias(c *echo.Context) error {
 
 	// Log Action
 	// For delete, we need the domain. We fetched 'alias' earlier which has the domain.
-	if err := utils.LogAction(h.DB, middleware.GetUsername(c), c.RealIP(), alias.Domain, "delete_alias", address); err != nil {
+	if err := utils.LogAction(h.DB, middleware.GetUsername(c, middleware.SessionName), c.RealIP(), alias.Domain, "delete_alias", address); err != nil {
 		// Just log error
 		fmt.Printf("Failed to log delete_alias: %v\n", err)
 	}
@@ -489,6 +489,6 @@ func renderAddAliasError(c *echo.Context, errorMsg, localPart, domain, gotoRaw s
 		"Goto":         gotoRaw,
 		"Domains":      domains,
 		"IsSuperAdmin": isSuperAdmin,
-		"SessionUser":  middleware.GetUsername(c),
+		"SessionUser":  middleware.GetUsername(c, middleware.SessionName),
 	})
 }

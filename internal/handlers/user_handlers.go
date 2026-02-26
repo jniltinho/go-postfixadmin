@@ -33,7 +33,7 @@ func (h *Handler) UserLogin(c *echo.Context) error {
 			return c.Render(http.StatusUnauthorized, "users/login.html", map[string]interface{}{"errorKey": "Login_ErrInvalidCredentials"})
 		}
 
-		if err := middleware.SetUserSession(c, mailbox.Username); err != nil {
+		if err := middleware.SetSession(c, middleware.UserSessionName, mailbox.Username, false); err != nil {
 			return c.Render(http.StatusInternalServerError, "users/login.html", map[string]interface{}{"errorKey": "Login_ErrSession"})
 		}
 
@@ -44,13 +44,13 @@ func (h *Handler) UserLogin(c *echo.Context) error {
 
 // UserLogout clears the user session
 func (h *Handler) UserLogout(c *echo.Context) error {
-	middleware.ClearUserSession(c)
+	middleware.ClearSession(c, middleware.UserSessionName)
 	return c.Redirect(http.StatusFound, "/users/login")
 }
 
 // UserDashboard displays the user dashboard
 func (h *Handler) UserDashboard(c *echo.Context) error {
-	username := middleware.GetUser(c)
+	username := middleware.GetUsername(c, middleware.UserSessionName)
 	if username == "" {
 		return c.Redirect(http.StatusFound, "/users/login")
 	}
@@ -74,7 +74,7 @@ func (h *Handler) UserDashboard(c *echo.Context) error {
 
 // UpdateUserPassword changes the user's password
 func (h *Handler) UpdateUserPassword(c *echo.Context) error {
-	username := middleware.GetUser(c)
+	username := middleware.GetUsername(c, middleware.UserSessionName)
 	currentPassword := c.FormValue("current_password")
 	newPassword := c.FormValue("new_password")
 	confirmPassword := c.FormValue("confirm_password")
@@ -121,7 +121,7 @@ func (h *Handler) UpdateUserPassword(c *echo.Context) error {
 
 // UpdateUserForwarding updates the user's forwarding address (alias)
 func (h *Handler) UpdateUserForwarding(c *echo.Context) error {
-	username := middleware.GetUser(c)
+	username := middleware.GetUsername(c, middleware.UserSessionName)
 	forwarding := c.FormValue("forwarding")
 
 	tx := h.DB.Begin()
@@ -185,7 +185,7 @@ func (h *Handler) UpdateUserForwarding(c *echo.Context) error {
 
 // UserVacation displays the user's vacation/auto-reply configuration form
 func (h *Handler) UserVacation(c *echo.Context) error {
-	username := middleware.GetUser(c)
+	username := middleware.GetUsername(c, middleware.UserSessionName)
 	if username == "" {
 		return c.Redirect(http.StatusFound, "/users/login")
 	}
@@ -216,7 +216,7 @@ func (h *Handler) UserVacation(c *echo.Context) error {
 
 // UpdateUserVacation upserts the user's vacation configuration
 func (h *Handler) UpdateUserVacation(c *echo.Context) error {
-	username := middleware.GetUser(c)
+	username := middleware.GetUsername(c, middleware.UserSessionName)
 	if username == "" {
 		return c.Redirect(http.StatusFound, "/users/login")
 	}
@@ -290,7 +290,7 @@ func (h *Handler) UpdateUserVacation(c *echo.Context) error {
 
 // DeleteUserVacation removes the user's vacation configuration
 func (h *Handler) DeleteUserVacation(c *echo.Context) error {
-	username := middleware.GetUser(c)
+	username := middleware.GetUsername(c, middleware.UserSessionName)
 	if username == "" {
 		return c.Redirect(http.StatusFound, "/users/login")
 	}
