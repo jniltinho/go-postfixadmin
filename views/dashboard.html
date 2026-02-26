@@ -114,7 +114,8 @@
                 <tbody class="text-sm font-medium text-gray-700">
                     {{if .Logs}}
                     {{range .Logs}}
-                    <tr class="border-b border-gray-100 hover:bg-yellow-50 transition-colors">
+                    <tr
+                        class="border-b border-gray-100 even:bg-gray-50 odd:bg-white hover:bg-gray-100 transition-colors">
                         <td class="py-1 px-2 whitespace-nowrap text-xs font-bold text-gray-500">{{.Timestamp.Format
                             "2006-01-02 15:04:05"}}</td>
                         <td class="py-1 px-2 text-brand-primary font-bold">{{.Username}}</td>

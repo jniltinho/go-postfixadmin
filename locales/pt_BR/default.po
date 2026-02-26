@@ -643,7 +643,7 @@ msgstr "GERAR"
 msgid "Mailboxes_PwdStrength"
 msgstr "Força da Senha"
 
-msgid "Mailboxes_PwdStrengthShort"
+msgid "Strength"
 msgstr "Força"
 
 msgid "Mailboxes_AdvancedTitle"

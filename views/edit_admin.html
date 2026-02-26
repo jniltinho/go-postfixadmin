@@ -20,7 +20,7 @@
     </div>
     {{end}}
 
-    <form method="POST" action="/admins/edit/{{.Admin.Username}}" class="space-y-6">
+    <form method="POST" action="/admins/edit/{{.Admin.Username}}" class="space-y-6" id="editAdminForm">
         <!-- Card Principal -->
         <!-- Card Principal -->
         <div class="bg-white border-4 border-brand-text neo-shadow-sm p-8">
@@ -127,7 +127,7 @@
                 <div id="strengthMeter" class="hidden">
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-xs font-black uppercase tracking-widest text-brand-text">{{ T $.Lang
-                            `Admins_JsStrengthShort` }}</span>
+                            `Strength` }}</span>
                         <span id="strengthText" class="text-xs font-bold uppercase tracking-wider"></span>
                     </div>
                     <div class="h-2 bg-gray-200 border-2 border-brand-text overflow-hidden">
@@ -175,7 +175,7 @@
                 <i data-lucide="x" class="w-5 h-5 mr-2"></i>
                 {{ T $.Lang `Admins_BtnCancel` }}
             </a>
-            <button type="submit"
+            <button type="submit" id="submitBtn"
                 class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-8 py-4 shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center">
                 <i data-lucide="save" class="w-5 h-5 mr-2"></i>
                 {{ T $.Lang `Admins_BtnSaveChanges` }}
@@ -212,7 +212,7 @@
     };
     var _matchOpts = {
         passwordId: 'password', confirmId: 'password_confirm',
-        indicatorId: 'matchIndicator',
+        indicatorId: 'matchIndicator', submitBtnId: 'submitBtn',
         labels: {
             match: `{{ T $.Lang "Admins_JsPwdMatchOk" }}`,
             noMatch: `{{ T $.Lang "Admins_JsPwdMatchFail" }}`
@@ -228,7 +228,8 @@
         App.initPasswordForm({
             passwordId: 'password', confirmId: 'password_confirm',
             meterId: 'strengthMeter', barId: 'strengthBar', textId: 'strengthText',
-            indicatorId: 'matchIndicator',
+            indicatorId: 'matchIndicator', submitBtnId: 'submitBtn',
+            formId: 'editAdminForm',
             changeInputId: 'change_password',
             labels: {
                 weak: `{{ T $.Lang "Admins_JsPwdWeak" }}`,
@@ -237,6 +238,10 @@
                 strong: `{{ T $.Lang "Admins_JsPwdStrong" }}`,
                 match: `{{ T $.Lang "Admins_JsPwdMatchOk" }}`,
                 noMatch: `{{ T $.Lang "Admins_JsPwdMatchFail" }}`
+            },
+            validationMsgs: {
+                minLen: `{{ T $.Lang "Admins_JsPwdMinLen" }}`,
+                noMatch: `{{ T $.Lang "Admins_JsPwdNoMatch" }}`
             }
         });
     });

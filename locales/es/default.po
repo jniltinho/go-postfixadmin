@@ -643,7 +643,7 @@ msgstr "GENERAR"
 msgid "Mailboxes_PwdStrength"
 msgstr "Fuerza de la Contraseña"
 
-msgid "Mailboxes_PwdStrengthShort"
+msgid "Strength"
 msgstr "Fuerza"
 
 msgid "Mailboxes_AdvancedTitle"
