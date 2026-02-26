@@ -43,13 +43,13 @@ control_admin  = "YES"
 604800   = "reply_once_per_week"   # 60*60*24*7
 
 [alias]
-edit_alias          = "YES"
-alias_control       = "YES"
-alias_control_admin = "YES"
-special_alias_control = "NO"
-alias_domain        = "YES"
+edit_alias          = true
+alias_domain        = true
 
 [transport]
-enabled  = "NO"
+enabled  = true
 options  = ["virtual", "local", "relay"]
 default  = "virtual"
+
+[features]
+fetchmail = false

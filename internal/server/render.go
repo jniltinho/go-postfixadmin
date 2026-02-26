@@ -13,6 +13,7 @@ import (
 	"go-postfixadmin/internal/i18n"
 
 	"github.com/labstack/echo/v5"
+	"github.com/spf13/viper"
 )
 
 // Template stores pre-parsed templates for each route.
@@ -41,14 +42,18 @@ func (t *Template) Render(c *echo.Context, w io.Writer, name string, data any) e
 		}
 	}
 
+	fetchmailEnabled := viper.GetBool("features.fetchmail")
+
 	var viewData any = data
 	if data == nil {
-		viewData = map[string]any{"Lang": lang}
+		viewData = map[string]any{"Lang": lang, "FetchmailEnabled": fetchmailEnabled}
 	} else if m, ok := data.(map[string]any); ok {
 		m["Lang"] = lang
+		m["FetchmailEnabled"] = fetchmailEnabled
 		viewData = m
 	} else if m, ok := data.(map[string]interface{}); ok {
 		m["Lang"] = lang
+		m["FetchmailEnabled"] = fetchmailEnabled
 		viewData = m
 	}
 

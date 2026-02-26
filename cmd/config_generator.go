@@ -36,14 +36,14 @@ domain_quota      = true
 multiplier        = 1024000
 
 [vacation]
-enabled        = "YES"
+enabled        = true
 # Autoreply domain — must match Postfix transport_maps entry.
 # This domain does NOT need real DNS; it must not be used for normal mail.
 domain         = "autoreply.change-this-to-your.domain.tld"
 # Allow users to control their own vacation settings
-control        = "YES"
+control        = true
 # Allow domain admins to edit user vacation settings
-control_admin  = "YES"
+control_admin  = true
 
 # Reply frequency options: seconds => PALANG key
 # 0 = reply only once; 1 = reply to every mail
@@ -52,16 +52,19 @@ control_admin  = "YES"
 604800   = "reply_once_per_week"   # 60*60*24*7
 
 [alias]
-edit_alias          = "YES"
-alias_control       = "YES"
-alias_control_admin = "YES"
-special_alias_control = "NO"
-alias_domain        = "YES"
+edit_alias          = true
+alias_control       = true
+alias_control_admin = true
+special_alias_control = false
+alias_domain        = true
 
 [transport]
-enabled  = "NO"
+enabled  = true
 options  = ["virtual", "local", "relay"]
 default  = "virtual"
+
+[features]
+fetchmail = false
 `
 
 	fileName := fmt.Sprintf("config_%s.toml", time.Now().Format("2006-01-02_150405"))
