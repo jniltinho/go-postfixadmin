@@ -10,8 +10,6 @@ import (
 	"path"
 	"strings"
 
-	"go-postfixadmin/internal/i18n"
-
 	"github.com/labstack/echo/v5"
 	"github.com/spf13/viper"
 )
@@ -66,58 +64,6 @@ func (t *Template) Render(c *echo.Context, w io.Writer, name string, data any) e
 	}
 
 	return tmpl.ExecuteTemplate(w, layout, viewData)
-}
-
-// templateFuncMap returns the custom template functions used across all templates.
-func templateFuncMap() template.FuncMap {
-	return template.FuncMap{
-		"T": func(lang, messageID string) string {
-			return i18n.Translate(lang, messageID, nil)
-		},
-		"TData": func(lang, messageID string, templateData map[string]interface{}) string {
-			return i18n.Translate(lang, messageID, templateData)
-		},
-		"version": func() string { return AppVersion },
-		"mul":     func(a, b float64) float64 { return a * b },
-		"div":     func(a, b float64) float64 { return a / b },
-		"float64": func(i any) float64 {
-			switch v := i.(type) {
-			case int:
-				return float64(v)
-			case int64:
-				return float64(v)
-			case float64:
-				return v
-			default:
-				return 0
-			}
-		},
-		"commaToLines": func(s string) template.HTML {
-			parts := strings.Split(s, ",")
-			var trimmed []string
-			for _, p := range parts {
-				p = strings.TrimSpace(p)
-				if p != "" {
-					trimmed = append(trimmed, template.HTMLEscapeString(p))
-				}
-			}
-			return template.HTML(strings.Join(trimmed, "<br>"))
-		},
-		"commaToNewlines": func(s string) string {
-			parts := strings.Split(s, ",")
-			var trimmed []string
-			for _, p := range parts {
-				p = strings.TrimSpace(p)
-				if p != "" {
-					trimmed = append(trimmed, p)
-				}
-			}
-			return strings.Join(trimmed, "\n")
-		},
-		"unescapeHTML": func(s string) template.HTML {
-			return template.HTML(s)
-		},
-	}
 }
 
 // loadTemplates parses all view templates from the embedded filesystem.

@@ -61,8 +61,7 @@
                                 class="w-32 bg-gray-200 h-6 relative border border-brand-text overflow-hidden shadow-[1px_1px_0px_#1E293B]">
                                 <!-- Progress Bar Logic: Calculate percentage -->
                                 <div class="bg-green-500 h-full absolute top-0 left-0"
-                                    style="width:{{if gt .Aliases 0}}{{printf " %.0f" (mul (div (float64 .AliasCount)
-                                    (float64 .Aliases)) 100.0)}}{{else}}0{{end}}%"></div>
+                                    style="width:{{calcPercentage .AliasCount .Aliases}}%"></div>
                                 <div
                                     class="absolute inset-0 flex items-center justify-center text-xs font-bold text-gray-700 z-10">
                                     {{.AliasCount}} / {{.Aliases}}
@@ -75,8 +74,7 @@
                             <div
                                 class="w-32 bg-gray-200 h-6 relative border border-brand-text overflow-hidden shadow-[1px_1px_0px_#1E293B]">
                                 <div class="bg-green-500 h-full absolute top-0 left-0"
-                                    style="width:{{if gt .Mailboxes 0}}{{printf " %.0f" (mul (div (float64
-                                    .MailboxCount) (float64 .Mailboxes)) 100.0)}}{{else}}0{{end}}%"></div>
+                                    style="width:{{calcPercentage .MailboxCount .Mailboxes}}%"></div>
                                 <div
                                     class="absolute inset-0 flex items-center justify-center text-xs font-bold text-gray-700 z-10">
                                     {{.MailboxCount}} / {{.Mailboxes}}
