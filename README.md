@@ -77,7 +77,7 @@ This command runs a multi-stage build that:
 
 ### 3. Quick Start with Docker Compose
 
-The fastest way to get a full environment running (MySQL 8 + Go-Postfixadmin).
+The fastest way to get a full environment running (MariaDB + Go-Postfixadmin).
 
 **Requirements:** Docker and Docker Compose installed.
 
@@ -87,7 +87,7 @@ docker-compose up
 ```
 
 This will:
-- Start a MySQL 8 container.
+- Start a MariaDB container.
 - Build and start the Go-Postfixadmin container.
 - **Automatically** wait for the DB to be ready.
 - **Automatically** run database migrations.
@@ -113,7 +113,7 @@ docker run -p 8080:8080 -e DB_URL="your-dsn" postfixadmin:latest
 
 ### DB_URL Examples
 
-**MySQL:**
+**MariaDB:**
 ```bash
 # Standard format
 DB_URL="user:password@tcp(localhost:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local"
@@ -230,4 +230,4 @@ Check out more images in the [screenshots](DOCUMENTS/screenshots) folder.
 
 ## 📖 Installation and Configuration Guide
 
-For complete step-by-step instructions on how to set up an email server on Ubuntu with Postfix, Dovecot, MySQL, and integrate it with Go-PostfixAdmin, see our [Complete Setup Guide](DOCUMENTS/setup/README.md).
+For complete step-by-step instructions on how to set up an email server on Ubuntu with Postfix, Dovecot, MariaDB, and integrate it with Go-PostfixAdmin, see our [Complete Setup Guide](DOCUMENTS/setup/README.md).
