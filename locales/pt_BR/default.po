@@ -622,6 +622,9 @@ msgstr "Nome completo exibido no cliente de e-mail"
 msgid "Mailboxes_LblActive"
 msgstr "Conta Ativa"
 
+msgid "Send Welcome Email"
+msgstr "Enviar e-mail de boas-vindas"
+
 msgid "Mailboxes_LblEnabled"
 msgstr "Ativo"
 

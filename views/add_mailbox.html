@@ -87,13 +87,25 @@
                     <p class="text-xs text-gray-500 mt-2">{{ T $.Lang `Mailboxes_HelpDisplayName` }}</p>
                 </div>
 
-                <!-- Active Toggle -->
-                <div class="flex items-center">
-                    <input type="checkbox" id="active" name="active" value="true" {{if or (not .LocalPart)
-                        .Active}}checked{{end}} class="w-6 h-6 border-2 border-brand-text cursor-pointer">
-                    <label for="active" class="ml-3 text-sm font-bold cursor-pointer">
-                        {{ T $.Lang `Mailboxes_LblActive` }}
-                    </label>
+                <!-- Active & Welcome Mail Toggles -->
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Active Toggle -->
+                    <div class="flex items-center">
+                        <input type="checkbox" id="active" name="active" value="true" {{if or (not .LocalPart)
+                            .Active}}checked{{end}} class="w-6 h-6 border-2 border-brand-text cursor-pointer">
+                        <label for="active" class="ml-3 text-sm font-bold cursor-pointer">
+                            {{ T $.Lang `Mailboxes_LblActive` }}
+                        </label>
+                    </div>
+
+                    <!-- Send Welcome Mail Toggle -->
+                    <div class="flex items-center">
+                        <input type="checkbox" id="send_welcome_mail" name="send_welcome_mail" value="true"
+                            class="w-6 h-6 border-2 border-brand-text cursor-pointer">
+                        <label for="send_welcome_mail" class="ml-3 text-sm font-bold cursor-pointer">
+                            {{ T $.Lang "Send Welcome Email" }}
+                        </label>
+                    </div>
                 </div>
             </div>
         </div>

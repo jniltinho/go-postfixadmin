@@ -53,3 +53,9 @@ default  = "virtual"
 
 [features]
 fetchmail = false
+
+[smtp]
+server  = "localhost"
+port    = 25
+subject = "Welcome!"
+body    = "Hi,\n\nWelcome to your new account."

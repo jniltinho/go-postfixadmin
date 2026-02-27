@@ -109,6 +109,7 @@ func (h *Handler) AddMailbox(c *echo.Context) error {
 	passwordConfirm := c.FormValue("password_confirm")
 	active := c.FormValue("active") == "true"
 	smtpActive := c.FormValue("smtp_active") == "true"
+	sendWelcomeMail := c.FormValue("send_welcome_mail") == "true"
 
 	emailOther := c.FormValue("email_other")
 
@@ -303,6 +304,13 @@ func (h *Handler) AddMailbox(c *echo.Context) error {
 			"IsSuperAdmin": isSuperAdmin,
 			"SessionUser":  SessionUser,
 		})
+	}
+
+	// Send Welcome Mail if requested
+	if sendWelcomeMail {
+		if err := utils.SendWelcomeEmail(SessionUser, username); err != nil {
+			fmt.Printf("Failed to send welcome email to %s: %v\n", username, err)
+		}
 	}
 
 	// Redirect to mailboxes list filtered by domain
