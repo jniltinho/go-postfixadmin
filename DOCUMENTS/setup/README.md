@@ -1,6 +1,6 @@
 # Installation Guide: Email Server (Ubuntu) + Go-PostfixAdmin
 
-This step-by-step guide teaches you how to prepare a complete email server on Ubuntu using **Postfix**, **Dovecot**, **MySQL**, and how to manage everything via **Go-PostfixAdmin**.
+This step-by-step guide teaches you how to prepare a complete email server on Ubuntu using **Postfix**, **Dovecot**, **MariaDB**, and how to manage everything via **Go-PostfixAdmin**.
 
 ---
 
@@ -10,7 +10,7 @@ On Ubuntu, update your packages and install the necessary basic services:
 
 ```bash
 sudo apt update && sudo apt upgrade -y
-sudo apt install postfix postfix-mysql dovecot-core dovecot-imapd dovecot-pop3d dovecot-lmtpd dovecot-mysql mysql-server -y
+sudo apt install postfix postfix-mysql dovecot-core dovecot-imapd dovecot-pop3d dovecot-lmtpd dovecot-mysql mariadb-server -y
 sudo apt install certbot git curl -y
 ```
 
@@ -18,12 +18,12 @@ During Postfix installation, the wizard will ask for the configuration type. Sel
 
 ---
 
-## 2. Configure the MySQL Database
+## 2. Configure the MariaDB Database
 
-Access the MySQL console:
+Access the MariaDB console:
 
 ```bash
-sudo mysql
+sudo mariadb
 ```
 
 Run the commands below to create the database and the user that Postfix, Dovecot, and Go-PostfixAdmin will use:
@@ -137,7 +137,7 @@ myhostname = mail.example.com
 mydomain   = example.com
 myorigin   = $mydomain
 
-# Virtual mailboxes (MySQL Integration via Go-PostfixAdmin)
+# Virtual mailboxes (MariaDB Integration via Go-PostfixAdmin)
 virtual_mailbox_base    = /var/vmail
 virtual_mailbox_domains = proxy:mysql:/etc/postfix/sql/mysql_virtual_domains_maps.cf
 virtual_mailbox_maps    = proxy:mysql:/etc/postfix/sql/mysql_virtual_mailbox_maps.cf,
@@ -177,7 +177,7 @@ sudo mkdir -p /etc/postfix/sql
 sudo chown root:postfix /etc/postfix/sql
 ```
 
-> **Warning:** In all the files below, replace `your_secure_password` with the password configured in MySQL.
+> **Warning:** In all the files below, replace `your_secure_password` with the password configured in MariaDB.
 
 ### `/etc/postfix/sql/mysql_virtual_domains_maps.cf`
 ```ini
@@ -359,7 +359,7 @@ sudo systemctl restart postfix dovecot
 sudo systemctl enable postfix dovecot
 ```
 
-Validate if MySQL support was recognized by Postfix:
+Validate if MariaDB support was recognized by Postfix:
 ```bash
 postconf -m | grep mysql
 # The output should list "mysql"

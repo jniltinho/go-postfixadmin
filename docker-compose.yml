@@ -1,16 +1,16 @@
 services:
-  mysql:
-    image: mysql:8
+  mariadb:
+    image: mariadb:10.11
     container_name: postfixadmin-db
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: postfix
-      MYSQL_USER: postfix
-      MYSQL_PASSWORD: postfixPassword
+      MARIADB_ROOT_PASSWORD: rootpassword
+      MARIADB_DATABASE: postfix
+      MARIADB_USER: postfix
+      MARIADB_PASSWORD: postfixPassword
     ports:
       - "3306:3319"
     healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      test: ["CMD", "mariadb-admin" ,"ping", "-h", "localhost"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -19,13 +19,13 @@ services:
     image: jniltinho/go-postfixadmin:latest
     container_name: postfixadmin-app
     depends_on:
-      mysql:
+      mariadb:
         condition: service_healthy
     environment:
-      DB_HOST: mysql
+      DB_HOST: mariadb
       DB_PORT: 3306
       DB_DRIVER: mysql
-      DB_URL: postfix:postfixPassword@tcp(mysql:3306)/postfix?charset=utf8mb4&parseTime=True&loc=Local&multiStatements=true
+      DB_URL: postfix:postfixPassword@tcp(mariadb:3306)/postfix?charset=utf8mb4&parseTime=True&loc=Local&multiStatements=true
       ADMIN_EMAIL: admin@example.com
       ADMIN_PASSWORD: adminpassword
     ports:

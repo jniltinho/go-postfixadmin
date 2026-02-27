@@ -1,6 +1,6 @@
 <?php
 		$CONF['database_type'] = 'mysqli';
-		$CONF['database_host'] = 'dbmysql';
+		$CONF['database_host'] = 'mariadb';
 		$CONF['database_port'] = '3306';
 		$CONF['database_user'] = 'postfixadmin';
 		$CONF['database_password'] = 'postfixadminPassword';
