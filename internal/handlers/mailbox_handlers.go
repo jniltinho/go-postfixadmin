@@ -515,7 +515,7 @@ func (h *Handler) DeleteMailbox(c *echo.Context) error {
 		}
 
 		// Delete Vacation
-		if err := tx.Where("username = ?", username).Delete(&models.Vacation{}).Error; err != nil {
+		if err := tx.Where("email = ?", username).Delete(&models.Vacation{}).Error; err != nil {
 			return err
 		}
 
