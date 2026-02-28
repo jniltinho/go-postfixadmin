@@ -54,6 +54,7 @@ server  = "localhost"
 port    = 25
 subject = "Welcome!"
 body    = "Hi,\n\nWelcome to your new account."
+type    = "plain" # type: plain | tls | starttls
 `
 
 	fileName := fmt.Sprintf("config_%s.toml", time.Now().Format("2006-01-02_150405"))
