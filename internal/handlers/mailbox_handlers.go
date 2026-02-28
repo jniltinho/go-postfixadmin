@@ -14,6 +14,7 @@ import (
 	"go-postfixadmin/internal/utils"
 
 	"github.com/labstack/echo/v5"
+	"github.com/spf13/viper"
 	"gorm.io/gorm"
 )
 
@@ -537,6 +538,15 @@ func (h *Handler) DeleteMailbox(c *echo.Context) error {
 			"success": false,
 			"error":   "Failed to delete mailbox: " + err.Error(),
 		})
+	}
+
+	// Tentar limpar o diretório físico da mailbox, sem falhar a requisição se der erro
+	// já que a intenção real (excluir o registro) funcionou
+	if viper.GetBool("server.clean_up_maildir") {
+		baseDir := "/var/vmail" // TODO: Isso talvez devesse vir da config
+		if cleanupErr := utils.CleanupOrphanedMaildir(h.DB, baseDir, mailbox.Domain, mailbox.LocalPart); cleanupErr != nil {
+			fmt.Printf("Aviso: Falha ao limpar diretório órfão de %s: %v\n", username, cleanupErr)
+		}
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{

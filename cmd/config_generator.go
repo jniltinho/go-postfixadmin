@@ -16,6 +16,7 @@ url = "postfix:postfixPassword@tcp(localhost:3306)/postfix?charset=utf8mb4&parse
 [server]
 # Server Port (default 8080)
 port = 8080
+clean_up_maildir = false # Clean up orphaned maildirs when deleting a mailbox
 
 [ssl]
 #enabled = false
