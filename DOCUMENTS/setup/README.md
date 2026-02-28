@@ -20,7 +20,19 @@ During Postfix installation, the wizard will ask for the configuration type. Sel
 
 ## 2. Configure the MariaDB Database
 
-Access the MariaDB console:
+First, run the secure installation script to improve security:
+
+```bash
+sudo mariadb-secure-installation
+```
+
+During the wizard, you can adjust several security configurations by answering the prompted questions. Here is what you can do during the process:
+- Validate password strength to prevent users from using weak credentials.
+- Disallow root login remotely, allowing database access only from localhost.
+- Delete anonymous user accounts, which enable all users to log in to your database. 
+- Remove the default test database that is accessible to all users.
+
+Next, access the MariaDB console:
 
 ```bash
 sudo mariadb
