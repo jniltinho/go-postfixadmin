@@ -19,6 +19,7 @@ var (
 	listDomainAdmins bool
 	listLogs         bool
 	addSuperAdmin    string
+	cleanupMaildirs  bool
 )
 
 var adminCmd = &cobra.Command{
@@ -46,6 +47,8 @@ var adminCmd = &cobra.Command{
 			admin.ListDomainAdmins(db)
 		} else if listLogs {
 			admin.ListLogs(db)
+		} else if cleanupMaildirs {
+			admin.CleanupMaildirs(db)
 		} else if addSuperAdmin != "" {
 			admin.AddSuperAdmin(db, addSuperAdmin)
 		} else {
@@ -63,5 +66,6 @@ func init() {
 	adminCmd.Flags().BoolVarP(&listAliasDomains, "list-alias-domains", "S", false, "List all alias domains")
 	adminCmd.Flags().BoolVarP(&listDomainAdmins, "domain-admins", "A", false, "List all domain admins")
 	adminCmd.Flags().BoolVarP(&listLogs, "list-logs", "L", false, "List all system logs")
+	adminCmd.Flags().BoolVarP(&cleanupMaildirs, "cleanup-maildir", "c", false, "Clean up orphaned maildirs on the server")
 	adminCmd.Flags().StringVar(&addSuperAdmin, "add-superadmin", "", "Add a new superadmin (format: email:password)")
 }

@@ -10,37 +10,37 @@ import (
 	"gorm.io/gorm"
 )
 
-// CleanupOrphanedMaildir verifica se uma mailbox existe no banco de dados.
-// Se não existir, mas o diretório físico existir no servidor (/var/vmail/domain/user),
-// o diretório será apagado.
+// CleanupOrphanedMaildir checks if a mailbox exists in the database.
+// If it does not exist, but the physical directory exists on the server (/var/vmail/domain/user),
+// the directory will be deleted.
 // baseDir is typically "/var/vmail".
 func CleanupOrphanedMaildir(db *gorm.DB, baseDir, domain, localPart string) error {
 	username := fmt.Sprintf("%s@%s", localPart, domain)
 
-	// Verifica se a mailbox existe
+	// Check if mailbox exists
 	var mailbox models.Mailbox
 	err := db.Where("username = ?", username).First(&mailbox).Error
 	if err == nil {
-		// A mailbox existe, não devemos apagar a pasta
+		// Mailbox exists, we should not delete the folder
 		return nil
 	}
 
 	if err != gorm.ErrRecordNotFound {
-		// Ocorreu um erro no banco de dados
-		return fmt.Errorf("erro ao verificar mailbox no banco de dados: %w", err)
+		// Database error occurred
+		return fmt.Errorf("error checking mailbox in database: %w", err)
 	}
 
-	// A mailbox não existe, vamos verificar se o diretório físico existe
+	// Mailbox does not exist, check if physical directory exists
 	maildirPath := filepath.Join(baseDir, domain, localPart)
 
 	if _, err := os.Stat(maildirPath); os.IsNotExist(err) {
-		// O diretório não existe, nada a fazer
+		// Directory does not exist, nothing to do
 		return nil
 	}
 
-	// O diretório existe, vamos apagá-lo
+	// Directory exists, delete it
 	if err := os.RemoveAll(maildirPath); err != nil {
-		return fmt.Errorf("erro ao apagar diretório %s: %w", maildirPath, err)
+		return fmt.Errorf("error removing directory %s: %w", maildirPath, err)
 	}
 
 	return nil
