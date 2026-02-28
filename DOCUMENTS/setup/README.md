@@ -114,7 +114,8 @@ Go-PostfixAdmin will manage the database structure (tables, domains, accounts, a
 4. **Configure the Systemd Service:**
    Copy the service file (provided in `DOCUMENTS/setup/postfixadmin.service`) to systemd:
    ```bash
-   sudo cp download/DOCUMENTS/setup/postfixadmin.service /etc/systemd/system/
+   wget https://raw.githubusercontent.com/jniltinho/go-postfixadmin/refs/heads/main/DOCUMENTS/setup/postfixadmin.service
+   sudo cp postfixadmin.service /etc/systemd/system/
    sudo systemctl daemon-reload
    sudo systemctl enable --now postfixadmin.service
    ```
