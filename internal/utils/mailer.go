@@ -83,7 +83,7 @@ func sendPlain(addr, from, to string, msg []byte) error {
 
 func sendTLS(addr, server, from, to string, msg []byte) error {
 	tlsConfig := &tls.Config{
-		InsecureSkipVerify: true,
+		InsecureSkipVerify: false,
 		ServerName:         server,
 	}
 	conn, err := tls.Dial("tcp", addr, tlsConfig)
@@ -126,7 +126,7 @@ func sendStartTLS(addr, server, from, to string, msg []byte) error {
 	defer c.Close()
 
 	tlsConfig := &tls.Config{
-		InsecureSkipVerify: true,
+		InsecureSkipVerify: false,
 		ServerName:         server,
 	}
 
