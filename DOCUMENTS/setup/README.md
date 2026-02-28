@@ -54,7 +54,6 @@ Go-PostfixAdmin will manage the database structure (tables, domains, accounts, a
    cd /opt/go-postfixadmin
    # Replace the URL below with the latest release URL from your repository:
    sudo curl -L -O https://github.com/jniltinho/go-postfixadmin/releases/latest/download/postfixadmin_X.X.X_linux_amd64.tar.gz
-   sudo git clone https://github.com/jniltinho/go-postfixadmin.git download
    sudo tar -xzvf postfixadmin_*.tar.gz
    ```
    
