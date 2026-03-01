@@ -1,43 +1,43 @@
-# Guia de Instalação: Nginx + SOGo Webmail + MySQL (Ubuntu/Debian)
+# Installation Guide: Nginx + SOGo Webmail + MySQL (Ubuntu/Debian)
 
-Este documento descreve o processo de instalação e configuração do webmail SOGo utilizando Nginx como proxy reverso e MySQL (MariaDB) como banco de dados, integrado ao seu servidor de email (Go-PostfixAdmin / Postfix / Dovecot).
-
----
-
-## 1. Pré-requisitos
-
-* Servidor Ubuntu/Debian com Postfix, Dovecot e MariaDB já instalados e funcionais.
-* Um domínio configurado apontando para o seu servidor (ex: `mail.seudominio.com.br`).
-* Certificados SSL/TLS válidos (ex: Let's Encrypt).
+This document describes the installation and configuration process for the SOGo webmail using Nginx as a reverse proxy and MySQL (MariaDB) as the database, integrated with your email server (Go-PostfixAdmin / Postfix / Dovecot).
 
 ---
 
-## 2. Configuração do MariaDB para o SOGo
+## 1. Prerequisites
 
-O SOGo precisa de um banco de dados próprio para armazenar preferências de usuários, contatos e calendários.
+* Ubuntu/Debian server with Postfix, Dovecot, and MariaDB already installed and functional.
+* A configured domain pointing to your server (e.g., `mail.yourdomain.com`).
+* Valid SSL/TLS certificates (e.g., Let's Encrypt).
 
-Acesse o console do MariaDB:
+---
+
+## 2. MariaDB Configuration for SOGo
+
+SOGo needs its own database to store user preferences, contacts, and calendars.
+
+Access the MariaDB console:
 ```bash
 sudo mariadb
 ```
 
-Crie o banco de dados e o usuário para o SOGo. Em seguida, crie uma View (Visão) para que o SOGo consiga ler os usuários do Go-PostfixAdmin formatados corretamente:
+Create the database and user for SOGo. Then, create a View so that SOGo can read the correctly formatted Go-PostfixAdmin users:
 ```sql
 CREATE DATABASE sogo CHARSET='utf8mb4';
-CREATE USER 'sogo'@'localhost' IDENTIFIED BY 'SUA_SENHA_SEGURA_AQUI';
+CREATE USER 'sogo'@'localhost' IDENTIFIED BY 'YOUR_SECURE_PASSWORD_HERE';
 GRANT ALL PRIVILEGES ON sogo.* TO 'sogo'@'localhost';
--- Permite que o SOGo leia a tabela de caixas de e-mail do postfix
+-- Allows SOGo to read the postfix mailbox table
 GRANT SELECT ON postfix.mailbox TO 'sogo'@'localhost';
 FLUSH PRIVILEGES;
 
 USE sogo;
 CREATE OR REPLACE VIEW sogo_users_view AS
 SELECT
-    username AS c_uid,             -- O e-mail completo (user@domain.com)
-    username AS c_name,            -- Nome interno
-    name AS c_cn,                  -- Nome de exibição (Common Name)
-    password AS c_password,        -- Hash da senha
-    username AS mail               -- Campo de e-mail para buscas
+    username AS c_uid,             -- The full email (user@domain.com)
+    username AS c_name,            -- Internal name
+    name AS c_cn,                  -- Display name (Common Name)
+    password AS c_password,        -- Password hash
+    username AS mail               -- Email field for searches
 FROM postfix.mailbox
 WHERE active = 1;
 
@@ -46,9 +46,9 @@ EXIT;
 
 ---
 
-## 3. Instalação do SOGo
+## 3. SOGo Installation
 
-Adicione a chave e o repositório do SOGo para a sua versão do Ubuntu/Debian (certifique-se de referenciar o repositório correto da sua distro, exemplo abaixo para Ubuntu):
+Add the SOGo key and repository for your Ubuntu/Debian version (make sure to reference the correct repository for your distro, example below is for Ubuntu):
 
 ```bash
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key 74FFC6D72B925A01
@@ -56,29 +56,29 @@ sudo add-apt-repository "deb [arch=amd64] https://packages.inverse.ca/SOGo/night
 sudo apt update
 ```
 
-Instale o SOGo e o memcached (necessário para as sessões):
+Install SOGo and memcached (required for sessions):
 ```bash
 sudo apt install sogo sogo-activesync memcached -y
 ```
 
 ---
 
-## 4. Configuração do SOGo (`/etc/sogo/sogo.conf`)
+## 4. SOGo Configuration (`/etc/sogo/sogo.conf`)
 
-Faça backup da configuração original:
+Backup the original configuration:
 ```bash
 sudo cp /etc/sogo/sogo.conf /etc/sogo/sogo.conf.bkp
 ```
 
-Edite o arquivo `/etc/sogo/sogo.conf`. Limpe o arquivo original (que vem com muitos comentários) e use esta configuração base adaptando para a sua realidade:
+Edit the `/etc/sogo/sogo.conf` file. Clear the original file (which comes with many comments) and use this base configuration adapting it to your reality:
 
 ```ini
 {
   /* Database configuration (MySQL SOGo) */
-  SOGoProfileURL = "mysql://sogo:SUA_SENHA_SEGURA_AQUI@localhost:3306/sogo/sogo_user_profile";
-  OCSFolderInfoURL = "mysql://sogo:SUA_SENHA_SEGURA_AQUI@localhost:3306/sogo/sogo_folder_info";
-  OCSSessionsFolderURL = "mysql://sogo:SUA_SENHA_SEGURA_AQUI@localhost:3306/sogo/sogo_sessions_folder";
-  OCSAdminURL = "mysql://sogo:UA_SENHA_SEGURA_AQUI@localhost:3306/sogo/sogo_admin";
+  SOGoProfileURL = "mysql://sogo:YOUR_SECURE_PASSWORD_HERE@localhost:3306/sogo/sogo_user_profile";
+  OCSFolderInfoURL = "mysql://sogo:YOUR_SECURE_PASSWORD_HERE@localhost:3306/sogo/sogo_folder_info";
+  OCSSessionsFolderURL = "mysql://sogo:YOUR_SECURE_PASSWORD_HERE@localhost:3306/sogo/sogo_sessions_folder";
+  OCSAdminURL = "mysql://sogo:YOUR_SECURE_PASSWORD_HERE@localhost:3306/sogo/sogo_admin";
 
   /* Mail */
   SOGoDraftsFolderName = Drafts;
@@ -87,18 +87,18 @@ Edite o arquivo `/etc/sogo/sogo.conf`. Limpe o arquivo original (que vem com mui
   SOGoJunkFolderName = Junk;
   SOGoIMAPServer = "localhost";
   SOGoSMTPServer = "smtp://localhost";
-  SOGoMailDomain = seudominio.com.br;
+  SOGoMailDomain = yourdomain.com;
   SOGoMailingMechanism = smtp;
 
-  /* Authentication (usando a view criada no banco do SOGo com os dados do Go-PostfixAdmin) */
+  /* Authentication (using the view created in the SOGo database with the Go-PostfixAdmin data) */
   SOGoUserSources = (
     {
       type = sql;
       id = directory;
-      viewURL = "mysql://sogo:SUA_SENHA_SEGURA_AQUI@localhost:3306/sogo/sogo_users_view";
+      viewURL = "mysql://sogo:YOUR_SECURE_PASSWORD_HERE@localhost:3306/sogo/sogo_users_view";
       canAuthenticate = YES;
       isAddressBook = YES;
-      /* Deve bater com o formato usado no Go-Postfixadmin (Dovecot) ex: blf-crypt (Bcrypt) */
+      /* Must match the format used in Go-Postfixadmin (Dovecot) e.g., blf-crypt (Bcrypt) */
       userPasswordAlgorithm = blf-crypt; 
     }
   );
@@ -111,9 +111,9 @@ Edite o arquivo `/etc/sogo/sogo.conf`. Limpe o arquivo original (que vem com mui
   SOGoMailAuxiliaryUserAccountsEnabled = YES;
 
   /* General */
-  SOGoLanguage = Portuguese;
+  SOGoLanguage = English;
   SOGoTimeZone = America/Sao_Paulo;
-  SOGoSuperUsernames = ("admin@seudominio.com.br");
+  SOGoSuperUsernames = ("admin@yourdomain.com");
   SOGoMemcachedHost = "127.0.0.1";
 
   /* Workers */
@@ -121,9 +121,9 @@ Edite o arquivo `/etc/sogo/sogo.conf`. Limpe o arquivo original (que vem com mui
 }
 ```
 
-*Atenção: Substitua `SUA_SENHA_SEGURA_AQUI`, `SENHA_DO_USUARIO_POSTFIX`, e `seudominio.com.br` pelos valores reais do seu ambiente.*
+*Note: Replace `YOUR_SECURE_PASSWORD_HERE`, `POSTFIX_USER_PASSWORD`, and `yourdomain.com` with the real values from your environment.*
 
-Após configurar, reinicie os serviços:
+After configuring, restart the services:
 ```bash
 sudo systemctl restart memcached sogo
 sudo systemctl enable memcached sogo
@@ -131,36 +131,36 @@ sudo systemctl enable memcached sogo
 
 ---
 
-## 5. Instalação e Configuração do Nginx
+## 5. Nginx Installation and Configuration
 
-Instale o Nginx se ainda não estiver instalado:
+Install Nginx if it's not already installed:
 ```bash
 sudo apt install nginx -y
 ```
 
-Crie o arquivo de configuração para o SOGo no Nginx:
+Create the configuration file for SOGo in Nginx:
 ```bash
 sudo nano /etc/nginx/sites-available/sogo.conf
 ```
 
-Exemplo básico de configuração de Virtual Host (Proxy Reverso) com SSL:
+Basic Virtual Host (Reverse Proxy) configuration example with SSL:
 
 ```nginx
 server {
     listen 80;
-    server_name mail.seudominio.com.br;
+    server_name mail.yourdomain.com;
     
-    # Redirecionar HTTP para HTTPS
+    # Redirect HTTP to HTTPS
     return 301 https://$host$request_uri;
 }
 
 server {
     listen 443 ssl;
-    server_name mail.seudominio.com.br;
+    server_name mail.yourdomain.com;
 
-    # Certificados SSL (Exemplo via Let's Encrypt)
-    ssl_certificate /etc/letsencrypt/live/mail.seudominio.com.br/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/mail.seudominio.com.br/privkey.pem;
+    # SSL Certificates (Example via Let's Encrypt)
+    ssl_certificate /etc/letsencrypt/live/mail.yourdomain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/mail.yourdomain.com/privkey.pem;
 
     root /usr/lib/GNUstep/SOGo/WebServerResources/;
 
@@ -169,12 +169,12 @@ server {
         allow all;
     }
 
-    # Proxy para o SOGo
+    # SOGo Proxy
     location ^~ /SOGo {
         proxy_pass http://127.0.0.1:20000;
         proxy_redirect http://127.0.0.1:20000 default;
         
-        # Headers necessários
+        # Required headers
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header Host $host;
@@ -184,13 +184,13 @@ server {
         proxy_set_header x-webobjects-server-url https://$server_name;
         proxy_set_header x-webobjects-server-port 443;
         
-        # Ajustes de limite de envios
+        # Upload limits adjustments
         client_max_body_size 50M;
         client_body_buffer_size 128k;
         break;
     }
 
-    # Arquivos estáticos SOGo
+    # SOGo Static files
     location /SOGo.woa/WebServerResources/ {
         alias /usr/lib/GNUstep/SOGo/WebServerResources/;
         allow all;
@@ -203,7 +203,7 @@ server {
         expires max;
     }
 
-    # ActiveSync (opcional, para clientes mobile/Outlook)
+    # ActiveSync (optional, for mobile/Outlook clients)
     location ^~ /Microsoft-Server-ActiveSync {
         proxy_pass http://127.0.0.1:20000/SOGo/Microsoft-Server-ActiveSync;
         proxy_redirect http://127.0.0.1:20000/Microsoft-Server-ActiveSync /;
@@ -230,7 +230,7 @@ server {
 }
 ```
 
-Habilite o site no Nginx configurando o link simbólico e recarregando o serviço:
+Enable the site in Nginx by setting up the symbolic link and reloading the service:
 ```bash
 sudo ln -s /etc/nginx/sites-available/sogo.conf /etc/nginx/sites-enabled/
 sudo nginx -t
@@ -239,13 +239,13 @@ sudo systemctl restart nginx
 
 ---
 
-## 6. Testando o Acesso
+## 6. Testing Access
 
-1. No seu navegador, acesso `https://mail.seudominio.com.br`.
-2. A tela de login do SOGo deverá aparecer.
-3. Entre com um endereço completo criado no seu **Go-PostfixAdmin** (ex: `usuario@seudominio.com.br`) e com a respectiva senha.
+1. In your browser, go to `https://mail.yourdomain.com`.
+2. The SOGo login screen should appear.
+3. Enter with a complete email address created in your **Go-PostfixAdmin** (e.g., `user@yourdomain.com`) and its respective password.
 
-### Dicas Adicionais
+### Additional Tips
 
-- **Logs do SOGo**: Verifique `/var/log/sogo/sogo.log` caso ocorram erros 502 ou falhas de login que pareçam misteriosas.
-- **Integração Go-PostfixAdmin**: Qualquer alteração de senha, criação de nova caixa ou suspensão feita pelo *Go-PostfixAdmin* vai automaticamente impactar o acesso ao SOGo, já que utilizamos o mesmo banco de dados MariaDB (`postfix`) para as credenciais.
+- **SOGo Logs**: Check `/var/log/sogo/sogo.log` in case of 502 errors or mysterious login failures.
+- **Go-PostfixAdmin Integration**: Any password change, new mailbox creation, or suspension done through *Go-PostfixAdmin* will automatically impact access to SOGo, since we use the same MariaDB database (`postfix`) for credentials.
