@@ -1,4 +1,4 @@
-# Installation Guide: Nginx + SOGo Webmail + MySQL (Ubuntu/Debian)
+# Installation Guide: Nginx + SOGo Webmail + MySQL (Ubuntu)
 
 This document describes the installation and configuration process for the SOGo webmail using Nginx as a reverse proxy and MySQL (MariaDB) as the database, integrated with your email server (Go-PostfixAdmin / Postfix / Dovecot).
 
@@ -239,7 +239,47 @@ sudo systemctl restart nginx
 
 ---
 
-## 6. Testing Access
+## 6. Customizing the SOGo Theme
+
+SOGo relies on the [theming system](https://material.angularjs.org/latest/Theming/01_introduction) of Angular Material to define the colors of the Web interface.
+
+To overwrite the default theme, add the following parameter inside the configuration block in `/etc/sogo/sogo.conf`:
+
+```ini
+  SOGoUIAdditionalJSFiles = (js/theme.js);
+```
+
+Then, edit or create `theme.js` under `/usr/lib/GNUstep/SOGo/WebServerResources/js/` (or `/usr/lib64/GNUstep/SOGo/WebServerResources/js/` depending on your platform) and restart `sogo`.
+
+### Generating a new stylesheet
+
+If the configuration parameter `SOGoUIxDebugEnabled` is unset or set to `NO` in `/etc/sogo/sogo.conf`, you will need to generate a new `theme-default.css` stylesheet for the new theme:
+
+1. Temporarily set `SOGoUIxDebugEnabled = YES;` in `/etc/sogo/sogo.conf`.
+2. Restart the SOGo service:
+   ```bash
+   sudo systemctl restart sogo
+   ```
+3. Access the webmail in your browser and verify the theme adjustments.
+4. From your favorite browser, open the Developer Tools JavaScript console and type the following:
+   ```javascript
+   copy([].slice.call(document.styleSheets)
+     .map(e => e.ownerNode)
+     .filter(e => e.hasAttribute('md-theme-style'))
+     .map(e => e.textContent)
+     .join('\n')
+   )
+   ```
+5. Overwrite the content of `/usr/lib/GNUstep/SOGo/WebServerResources/css/theme-default.css` with the content of your clipboard.
+6. Restore the value of `SOGoUIxDebugEnabled` in `/etc/sogo/sogo.conf` (set to `NO` or remove it).
+7. Restart the SOGo service again:
+   ```bash
+   sudo systemctl restart sogo
+   ```
+
+---
+
+## 7. Testing Access
 
 1. In your browser, go to `https://mail.yourdomain.com`.
 2. The SOGo login screen should appear.
