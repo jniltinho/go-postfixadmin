@@ -64,8 +64,9 @@ Go-PostfixAdmin will manage the database structure (tables, domains, accounts, a
    ```bash
    sudo mkdir -p /opt/go-postfixadmin
    cd /opt/go-postfixadmin
-   # Replace the URL below with the latest release URL from your repository:
-   sudo curl -L -O https://github.com/jniltinho/go-postfixadmin/releases/latest/download/postfixadmin_X.X.X_linux_amd64.tar.gz
+   # Download the latest release:
+   TAG=$(curl -s https://api.github.com/repos/jniltinho/go-postfixadmin/releases/latest|grep tag_name|cut -d '"' -f4|tr -d v)
+   sudo curl -L -o postfixadmin_${TAG}_linux_amd64.tar.gz "https://github.com/jniltinho/go-postfixadmin/releases/download/v${TAG}/postfixadmin_${TAG}_linux_amd64.tar.gz"
    sudo tar -xzvf postfixadmin_*.tar.gz
    ```
    
@@ -134,7 +135,9 @@ Go-PostfixAdmin will manage the database structure (tables, domains, accounts, a
 
 ---
 
-## 4. Configure Postfix (`/etc/postfix/main.cf`)
+## 4. Configure Postfix
+
+### General Configuration (`/etc/postfix/main.cf`)
 
 Back up the original file:
 ```bash
@@ -176,6 +179,25 @@ smtpd_recipient_restrictions = permit_sasl_authenticated, permit_mynetworks, rej
 # smtpd_tls_key_file  = /etc/letsencrypt/live/mail.example.com/privkey.pem
 # smtpd_use_tls       = yes
 # smtpd_tls_auth_only = yes
+```
+
+### Enable Submission Port (`/etc/postfix/master.cf`)
+
+Edit `/etc/postfix/master.cf` to enable the submission port (587) for sending emails securely. Uncomment the `submission` section and modify it to match the configuration below:
+
+```ini
+submission inet n       -       y       -       -       smtpd
+  -o syslog_name=postfix/submission
+  -o smtpd_tls_security_level=encrypt
+  -o smtpd_sasl_auth_enable=yes
+  -o smtpd_tls_auth_only=yes
+  -o smtpd_reject_unlisted_recipient=no
+  -o smtpd_client_restrictions=$mua_client_restrictions
+  -o smtpd_helo_restrictions=$mua_helo_restrictions
+  -o smtpd_sender_restrictions=$mua_sender_restrictions
+  -o smtpd_recipient_restrictions=
+  -o smtpd_relay_restrictions=permit_sasl_authenticated,reject
+  -o milter_macro_daemon_name=ORIGINATING
 ```
 
 ---
