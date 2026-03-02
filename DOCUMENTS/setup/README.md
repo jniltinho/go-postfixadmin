@@ -95,25 +95,49 @@ Go-PostfixAdmin will manage the database structure (tables, domains, accounts, a
    
    ```toml
    [database]
-   # Database Configuration
+   # Format: user:password@tcp(host:port)/dbname?args | driver = "mysql"
    url = "postfix:your_secure_password@tcp(localhost:3306)/postfix?charset=utf8mb4&parseTime=True&loc=Local"
    
    [server]
    # Web Server Configuration. For SSL use port 443
    port = 8080
-   
-   # Secret Session Key (Generate a 64-char string via: openssl rand -hex 32)
-   session_secret = "your_super_secret_session_key_here"
+   cleanup_maildir = false # Clean up orphaned maildirs when deleting a mailbox
    
    [ssl]
    # (Optional) SSL Settings for standalone secure server
    enabled = true
    cert = "/etc/letsencrypt/live/mail.example.com/fullchain.pem"
    key = "/etc/letsencrypt/live/mail.example.com/privkey.pem"
+   # Secret Session Key (Generate a 64-character hex string via: openssl rand -hex 32)
+   session_secret = "your_super_secret_session_key_here"
 
    [quota]
+   enabled      = false
+   domain_quota = true
    # Bytes per MB: 1024000 or 1048576
-   multiplier = 1024000
+   multiplier   = 1024000
+
+   [vacation]
+   enabled = true
+
+   [alias]
+   edit_alias   = true
+   alias_domain = true
+
+   [transport]
+   enabled  = true
+   options  = ["virtual", "local", "relay"]
+   default  = "virtual"
+
+   [features]
+   fetchmail = false
+
+   [smtp]
+   server  = "localhost"
+   port    = 25
+   subject = "Welcome!"
+   body    = "Hi,\n\nWelcome to your new account."
+   type    = "plain" # type: plain | tls | starttls
    ```
 
 3. **Run Migrations:**

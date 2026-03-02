@@ -542,7 +542,7 @@ func (h *Handler) DeleteMailbox(c *echo.Context) error {
 
 	// Attempt to clean up the physical mailbox directory without failing the request on error,
 	// since the actual intention (deleting the record) was successful.
-	if viper.GetBool("server.clean_up_maildir") {
+	if viper.GetBool("server.cleanup_maildir") {
 		baseDir := "/var/vmail" // TODO: This should probably come from config
 		if cleanupErr := utils.CleanupOrphanedMaildir(h.DB, baseDir, mailbox.Domain, mailbox.LocalPart); cleanupErr != nil {
 			fmt.Printf("Warning: Failed to clean up orphaned directory for %s: %v\n", username, cleanupErr)
