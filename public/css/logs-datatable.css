@@ -48,19 +48,24 @@
 .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
     background: #2563EB !important;
     color: white !important;
-    border: 2px solid #1E293B !important;
+    border: 3px solid #1E293B !important;
 }
 
-.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-    background: #f3f4f6 !important;
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover:not(.current) {
+    background: transparent !important;
     color: #1E293B !important;
-    border: 2px solid #1E293B !important;
+    border: 2px solid transparent !important;
+    text-decoration: underline;
 }
 
 table.dataTable thead th {
     border-bottom: 4px solid #1E293B !important;
     vertical-align: middle;
     padding-right: 24px;
+}
+
+table.dataTable tbody td {
+    vertical-align: middle;
 }
 
 table.dataTable.no-footer {
@@ -73,10 +78,30 @@ table.dataTable {
     border-top: 4px solid #1E293B !important;
 }
 
+/* Zebra Striping */
+table.dataTable tbody tr.odd {
+    background-color: #ffffff;
+}
+
 table.dataTable tbody tr.even {
     background-color: #f9fafb;
 }
 
 table.dataTable tbody tr:hover {
+    background-color: #f3f4f6;
+}
+
+table.dataTable.display tbody tr.odd>.sorting_1,
+table.dataTable.order-column.stripe tbody tr.odd>.sorting_1 {
+    background-color: #ffffff;
+}
+
+table.dataTable.display tbody tr.even>.sorting_1,
+table.dataTable.order-column.stripe tbody tr.even>.sorting_1 {
+    background-color: #f9fafb;
+}
+
+table.dataTable.display tbody tr:hover>.sorting_1,
+table.dataTable.order-column.hover tbody tr:hover>.sorting_1 {
     background-color: #f3f4f6;
 }
