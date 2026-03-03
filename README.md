@@ -9,6 +9,7 @@ Professional Email Administration System built with Go, Echo, and Tailwind CSS.
 *   **Modern Design**: Clean and responsive interface built with Tailwind CSS.
 *   **Security**: Strong password hashing and protection against common attacks.
 *   **Integrated CLI**: Command-line tools for automation and access recovery.
+*   **Welcome Emails**: Optional automatic welcome emails sent upon mailbox creation.
 *   **Internationalization (i18n)**: Multi-language support (PT, EN, ES) powered by [gotext](https://github.com/leonelquinteros/gotext) with GNU Gettext `.po` files and dynamic locale loading.
 
 
@@ -199,10 +200,13 @@ The binary also supports direct administrative commands via the `admin` subcomma
 ```
 
 Other available flags for `admin`:
-*   `--list-mailboxes`: List all mailboxes.
-*   `--list-aliases`: List all aliases.
-*   `--domain-admins`: List domain administrators.
-
+*   `--list-mailboxes` (`-m`): List all mailboxes.
+*   `--list-aliases` (`-s`): List all aliases.
+*   `--list-alias-domains` (`-S`): List all alias domains.
+*   `--domain-admins` (`-A`): List all domain admins.
+*   `--list-logs` (`-L`): List all system logs.
+*   `--cleanup-maildir` (`-c`): Clean up orphaned maildirs on the server.
+*   `--base-dir`: Base directory for maildirs (default "/var/vmail").
 
 ---
 
@@ -231,3 +235,5 @@ Check out more images in the [screenshots](DOCUMENTS/screenshots) folder.
 ## 📖 Installation and Configuration Guide
 
 For complete step-by-step instructions on how to set up an email server on Ubuntu with Postfix, Dovecot, MariaDB, and integrate it with Go-PostfixAdmin, see our [Complete Setup Guide](DOCUMENTS/setup/README.md).
+
+You can also find our guide for setting up a complete webmail environment with [Nginx, SOGo, and MariaDB here](DOCUMENTS/setup/nginx-sogo-mysql.md).
