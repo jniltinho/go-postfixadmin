@@ -15,11 +15,11 @@ $(document).ready(function () {
             "type": "GET"
         },
         "columns": [
-            { "data": "timestamp", "className": "text-gray-600 font-medium text-xs py-2 px-4" },
-            { "data": "username", "className": "text-brand-primary font-bold text-xs py-2 px-4" },
-            { "data": "domain", "className": "text-gray-600 font-medium text-xs py-2 px-4" },
-            { "data": "action", "className": "uppercase text-xs font-black tracking-wide py-2 px-4" },
-            { "data": "data", "className": "text-gray-600 font-mono text-xs py-2 px-4" }
+            { "data": "timestamp", "className": "text-gray-600 font-medium text-xs py-1 px-2" },
+            { "data": "username", "className": "text-brand-primary font-bold text-xs py-1 px-2" },
+            { "data": "domain", "className": "text-gray-600 font-medium text-xs py-1 px-2" },
+            { "data": "action", "className": "uppercase text-xs font-black tracking-wide py-1 px-2" },
+            { "data": "data", "className": "text-gray-600 font-mono text-xs py-1 px-2" }
         ],
         "order": [[0, "desc"]],
         "language": dtLang,

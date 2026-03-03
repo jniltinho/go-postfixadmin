@@ -79,12 +79,6 @@
                         </div>
                     </td>
                 </tr>
-                {{else}}
-                <tr>
-                    <td colspan="5" class="px-8 py-20 text-center text-gray-400">
-                        {{ T $.Lang `Admins_NoAdminsFound` }}
-                    </td>
-                </tr>
                 {{end}}
             </tbody>
         </table>
@@ -104,14 +98,6 @@
             }
         });
     }
-</script>
-
-<!-- DataTables -->
-<link rel="stylesheet" type="text/css" href="/static/css/jquery.dataTables.min.css" />
-<script type="text/javascript" src="/static/js/jquery.dataTables.min.js"></script>
-<link rel="stylesheet" type="text/css" href="/static/css/logs-datatable.css" />
-
-<script>
     $(document).ready(function () {
         var lang = "{{$.Lang}}";
         var langUrl = "";
@@ -136,4 +122,9 @@
         });
     });
 </script>
+
+<!-- DataTables -->
+<link rel="stylesheet" type="text/css" href="/static/css/jquery.dataTables.min.css" />
+<script type="text/javascript" src="/static/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" type="text/css" href="/static/css/logs-datatable.css" />
 {{end}}
