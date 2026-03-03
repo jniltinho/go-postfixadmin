@@ -24,7 +24,7 @@ $(document).ready(function () {
             ],
             "order": [[0, "desc"]],
             "language": dtLang,
-            "pageLength": 12,
+            "pageLength": 10,
             "drawCallback": function (settings) {
                 // Re-initialize Lucide icons when data redraws
                 if (typeof lucide !== 'undefined') {
@@ -39,6 +39,7 @@ $(document).ready(function () {
         if ($(selector).length) {
             $(selector).DataTable({
                 language: dtLang,
+                pageLength: 10,
                 // Disable ordering on the last column (actions)
                 columnDefs: [
                     { orderable: false, targets: -1 }
