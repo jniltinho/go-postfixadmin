@@ -126,33 +126,10 @@
             }
         });
     }
-
-    $(document).ready(function () {
-        var lang = "{{$.Lang}}";
-        var langUrl = "";
-        if (lang === "pt") {
-            langUrl = "/static/js/i18n/pt-BR.json";
-        } else if (lang === "es") {
-            langUrl = "/static/js/i18n/es-ES.json";
-        }
-
-        $('#mailboxesTable').DataTable({
-            language: langUrl ? { url: langUrl } : {},
-            // Disable ordering on the last column (actions)
-            columnDefs: [
-                { orderable: false, targets: -1 }
-            ],
-            drawCallback: function (settings) {
-                // Re-render Lucide icons on pagination/draw
-                if (window.lucide) {
-                    lucide.createIcons();
-                }
-            }
-        });
-    });
 </script>
 <!-- DataTables -->
 <link rel="stylesheet" type="text/css" href="/static/css/jquery.dataTables.min.css" />
 <script type="text/javascript" src="/static/js/jquery.dataTables.min.js"></script>
 <link rel="stylesheet" type="text/css" href="/static/css/logs-datatable.css" />
+<script type="text/javascript" src="/static/js/logs-datatable.js"></script>
 {{end}}
