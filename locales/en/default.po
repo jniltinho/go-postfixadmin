@@ -352,7 +352,7 @@ msgstr "Add Domain"
 msgid "Domains_TblDomain"
 msgstr "Domain"
 
-msgid "Domains_TblDescription"
+msgid "Description"
 msgstr "Description"
 
 msgid "Domains_TblAliases"
@@ -370,7 +370,7 @@ msgstr "Active"
 msgid "Domains_TblModified"
 msgstr "Modified"
 
-msgid "Domains_TblPassExpires"
+msgid "Pass Expires"
 msgstr "Pass Expires"
 
 msgid "Domains_Yes"

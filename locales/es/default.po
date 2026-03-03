@@ -352,7 +352,7 @@ msgstr "Agregar Dominio"
 msgid "Domains_TblDomain"
 msgstr "Dominio"
 
-msgid "Domains_TblDescription"
+msgid "Description"
 msgstr "Descripción"
 
 msgid "Domains_TblAliases"
@@ -370,7 +370,7 @@ msgstr "Activo"
 msgid "Domains_TblModified"
 msgstr "Modificado"
 
-msgid "Domains_TblPassExpires"
+msgid "Pass Expires"
 msgstr "Contraseña Expira"
 
 msgid "Domains_Yes"
