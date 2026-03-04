@@ -39,10 +39,18 @@ var translations = map[string]Translation{
 			"Atenciosamente,\r\n" +
 			"Administrador do Sistema\r\n",
 	},
+	"es": {
+		Subject: "Aviso de Cuota de Correo (%s%%)",
+		Body: "Estimado usuario,\r\n\r\n" +
+			"Su buzón ha alcanzado el %s%% de su capacidad total de almacenamiento.\r\n" +
+			"Por favor, elimine mensajes antiguos o no deseados para liberar espacio y evitar ser bloqueado para recibir nuevos mensajes.\r\n\r\n" +
+			"Atentamente,\r\n" +
+			"Administrador del Sistema\r\n",
+	},
 }
 
 func main() {
-	langPtr := flag.String("lang", "en", "Language for the email (en or pt-br)")
+	langPtr := flag.String("lang", "en", "Language for the email (en, pt-br, or es)")
 	flag.Parse()
 
 	// Dovecot passes arguments to the script
@@ -50,7 +58,7 @@ func main() {
 	// 2 = Logged in user's email address
 	args := flag.Args()
 	if len(args) != 2 {
-		fmt.Printf("Usage: %s [--lang=en|pt-br] <percentage> <user_email>\n", os.Args[0])
+		fmt.Printf("Usage: %s [--lang=en|pt-br|es] <percentage> <user_email>\n", os.Args[0])
 		os.Exit(1)
 	}
 
