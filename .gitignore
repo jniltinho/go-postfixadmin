@@ -34,5 +34,8 @@ config_*.toml
 # Docker data
 DOCUMENTS/docker/_dbdata/
 DOCUMENTS/docker/_dbdata/*
+DOCUMENTS/setup/quota-warning/quota-warning
+DOCUMENTS/setup/quota-report/quota-report
+
 
 
