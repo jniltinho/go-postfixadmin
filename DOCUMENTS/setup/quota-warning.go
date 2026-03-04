@@ -8,6 +8,7 @@ package main
 // sudo chown vmail:vmail /usr/local/bin/quota-warning
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net/smtp"
@@ -16,17 +17,51 @@ import (
 	"strings"
 )
 
+type Translation struct {
+	Subject string
+	Body    string
+}
+
+var translations = map[string]Translation{
+	"en": {
+		Subject: "Email Quota Warning (%s%%)",
+		Body: "Dear user,\r\n\r\n" +
+			"Your mailbox has reached %s%% of its total storage capacity.\r\n" +
+			"Please delete old or unwanted messages to free up space and avoid being blocked from receiving new messages.\r\n\r\n" +
+			"Best regards,\r\n" +
+			"System Administrator\r\n",
+	},
+	"pt-br": {
+		Subject: "Aviso de Quota de E-mail (%s%%)",
+		Body: "Caro usuário,\r\n\r\n" +
+			"Sua caixa de correio atingiu %s%% da sua capacidade total de armazenamento.\r\n" +
+			"Por favor, exclua mensagens antigas ou indesejadas para liberar espaço e evitar o bloqueio no recebimento de novas mensagens.\r\n\r\n" +
+			"Atenciosamente,\r\n" +
+			"Administrador do Sistema\r\n",
+	},
+}
+
 func main() {
-	// Dovecot passes 2 arguments to the script (excluding the program name itself)
+	langPtr := flag.String("lang", "en", "Language for the email (en or pt-br)")
+	flag.Parse()
+
+	// Dovecot passes arguments to the script
 	// 1 = Usage percentage (e.g., 80, 95)
 	// 2 = Logged in user's email address
-	if len(os.Args) != 3 {
-		fmt.Printf("Usage: %s <percentage> <user_email>\n", os.Args[0])
+	args := flag.Args()
+	if len(args) != 2 {
+		fmt.Printf("Usage: %s [--lang=en|pt-br] <percentage> <user_email>\n", os.Args[0])
 		os.Exit(1)
 	}
 
-	percent := os.Args[1]
-	user := os.Args[2]
+	percent := args[0]
+	user := args[1]
+
+	lang := strings.ToLower(*langPtr)
+	t, ok := translations[lang]
+	if !ok {
+		t = translations["en"]
+	}
 
 	// Determine the domain name equivalently to $(hostname -d) in bash
 	domain := "example.com"
@@ -52,14 +87,10 @@ func main() {
 	// Build the email payload using RFC 822 format (with \r\n endings)
 	emailContent := fmt.Sprintf("From: %s\r\n"+
 		"To: %s\r\n"+
-		"Subject: Email Quota Warning (%s%%)\r\n"+
+		"Subject: %s\r\n"+
 		"Content-Type: text/plain; charset=\"utf-8\"\r\n"+
 		"\r\n"+
-		"Dear user,\r\n\r\n"+
-		"Your mailbox has reached %s%% of its total storage capacity.\r\n"+
-		"Please delete old or unwanted messages to free up space and avoid being blocked from receiving new messages.\r\n\r\n"+
-		"Best regards,\r\n"+
-		"System Administrator\r\n", from, user, percent, percent)
+		"%s", from, user, fmt.Sprintf(t.Subject, percent), fmt.Sprintf(t.Body, percent))
 
 	err = sendPlain("127.0.0.1:25", from, user, []byte(emailContent))
 	if err != nil {

@@ -453,7 +453,54 @@ sudo chown -R vmail:vmail /var/vmail
 
 ---
 
-## 8. Restart and Validate Services
+## 8. Configure System Logging (rsyslog)
+
+To properly capture logs from Postfix (especially if running chrooted) and Dovecot, you need to configure `rsyslog`.
+
+First, edit the main `rsyslog` configuration file to ensure the traditional timestamp format is enabled:
+
+```bash
+sudo nano /etc/rsyslog.conf
+```
+
+Find the `#### GLOBAL DIRECTIVES ####` section and make sure the `ActionFileDefaultTemplate` line is present and uncommented:
+
+```ini
+###########################
+#### GLOBAL DIRECTIVES ####
+###########################
+
+# Use traditional timestamp format.
+# To enable high precision timestamps, comment out the following line.
+$ActionFileDefaultTemplate RSYSLOG_TraditionalFileFormat
+```
+
+Next, copy the provided `postfix.conf` to the `rsyslog.d` directory:
+
+```bash
+sudo cp /etc/rsyslog.d/postfix.conf /etc/rsyslog.d/postfix.conf.bkp
+sudo cp DOCUMENTS/setup/postfix.conf /etc/rsyslog.d/postfix.conf
+```
+
+This file tells `rsyslog` to listen for Postfix logs and routes Dovecot logs to specific files:
+```ini
+# /etc/rsyslog.d/postfix.conf
+$AddUnixListenSocket /var/spool/postfix/dev/log
+$template MFORMAT, "%TIMESTAMP:::date-rfc3164% %hostname% %syslogtag%%msg:::sp-if-no-1st-sp%%msg:::drop-last-lf%\n"
+
+local5.*        -/var/log/dovecot.log
+local5.warning;local5.error;local5.crit -/var/log/dovecot-errors.log
+```
+
+Restart the `rsyslog` service to apply the changes:
+
+```bash
+sudo systemctl restart rsyslog
+```
+
+---
+
+## 9. Restart and Validate Services
 
 After making all configurations, restart the services to apply changes:
 

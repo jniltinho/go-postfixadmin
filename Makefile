@@ -1,7 +1,7 @@
 BINARY_NAME=postfixadmin
 
 DATE=`date +%Y-%m-%d\ %H:%M`
-VERSION=v1.0.36
+VERSION=v1.0.37
 PREFIX=go-postfixadmin/cmd
 LDFLAGS = -X '${PREFIX}.Version=${VERSION}' -X '${PREFIX}.BuildDate=${DATE}'
 FLAGS=-v -ldflags="-s -w ${LDFLAGS}"
@@ -20,7 +20,7 @@ build-prod: css
 	@echo "Building Go application..."
 	rm -f $(BINARY_NAME)
 	CGO_ENABLED=0 go build -o $(BINARY_NAME) ${FLAGS}
-	upx $(BINARY_NAME)
+	upx --best --lzma $(BINARY_NAME)
 
 
 run: build
