@@ -53,8 +53,6 @@ fetchmail = false
 [smtp]
 server  = "localhost"
 port    = 25
-subject = "Welcome!"
-body    = "Hi,\n\nWelcome to your new account."
 type    = "plain" # type: plain | tls | starttls
 `
 

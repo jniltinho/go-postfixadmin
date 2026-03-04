@@ -309,7 +309,11 @@ func (h *Handler) AddMailbox(c *echo.Context) error {
 
 	// Send Welcome Mail if requested
 	if sendWelcomeMail {
-		if err := utils.SendWelcomeEmail(SessionUser, username); err != nil {
+		lang := "en"
+		if cookie, err := c.Cookie("lang"); err == nil {
+			lang = cookie.Value
+		}
+		if err := utils.SendWelcomeEmail(SessionUser, username, lang); err != nil {
 			fmt.Printf("Failed to send welcome email to %s: %v\n", username, err)
 		}
 	}

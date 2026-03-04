@@ -4,13 +4,34 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/smtp"
+	"strings"
 
 	"github.com/spf13/viper"
 )
 
+type Translation struct {
+	Subject string
+	Body    string
+}
+
+var translations = map[string]Translation{
+	"en": {
+		Subject: "Welcome!",
+		Body:    "Hi,\n\nWelcome to your new email account.",
+	},
+	"pt-br": {
+		Subject: "Bem-vindo(a)!",
+		Body:    "Olá,\n\nBem-vindo(a) à sua nova conta de e-mail.",
+	},
+	"es": {
+		Subject: "¡Bienvenido(a)!",
+		Body:    "Hola,\n\nBienvenido(a) a tu nueva cuenta de correo electrónico.",
+	},
+}
+
 // SendWelcomeEmail envia uma mensagem de boas-vindas para a caixa de correio recém-criada.
-// Utiliza configurações da seção [smtp] no config.toml.
-func SendWelcomeEmail(adminUsername, newMailbox string) error {
+// Utiliza configurações da seção [smtp] no config.toml, definindo subject e body com base no idioma informando (en, pt-br, es).
+func SendWelcomeEmail(adminUsername, newMailbox, lang string) error {
 	server := viper.GetString("smtp.server")
 	if server == "" {
 		server = "127.0.0.1"
@@ -23,14 +44,18 @@ func SendWelcomeEmail(adminUsername, newMailbox string) error {
 	if smtpType == "" {
 		smtpType = "plain"
 	}
-	subject := viper.GetString("smtp.subject")
-	if subject == "" {
-		subject = "Welcome!"
+	langKey := strings.ToLower(lang)
+	if langKey == "pt" || langKey == "pt_br" {
+		langKey = "pt-br"
 	}
-	body := viper.GetString("smtp.body")
-	if body == "" {
-		body = "Hi,\n\nWelcome to your new account."
+
+	t, ok := translations[langKey]
+	if !ok {
+		t = translations["en"]
 	}
+
+	subject := t.Subject
+	body := t.Body
 
 	addr := fmt.Sprintf("%s:%d", server, port)
 
