@@ -115,7 +115,7 @@ Go-PostfixAdmin will manage the database structure (tables, domains, accounts, a
    enabled      = false
    domain_quota = true
    # Bytes per MB: 1024000 or 1048576
-   multiplier   = 1024000
+   multiplier   = 1048576
 
    [vacation]
    enabled = true
@@ -301,21 +301,25 @@ sudo chown root:postfix /etc/postfix/sql/*.cf
 
 ## 6. Configure Dovecot
 
-### `/etc/dovecot/conf.d/10-ssl.conf` (Recommended)
+Instead of making changes across multiple fragmented files, you can configure everything mainly using two files. 
 
-Configure Dovecot to use the same TLS/SSL certificates as Postfix:
-```ini
-ssl = required
-# The '<' sign before the path tells Dovecot to read the file's contents
-ssl_cert = </etc/letsencrypt/live/mail.example.com/fullchain.pem
-ssl_key = </etc/letsencrypt/live/mail.example.com/privkey.pem
+First, back up the original configuration:
+```bash
+sudo mv /etc/dovecot/dovecot.conf /etc/dovecot/dovecot.conf.bkp
 ```
 
 ### `/etc/dovecot/dovecot.conf`
 
-Edit or append to the main file:
+Create a new `/etc/dovecot/dovecot.conf` and combine all core settings into it:
+
 ```ini
 protocols = imap lmtp pop3
+disable_plaintext_auth = no
+
+# SSL/TLS certificates
+ssl = required
+ssl_cert = </etc/letsencrypt/live/mail.example.com/fullchain.pem
+ssl_key = </etc/letsencrypt/live/mail.example.com/privkey.pem
 
 # Path to emails
 mail_location = maildir:/var/vmail/%d/%n/Maildir
@@ -323,33 +327,88 @@ mail_location = maildir:/var/vmail/%d/%n/Maildir
 # System user for delivery (vmail mapped with UID/GID 1001)
 mail_uid = 1001
 mail_gid = 1001
-```
 
-### `/etc/dovecot/conf.d/10-auth.conf`
-
-Configure authentication mechanisms and include MySQL integration:
-```ini
+# Authentication mechanisms
 auth_mechanisms = plain login
-!include auth-sql.conf.ext
-```
 
-### `/etc/dovecot/conf.d/auth-sql.conf.ext`
-
-Enable SQL query for users and passwords:
-```ini
+# Password and User databases via SQL
 passdb {
   driver = sql
-  args   = /etc/dovecot/dovecot-sql.conf.ext
+  args   = /etc/dovecot/dovecot-sql.conf
 }
 userdb {
   driver = sql
-  args   = /etc/dovecot/dovecot-sql.conf.ext
+  args   = /etc/dovecot/dovecot-sql.conf
 }
+
+# Communication sockets with Postfix
+service lmtp {
+  unix_listener /var/spool/postfix/private/dovecot-lmtp {
+    mode  = 0600
+    user  = postfix
+    group = postfix
+  }
+}
+
+service auth {
+  unix_listener /var/spool/postfix/private/auth {
+    mode  = 0660
+    user  = postfix
+    group = postfix
+  }
+}
+
+mail_plugins = quota
+
+protocol imap {
+  mail_plugins = $mail_plugins imap_quota
+}
+
+protocol lmtp {
+  mail_plugins = $mail_plugins quota
+}
+
+plugin {
+  quota = maildir:User quota
+
+  quota_warning = storage=80%% quota-warning 80 %u
+  quota_warning2 = storage=95%% quota-warning 95 %u
+}
+
+service quota-warning {
+  executable = script /usr/local/bin/quota-warning.sh
+  user = vmail
+  unix_listener quota-warning {
+    mode = 0660
+    user = vmail
+    group = vmail
+  }
+}
+
+
+################################
+# LOGGING E OTIMIZAÇÃO
+################################
+log_path = syslog
+syslog_facility = local5
+auth_verbose = yes
+auth_debug_passwords = no
 ```
 
-### `/etc/dovecot/dovecot-sql.conf.ext`
+### `/usr/local/bin/quota-warning.sh`
 
-Connection and query settings for Dovecot:
+Create the executable script that will be triggered when quotas reach the limits:
+```bash
+sudo cp DOCUMENTS/setup/quota-warning.sh /usr/local/bin/quota-warning.sh
+sudo chmod +x /usr/local/bin/quota-warning.sh
+sudo chown vmail:vmail /usr/local/bin/quota-warning.sh
+```
+Make sure to eventually edit the `From:` header inside `/usr/local/bin/quota-warning.sh` to match your main domain (e.g. `postmaster@example.com`).
+
+### `/etc/dovecot/dovecot-sql.conf`
+
+Create `/etc/dovecot/dovecot-sql.conf` for the SQL connection and query settings:
+
 ```ini
 driver  = mysql
 connect = host=localhost dbname=postfix user=postfix password=your_secure_password
@@ -373,25 +432,11 @@ user_query = \
 iterate_query = SELECT username AS user FROM mailbox WHERE active='1'
 ```
 
-### `/etc/dovecot/conf.d/10-master.conf`
-
-Configure communication sockets with Postfix:
-```ini
-service lmtp {
-  unix_listener /var/spool/postfix/private/dovecot-lmtp {
-    mode  = 0600
-    user  = postfix
-    group = postfix
-  }
-}
-
-service auth {
-  unix_listener /var/spool/postfix/private/auth {
-    mode  = 0660
-    user  = postfix
-    group = postfix
-  }
-}
+Fix the file permissions to protect the passwords:
+```bash
+sudo chmod 640 /etc/dovecot/dovecot-sql.conf
+sudo chown root:dovecot /etc/dovecot/dovecot-sql.conf
+```
 ```
 
 ---

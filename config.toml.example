@@ -20,7 +20,7 @@ session_secret = "9a048f79e88e35de37dc2c43c1fc002f358f92957a7690e60109cfe8a65178
 [quota]
 enabled      = false
 domain_quota = true
-multiplier   = 1024000 # Bytes per MB: 1024000 or 1048576
+multiplier   = 1048576 # Bytes per MB: 1024000 or 1048576
 
 [vacation]
 enabled = true

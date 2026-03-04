@@ -30,7 +30,7 @@ cleanup_maildir = false # Clean up orphaned maildirs when deleting a mailbox
 [quota]
 enabled      = false
 domain_quota = true
-multiplier   = 1024000 # Bytes per MB: 1024000 or 1048576
+multiplier   = 1048576 # Bytes per MB: 1024000 or 1048576
 
 [vacation]
 enabled = true
