@@ -1,38 +1,39 @@
 # SETUP_MAILSERVER.md
 
-> Guia completo de configuração de servidor de e-mail com **Postfix + Dovecot + Go-PostfixAdmin + MySQL**
+> Complete email server setup guide with **Postfix + Dovecot + Go-PostfixAdmin + MySQL**
+> For the full, detailed, step-by-step setup guide, please see [DOCUMENTS/setup/README.md](DOCUMENTS/setup/README.md).
 
 ---
 
-## Sumário
+## Summary
 
-1. [Banco de Dados MySQL](#1-banco-de-dados-mysql)
+1. [MySQL Database](#1-mysql-database)
 2. [Postfix — main.cf](#2-postfix--maincf)
-3. [Arquivos SQL do Postfix](#3-arquivos-sql-do-postfix)
+3. [Postfix SQL Files](#3-postfix-sql-files)
 4. [Dovecot](#4-dovecot)
-5. [Usuário e Diretório de E-mails](#5-criar-usuário-e-diretório-de-e-mails)
-6. [Reiniciar Serviços](#6-reiniciar-tudo)
-7. [Pontos de Atenção](#pontos-de-atenção)
+5. [User and Emails Directory](#5-create-user-and-emails-directory)
+6. [Restart Services](#6-restart-everything)
+7. [Points of Attention](#points-of-attention)
 
 ---
 
-## 1. Banco de Dados MySQL
+## 1. MySQL Database
 
 ```sql
 CREATE DATABASE postfix;
-CREATE USER 'postfix'@'localhost' IDENTIFIED BY 'sua_senha';
+CREATE USER 'postfix'@'localhost' IDENTIFIED BY 'your_password';
 GRANT ALL ON postfix.* TO 'postfix'@'localhost';
 FLUSH PRIVILEGES;
 ```
 
 ```bash
-## Após criar o banco faça:
+## After creating the database do:
 ./postfixadmin --generate-config
 
-## Ajuste o arquivo gerado config.toml com a senha salva do banco ("sua_senha")
-## E em seguida rode a migração:
+## Adjust the generated config.toml file with the saved database password ("your_password")
+## And then run the migration:
 ./postfixadmin migrate
-## O Binário do Go-PostfixAdmin cria as tabelas automaticamente basendo-se no config.toml
+## The Go-PostfixAdmin binary creates tables automatically based on config.toml
 ```
 
 ---
@@ -40,7 +41,7 @@ FLUSH PRIVILEGES;
 ## 2. Postfix — `/etc/postfix/main.cf`
 
 ```ini
-# Domínio e hostname
+# Domain and hostname
 myhostname = mail.example.com
 mydomain   = example.com
 myorigin   = $mydomain
@@ -54,11 +55,11 @@ virtual_alias_maps      = proxy:mysql:/etc/postfix/sql/mysql_virtual_alias_maps.
                           proxy:mysql:/etc/postfix/sql/mysql_virtual_alias_domain_maps.cf,
                           proxy:mysql:/etc/postfix/sql/mysql_virtual_alias_domain_catchall_maps.cf
 
-# UID/GID do usuário vmail (crie com: useradd -u 1001 -g 1001 vmail)
+# UID/GID of the vmail user (create with: useradd -u 1001 -g 1001 vmail)
 virtual_uid_maps = static:1001
 virtual_gid_maps = static:1001
 
-# Entrega via Dovecot LMTP
+# Delivery via Dovecot LMTP
 virtual_transport = lmtp:unix:private/dovecot-lmtp
 
 # SASL via Dovecot
@@ -76,9 +77,9 @@ smtpd_tls_auth_only = yes
 
 ---
 
-## 3. Arquivos SQL do Postfix
+## 3. Postfix SQL Files
 
-Crie os arquivos abaixo em `/etc/postfix/sql/` e em seguida proteja-os:
+Create the files below in `/etc/postfix/sql/` and then protect them:
 
 ```bash
 chmod 640 /etc/postfix/sql/*.cf
@@ -89,7 +90,7 @@ chown root:postfix /etc/postfix/sql/*.cf
 
 ```ini
 user     = postfix
-password = sua_senha
+password = your_password
 hosts    = localhost
 dbname   = postfix
 query    = SELECT domain FROM domain WHERE domain='%s' AND active='1'
@@ -99,7 +100,7 @@ query    = SELECT domain FROM domain WHERE domain='%s' AND active='1'
 
 ```ini
 user     = postfix
-password = sua_senha
+password = your_password
 hosts    = localhost
 dbname   = postfix
 query    = SELECT maildir FROM mailbox WHERE username='%s' AND active='1'
@@ -109,7 +110,7 @@ query    = SELECT maildir FROM mailbox WHERE username='%s' AND active='1'
 
 ```ini
 user     = postfix
-password = sua_senha
+password = your_password
 hosts    = localhost
 dbname   = postfix
 query    = SELECT goto FROM alias WHERE address='%s' AND active='1'
@@ -119,7 +120,7 @@ query    = SELECT goto FROM alias WHERE address='%s' AND active='1'
 
 ```ini
 user     = postfix
-password = sua_senha
+password = your_password
 hosts    = localhost
 dbname   = postfix
 query    = SELECT goto FROM alias,alias_domain
@@ -132,7 +133,7 @@ query    = SELECT goto FROM alias,alias_domain
 
 ```ini
 user     = postfix
-password = sua_senha
+password = your_password
 hosts    = localhost
 dbname   = postfix
 query    = SELECT goto FROM alias,alias_domain
@@ -145,7 +146,7 @@ query    = SELECT goto FROM alias,alias_domain
 
 ```ini
 user     = postfix
-password = sua_senha
+password = your_password
 hosts    = localhost
 dbname   = postfix
 query    = SELECT maildir FROM mailbox,alias_domain
@@ -158,64 +159,42 @@ query    = SELECT maildir FROM mailbox,alias_domain
 
 ## 4. Dovecot
 
+Instead of making changes across multiple fragmented files, you can configure everything mainly using two files.
+
 ### `/etc/dovecot/dovecot.conf`
 
-```ini
-protocols = imap lmtp
+Create a single consolidated configuration file for Dovecot:
 
+```ini
+protocols = imap lmtp pop3
+disable_plaintext_auth = no
+
+# SSL/TLS certificates
+ssl = required
+ssl_cert = </etc/letsencrypt/live/mail.example.com/fullchain.pem
+ssl_key = </etc/letsencrypt/live/mail.example.com/privkey.pem
+
+# Path to emails
 mail_location = maildir:/var/vmail/%d/%n/Maildir
 
-# Usuário de sistema para entrega
+# System user for delivery (vmail mapped with UID/GID 1001)
 mail_uid = 1001
 mail_gid = 1001
-```
 
-### `/etc/dovecot/conf.d/10-auth.conf`
-
-```ini
+# Authentication mechanisms
 auth_mechanisms = plain login
-!include auth-sql.conf.ext
-```
 
-### `/etc/dovecot/conf.d/auth-sql.conf.ext`
-
-```ini
+# Password and User databases via SQL
 passdb {
   driver = sql
-  args   = /etc/dovecot/dovecot-sql.conf.ext
+  args   = /etc/dovecot/dovecot-sql.conf
 }
 userdb {
   driver = sql
-  args   = /etc/dovecot/dovecot-sql.conf.ext
+  args   = /etc/dovecot/dovecot-sql.conf
 }
-```
 
-### `/etc/dovecot/dovecot-sql.conf.ext`
-
-```ini
-driver  = mysql
-connect = host=localhost dbname=postfix user=postfix password=sua_senha
-
-# Deve bater com $CONF['encrypt'] no PostfixAdmin
-default_pass_scheme = BLF-CRYPT
-
-password_query = \
-  SELECT username AS user, password \
-  FROM mailbox WHERE username='%u' AND active='1'
-
-user_query = \
-  SELECT CONCAT('/var/vmail/', maildir) AS home, \
-         1001 AS uid, 1001 AS gid, \
-         CONCAT('*:bytes=', quota) AS quota_rule \
-  FROM mailbox WHERE username='%u' AND active='1'
-
-# Para atualizar quota usada em tempo real
-iterate_query = SELECT username AS user FROM mailbox WHERE active='1'
-```
-
-### `/etc/dovecot/conf.d/10-master.conf` — Sockets para o Postfix
-
-```ini
+# Communication sockets with Postfix
 service lmtp {
   unix_listener /var/spool/postfix/private/dovecot-lmtp {
     mode  = 0600
@@ -231,33 +210,102 @@ service auth {
     group = postfix
   }
 }
+
+mail_plugins = quota
+
+protocol imap {
+  mail_plugins = $mail_plugins imap_quota
+}
+
+protocol lmtp {
+  mail_plugins = $mail_plugins quota
+}
+
+plugin {
+  quota = maildir:User quota
+
+  quota_warning = storage=80%% quota-warning 80 %u
+  quota_warning2 = storage=95%% quota-warning 95 %u
+}
+
+service quota-warning {
+  executable = script /usr/local/bin/quota-warning.sh
+  user = vmail
+  unix_listener quota-warning {
+    mode = 0660
+    user = vmail
+    group = vmail
+  }
+}
+
+################################
+# LOGGING AND OPTIMIZATION
+################################
+log_path = syslog
+syslog_facility = local5
+auth_verbose = yes
+auth_debug_passwords = no
+```
+
+### `/etc/dovecot/dovecot-sql.conf`
+
+Create `/etc/dovecot/dovecot-sql.conf` for the SQL connection and query settings:
+
+```ini
+driver  = mysql
+connect = host=localhost dbname=postfix user=postfix password=your_password
+
+# Must match $CONF['encrypt'] in PostfixAdmin
+default_pass_scheme = BLF-CRYPT
+
+# Password validation query
+password_query = \
+  SELECT username AS user, password \
+  FROM mailbox WHERE username='%u' AND active='1'
+
+# Home directory and quotas query
+user_query = \
+  SELECT CONCAT('/var/vmail/', maildir) AS home, \
+         1001 AS uid, 1001 AS gid, \
+         CONCAT('*:bytes=', quota) AS quota_rule \
+  FROM mailbox WHERE username='%u' AND active='1'
+
+# Real-time used quota update
+iterate_query = SELECT username AS user FROM mailbox WHERE active='1'
+```
+
+Fix the file permissions to protect the passwords:
+```bash
+sudo chmod 640 /etc/dovecot/dovecot-sql.conf
+sudo chown root:dovecot /etc/dovecot/dovecot-sql.conf
 ```
 
 ---
 
-## 5. Criar usuário e diretório de e-mails
+## 5. Create user and emails directory
 
 ```bash
 groupadd -g 1001 vmail
 useradd -g vmail -u 1001 vmail -d /var/vmail -m
+chown -R vmail:vmail /var/vmail
 ```
 
 ---
 
-## 6. Reiniciar tudo
+## 6. Restart everything
 
 ```bash
-systemctl restart postfix dovecot
+systemctl restart postfix dovecot rsyslog
 ```
 
 ---
 
-## Pontos de Atenção
+## Points of Attention
 
-| Item | Detalhe |
+| Item | Detail |
 |------|---------|
-| **Criptografia consistente** | O `default_pass_scheme` no Dovecot deve bater com o método configurado no PostfixAdmin |
-| **UID/GID do vmail** | Deve ser o mesmo em `virtual_uid_maps`/`virtual_gid_maps` (Postfix) e `mail_uid`/`mail_gid` (Dovecot) |
-| **Suporte MySQL no Postfix** | Verifique com `postconf -m \| grep mysql`. Se não houver, instale `postfix-mysql` |
-| **Permissões dos arquivos SQL** | Mantenha `640` com owner `root:postfix` para segurança |
-| **TLS** | Sempre use `smtpd_tls_auth_only = yes` para evitar transmissão de credenciais sem criptografia |
+| **Consistent encryption** | The `default_pass_scheme` in Dovecot must match the method configured in PostfixAdmin |
+| **UID/GID of vmail** | Must be the same in `virtual_uid_maps`/`virtual_gid_maps` (Postfix) e `mail_uid`/`mail_gid` (Dovecot) |
+| **MySQL Support in Postfix** | Verify with `postconf -m \| grep mysql`. If missing, install `postfix-mysql` |
+| **Permissions of SQL files** | Keep `640` with owner `root:postfix` for security |
+| **TLS** | Always use `smtpd_tls_auth_only = yes` to prevent credential transmission without encryption |
