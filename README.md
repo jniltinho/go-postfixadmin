@@ -206,6 +206,8 @@ Other available flags for `admin`:
 *   `--domain-admins` (`-A`): List all domain admins.
 *   `--list-logs` (`-L`): List all system logs.
 *   `--cleanup-maildir` (`-c`): Clean up orphaned maildirs on the server.
+*   `--quota-report` (`-q`): Fetches and displays Dovecot quota report.
+*   `--email` (`-e`): Optionally send the quota report via sendmail to this address (when combined with `-q`).
 *   `--base-dir`: Base directory for maildirs (default "/var/vmail").
 
 ---

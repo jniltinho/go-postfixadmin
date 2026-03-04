@@ -1,10 +1,10 @@
 package admin
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/smtp"
 	"os"
 	"os/exec"
 	"sort"
@@ -136,26 +136,56 @@ func sendReportViaEmail(t table.Writer, toEmail string) {
 	}
 	fromEmail := fmt.Sprintf("postmaster@%s", domain)
 
-	// Send via sendmail
+	// Send via SMTP using sendPlain
 	subject := "Dovecot Quota Report"
 
 	// Create an HTML message with basic styling
-	body := fmt.Sprintf("From: %s\n"+
-		"Subject: %s\n"+
-		"Content-Type: text/html; charset=\"UTF-8\"\n\n"+
+	// Note: With SMTP we need to provide the 'To:' header manually inside the payload.
+	body := fmt.Sprintf("From: %s\r\n"+
+		"To: %s\r\n"+
+		"Subject: %s\r\n"+
+		"Content-Type: text/html; charset=\"UTF-8\"\r\n\r\n"+
 		"<html><head><style>"+
 		"table { border-collapse: collapse; font-family: sans-serif; font-size: 14px; } "+
 		"th, td { border: 1px solid #dddddd; padding: 8px; text-align: left; } "+
 		"th { background-color: #f2f2f2; }"+
-		"</style></head><body><h2>Dovecot Quota Report</h2>\n%s\n</body></html>\n",
-		fromEmail, subject, htmlTable)
+		"</style></head><body><h2>Dovecot Quota Report</h2>\r\n%s\r\n</body></html>\r\n",
+		fromEmail, toEmail, subject, htmlTable)
 
-	cmdSendmail := exec.Command("sendmail", "-t", toEmail)
-	cmdSendmail.Stdin = bytes.NewBufferString(body)
-
-	if err := cmdSendmail.Run(); err != nil {
-		log.Fatalf("Error sending email via sendmail: %v", err)
+	err = sendPlain("127.0.0.1:25", fromEmail, toEmail, []byte(body))
+	if err != nil {
+		log.Fatalf("Error sending email via SMTP: %v\n", err)
 	}
 
 	fmt.Printf("Report successfully sent to %s\n", toEmail)
+}
+
+// sendPlain establishes a connection to the SMTP server and sends the email
+// without attempting STARTTLS or authentication (typical for local submission).
+func sendPlain(addr, from, to string, msg []byte) error {
+	c, err := smtp.Dial(addr)
+	if err != nil {
+		return fmt.Errorf("smtp dial error: %w", err)
+	}
+	defer c.Close()
+
+	if err = c.Mail(from); err != nil {
+		return err
+	}
+	if err = c.Rcpt(to); err != nil {
+		return err
+	}
+	w, err := c.Data()
+	if err != nil {
+		return err
+	}
+	_, err = w.Write(msg)
+	if err != nil {
+		return err
+	}
+	err = w.Close()
+	if err != nil {
+		return err
+	}
+	return c.Quit()
 }
