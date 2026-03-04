@@ -20,6 +20,8 @@ var (
 	listLogs         bool
 	addSuperAdmin    string
 	cleanupMaildirs  bool
+	quotaReport      bool
+	reportEmail      string
 	baseDir          string
 )
 
@@ -50,6 +52,8 @@ var adminCmd = &cobra.Command{
 			admin.ListLogs(db)
 		} else if cleanupMaildirs {
 			admin.CleanupMaildirs(db, baseDir)
+		} else if quotaReport {
+			admin.ShowQuotaReport(reportEmail)
 		} else if addSuperAdmin != "" {
 			admin.AddSuperAdmin(db, addSuperAdmin)
 		} else {
@@ -68,6 +72,8 @@ func init() {
 	adminCmd.Flags().BoolVarP(&listDomainAdmins, "domain-admins", "A", false, "List all domain admins")
 	adminCmd.Flags().BoolVarP(&listLogs, "list-logs", "L", false, "List all system logs")
 	adminCmd.Flags().BoolVarP(&cleanupMaildirs, "cleanup-maildir", "c", false, "Clean up orphaned maildirs on the server")
+	adminCmd.Flags().BoolVarP(&quotaReport, "quota-report", "q", false, "Show Dovecot quota report")
+	adminCmd.Flags().StringVarP(&reportEmail, "email", "e", "", "Send quota report via sendmail to this address")
 	adminCmd.Flags().StringVar(&addSuperAdmin, "add-superadmin", "", "Add a new superadmin (format: email:password)")
 	adminCmd.Flags().StringVar(&baseDir, "base-dir", "/var/vmail", "Base directory for maildirs")
 }
