@@ -3,31 +3,11 @@ package utils
 import (
 	"crypto/tls"
 	"fmt"
+	"go-postfixadmin/internal/i18n"
 	"net/smtp"
-	"strings"
 
 	"github.com/spf13/viper"
 )
-
-type Translation struct {
-	Subject string
-	Body    string
-}
-
-var translations = map[string]Translation{
-	"en": {
-		Subject: "Welcome!",
-		Body:    "Hi,\n\nWelcome to your new email account.",
-	},
-	"pt-br": {
-		Subject: "Bem-vindo(a)!",
-		Body:    "Olá,\n\nBem-vindo(a) à sua nova conta de e-mail.",
-	},
-	"es": {
-		Subject: "¡Bienvenido(a)!",
-		Body:    "Hola,\n\nBienvenido(a) a tu nueva cuenta de correo electrónico.",
-	},
-}
 
 // SendWelcomeEmail envia uma mensagem de boas-vindas para a caixa de correio recém-criada.
 // Utiliza configurações da seção [smtp] no config.toml, definindo subject e body com base no idioma informando (en, pt-br, es).
@@ -44,18 +24,9 @@ func SendWelcomeEmail(adminUsername, newMailbox, lang string) error {
 	if smtpType == "" {
 		smtpType = "plain"
 	}
-	langKey := strings.ToLower(lang)
-	if langKey == "pt" || langKey == "pt_br" {
-		langKey = "pt-br"
-	}
-
-	t, ok := translations[langKey]
-	if !ok {
-		t = translations["en"]
-	}
-
-	subject := t.Subject
-	body := t.Body
+	// Use i18n to fetch translated subject and body based on the language provided
+	subject := i18n.Translate(lang, "Welcome!", nil)
+	body := i18n.Translate(lang, "Hi,\n\nWelcome to your new email account.", nil)
 
 	addr := fmt.Sprintf("%s:%d", server, port)
 

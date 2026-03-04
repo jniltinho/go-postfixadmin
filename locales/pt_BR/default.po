@@ -1200,3 +1200,9 @@ msgstr "Descrição"
 
 msgid "LayoutAdmin_Logs"
 msgstr "Logs"
+
+msgid "Welcome!"
+msgstr "Bem-vindo(a)!"
+
+msgid "Hi,\n\nWelcome to your new email account."
+msgstr "Olá,\n\nBem-vindo(a) à sua nova conta de e-mail."
