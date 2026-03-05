@@ -5,6 +5,7 @@ BINARY_NAME=quota-report
 
 build:
 	@echo "Construindo o binário..."
+	rm -f $(BINARY_NAME)
 	CGO_ENABLED=0 go build -ldflags="-s -w" -o $(BINARY_NAME) quota-report.go
 	@echo "Comprimindo com upx (opcional)..."
 	-upx --best --lzma $(BINARY_NAME)
