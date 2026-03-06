@@ -10,6 +10,7 @@ import (
 	"go-postfixadmin/internal/utils"
 
 	"github.com/labstack/echo/v5"
+	"github.com/spf13/viper"
 )
 
 // UserLogin processes user authentication (mailbox)
@@ -235,13 +236,21 @@ func (h *Handler) UpdateUserVacation(c *echo.Context) error {
 	intervalTimeStr := c.FormValue("interval_time")
 	activeStr := c.FormValue("active")
 
+	// Try parsing with both minutes precision (default datetime-local) and seconds precision (fallback)
 	activeFrom, err := time.ParseInLocation("2006-01-02T15:04", activeFromStr, time.Local)
 	if err != nil {
-		activeFrom = time.Now()
+		activeFrom, err = time.ParseInLocation("2006-01-02T15:04:05", activeFromStr, time.Local)
+		if err != nil {
+			activeFrom = time.Now()
+		}
 	}
+
 	activeUntil, err := time.ParseInLocation("2006-01-02T15:04", activeUntilStr, time.Local)
 	if err != nil {
-		activeUntil = time.Now()
+		activeUntil, err = time.ParseInLocation("2006-01-02T15:04:05", activeUntilStr, time.Local)
+		if err != nil {
+			activeUntil = time.Now()
+		}
 	}
 
 	intervalTime := 0
@@ -284,6 +293,12 @@ func (h *Handler) UpdateUserVacation(c *echo.Context) error {
 	utils.LogAction(tx, username, c.RealIP(), domain, "USER_UPDATE_VACATION", username)
 
 	tx.Commit()
+
+	// Update sieve script for this user if vacation is enabled globally
+	if viper.GetBool("vacation.enabled") {
+		_ = utils.SyncSingleVacationSieve(h.DB, username, "")
+	}
+
 	middleware.SetFlash(c, "message", "Resposta automática salva com sucesso")
 	return c.Redirect(http.StatusFound, "/users/vacation")
 }
@@ -312,6 +327,12 @@ func (h *Handler) DeleteUserVacation(c *echo.Context) error {
 	utils.LogAction(tx, username, c.RealIP(), domain, "USER_DELETE_VACATION", username)
 
 	tx.Commit()
+
+	// Remove sieve script for this user if vacation is enabled globally
+	if viper.GetBool("vacation.enabled") {
+		_ = utils.SyncSingleVacationSieve(h.DB, username, "")
+	}
+
 	middleware.SetFlash(c, "message", "Resposta automática removida com sucesso")
 	return c.Redirect(http.StatusFound, "/users/dashboard")
 }

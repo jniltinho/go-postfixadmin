@@ -19,15 +19,23 @@ type vacationRow struct {
 	Subject      string
 	Body         string
 	Active       bool
-	ActiveFrom   time.Time
-	ActiveUntil  time.Time
+	ActiveFrom   *time.Time
+	ActiveUntil  *time.Time
 	IntervalTime int
 	Maildir      string
 }
 
 // isVacationActive returns true when the vacation is enabled and within its active period.
 func isVacationActive(v vacationRow, now time.Time) bool {
-	return v.Active && now.After(v.ActiveFrom) && now.Before(v.ActiveUntil)
+	if !v.Active {
+		return false
+	}
+
+	// If ActiveFrom is NULL/zero or in the past, and ActiveUntil is NULL/zero or in the future
+	isAfterStart := v.ActiveFrom == nil || v.ActiveFrom.IsZero() || now.After(*v.ActiveFrom)
+	isBeforeEnd := v.ActiveUntil == nil || v.ActiveUntil.IsZero() || now.Before(*v.ActiveUntil)
+
+	return isAfterStart && isBeforeEnd
 }
 
 // generateSieve builds the Sieve script content for the vacation rule.
@@ -100,10 +108,7 @@ func SyncVacationSieve(db *gorm.DB, mailBase string) error {
 
 	for rows.Next() {
 		var v vacationRow
-		if err := rows.Scan(
-			&v.Email, &v.Subject, &v.Body, &v.Active,
-			&v.ActiveFrom, &v.ActiveUntil, &v.IntervalTime, &v.Maildir,
-		); err != nil {
+		if err := db.ScanRows(rows, &v); err != nil {
 			slog.Warn("failed to scan vacation row", "error", err)
 			continue
 		}
@@ -124,4 +129,47 @@ func SyncVacationSieve(db *gorm.DB, mailBase string) error {
 	}
 
 	return rows.Err()
+}
+
+// SyncSingleVacationSieve reads a single vacation record from the database and writes or
+// removes the Dovecot Sieve script accordingly for that specific user.
+func SyncSingleVacationSieve(db *gorm.DB, email string, mailBase string) error {
+	if mailBase == "" {
+		mailBase = viper.GetString("server.mail_base")
+	}
+	if mailBase == "" {
+		mailBase = "/var/vmail"
+	}
+
+	// Get maildir from mailbox just in case vacation record is deleted
+	var maildir string
+	if err := db.Table("mailbox").Select("maildir").Where("username = ?", email).Scan(&maildir).Error; err != nil || maildir == "" {
+		slog.Error("SyncSingleVacationSieve: could not find maildir for user", "email", email, "error", err)
+		return fmt.Errorf("could not find maildir for user %s", email)
+	}
+
+	maildirPath := filepath.Join(mailBase, maildir, "Maildir")
+	sievePath := filepath.Join(maildirPath, ".dovecot.sieve")
+
+	var v vacationRow
+	err := db.Raw(vacationQuery+" WHERE v.email = ?", email).Scan(&v).Error
+
+	now := time.Now()
+	isActive := isVacationActive(v, now)
+
+	// If missing, errored, or not active, remove the sieve script
+	if err != nil || v.Email == "" || !isActive {
+		removeSieve(sievePath)
+		return nil
+	}
+
+	// Write and compile the sieve script
+	if err := writeSieve(sievePath, generateSieve(v)); err != nil {
+		slog.Error("SyncSingleVacationSieve: failed to write sieve script", "email", email, "error", err)
+		return err
+	}
+	compileSieve(sievePath)
+	slog.Info("vacation script created", "email", email)
+
+	return nil
 }

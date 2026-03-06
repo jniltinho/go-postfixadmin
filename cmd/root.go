@@ -42,6 +42,7 @@ var (
 	dbDriver           string
 	generateConfigFlag bool
 	vacationSync       bool
+	debugFlag          bool
 
 	// Shared resources
 	EmbeddedFiles embed.FS
@@ -71,6 +72,17 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		// Successfully read config
 	}
+
+	// Setup logger level after config is parsed
+	level := slog.LevelInfo
+	if viper.GetBool("debug") {
+		level = slog.LevelDebug
+	}
+	opts := &slog.HandlerOptions{
+		Level: level,
+	}
+	logger := slog.New(slog.NewTextHandler(os.Stdout, opts))
+	slog.SetDefault(logger)
 }
 
 func init() {
@@ -80,7 +92,9 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./config.toml)")
 	rootCmd.PersistentFlags().StringVar(&dbUrl, "db-url", "", "Database URL connection string")
 	rootCmd.PersistentFlags().StringVar(&dbDriver, "db-driver", "", "Database driver (mysql or postgres)")
+	rootCmd.PersistentFlags().BoolVar(&debugFlag, "debug", false, "Enable debug output")
 
 	viper.BindPFlag("database.url", rootCmd.PersistentFlags().Lookup("db-url"))
 	viper.BindPFlag("database.driver", rootCmd.PersistentFlags().Lookup("db-driver"))
+	viper.BindPFlag("debug", rootCmd.PersistentFlags().Lookup("debug"))
 }

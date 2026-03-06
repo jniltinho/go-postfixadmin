@@ -32,7 +32,7 @@ func StartServer(embeddedFiles embed.FS, port int, db *gorm.DB, ssl bool, certFi
 	e.Use(echoMiddleware.Recover())
 
 	// Session Middleware
-	secret := viper.GetString("server.session_secret")
+	secret := viper.GetString("ssl.session_secret")
 	if secret == "" {
 		secret = os.Getenv("SESSION_SECRET") // fallback
 	}
