@@ -545,6 +545,9 @@ Install the Dovecot Sieve plugin:
 
 ```bash
 sudo apt install dovecot-sieve dovecot-managesieved -y
+mkdir -p /var/lib/dovecot/sieve
+touch /var/lib/dovecot/sieve/default.sieve
+chown -R vmail:vmail /var/lib/dovecot/sieve
 ```
 
 Add the following to `/etc/dovecot/dovecot.conf` (or append to the existing `plugin {}` block):
@@ -559,7 +562,7 @@ protocol imap {
 }
 
 protocol lmtp {
-  mail_plugins = $mail_plugins quota sieve
+  mail_plugins = $mail_plugins
 }
 
 plugin {
@@ -567,10 +570,13 @@ plugin {
   quota = maildir:User quota
 
   # Sieve: path to the active script per user
-  sieve = /var/vmail/%d/%n/Maildir/.dovecot.sieve
-
-  # Optional: global sieve script applied before per-user script
-  # sieve_global_path = /etc/dovecot/sieve/default.sieve
+  sieve = file:~/Maildir/sieve;active=~/Maildir/.dovecot.sieve
+  sieve_global_path = /var/lib/dovecot/sieve/default.sieve
+  sieve_before = /var/lib/dovecot/sieve/before.sieve
+  sieve_after  = /var/lib/dovecot/sieve/after.sieve
+  sieve_vacation_send_from_recipient = yes
+  sieve_vacation_min_period = 1h
+  sieve_vacation_max_period = 30d
 }
 ```
 
@@ -586,7 +592,7 @@ The `dovecot-vacation` binary is part of this project. Build and install it:
 
 ```bash
 git clone https://github.com/jniltinho/go-postfixadmin.git
-cd go-postfixadmin/DOCUMENTS/VIRTUAL_VACATION/golang/vacation
+cd go-postfixadmin/DOCUMENTS/DOVECOT_VACATION/vacation
 make deps
 make build
 sudo cp dovecot-vacation /opt/go-postfixadmin/
