@@ -28,8 +28,9 @@ func (v Vacation) IsActive(now time.Time) bool {
 }
 
 // generateSieve builds the Sieve script content for the vacation rule.
+// interval_time is stored in seconds by PostfixAdmin (e.g. 604800 = 7 days).
 func generateSieve(v Vacation) string {
-	days := v.IntervalTime
+	days := v.IntervalTime / 86400 // seconds → days
 	if days <= 0 {
 		days = 1
 	}

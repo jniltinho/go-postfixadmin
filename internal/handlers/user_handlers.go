@@ -245,10 +245,10 @@ func (h *Handler) UpdateUserVacation(c *echo.Context) error {
 	}
 
 	intervalTime := 0
-	if intervalTimeStr == "1" {
-		intervalTime = 1
-	} else if intervalTimeStr == "7" {
-		intervalTime = 7
+	if intervalTimeStr == "86400" {
+		intervalTime = 86400 // 1 day
+	} else if intervalTimeStr == "604800" {
+		intervalTime = 604800 // 7 days
 	}
 
 	active := false

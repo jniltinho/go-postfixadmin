@@ -82,9 +82,11 @@
                         class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors appearance-none bg-white">
                         <option value="0" {{if and .Vacation (eq .Vacation.IntervalTime 0)}}selected{{end}}>{{ T $.Lang
                             `Vacation_ReplyOnce` }}</option>
-                        <option value="1" {{if and .Vacation (eq .Vacation.IntervalTime 1)}}selected{{end}}>{{ T $.Lang
+                        <option value="86400" {{if and .Vacation (eq .Vacation.IntervalTime 86400)}}selected{{end}}>{{ T
+                            $.Lang
                             `Vacation_ReplyEveryDay` }}</option>
-                        <option value="7" {{if and .Vacation (eq .Vacation.IntervalTime 7)}}selected{{end}}>{{ T $.Lang
+                        <option value="604800" {{if and .Vacation (eq .Vacation.IntervalTime 604800)}}selected{{end}}>{{
+                            T $.Lang
                             `Vacation_ReplyEvery7Days` }}</option>
                     </select>
                     <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-brand-text">
