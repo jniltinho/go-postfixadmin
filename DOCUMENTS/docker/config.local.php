@@ -13,4 +13,6 @@
 		$CONF['dkim'] = 'NO';
 		$CONF['dkim_all_admins'] = 'NO';
 		$CONF['vacation'] = 'YES';
+		$CONF['vacation_domain'] = 'autoreply.linuxpro.com.br'; // O mesmo do passo anterior
+		$CONF['vacation_control'] = 'YES';
 		?>
