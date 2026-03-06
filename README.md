@@ -10,6 +10,7 @@ Professional Email Administration System built with Go, Echo, and Tailwind CSS.
 *   **Security**: Strong password hashing and protection against common attacks.
 *   **Integrated CLI**: Command-line tools for automation and access recovery.
 *   **Welcome Emails**: Optional automatic welcome emails sent upon mailbox creation.
+*   **Auto-Reply (Vacation)**: Integrated Dovecot Sieve script generation for automatic vacation responses.
 *   **Internationalization (i18n)**: Multi-language support (PT, EN, ES) powered by [gotext](https://github.com/leonelquinteros/gotext) with GNU Gettext `.po` files and dynamic locale loading.
 
 
@@ -176,6 +177,7 @@ Flags:
       --config string      config file (default is ./config.toml)
       --db-driver string   Database driver (mysql or postgres)
       --db-url string      Database URL connection string
+      --debug              Enable debug output
       --generate-config    Generate a default config.toml file in the current directory
   -h, --help               help for postfixadmin
 
