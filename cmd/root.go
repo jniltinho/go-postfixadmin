@@ -3,7 +3,10 @@ package cmd
 import (
 	"embed"
 	"fmt"
+	"log/slog"
 	"os"
+
+	"go-postfixadmin/internal/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -17,6 +20,16 @@ var (
 		Run: func(cmd *cobra.Command, args []string) {
 			if generateConfigFlag {
 				generateConfig()
+			} else if vacationSync {
+				db, err := utils.ConnectDB(dbUrl, dbDriver)
+				if err != nil {
+					slog.Error("database connection failed", "error", err)
+					os.Exit(1)
+				}
+				if err := utils.SyncVacationSieve(db, ""); err != nil {
+					slog.Error("vacation sync failed", "error", err)
+					os.Exit(1)
+				}
 			} else {
 				cmd.Help()
 			}
@@ -28,6 +41,7 @@ var (
 	dbUrl              string
 	dbDriver           string
 	generateConfigFlag bool
+	vacationSync       bool
 
 	// Shared resources
 	EmbeddedFiles embed.FS
@@ -62,6 +76,7 @@ func initConfig() {
 func init() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.Flags().BoolVar(&generateConfigFlag, "generate-config", false, "Generate a default config.toml file in the current directory")
+	rootCmd.Flags().BoolVar(&vacationSync, "vacation", false, "Sync vacation auto-replies to Dovecot Sieve scripts (for crontab)")
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./config.toml)")
 	rootCmd.PersistentFlags().StringVar(&dbUrl, "db-url", "", "Database URL connection string")
 	rootCmd.PersistentFlags().StringVar(&dbDriver, "db-driver", "", "Database driver (mysql or postgres)")
