@@ -519,3 +519,158 @@ Validate email delivery by strictly observing system logs:
 ```bash
 sudo tail -f /var/log/mail.log
 ```
+
+---
+
+## 10. Vacation / Auto-Reply with Dovecot Sieve
+
+Go-PostfixAdmin allows users to configure vacation auto-replies through the web UI. The actual delivery of these replies is handled by **Dovecot Sieve** — a mail filtering language built into Dovecot.
+
+The `dovecot-vacation` daemon (included in this project) bridges the two: it reads vacation settings from MariaDB and writes/removes `.dovecot.sieve` scripts in each user's Maildir automatically.
+
+### How It Works
+
+```
+Cron (*/10 min)
+  → dovecot-vacation
+  → MySQL: SELECT vacation + mailbox
+  → For each user:
+      active + within date range → write .dovecot.sieve + compile with sievec
+      inactive or out of range  → remove .dovecot.sieve
+```
+
+### 10.1 Enable Sieve in Dovecot
+
+Install the Dovecot Sieve plugin:
+
+```bash
+sudo apt install dovecot-sieve dovecot-managesieved -y
+```
+
+Add the following to `/etc/dovecot/dovecot.conf` (or append to the existing `plugin {}` block):
+
+```ini
+protocols = imap lmtp pop3
+
+mail_plugins = quota sieve
+
+protocol imap {
+  mail_plugins = $mail_plugins imap_quota imap_sieve
+}
+
+protocol lmtp {
+  mail_plugins = $mail_plugins quota sieve
+}
+
+plugin {
+  # Quota (already configured in section 6)
+  quota = maildir:User quota
+
+  # Sieve: path to the active script per user
+  sieve = /var/vmail/%d/%n/Maildir/.dovecot.sieve
+
+  # Optional: global sieve script applied before per-user script
+  # sieve_global_path = /etc/dovecot/sieve/default.sieve
+}
+```
+
+Restart Dovecot to apply:
+
+```bash
+sudo systemctl restart dovecot
+```
+
+### 10.2 Install the `dovecot-vacation` Binary
+
+The `dovecot-vacation` binary is part of this project. Build and install it:
+
+```bash
+git clone https://github.com/jniltinho/go-postfixadmin.git
+cd go-postfixadmin/DOCUMENTS/VIRTUAL_VACATION/golang/vacation
+make deps
+make build
+sudo cp dovecot-vacation /opt/go-postfixadmin/
+```
+
+Ensure the binary can write to Maildirs:
+
+```bash
+sudo chown vmail:vmail /opt/go-postfixadmin/dovecot-vacation
+sudo chmod 750 /opt/go-postfixadmin/dovecot-vacation
+```
+
+### 10.3 Configuration (`config.toml`)
+
+The binary shares the same `config.toml` as Go-PostfixAdmin. Make sure the following keys are present:
+
+```toml
+[database]
+# Must use parseTime=True so vacation date columns are parsed correctly
+url = "postfix:your_secure_password@tcp(localhost:3306)/postfix?charset=utf8mb4&parseTime=True&loc=Local"
+
+[server]
+mail_base = "/var/vmail"  # Maildir base path (default: /var/vmail)
+
+[vacation]
+enabled = true
+```
+
+### 10.4 Schedule via Cron
+
+Add the cron entry to run the sync every 10 minutes as the `vmail` user:
+
+```bash
+sudo crontab -u vmail -e
+```
+
+Add the line:
+
+```cron
+*/10 * * * * /opt/go-postfixadmin/dovecot-vacation
+```
+
+> **Note:** The binary must be able to read and write files inside `/var/vmail`. Running it as `vmail` is the safest approach.
+
+### 10.5 Generated Sieve Script
+
+For each mailbox with an active vacation, `dovecot-vacation` writes a `.dovecot.sieve` file like this:
+
+```sieve
+require ["vacation"];
+
+vacation
+  :days 1
+  :subject "Estou de Férias"
+"Estarei fora do escritório de 05/03/2026 até 18/03/2026.
+Em caso de urgência, por favor contate José Nilton.";
+```
+
+- `:days` is derived from `interval_time` (stored in seconds) → `interval_time / 86400`
+- If `interval_time` is `0` (reply once), `:days` defaults to `1`
+- The script is automatically compiled with `sievec` after being written
+
+### 10.6 Verify
+
+Check if Sieve is active for a specific user:
+
+```bash
+ls -la /var/vmail/example.com/user/Maildir/.dovecot.sieve
+ls -la /var/vmail/example.com/user/Maildir/.dovecot.svbin  # compiled binary
+```
+
+Check active vacation records in the database:
+
+```sql
+SELECT email, subject, activefrom, activeuntil, interval_time, active
+FROM vacation
+WHERE active = 1;
+```
+
+Run the sync manually to test:
+
+```bash
+sudo -u vmail /opt/go-postfixadmin/dovecot-vacation
+```
+
+---
+
