@@ -9,6 +9,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 // ConnectDB initializes the database connection
@@ -34,10 +35,15 @@ func ConnectDB(dsn string, driver string) (*gorm.DB, error) {
 		}
 	}
 
+	gormConfig := &gorm.Config{}
+	if viper.GetBool("debug") {
+		gormConfig.Logger = logger.Default.LogMode(logger.Info)
+	}
+
 	if driver == "postgres" {
-		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+		db, err = gorm.Open(postgres.Open(dsn), gormConfig)
 	} else {
-		db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+		db, err = gorm.Open(mysql.Open(dsn), gormConfig)
 	}
 
 	return db, err
