@@ -273,6 +273,7 @@
 
     $(function () {
         App.fadeAlert('.flash-message', { delay: 4000 });
+        App.updateEmailPreview();
         // Force lowercase on username input
         $('#local_part').on('input', function () {
             $(this).val($(this).val().toLowerCase());
