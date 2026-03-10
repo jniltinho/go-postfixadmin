@@ -6,7 +6,7 @@ import (
 	"go-postfixadmin/cmd"
 )
 
-//go:embed views public locales
+//go:embed web locales
 var embeddedFiles embed.FS
 
 func main() {

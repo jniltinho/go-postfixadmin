@@ -74,10 +74,10 @@ func loadTemplates(embeddedFiles embed.FS) (*Template, error) {
 
 	funcMap := templateFuncMap()
 
-	layout := "views/layout.html"
-	userLayout := "views/users/layout.html"
+	layout := "web/templates/layout.html"
+	userLayout := "web/templates/users/layout.html"
 
-	err := fs.WalkDir(embeddedFiles, "views", func(filePath string, d fs.DirEntry, err error) error {
+	err := fs.WalkDir(embeddedFiles, "web/templates", func(filePath string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -86,7 +86,7 @@ func loadTemplates(embeddedFiles embed.FS) (*Template, error) {
 		}
 
 		name := d.Name()
-		if filePath == "views/layout.html" || filePath == "views/users/layout.html" {
+		if filePath == "web/templates/layout.html" || filePath == "web/templates/users/layout.html" {
 			return nil
 		}
 
@@ -94,7 +94,7 @@ func loadTemplates(embeddedFiles embed.FS) (*Template, error) {
 		var tmpl *template.Template
 		var parseErr error
 
-		if path.Dir(filePath) == "views/users" {
+		if path.Dir(filePath) == "web/templates/users" {
 			tmplKey = "users/" + name
 			if name == "login.html" {
 				tmpl, parseErr = template.New(tmplKey).Funcs(funcMap).ParseFS(embeddedFiles, filePath)

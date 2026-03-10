@@ -23,22 +23,22 @@ build-prod: css
 	upx --best --lzma $(BINARY_NAME)
 
 
-run: build
+run:
 	@echo "Starting application..."
 	./$(BINARY_NAME) server
 
 css:
 	@echo "Building CSS with Tailwind..."
-	npx @tailwindcss/cli -i ./public/css/input.css -o ./public/css/style.css --minify
+	npx @tailwindcss/cli -i ./web/static/css/input.css -o ./web/static/css/style.css --minify
 
 watch-css:
 	@echo "Watching CSS changes..."
-	npx tailwindcss -i ./public/css/input.css -o ./public/css/style.css --watch
+	npx tailwindcss -i ./web/static/css/input.css -o ./web/static/css/style.css --watch
 
 clean:
 	@echo "Cleaning up..."
 	rm -f $(BINARY_NAME)
-	rm -f public/css/style.css
+	rm -f web/static/css/style.css
 
 tidy:
 	@echo "Tidying go modules..."

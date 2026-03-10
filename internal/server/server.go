@@ -61,7 +61,7 @@ func StartServer(embeddedFiles embed.FS, port int, db *gorm.DB, ssl bool, certFi
 	h := &handlers.Handler{DB: db}
 
 	// Static files from embedded FS
-	publicFS, err := fs.Sub(embeddedFiles, "public")
+	publicFS, err := fs.Sub(embeddedFiles, "web/static")
 	if err != nil {
 		e.Logger.Error("failed to create sub filesystem", "error", err)
 		os.Exit(1)
