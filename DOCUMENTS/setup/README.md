@@ -554,11 +554,11 @@ protocols = imap lmtp pop3
 mail_plugins = quota sieve
 
 protocol imap {
-  mail_plugins = $mail_plugins imap_quota imap_sieve
+  mail_plugins = quota imap_sieve
 }
 
 protocol lmtp {
-  mail_plugins = $mail_plugins
+  mail_plugins = $mail_plugins sieve
 }
 
 plugin {

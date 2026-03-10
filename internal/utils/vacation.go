@@ -71,14 +71,23 @@ func compileSieve(path string) {
 }
 
 // removeSieve deletes the Sieve file at path if it exists.
-func removeSieve(path string) {
-	if _, err := os.Stat(path); os.IsNotExist(err) {
+func removeSieve(maildir string) {
+	sieveDir := filepath.Join(maildir, "sieve")
+	sieveFile := filepath.Join(sieveDir, "vacation.sieve")
+	symlink := filepath.Join(maildir, ".dovecot.sieve")
+	if _, err := os.Stat(sieveFile); os.IsNotExist(err) {
 		return
 	}
-	if err := os.Remove(path); err != nil {
-		slog.Warn("failed to remove sieve file", "path", path, "error", err)
+
+	if err := os.Remove(sieveFile); err != nil {
+		slog.Warn("failed to remove sieve file", "path", sieveFile, "error", err)
 	} else {
-		slog.Info("vacation script removed", "path", path)
+		slog.Info("vacation script removed", "path", sieveFile)
+	}
+	if err := os.Remove(symlink); err != nil {
+		slog.Warn("failed to remove symlink", "path", symlink, "error", err)
+	} else {
+		slog.Info("symlink removed", "path", symlink)
 	}
 }
 
@@ -113,18 +122,30 @@ func SyncVacationSieve(db *gorm.DB, mailBase string) error {
 			continue
 		}
 
-		maildirPath := filepath.Join(mailBase, v.Maildir, "Maildir")
-		sievePath := filepath.Join(maildirPath, ".dovecot.sieve")
+		maildir := filepath.Join(mailBase, v.Maildir, "Maildir")
+		sieveDir := filepath.Join(maildir, "sieve")
+		sieveFile := filepath.Join(sieveDir, "vacation.sieve")
+		symlink := filepath.Join(maildir, ".dovecot.sieve")
+
+		// Check if sieve directory exists
+		if _, err := os.Stat(sieveDir); os.IsNotExist(err) {
+			os.MkdirAll(sieveDir, 0755)
+		}
 
 		if isVacationActive(v, now) {
-			if err := writeSieve(sievePath, generateSieve(v)); err != nil {
+			if err := writeSieve(sieveFile, generateSieve(v)); err != nil {
 				slog.Warn("failed to write sieve script", "email", v.Email, "error", err)
 				continue
 			}
-			compileSieve(sievePath)
+			compileSieve(sieveFile)
+			os.Remove(symlink)
+			err = os.Symlink("sieve/vacation.sieve", symlink)
+			if err != nil {
+				slog.Warn("failed to create symlink", "email", v.Email, "error", err)
+			}
 			slog.Info("vacation script created", "email", v.Email)
 		} else {
-			removeSieve(sievePath)
+			removeSieve(maildir)
 		}
 	}
 
@@ -149,26 +170,36 @@ func SyncSingleVacationSieve(db *gorm.DB, email string, mailBase string) error {
 	}
 
 	maildirPath := filepath.Join(mailBase, maildir, "Maildir")
-	sievePath := filepath.Join(maildirPath, ".dovecot.sieve")
+	sieveDir := filepath.Join(maildirPath, "sieve")
+	sieveFile := filepath.Join(sieveDir, "vacation.sieve")
+	symlink := filepath.Join(maildirPath, ".dovecot.sieve")
 
 	var v vacationRow
 	err := db.Raw(vacationQuery+" WHERE v.email = ?", email).Scan(&v).Error
 
 	now := time.Now()
-	isActive := isVacationActive(v, now)
 
 	// If missing, errored, or not active, remove the sieve script
-	if err != nil || v.Email == "" || !isActive {
-		removeSieve(sievePath)
+	if err != nil || v.Email == "" || !isVacationActive(v, now) {
+		removeSieve(maildirPath)
 		return nil
 	}
 
+	// Check if sieve directory exists
+	if _, err := os.Stat(sieveDir); os.IsNotExist(err) {
+		os.MkdirAll(sieveDir, 0755)
+	}
+
 	// Write and compile the sieve script
-	if err := writeSieve(sievePath, generateSieve(v)); err != nil {
+	if err := writeSieve(sieveFile, generateSieve(v)); err != nil {
 		slog.Error("SyncSingleVacationSieve: failed to write sieve script", "email", email, "error", err)
 		return err
 	}
-	compileSieve(sievePath)
+	compileSieve(sieveFile)
+	os.Remove(symlink)
+	if err := os.Symlink("sieve/vacation.sieve", symlink); err != nil {
+		slog.Warn("SyncSingleVacationSieve: failed to create symlink", "email", email, "error", err)
+	}
 	slog.Info("vacation script created", "email", email)
 
 	return nil
