@@ -100,14 +100,12 @@ Go-PostfixAdmin will manage the database structure (tables, domains, accounts, a
    
    [server]
    # Web Server Configuration. For SSL use port 443
-   port = 8080
+   port = 443
    cleanup_maildir = false # Clean up orphaned maildirs when deleting a mailbox
-   
-   [ssl]
    # (Optional) SSL Settings for standalone secure server
-   enabled = true
-   cert = "/etc/letsencrypt/live/mail.example.com/fullchain.pem"
-   key = "/etc/letsencrypt/live/mail.example.com/privkey.pem"
+   ssl_enable = true
+   ssl_cert = "/etc/letsencrypt/live/mail.example.com/fullchain.pem"
+   ssl_key = "/etc/letsencrypt/live/mail.example.com/privkey.pem"
    # Secret Session Key (Generate a 64-character hex string via: openssl rand -hex 32)
    session_secret = "your_super_secret_session_key_here"
 
