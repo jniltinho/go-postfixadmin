@@ -51,9 +51,9 @@ deps:
 
 certs:
 	@echo "Generating SSL certificates..."
-	mkdir -p certs
+	mkdir -p ssl
 	openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
-		-keyout certs/server.key -out certs/server.crt \
+		-keyout ssl/server.key -out ssl/server.crt \
 		-subj "/C=BR/ST=SP/L=Sao Paulo/O=Development/CN=localhost"
 
 build-docker:
