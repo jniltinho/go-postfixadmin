@@ -49,8 +49,9 @@ Have an idea to make Go-Postfixadmin better?
 │   ├── server/           # HTTP server setup and render helpers
 │   └── utils/            # Shared utilities (mailer, DB connection, quota)
 ├── locales/              # GNU Gettext .po translation files
-├── views/                # HTML templates (Go html/template)
-├── public/               # Static assets (CSS, JS, images)
+├── web/
+│   ├── static/           # Static assets (CSS, JS, images)
+│   └── templates/        # HTML templates (Go html/template)
 ├── config.toml.example   # Example configuration file
 └── Makefile              # Build and development commands
 ```
@@ -155,10 +156,10 @@ To add a new language:
 2. Copy `locales/en/default.po` to `locales/fr/default.po`.
 3. Translate the `msgstr` values (keep `msgid` keys unchanged).
 4. Add a language switcher link in:
-   - `views/layout.html`
-   - `views/login.html`
-   - `views/users/layout.html`
-   - `views/users/login.html`
+   - `web/templates/layout.html`
+   - `web/templates/login.html`
+   - `web/templates/users/layout.html`
+   - `web/templates/users/login.html`
 5. Register the new language code in `SetLanguage` (`internal/handlers/handlers.go`) and `Render` (`internal/server/render.go`).
 6. Add translations for welcome email subject/body in `internal/utils/mailer.go` (the `SendWelcomeEmail` function uses `i18n.Translate`).
 
