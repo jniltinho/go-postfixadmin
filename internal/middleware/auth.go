@@ -84,7 +84,7 @@ func SetSession(c *echo.Context, sessionName string, username string, isSuperAdm
 		Path:     "/",
 		MaxAge:   86400 * 7, // 7 days
 		HttpOnly: true,
-		Secure:   viper.GetBool("server.ssl"),
+		Secure:   viper.GetBool("server.ssl_enable"),
 		SameSite: http.SameSiteLaxMode,
 	}
 	sess.Values[AuthKey] = true

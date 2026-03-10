@@ -30,18 +30,18 @@ var serverCmd = &cobra.Command{
 			}
 		}
 
-		if !cmd.Flags().Changed("cert") && viper.GetString("ssl.cert") != "" {
-			certFile = viper.GetString("ssl.cert")
+		if !cmd.Flags().Changed("cert") && viper.GetString("server.ssl_cert") != "" {
+			certFile = viper.GetString("server.ssl_cert")
 		}
 
-		if !cmd.Flags().Changed("key") && viper.GetString("ssl.key") != "" {
-			keyFile = viper.GetString("ssl.key")
+		if !cmd.Flags().Changed("key") && viper.GetString("server.ssl_key") != "" {
+			keyFile = viper.GetString("server.ssl_key")
 		}
 
 		// Auto-enable SSL if cert and key are provided via config or flags
 		if certFile != "" && keyFile != "" && !cmd.Flags().Changed("ssl") {
-			ssl = viper.GetBool("ssl.enabled")
-			if !viper.IsSet("ssl.enabled") {
+			ssl = viper.GetBool("server.ssl_enable")
+			if !viper.IsSet("server.ssl_enable") {
 				ssl = true
 			}
 		}
