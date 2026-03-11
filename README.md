@@ -11,6 +11,8 @@ Professional Email Administration System built with Go, Echo, and Tailwind CSS.
 *   **Integrated CLI**: Command-line tools for automation and access recovery.
 *   **Welcome Emails**: Optional automatic welcome emails sent upon mailbox creation.
 *   **Auto-Reply (Vacation)**: Integrated Dovecot Sieve script generation for automatic vacation responses.
+*   **Mail Log Viewer**: Built-in admin panel page to browse Postfix filter log entries (`/maillog`) with server-side DataTables pagination, search, and sorting.
+*   **Mail Log Reader (`readlog`)**: CLI daemon that parses `FILTER:` entries from `/var/log/mail.log` and stores them in the `maillog` database table (runs every 5 minutes via internal ticker).
 *   **Internationalization (i18n)**: Multi-language support (PT, EN, ES) powered by [gotext](https://github.com/leonelquinteros/gotext) with GNU Gettext `.po` files and dynamic locale loading.
 
 
@@ -170,6 +172,7 @@ Available Commands:
   help        Help about any command
   importsql   Import SQL file to database
   migrate     Run database migration
+  readlog     Parse mail.log and store FILTER entries in the maillog table
   server      Start the administration server
   version     Display version information
 
@@ -206,11 +209,24 @@ Other available flags for `admin`:
 *   `--list-aliases` (`-s`): List all aliases.
 *   `--list-alias-domains` (`-S`): List all alias domains.
 *   `--domain-admins` (`-A`): List all domain admins.
-*   `--list-logs` (`-L`): List all system logs.
+*   `--list-logs` (`-L`): List all system logs (last 100).
+*   `--list-maillog`: List mail filter log entries (last 100 by default).
+*   `--maillog-domain`: Filter maillog output by domain.
+*   `--maillog-limit`: Number of maillog entries to show (default `100`).
 *   `--cleanup-maildir` (`-c`): Clean up orphaned maildirs on the server.
 *   `--quota-report` (`-q`): Fetches and displays Dovecot quota report.
 *   `--email` (`-e`): Optionally send the quota report via sendmail to this address (when combined with `-q`).
 *   `--base-dir`: Base directory for maildirs (default "/var/vmail").
+
+#### readlog command
+
+Parses `FILTER:` entries from `/var/log/mail.log` and stores them in the `maillog` database table. Runs continuously, polling every 5 minutes:
+
+```bash
+./postfixadmin readlog
+```
+
+The `maillog` table stores: timestamp, sender, recipient, sender domain, recipient domain, host IP, hostname, HELO string, and message size.
 
 ---
 

@@ -18,6 +18,9 @@ var (
 	listAliasDomains bool
 	listDomainAdmins bool
 	listLogs         bool
+	listMaillog      bool
+	maillogDomain    string
+	maillogLimit     int
 	addSuperAdmin    string
 	cleanupMaildirs  bool
 	quotaReport      bool
@@ -50,6 +53,8 @@ var adminCmd = &cobra.Command{
 			admin.ListDomainAdmins(db)
 		} else if listLogs {
 			admin.ListLogs(db)
+		} else if listMaillog {
+			admin.ListMaillog(db, maillogDomain, maillogLimit)
 		} else if cleanupMaildirs {
 			admin.CleanupMaildirs(db, baseDir)
 		} else if quotaReport {
@@ -71,6 +76,9 @@ func init() {
 	adminCmd.Flags().BoolVarP(&listAliasDomains, "list-alias-domains", "S", false, "List all alias domains")
 	adminCmd.Flags().BoolVarP(&listDomainAdmins, "domain-admins", "A", false, "List all domain admins")
 	adminCmd.Flags().BoolVarP(&listLogs, "list-logs", "L", false, "List all system logs")
+	adminCmd.Flags().BoolVar(&listMaillog, "list-maillog", false, "List mail filter log entries")
+	adminCmd.Flags().StringVar(&maillogDomain, "maillog-domain", "", "Filter maillog by domain")
+	adminCmd.Flags().IntVar(&maillogLimit, "maillog-limit", 100, "Number of maillog entries to show")
 	adminCmd.Flags().BoolVarP(&cleanupMaildirs, "cleanup-maildir", "c", false, "Clean up orphaned maildirs on the server")
 	adminCmd.Flags().BoolVarP(&quotaReport, "quota-report", "q", false, "Show Dovecot quota report")
 	adminCmd.Flags().StringVarP(&reportEmail, "email", "e", "", "Send quota report via sendmail to this address")

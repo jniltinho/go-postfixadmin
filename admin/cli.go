@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"os"
 	"strings"
+	"time"
 
 	"go-postfixadmin/internal/models"
 	"go-postfixadmin/internal/utils"
@@ -195,6 +196,49 @@ func ListDomainAdmins(db *gorm.DB) {
 	style.Format.Footer = text.FormatDefault
 	t.SetStyle(style)
 	t.AppendFooter(table.Row{"List All Domain Admins", strings.Join(os.Args, " ")})
+	t.Render()
+}
+
+// ListMaillog lists maillog entries with optional domain filter and limit
+func ListMaillog(db *gorm.DB, domain string, limit int) {
+	if limit <= 0 {
+		limit = 100
+	}
+
+	q := db.Model(&models.Maillog{}).Order("tstamp DESC").Limit(limit)
+	if domain != "" {
+		q = q.Where("domain_to = ? OR domain_from = ?", domain, domain)
+	}
+
+	var entries []models.Maillog
+	if err := q.Find(&entries).Error; err != nil {
+		slog.Error("Failed to fetch maillog", "error", err)
+		os.Exit(1)
+	}
+
+	t := table.NewWriter()
+	t.SetOutputMirror(os.Stdout)
+	t.AppendHeader(table.Row{"Date", "From", "To", "From Domain", "To Domain", "Host IP", "Size"})
+
+	for _, l := range entries {
+		t.AppendRow(table.Row{
+			time.Unix(l.Tstamp, 0).Format("2006-01-02 15:04:05"),
+			l.MFrom,
+			l.MTo,
+			l.DomainFrom,
+			l.DomainTo,
+			l.HostIP,
+			FormatQuota(l.MsgSize),
+		})
+	}
+	style := table.StyleDefault
+	style.Format.Footer = text.FormatDefault
+	t.SetStyle(style)
+	footer := fmt.Sprintf("Maillog (Last %d)", limit)
+	if domain != "" {
+		footer += fmt.Sprintf(" — domain: %s", domain)
+	}
+	t.AppendFooter(table.Row{footer, strings.Join(os.Args, " ")})
 	t.Render()
 }
 

@@ -1,0 +1,38 @@
+{{define "title"}}{{ T $.Lang `MailLog_Title` }} - Go-PostfixAdmin{{end}}
+{{define "breadcrumb"}}{{ T $.Lang `MailLog_Title` }}{{end}}
+
+{{define "content"}}
+<div class="mb-12 flex justify-between items-end">
+    <div>
+        <h2 class="text-4xl font-mono font-black uppercase tracking-tight mb-2">{{ T $.Lang `MailLog_Title` }}</h2>
+        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">{{ T $.Lang `MailLog_Subtitle` }}</p>
+    </div>
+</div>
+
+<div class="bg-white border-2 border-brand-text overflow-hidden pt-4 pb-1 p-2 neo-shadow-sm">
+    <div class="overflow-x-auto">
+        <table id="maillogTable" class="w-full text-left border-collapse border-2 border-brand-text">
+            <thead class="bg-brand-primary text-white border-b-2 border-brand-text">
+                <tr>
+                    <th class="text-left text-xs font-black uppercase tracking-widest text-white py-2 px-4">{{ T $.Lang `MailLog_TblDate` }}</th>
+                    <th class="text-left text-xs font-black uppercase tracking-widest text-white py-2 px-4">{{ T $.Lang `MailLog_TblFrom` }}</th>
+                    <th class="text-left text-xs font-black uppercase tracking-widest text-white py-2 px-4">{{ T $.Lang `MailLog_TblTo` }}</th>
+                    <th class="text-left text-xs font-black uppercase tracking-widest text-white py-2 px-4">{{ T $.Lang `MailLog_TblDomainFrom` }}</th>
+                    <th class="text-left text-xs font-black uppercase tracking-widest text-white py-2 px-4">{{ T $.Lang `MailLog_TblDomainTo` }}</th>
+                    <th class="text-left text-xs font-black uppercase tracking-widest text-white py-2 px-4">{{ T $.Lang `MailLog_TblHostIP` }}</th>
+                    <th class="text-left text-xs font-black uppercase tracking-widest text-white py-2 px-4">{{ T $.Lang `MailLog_TblHostName` }}</th>
+                    <th class="text-left text-xs font-black uppercase tracking-widest text-white py-2 px-4">{{ T $.Lang `MailLog_TblHelo` }}</th>
+                    <th class="text-left text-xs font-black uppercase tracking-widest text-white py-2 px-4">{{ T $.Lang `MailLog_TblSize` }}</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 text-sm">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- DataTables -->
+<link rel="stylesheet" type="text/css" href="/static/css/datatables.css" />
+<script type="text/javascript" src="/static/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="/static/js/logs-datatable.js"></script>
+{{end}}

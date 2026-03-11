@@ -33,6 +33,10 @@ func RegisterRoutes(e *echo.Echo, h *handlers.Handler) {
 	adminGroup.GET("/logs", h.Logs)
 	adminGroup.GET("/api/logs", h.LogsData)
 
+	// Maillog
+	adminGroup.GET("/maillog", h.MailLog)
+	adminGroup.GET("/api/maillog", h.MailLogData)
+
 	// Domains
 	adminGroup.GET("/domains", h.ListDomains)
 	adminGroup.GET("/domains/add", h.AddDomainForm)

@@ -1201,6 +1201,42 @@ msgstr "Descripción"
 msgid "LayoutAdmin_Logs"
 msgstr "Registros"
 
+msgid "LayoutAdmin_MailLog"
+msgstr "MailLog"
+
+msgid "MailLog_Title"
+msgstr "MailLog"
+
+msgid "MailLog_Subtitle"
+msgstr "Mensajes recibidos procesados por el filtro de correo."
+
+msgid "MailLog_TblDate"
+msgstr "Fecha"
+
+msgid "MailLog_TblFrom"
+msgstr "Remitente"
+
+msgid "MailLog_TblTo"
+msgstr "Destinatario"
+
+msgid "MailLog_TblDomainFrom"
+msgstr "Dominio Remitente"
+
+msgid "MailLog_TblDomainTo"
+msgstr "Dominio Destinatario"
+
+msgid "MailLog_TblHostIP"
+msgstr "IP del Host"
+
+msgid "MailLog_TblHostName"
+msgstr "Nombre del Host"
+
+msgid "MailLog_TblHelo"
+msgstr "HELO"
+
+msgid "MailLog_TblSize"
+msgstr "Tamaño"
+
 msgid "Welcome!"
 msgstr "¡Bienvenido(a)!"
 
