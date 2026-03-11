@@ -69,5 +69,6 @@ func MigrateDB(db *gorm.DB) error {
 		&models.TOTPExceptionAddress{},
 		&models.Vacation{},
 		&models.VacationNotification{},
+		&models.Maillog{},
 	)
 }

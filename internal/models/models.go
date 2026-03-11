@@ -269,3 +269,21 @@ type DKIMSigning struct {
 func (DKIMSigning) TableName() string {
 	return "dkim_signing"
 }
+
+// Maillog represents the 'maillog' table — stores FILTER entries from mail.log
+type Maillog struct {
+	LogID      int       `gorm:"column:logid;primaryKey;autoIncrement;not null"`
+	Tstamp     int64     `gorm:"column:tstamp;not null;default:0;index"`
+	LogDate    time.Time `gorm:"column:logdate;type:date;not null"`
+	ProcNum    int       `gorm:"column:procnum;not null;default:0"`
+	MFrom      string    `gorm:"column:m_from;type:varchar(150);not null;default:''"`
+	MTo        string    `gorm:"column:m_to;type:varchar(150);not null;default:''"`
+	DomainTo   string    `gorm:"column:domain_to;type:varchar(150);not null;default:''"`
+	Helo       string    `gorm:"column:helo;type:varchar(150);not null;default:''"`
+	HostIP     string    `gorm:"column:host_ip;type:varchar(150);not null;default:''"`
+	HostName   string    `gorm:"column:host_name;type:varchar(150);not null;default:''"`
+	MsgSize    int64     `gorm:"column:msgsize;not null;default:0"`
+	DomainFrom string    `gorm:"column:domain_from;type:varchar(150);not null;default:''"`
+}
+
+func (Maillog) TableName() string { return "maillog" }
