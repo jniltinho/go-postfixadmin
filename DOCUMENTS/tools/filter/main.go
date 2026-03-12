@@ -32,6 +32,54 @@ var (
 	recipients []string
 )
 
+func usage() {
+	fmt.Printf(`Usage: %s [OPTIONS] -- RECIPIENT [RECIPIENT ...]
+
+Postfix content filter: saves the message to a temp file,
+logs it to syslog (mail.info) and re-injects via sendmail.
+
+Options:
+  --from      <addr>   Envelope sender address (lowercased)
+  --host-ip   <ip>     Client IP address
+  --host-name <name>   Client hostname
+  --helo      <name>   Client HELO/EHLO name
+  --size      <bytes>  Message size hint from Postfix
+  --stress    <value>  Postfix stress flag
+  --                   Start of recipient list
+  --help               Show this help and exit
+
+Paths:
+  Temp dir : %s
+  Sendmail : %s
+
+Exit codes:
+  0   Success
+  75  Temporary failure (Postfix will retry)
+
+Postfix master.cf configuration:
+
+  # Step 1: redirect smtp input through the filter
+  smtp      inet  n  -  y  -  -  smtpd
+    -o content_filter=filter:dummy
+
+  # Step 2: declare the filter service
+  filter    unix  -  n  n  -  10  pipe
+    flags=Rq user=filter null_sender=
+    argv=%s
+      --stress ${stress} --size ${size}
+      --host-ip ${client_address}
+      --host-name ${client_name}
+      --helo ${client_helo}
+      --from ${sender}
+      -- ${recipient}
+
+  # Step 3: re-injection bypass (avoid filter loop)
+  127.0.0.1:10025 inet  n  -  n  -  -  smtpd
+    -o content_filter=
+    -o receive_override_options=no_unknown_recipient_checks
+`, os.Args[0], inspectDir, sendmail, os.Args[0])
+}
+
 func main() {
 	parseArgs(os.Args[1:])
 
@@ -109,6 +157,9 @@ func parseArgs(args []string) {
 			continue
 		}
 		switch args[i] {
+		case "--help":
+			usage()
+			os.Exit(exOK)
 		case "--":
 			rcpt = true
 		case "--stress":
