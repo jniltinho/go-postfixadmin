@@ -64,19 +64,8 @@ Postfix master.cf configuration:
 
   # Step 2: declare the filter service
   filter    unix  -  n  n  -  10  pipe
-    flags=Rq user=filter null_sender=
-    argv=%s
-      --stress ${stress} --size ${size}
-      --host-ip ${client_address}
-      --host-name ${client_name}
-      --helo ${client_helo}
-      --from ${sender}
-      -- ${recipient}
-
-  # Step 3: re-injection bypass (avoid filter loop)
-  127.0.0.1:10025 inet  n  -  n  -  -  smtpd
-    -o content_filter=
-    -o receive_override_options=no_unknown_recipient_checks
+    flags=Rq user=filter argv=/usr/local/bin/%s --stress 0 --size ${size} --host-ip ${client_address} --host-name ${client_name} --helo ${client_helo} --from ${sender} -- ${recipient}
+	
 `, os.Args[0], inspectDir, sendmail, os.Args[0])
 }
 

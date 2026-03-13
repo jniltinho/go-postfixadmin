@@ -81,19 +81,7 @@ static void usage(const char *prog) {
         "\n"
         "  # Step 2: declare the filter service\n"
         "  filter    unix  -  n  n  -  10  pipe\n"
-        "    flags=Rq user=filter null_sender=\n"
-        "    argv=%s\n"
-        "      --stress ${stress} --size ${size}\n"
-        "      --host-ip ${client_address}\n"
-        "      --host-name ${client_name}\n"
-        "      --helo ${client_helo}\n"
-        "      --from ${sender}\n"
-        "      -- ${recipient}\n"
-        "\n"
-        "  # Step 3: re-injection bypass (avoid filter loop)\n"
-        "  127.0.0.1:10025 inet  n  -  n  -  -  smtpd\n"
-        "    -o content_filter=\n"
-        "    -o receive_override_options=no_unknown_recipient_checks\n",
+        "    flags=Rq user=filter argv=/usr/local/bin/%s --stress 0 --size ${size} --host-ip ${client_address} --host-name ${client_name} --helo ${client_helo} --from ${sender} -- ${recipient}\n",
         prog, INSPECT_DIR, SENDMAIL, prog);
 }
 
