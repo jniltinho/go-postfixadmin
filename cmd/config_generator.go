@@ -11,7 +11,7 @@ func generateConfig() {
 
 [database]
 # Format: user:password@tcp(host:port)/dbname?args | driver = "mysql" # mysql or postgres (default: mysql)
-url = "postfix:postfixPassword@tcp(localhost:3306)/postfix?charset=utf8mb4&parseTime=True&loc=Local"
+url = "postfix:postfixPassword@tcp(localhost:3306)/postfix?charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=True&loc=Local"
 
 [server]
 # Server Port (default 8080)

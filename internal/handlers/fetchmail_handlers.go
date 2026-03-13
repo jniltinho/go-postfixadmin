@@ -72,7 +72,7 @@ func (h *Handler) AddFetchmailPOST(c *echo.Context) error {
 		SrcUser:     srcUser,
 		SrcPassword: srcPassword,
 		SrcFolder:   srcFolder,
-		PollTime:    pollTime,
+		PollTime:    uint(pollTime),
 		Fetchall:    fetchall,
 		Keep:        keep,
 		UseSSL:      usessl,
@@ -103,7 +103,7 @@ func (h *Handler) AddFetchmailPOST(c *echo.Context) error {
 		}
 	}
 	if domainStr != nil {
-		newFetchmail.Domain = domainStr
+		newFetchmail.Domain = *domainStr
 	}
 
 	// Save to database

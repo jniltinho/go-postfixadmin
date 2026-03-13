@@ -25,7 +25,7 @@ func (h *Handler) ListAliases(c *echo.Context) error {
 		// We use Table("alias") to be explicit and Select("alias.*") to avoid GORM mapping issues
 		query := h.DB.Table("alias").Select("alias.*").
 			Joins("JOIN domain ON alias.domain = domain.domain").
-			Where("domain.active = ?", true).
+			Where("domain.active = ?", 1).
 			Order("alias.address ASC")
 
 		// Security: Filter by allowed domains
@@ -90,7 +90,7 @@ func (h *Handler) ListAliases(c *echo.Context) error {
 	// Fetch domains for the filter dropdown
 	var domains []models.Domain
 	if h.DB != nil {
-		domainQuery := h.DB.Where("domain != ?", "ALL").Where("active = ?", true).Order("domain ASC")
+		domainQuery := h.DB.Where("domain != ?", "ALL").Where("active = ?", 1).Order("domain ASC")
 		if !isSuperAdmin {
 			// Reuse allowedDomains from earlier
 			allowedDomains, _, err := utils.GetAllowedDomains(h.DB, middleware.GetUsername(c, middleware.SessionName), middleware.GetIsSuperAdmin(c))
@@ -128,7 +128,7 @@ func (h *Handler) AddAliasForm(c *echo.Context) error {
 		}
 		isSuperAdmin = isSuper
 
-		query := h.DB.Where("domain != ?", "ALL").Where("active = ?", true).Order("domain ASC")
+		query := h.DB.Where("domain != ?", "ALL").Where("active = ?", 1).Order("domain ASC")
 		if !isSuperAdmin {
 			if len(allowedDomains) == 0 {
 				query = query.Where("1 = 0")
@@ -177,7 +177,7 @@ func (h *Handler) AddAlias(c *echo.Context) error {
 	// Load domains for re-rendering on error
 	var domains []models.Domain
 	if h.DB != nil {
-		query := h.DB.Where("domain != ?", "ALL").Where("active = ?", true).Order("domain ASC")
+		query := h.DB.Where("domain != ?", "ALL").Where("active = ?", 1).Order("domain ASC")
 		if !isSuperAdmin {
 			if len(allowedDomains) == 0 {
 				query = query.Where("1 = 0")

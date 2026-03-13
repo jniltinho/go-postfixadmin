@@ -260,10 +260,7 @@ func (h *Handler) UpdateUserVacation(c *echo.Context) error {
 		intervalTime = 604800 // 7 days
 	}
 
-	active := false
-	if activeStr == "true" || activeStr == "on" || activeStr == "1" {
-		active = true
-	}
+	active := activeStr == "true" || activeStr == "on" || activeStr == "1"
 
 	tx := h.DB.Begin()
 
