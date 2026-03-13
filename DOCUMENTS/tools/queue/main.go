@@ -19,6 +19,9 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/jedib0t/go-pretty/v6/text"
 )
 
 const (
@@ -36,6 +39,7 @@ var (
 	flagMax     = flag.Int("max", 300, "Máximo de mensagens por remetente para deletar")
 	flagGetJSON = flag.Bool("getjson", false, "Exibir saída em JSON")
 	flagDebug   = flag.Bool("debug", false, "Modo verboso/debug")
+	flagTable   = flag.Bool("table", false, "Exibir saída em tabela formatada")
 )
 
 // Regexes
@@ -103,6 +107,8 @@ func main() {
 
 	if *flagGetJSON {
 		listQueueJSON()
+	} else if *flagTable {
+		listQueueTable()
 	} else if flag.NFlag() == 0 {
 		listQueue()
 	}
@@ -129,7 +135,7 @@ func listQueue() {
 	total := 0
 	for _, k := range sortedByValue(hashTo) {
 		total += hashTo[k]
-		fmt.Printf("%d - %s \n", hashTo[k], k)
+		fmt.Printf("%d - %s\n", hashTo[k], k)
 	}
 	fmt.Printf("\n%d -> TOTAL NA FILA TO\n", total)
 
@@ -138,9 +144,39 @@ func listQueue() {
 	total = 0
 	for _, k := range sortedByValue(hashMail) {
 		total += hashMail[k]
-		fmt.Printf("%d - %s \n", hashMail[k], k)
+		fmt.Printf("%d - %s\n", hashMail[k], k)
 	}
 	fmt.Printf("\n%d -> TOTAL NA FILA FROM\n", total)
+}
+
+func listQueueTable() {
+	t := table.NewWriter()
+	t.SetOutputMirror(os.Stdout)
+	t.SetStyle(table.StyleColoredBright)
+	t.SetColumnConfigs([]table.ColumnConfig{
+		{Number: 1, Align: text.AlignRight},
+	})
+	t.AppendHeader(table.Row{"#", "LISTA FILA TO DOMINIO"})
+	totalTo := 0
+	for _, k := range sortedByValue(hashTo) {
+		totalTo += hashTo[k]
+		t.AppendRow(table.Row{hashTo[k], k})
+	}
+	t.AppendSeparator()
+	t.AppendRow(table.Row{totalTo, "TOTAL NA FILA TO"})
+	t.AppendSeparator()
+
+	t.AppendRow(table.Row{"#", "LISTA FILA FROM"})
+	t.AppendSeparator()
+
+	totalFrom := 0
+	for _, k := range sortedByValue(hashMail) {
+		totalFrom += hashMail[k]
+		t.AppendRow(table.Row{hashMail[k], k})
+	}
+	t.AppendSeparator()
+	t.AppendRow(table.Row{totalFrom, "TOTAL NA FILA FROM"})
+	t.Render()
 }
 
 func listQueueJSON() {
