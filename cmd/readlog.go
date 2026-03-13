@@ -33,12 +33,19 @@ Examples:
   ./postfixadmin readlog --once
 
   # Custom interval and log path:
-  ./postfixadmin readlog --interval 1m --logfile /var/log/mail.log`,
+  ./postfixadmin readlog --interval 1m --logfile /var/log/mail.log
+
+  # Keep only last 60 days of entries:
+  ./postfixadmin readlog --retention-days 60
+
+  # Disable automatic purge:
+  ./postfixadmin readlog --retention-days 0`,
 	Run: func(cmd *cobra.Command, args []string) {
 		logFile, _ := cmd.Flags().GetString("logfile")
 		posFile, _ := cmd.Flags().GetString("posfile")
 		interval, _ := cmd.Flags().GetDuration("interval")
 		once, _ := cmd.Flags().GetBool("once")
+		retentionDays, _ := cmd.Flags().GetInt("retention-days")
 
 		db, err := utils.ConnectDB(dbUrl, dbDriver)
 		if err != nil {
@@ -48,9 +55,18 @@ Examples:
 
 		slog.Info("readlog started", "logfile", logFile, "posfile", posFile, "interval", interval, "once", once)
 
-		if err := utils.ReadMailLog(db, logFile, posFile); err != nil {
-			slog.Error("readlog: error processing log", "error", err)
+		runCycle := func() {
+			if err := utils.ReadMailLog(db, logFile, posFile); err != nil {
+				slog.Error("readlog: error processing log", "error", err)
+			}
+			if n, err := utils.PurgeMaillog(db, retentionDays); err != nil {
+				slog.Error("readlog: purge failed", "error", err)
+			} else if n > 0 {
+				slog.Info("readlog: purged old entries", "rows", n, "retention_days", retentionDays)
+			}
 		}
+
+		runCycle()
 
 		if once {
 			return
@@ -60,9 +76,7 @@ Examples:
 		defer ticker.Stop()
 
 		for range ticker.C {
-			if err := utils.ReadMailLog(db, logFile, posFile); err != nil {
-				slog.Error("readlog: error processing log", "error", err)
-			}
+			runCycle()
 		}
 	},
 }
@@ -73,4 +87,5 @@ func init() {
 	readlogCmd.Flags().String("posfile", defaultPosFile, "Path to the position state file")
 	readlogCmd.Flags().Duration("interval", defaultInterval, "Polling interval (e.g. 5m, 30s)")
 	readlogCmd.Flags().Bool("once", false, "Run once and exit (for crontab use)")
+	readlogCmd.Flags().Int("retention-days", 30, "Delete maillog entries older than N days (0 = keep all)")
 }

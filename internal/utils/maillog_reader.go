@@ -111,6 +111,20 @@ func writeOffset(posFile string, offset int64) {
 	}
 }
 
+// PurgeMaillog deletes maillog records older than retentionDays days.
+// Returns the number of rows deleted.
+func PurgeMaillog(db *gorm.DB, retentionDays int) (int64, error) {
+	if retentionDays <= 0 {
+		retentionDays = 30
+	}
+	cutoff := time.Now().AddDate(0, 0, -retentionDays).Unix()
+	result := db.Where("tstamp < ?", cutoff).Delete(&models.Maillog{})
+	if result.Error != nil {
+		return 0, fmt.Errorf("PurgeMaillog: %w", result.Error)
+	}
+	return result.RowsAffected, nil
+}
+
 // ReadMailLog reads new lines from logFile since the last saved offset,
 // parses FILTER entries and inserts them into the maillog table.
 func ReadMailLog(db *gorm.DB, logFile, posFile string) error {
