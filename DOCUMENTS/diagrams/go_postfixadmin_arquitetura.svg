@@ -1,0 +1,87 @@
+<svg width="100%" viewBox="0 0 680 600" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <style>
+    .t  { font-family: sans-serif; font-size: 14px; font-weight: 400; fill: #3d3d3a; }
+    .ts { font-family: sans-serif; font-size: 12px; font-weight: 400; fill: #5f5e5a; }
+    .th { font-family: sans-serif; font-size: 14px; font-weight: 600; fill: #3d3d3a; }
+    .arr { fill: none; stroke: #888780; stroke-width: 1.5; }
+  </style>
+  <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="#888780" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+
+<!-- Clients -->
+<rect x="40" y="24" width="600" height="66" rx="10" fill="#f1efe8" stroke="#888780" stroke-width="0.5"/>
+<text class="th" x="340" y="46" text-anchor="middle" dominant-baseline="central" fill="#444441">Clients</text>
+<rect x="60" y="50" width="140" height="30" rx="6" fill="#d3d1c7" stroke="#888780" stroke-width="0.5"/>
+<text class="ts" x="130" y="66" text-anchor="middle" dominant-baseline="central" fill="#2c2c2a">Web Browser</text>
+<rect x="270" y="50" width="140" height="30" rx="6" fill="#d3d1c7" stroke="#888780" stroke-width="0.5"/>
+<text class="ts" x="340" y="66" text-anchor="middle" dominant-baseline="central" fill="#2c2c2a">CLI (terminal)</text>
+<rect x="480" y="50" width="140" height="30" rx="6" fill="#d3d1c7" stroke="#888780" stroke-width="0.5"/>
+<text class="ts" x="550" y="66" text-anchor="middle" dominant-baseline="central" fill="#2c2c2a">Docker / Systemd</text>
+
+<!-- Arrows down from clients -->
+<line x1="130" y1="90" x2="230" y2="135" class="arr" marker-end="url(#arrow)"/>
+<line x1="340" y1="90" x2="340" y2="135" class="arr" marker-end="url(#arrow)"/>
+<line x1="550" y1="90" x2="450" y2="135" class="arr" marker-end="url(#arrow)"/>
+
+<!-- Echo HTTP Server -->
+<rect x="140" y="136" width="400" height="62" rx="10" fill="#eeedfe" stroke="#534ab7" stroke-width="0.5"/>
+<text class="th" x="340" y="158" text-anchor="middle" dominant-baseline="central" fill="#3c3489">Echo HTTP Server</text>
+<text class="ts" x="340" y="178" text-anchor="middle" dominant-baseline="central" fill="#534ab7">Router · Middleware (Auth/RBAC) · Static files</text>
+
+<!-- Arrows down -->
+<line x1="240" y1="198" x2="185" y2="240" class="arr" marker-end="url(#arrow)"/>
+<line x1="340" y1="198" x2="340" y2="240" class="arr" marker-end="url(#arrow)"/>
+<line x1="440" y1="198" x2="495" y2="240" class="arr" marker-end="url(#arrow)"/>
+
+<!-- Handlers -->
+<rect x="60" y="242" width="160" height="56" rx="8" fill="#faece7" stroke="#993c1d" stroke-width="0.5"/>
+<text class="th" x="140" y="264" text-anchor="middle" dominant-baseline="central" fill="#712b13">Handlers</text>
+<text class="ts" x="140" y="282" text-anchor="middle" dominant-baseline="central" fill="#993c1d">HTTP controllers</text>
+
+<!-- Views -->
+<rect x="260" y="242" width="160" height="56" rx="8" fill="#faece7" stroke="#993c1d" stroke-width="0.5"/>
+<text class="th" x="340" y="264" text-anchor="middle" dominant-baseline="central" fill="#712b13">Views / Templates</text>
+<text class="ts" x="340" y="282" text-anchor="middle" dominant-baseline="central" fill="#993c1d">HTML Go templates</text>
+
+<!-- CLI -->
+<rect x="460" y="242" width="160" height="56" rx="8" fill="#faece7" stroke="#993c1d" stroke-width="0.5"/>
+<text class="th" x="540" y="264" text-anchor="middle" dominant-baseline="central" fill="#712b13">CLI (Cobra)</text>
+<text class="ts" x="540" y="282" text-anchor="middle" dominant-baseline="central" fill="#993c1d">admin · migrate · server</text>
+
+<!-- Arrows down from handlers -->
+<line x1="140" y1="298" x2="200" y2="356" class="arr" marker-end="url(#arrow)"/>
+<line x1="340" y1="298" x2="340" y2="356" class="arr" marker-end="url(#arrow)"/>
+<line x1="540" y1="298" x2="480" y2="356" class="arr" marker-end="url(#arrow)"/>
+
+<!-- Business Logic -->
+<rect x="100" y="358" width="460" height="80" rx="10" fill="#e6f1fb" stroke="#185fa5" stroke-width="0.5"/>
+<text class="th" x="330" y="380" text-anchor="middle" dominant-baseline="central" fill="#0c447c">Models / Business Logic (internal/)</text>
+<rect x="115" y="390" width="110" height="36" rx="6" fill="#b5d4f4" stroke="#185fa5" stroke-width="0.5"/>
+<text class="ts" x="170" y="409" text-anchor="middle" dominant-baseline="central" fill="#0c447c">Domain</text>
+<rect x="237" y="390" width="110" height="36" rx="6" fill="#b5d4f4" stroke="#185fa5" stroke-width="0.5"/>
+<text class="ts" x="292" y="409" text-anchor="middle" dominant-baseline="central" fill="#0c447c">Mailbox</text>
+<rect x="359" y="390" width="110" height="36" rx="6" fill="#b5d4f4" stroke="#185fa5" stroke-width="0.5"/>
+<text class="ts" x="414" y="409" text-anchor="middle" dominant-baseline="central" fill="#0c447c">Alias</text>
+<rect x="481" y="390" width="66" height="36" rx="6" fill="#b5d4f4" stroke="#185fa5" stroke-width="0.5"/>
+<text class="ts" x="514" y="409" text-anchor="middle" dominant-baseline="central" fill="#0c447c">Admin</text>
+
+<!-- Arrow down to DB -->
+<line x1="330" y1="438" x2="330" y2="484" class="arr" marker-end="url(#arrow)"/>
+
+<!-- Database GORM -->
+<rect x="100" y="486" width="460" height="80" rx="10" fill="#e1f5ee" stroke="#0f6e56" stroke-width="0.5"/>
+<text class="th" x="330" y="510" text-anchor="middle" dominant-baseline="central" fill="#085041">Database (GORM ORM)</text>
+<rect x="115" y="524" width="180" height="30" rx="6" fill="#9fe1cb" stroke="#0f6e56" stroke-width="0.5"/>
+<text class="ts" x="205" y="540" text-anchor="middle" dominant-baseline="central" fill="#04342c">MySQL / MariaDB</text>
+<rect x="385" y="524" width="160" height="30" rx="6" fill="#9fe1cb" stroke="#0f6e56" stroke-width="0.5"/>
+<text class="ts" x="465" y="540" text-anchor="middle" dominant-baseline="central" fill="#04342c">PostgreSQL</text>
+
+<!-- Postfix/Dovecot -->
+<line x1="560" y1="530" x2="614" y2="530" class="arr" marker-end="url(#arrow)"/>
+<rect x="616" y="512" width="50" height="40" rx="6" fill="#eaf3de" stroke="#3b6d11" stroke-width="0.5"/>
+<text class="ts" x="641" y="527" text-anchor="middle" dominant-baseline="central" fill="#27500a">Postfix</text>
+<text class="ts" x="641" y="543" text-anchor="middle" dominant-baseline="central" fill="#27500a">Dovecot</text>
+</svg>
