@@ -3,6 +3,8 @@ package main
 import (
 	"os"
 	"strings"
+
+	"github.com/joho/godotenv"
 )
 
 // config holds all runtime configuration.
@@ -41,7 +43,13 @@ func envList(key string, fallback []string) []string {
 	return parts
 }
 
-func loadConfig() config {
+func loadConfig(envFile string) config {
+	if envFile != "" {
+		_ = godotenv.Load(envFile)
+	} else {
+		_ = godotenv.Load()
+	}
+
 	return config{
 		MySQLHost:  envOr("MYSQL_HOST", "localhost"),
 		MySQLUser:  envOr("MYSQL_USER", "root"),

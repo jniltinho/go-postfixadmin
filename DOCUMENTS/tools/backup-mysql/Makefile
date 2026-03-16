@@ -1,5 +1,5 @@
 BINARY    := backup-mysql
-VERSION   := 0.1.0
+VERSION   := 0.1.2
 DATE      := $(shell date '+%Y-%m-%d %H:%M')
 LDFLAGS   := -ldflags "-s -w -X 'main.version=$(VERSION)' -X 'main.buildDate=$(DATE)'"
 

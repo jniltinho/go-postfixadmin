@@ -4,18 +4,37 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 func newRootCmd(cfg *config) *cobra.Command {
+	var envFile string
+
 	root := &cobra.Command{
 		Use:           "backup-mysql",
 		Short:         "MySQL backup tool",
 		SilenceUsage:  true,
 		SilenceErrors: true,
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			*cfg = loadConfig(envFile)
+			// Re-apply any flags explicitly set by the user
+			cmd.Flags().Visit(func(f *pflag.Flag) {
+				switch f.Name {
+				case "host":
+					cfg.MySQLHost = f.Value.String()
+				case "user":
+					cfg.MySQLUser = f.Value.String()
+				case "passwd":
+					cfg.MySQLPass = f.Value.String()
+				}
+			})
+			return nil
+		},
 	}
 
 	// Persistent flags — available to all subcommands
 	pf := root.PersistentFlags()
+	pf.StringVar(&envFile, "env", "", "Path to .env file (default: .env in current directory)")
 	pf.StringVar(&cfg.MySQLHost, "host", cfg.MySQLHost, "MySQL host address")
 	pf.StringVar(&cfg.MySQLUser, "user", cfg.MySQLUser, "MySQL username")
 	pf.StringVar(&cfg.MySQLPass, "passwd", cfg.MySQLPass, "MySQL password")

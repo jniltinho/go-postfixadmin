@@ -25,7 +25,7 @@ var (
 )
 
 func main() {
-	cfg := loadConfig()
+	cfg := loadConfig("")
 	if err := newRootCmd(&cfg).Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

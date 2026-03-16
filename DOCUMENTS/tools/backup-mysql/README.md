@@ -19,7 +19,21 @@ The binary will be installed at `/usr/local/bin/backup-mysql`.
 
 ## Configuration
 
-Priority order: **CLI flag > environment variable > built-in default**.
+Priority order: **CLI flag > environment variable > `.env` file > built-in default**.
+
+### `.env` file
+
+Copy the example file and fill in your values:
+
+```bash
+cp .env.example .env
+```
+
+The tool automatically loads `.env` from the current directory. Use `--env` to specify a custom path:
+
+```bash
+backup-mysql --env /etc/backup-mysql.env backup --clean=5
+```
 
 ### Environment variables
 
@@ -65,6 +79,9 @@ backup-mysql backup --sendmail
 # All options combined
 backup-mysql backup --debug --clean=5 --sendmail
 
+# Load a custom .env file
+backup-mysql --env /etc/backup-mysql.env backup --clean=5
+
 # Override credentials via flags
 backup-mysql --host=192.168.1.10 --user=admin --passwd=secret backup --clean=7
 ```
@@ -79,11 +96,12 @@ backup-mysql version
 
 ### Global (apply to all subcommands)
 
-| Flag        | Default     | Description        |
-|-------------|-------------|--------------------|
-| `--host`    | `localhost` | MySQL host address |
-| `--user`    | `root`      | MySQL username     |
-| `--passwd`  | `root`      | MySQL password     |
+| Flag       | Default | Description                                          |
+|------------|---------|------------------------------------------------------|
+| `--env`    | ` `     | Path to `.env` file (default: `.env` in current dir) |
+| `--host`   | `localhost` | MySQL host address                               |
+| `--user`   | `root`  | MySQL username                                       |
+| `--passwd` | `root`  | MySQL password                                       |
 
 ### `backup`
 
@@ -117,7 +135,7 @@ EMAIL_TO=dba@company.com,ops@company.com
 05 01 * * * /usr/local/bin/backup-mysql backup --clean=5
 ```
 
-### Option 2 — env file with `env`
+### Option 2 — `.env` file with `--env` flag
 
 Store variables in `/etc/backup-mysql.env`:
 
@@ -126,12 +144,17 @@ MYSQL_HOST=localhost
 MYSQL_USER=admin
 MYSQL_PASS=s3cr3t
 BACKUP_DIR=/mnt/backups/mysql
+SMTP_SERVER=smtp.gmail.com
+SMTP_USER=alerts@company.com
+SMTP_PASS=app_password
+EMAIL_FROM=alerts@company.com
+EMAIL_TO=dba@company.com,ops@company.com
 ```
 
-Reference it in crontab:
+Reference it directly via the `--env` flag:
 
 ```cron
-05 01 * * * env $(cat /etc/backup-mysql.env | xargs) /usr/local/bin/backup-mysql backup --clean=5
+05 01 * * * /usr/local/bin/backup-mysql --env /etc/backup-mysql.env backup --clean=5
 ```
 
 ### Option 3 — wrapper script
