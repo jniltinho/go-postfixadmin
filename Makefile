@@ -1,10 +1,13 @@
-BINARY_NAME=postfixadmin
+APP        := postfixadmin
+BIN        := bin/$(APP)
 
-DATE=`date +%Y-%m-%d\ %H:%M`
-VERSION=v1.0.52
-PREFIX=go-postfixadmin/cmd
-LDFLAGS = -X '${PREFIX}.Version=${VERSION}' -X '${PREFIX}.BuildDate=${DATE}'
-FLAGS=-v -ldflags="-s -w ${LDFLAGS}"
+PREFIX     := go-postfixadmin/cmd
+VERSION    := $(shell git describe --tags --abbrev=0 2>/dev/null || echo "dev")
+BUILD_TIME := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
+GIT_COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+
+
+LDFLAGS    := -ldflags "-s -w -X $(PREFIX).Version=$(VERSION) -X $(PREFIX).BuildDate=$(BUILD_TIME) -X $(PREFIX).GitCommit=$(GIT_COMMIT)"
 
 .PHONY: all build run clean css help
 
@@ -12,20 +15,20 @@ all: css build-prod
 
 build: css
 	@echo "Building Go application..."
-	rm -f $(BINARY_NAME)
-	CGO_ENABLED=0 go build -o $(BINARY_NAME) ${FLAGS}
+	rm -f $(BIN)
+	CGO_ENABLED=0 go build -o $(BIN) $(LDFLAGS)
 
 
 build-prod: css
 	@echo "Building Go application..."
-	rm -f $(BINARY_NAME)
-	CGO_ENABLED=0 go build -o $(BINARY_NAME) ${FLAGS}
-	upx --best --lzma $(BINARY_NAME)
+	rm -f $(BIN)
+	CGO_ENABLED=0 go build -o $(BIN) $(LDFLAGS)
+	upx --best --lzma $(BIN)
 
 
 run:
 	@echo "Starting application..."
-	./$(BINARY_NAME) server
+	./$(BIN) server
 
 css:
 	@echo "Building CSS with Tailwind..."
@@ -37,7 +40,7 @@ watch-css:
 
 clean:
 	@echo "Cleaning up..."
-	rm -f $(BINARY_NAME)
+	rm -f $(BIN)
 	rm -f web/static/css/style.css
 
 tidy:
@@ -62,7 +65,8 @@ build-docker:
 
 build-docker-prod:
 	@echo "Building Go application..."
-	CGO_ENABLED=0 go build -o $(BINARY_NAME) ${FLAGS}
+	CGO_ENABLED=0 go build -o $(BIN) $(LDFLAGS)
+	upx --best --lzma $(BIN)
 
 
 help:

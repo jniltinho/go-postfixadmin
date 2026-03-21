@@ -31,6 +31,9 @@ go.work.sum
 config.toml
 config_*.toml
 
+bin/
+web/static/css/style.css
+
 # Docker data
 DOCUMENTS/docker/_dbdata/
 DOCUMENTS/docker/_dbdata/*

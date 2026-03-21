@@ -20,8 +20,7 @@ COPY . .
 COPY --from=css-builder /app/public/css/style.css ./public/css/style.css
 # Build the binary
 RUN make build-docker-prod
-# Compress the binary
-RUN upx postfixadmin
+
 
 # Stage 3: Final minimal image
 FROM alpine:3.21
@@ -29,7 +28,7 @@ ENV TZ=America/Sao_Paulo
 RUN apk add --no-cache ca-certificates tzdata
 WORKDIR /app
 # Copy the binary from the builder stage
-COPY --from=go-builder /app/postfixadmin .
+COPY --from=go-builder /app/bin/postfixadmin .
 COPY config.toml.example config.toml
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
@@ -41,4 +40,4 @@ EXPOSE 8080
 ENTRYPOINT ["/app/entrypoint.sh"]
 
 # Default command starting the server
-CMD ["./postfixadmin", "server", "--port", "8080"]
+CMD ["./postfixadmin", "server"]

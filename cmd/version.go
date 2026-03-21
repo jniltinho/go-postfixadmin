@@ -9,13 +9,17 @@ import (
 var (
 	Version   = "1.0.1"
 	BuildDate = "Unknown"
+	GitCommit = "Unknown"
 )
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Display version information",
+	Short: "Print version information",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("Go-Postfixadmin version %s (Build Date: %s)\n", Version, BuildDate)
+		fmt.Printf("Go-Postfixadmin\n")
+		fmt.Printf("  Version:    %s\n", Version)
+		fmt.Printf("  Build Time: %s\n", BuildDate)
+		fmt.Printf("  Git Commit: %s\n", GitCommit)
 	},
 }
 
