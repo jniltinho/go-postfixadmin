@@ -50,7 +50,6 @@ tidy:
 deps:
 	@echo "Installing dependencies..."
 	go mod download
-	npm install
 
 certs:
 	@echo "Generating SSL certificates..."
