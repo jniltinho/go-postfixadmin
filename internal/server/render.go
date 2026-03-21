@@ -7,7 +7,6 @@ import (
 	"io"
 	"io/fs"
 	"net/http"
-	"path"
 	"strings"
 
 	"github.com/labstack/echo/v5"
@@ -57,9 +56,9 @@ func (t *Template) Render(c *echo.Context, w io.Writer, name string, data any) e
 
 	// Determine layout
 	layout := "base"
-	if name == "login.html" || name == "users/login.html" {
-		layout = name
-	} else if len(name) > 6 && name[:6] == "users/" {
+	if name == "auth/login.html" || name == "users/login.html" {
+		layout = "login.html"
+	} else if strings.HasPrefix(name, "users/") {
 		layout = "user_base"
 	}
 
@@ -76,18 +75,17 @@ func loadTemplates(embeddedFiles embed.FS) (*Template, error) {
 
 	funcMap := templateFuncMap()
 
-	layout := "web/templates/layout.html"
+	layout := "web/templates/layout/layout.html"
 	userLayout := "web/templates/users/layout.html"
 
-	// Collect partial templates (form_*.html) from the root templates directory.
+	// Collect partial templates (form_*.html) from all directories.
 	var partials []string
-	if entries, err := fs.ReadDir(embeddedFiles, "web/templates"); err == nil {
-		for _, e := range entries {
-			if !e.IsDir() && strings.HasPrefix(e.Name(), "form_") {
-				partials = append(partials, "web/templates/"+e.Name())
-			}
+	fs.WalkDir(embeddedFiles, "web/templates", func(filePath string, d fs.DirEntry, err error) error {
+		if err == nil && !d.IsDir() && strings.HasPrefix(d.Name(), "form_") {
+			partials = append(partials, filePath)
 		}
-	}
+		return nil
+	})
 
 	err := fs.WalkDir(embeddedFiles, "web/templates", func(filePath string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -98,7 +96,7 @@ func loadTemplates(embeddedFiles embed.FS) (*Template, error) {
 		}
 
 		name := d.Name()
-		if filePath == "web/templates/layout.html" || filePath == "web/templates/users/layout.html" {
+		if filePath == "web/templates/layout/layout.html" || filePath == "web/templates/users/layout.html" {
 			return nil
 		}
 		// Partials are included in other templates, not registered standalone.
@@ -106,24 +104,24 @@ func loadTemplates(embeddedFiles embed.FS) (*Template, error) {
 			return nil
 		}
 
-		var tmplKey string
+		// Use the path relative to web/templates/ as the key
+		tmplKey := strings.TrimPrefix(filePath, "web/templates/")
+		
 		var tmpl *template.Template
 		var parseErr error
 
-		if path.Dir(filePath) == "web/templates/users" {
-			tmplKey = "users/" + name
+		if strings.HasPrefix(tmplKey, "users/") {
 			if name == "login.html" {
-				tmpl, parseErr = template.New(tmplKey).Funcs(funcMap).ParseFS(embeddedFiles, filePath)
+				tmpl, parseErr = template.New(name).Funcs(funcMap).ParseFS(embeddedFiles, filePath)
 			} else {
-				tmpl, parseErr = template.New(tmplKey).Funcs(funcMap).ParseFS(embeddedFiles, userLayout, filePath)
+				tmpl, parseErr = template.New(name).Funcs(funcMap).ParseFS(embeddedFiles, userLayout, filePath)
 			}
 		} else {
-			tmplKey = name
 			if name == "login.html" {
-				tmpl, parseErr = template.New(tmplKey).Funcs(funcMap).ParseFS(embeddedFiles, filePath)
+				tmpl, parseErr = template.New(name).Funcs(funcMap).ParseFS(embeddedFiles, filePath)
 			} else {
 				parseFiles := append([]string{layout}, append(partials, filePath)...)
-				tmpl, parseErr = template.New(tmplKey).Funcs(funcMap).ParseFS(embeddedFiles, parseFiles...)
+				tmpl, parseErr = template.New(name).Funcs(funcMap).ParseFS(embeddedFiles, parseFiles...)
 			}
 		}
 

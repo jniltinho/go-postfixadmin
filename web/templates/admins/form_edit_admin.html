@@ -1,0 +1,375 @@
+{{define "form_edit_admin"}}
+<!-- Edit Admin Modal -->
+<div id="editAdminModal" class="fixed inset-0 z-50 hidden">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/50" onclick="closeEditAdminModal()"></div>
+    <!-- Modal Box -->
+    <div class="relative z-10 flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white border-4 border-brand-text w-full max-w-4xl max-h-[90vh] flex flex-col">
+            <!-- Header -->
+            <div class="bg-brand-primary px-6 py-4 flex items-center justify-between flex-shrink-0">
+                <h3 class="text-lg font-mono font-black uppercase tracking-tight text-white flex items-center">
+                    <i data-lucide="edit" class="w-5 h-5 mr-2"></i>
+                    {{ T $.Lang `Admins_EditTitle` }} <span id="modal-edit-admin-title-suffix" class="ml-2 text-gray-200"></span>
+                </h3>
+                <button onclick="closeEditAdminModal()" class="text-white hover:text-gray-200 transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Scrollable Body -->
+            <div class="overflow-y-auto flex-1 relative">
+                <!-- Loading State -->
+                <div id="modal-edit-admin-loading" class="absolute inset-0 bg-white/80 z-20 flex items-center justify-center hidden">
+                    <div class="flex flex-col items-center">
+                        <i data-lucide="loader-2" class="w-8 h-8 text-brand-primary animate-spin mb-2"></i>
+                        <span class="text-sm font-bold uppercase tracking-widest text-brand-text">Loading...</span>
+                    </div>
+                </div>
+
+                <!-- Error Area -->
+                <div id="modal-edit-admin-error"
+                    class="hidden mx-6 mt-4 bg-red-50 border-2 border-red-600 p-3 flex items-start">
+                    <i data-lucide="alert-circle" class="w-4 h-4 text-red-600 mr-2 mt-0.5 flex-shrink-0"></i>
+                    <p id="modal-edit-admin-error-text" class="text-sm text-red-700 font-medium"></p>
+                </div>
+
+                <form id="modalEditAdminForm" class="p-6 space-y-5">
+                    <input type="hidden" id="modal-edit-admin-id" name="username_id">
+
+                    <!-- Basic Information Card -->
+                    <div class="border-2 border-brand-text p-4 space-y-4">
+                        <h4 class="text-sm font-mono font-black uppercase tracking-tight flex items-center">
+                            <i data-lucide="user" class="w-4 h-4 mr-2"></i>
+                            {{ T $.Lang `Admins_DetailsTitle` }}
+                        </h4>
+
+                        <!-- Username (Readonly) -->
+                        <div>
+                            <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                                {{ T $.Lang `Admins_EditLblAdmin` }}
+                            </label>
+                            <input type="text" id="modal-edit-username" name="username" readonly
+                                class="w-full h-10 px-3 border-2 border-gray-300 bg-gray-50 font-medium font-mono text-sm cursor-not-allowed">
+                            <p class="text-[10px] text-gray-500 mt-1">{{ T $.Lang `Admins_EditUsernameHelp` }}</p>
+                        </div>
+
+                        <!-- Options Grid -->
+                        <div class="flex flex-wrap gap-6 pt-2">
+                            <!-- Active -->
+                            <div class="flex items-center">
+                                <input type="checkbox" id="modal-edit-active" name="active" value="true"
+                                    class="w-5 h-5 border-2 border-brand-text cursor-pointer">
+                                <label for="modal-edit-active" class="ml-2 text-sm font-bold cursor-pointer" id="lbl-edit-active">
+                                    {{ T $.Lang `Admins_LblEnabled` }}
+                                </label>
+                                <!-- We will handle disabling it via JS if not superadmin -->
+                                <input type="hidden" id="modal-edit-active-hidden" name="active" value="false" disabled>
+                            </div>
+
+                            <!-- Superadmin -->
+                            <div class="flex items-center">
+                                <input type="checkbox" id="modal-edit-superadmin" name="superadmin" value="true"
+                                    class="w-5 h-5 border-2 border-brand-text cursor-pointer" onchange="toggleEditAdminDomains()">
+                                <label for="modal-edit-superadmin" class="ml-2 text-sm font-bold cursor-pointer" id="lbl-edit-superadmin">
+                                    {{ T $.Lang `Admins_LblSuperAdmin` }}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Password Section (Collapsible) -->
+                    <details class="border-2 border-brand-text group">
+                        <summary
+                            class="p-3 cursor-pointer font-bold uppercase tracking-tight text-sm flex items-center bg-gray-50 hover:bg-gray-100 transition-colors">
+                            <i data-lucide="key" class="w-4 h-4 mr-2"></i>
+                            {{ T $.Lang `Admins_PwdChangeTitle` }}
+                            <i data-lucide="chevron-down"
+                                class="w-4 h-4 ml-auto group-open:rotate-180 transition-transform"></i>
+                        </summary>
+
+                        <input type="hidden" name="change_password" id="modal-edit-change-password" value="false">
+
+                        <div class="p-4 space-y-4 border-t-2 border-brand-text">
+                            <div class="flex gap-2 items-center">
+                                <!-- Password Input -->
+                                <div class="relative flex-1">
+                                    <input type="password" id="modal-edit-password" name="password" minlength="8"
+                                        placeholder="{{ T $.Lang `Admins_PhNewPwd` }}"
+                                        class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm pr-10">
+                                    <button type="button" onclick="App.togglePassword('modal-edit-password', event.currentTarget)"
+                                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary transition-colors">
+                                        <i data-lucide="eye" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+
+                                <!-- Confirm Password Input -->
+                                <div class="relative flex-1">
+                                    <input type="password" id="modal-edit-password-confirm" name="password_confirm" minlength="8"
+                                        placeholder="{{ T $.Lang `Admins_PhRepeatPwd` }}"
+                                        class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm pr-10">
+                                    <button type="button" onclick="App.togglePassword('modal-edit-password-confirm', event.currentTarget)"
+                                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary transition-colors">
+                                        <i data-lucide="eye" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+
+                                <!-- Generate Button -->
+                                <button type="button" onclick="generateEditAdminPassword()" title="Generate strong password"
+                                    class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white text-xs font-black px-3 h-10 border-2 border-brand-text cursor-pointer uppercase tracking-widest flex items-center gap-1 whitespace-nowrap flex-shrink-0 transition-colors">
+                                    <i data-lucide="wand-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                            <p id="modal-edit-match-indicator" class="text-[10px] mt-1 hidden"></p>
+
+                            <!-- Password Strength Meter -->
+                            <div id="modal-edit-strength-meter" class="hidden">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-[10px] font-black uppercase tracking-widest text-brand-text">{{ T $.Lang `Strength` }}</span>
+                                    <span id="modal-edit-strength-text" class="text-[10px] font-bold uppercase tracking-wider"></span>
+                                </div>
+                                <div class="h-1.5 bg-gray-200 border border-brand-text overflow-hidden">
+                                    <div id="modal-edit-strength-bar" class="h-full transition-all duration-300" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+
+                    <!-- Domains Card -->
+                    <div id="modal-edit-domains-card" class="border-2 border-brand-text p-4">
+                        <h4 class="text-sm font-mono font-black uppercase tracking-tight flex items-center mb-2">
+                            <i data-lucide="globe" class="w-4 h-4 mr-2"></i>
+                            {{ T $.Lang `Admins_DomainsTitle` }}
+                        </h4>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">{{ T $.Lang `Admins_DomainsSubtitle` }}</p>
+
+                        <div id="modal-edit-domains-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 max-h-48 overflow-y-auto p-3 border-2 border-gray-100 bg-gray-50">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Footer / Actions -->
+            <div
+                class="bg-gray-50 px-6 py-4 flex items-center justify-end space-x-3 border-t-2 border-brand-text flex-shrink-0">
+                <button type="button" onclick="closeEditAdminModal()"
+                    class="bg-white hover:bg-gray-100 text-brand-text border-2 border-brand-text font-black px-6 py-2.5 shadow-[2px_2px_0px_#1E293B] hover:translate-y-px hover:shadow-[1px_1px_0px_#1E293B] active:translate-y-0.5 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center">
+                    <i data-lucide="x" class="w-4 h-4 mr-2"></i>
+                    {{ T $.Lang `Admins_BtnCancel` }}
+                </button>
+                <button type="submit" form="modalEditAdminForm" id="btn-update-admin"
+                    class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-6 py-2.5 shadow-[2px_2px_0px_#1E293B] hover:translate-y-px hover:shadow-[1px_1px_0px_#1E293B] active:translate-y-0.5 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center">
+                    <i data-lucide="save" class="w-4 h-4 mr-2"></i>
+                    {{ T $.Lang `Admins_BtnSaveChanges` }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var editAdminStrengthOpts, editAdminMatchOpts, editAdminIntentionOpts;
+    var currentSessionIsSuperAdmin = {{.IsSuperAdmin}};
+
+    function openEditAdminModal(username) {
+        document.getElementById('editAdminModal').classList.remove('hidden');
+        document.getElementById('modal-edit-admin-error').classList.add('hidden');
+        document.getElementById('modalEditAdminForm').classList.add('hidden');
+        document.getElementById('modal-edit-admin-loading').classList.remove('hidden');
+        
+        document.getElementById('modal-edit-admin-title-suffix').textContent = '- ' + username;
+
+        lucide.createIcons();
+
+        if(!editAdminStrengthOpts) {
+            editAdminStrengthOpts = {
+                passwordId: 'modal-edit-password', meterId: 'modal-edit-strength-meter',
+                barId: 'modal-edit-strength-bar', textId: 'modal-edit-strength-text',
+                labels: {
+                    weak: `{{ T $.Lang "Admins_JsPwdWeak" }}`,
+                    medium: `{{ T $.Lang "Admins_JsPwdMedium" }}`,
+                    good: `{{ T $.Lang "Admins_JsPwdGood" }}`,
+                    strong: `{{ T $.Lang "Admins_JsPwdStrong" }}`
+                }
+            };
+            editAdminMatchOpts = {
+                passwordId: 'modal-edit-password', confirmId: 'modal-edit-password-confirm',
+                indicatorId: 'modal-edit-match-indicator', submitBtnId: 'btn-update-admin',
+                labels: {
+                    match: `{{ T $.Lang "Admins_JsPwdMatchOk" }}`,
+                    noMatch: `{{ T $.Lang "Admins_JsPwdMatchFail" }}`
+                }
+            };
+            editAdminIntentionOpts = {
+                passwordId: 'modal-edit-password', confirmId: 'modal-edit-password-confirm',
+                changeInputId: 'modal-edit-change-password', meterId: 'modal-edit-strength-meter',
+                indicatorId: 'modal-edit-match-indicator'
+            };
+            
+            App.initPasswordForm({
+                passwordId: 'modal-edit-password', confirmId: 'modal-edit-password-confirm',
+                meterId: 'modal-edit-strength-meter', barId: 'modal-edit-strength-bar', textId: 'modal-edit-strength-text',
+                indicatorId: 'modal-edit-match-indicator', submitBtnId: 'btn-update-admin',
+                formId: 'modalEditAdminForm',
+                changeInputId: 'modal-edit-change-password',
+                labels: editAdminStrengthOpts.labels,
+                validationMsgs: {
+                    minLen: `{{ T $.Lang "Admins_JsPwdMinLen" }}`,
+                    noMatch: `{{ T $.Lang "Admins_JsPwdNoMatch" }}`
+                }
+            });
+        }
+
+        fetch('/api/admins/' + encodeURIComponent(username))
+            .then(function(res) {
+                if (!res.ok) throw new Error('Failed to load data');
+                return res.json();
+            })
+            .then(function(data) {
+                if (data.error) throw new Error(data.error);
+                
+                document.getElementById('modal-edit-admin-id').value = data.admin.Username;
+                document.getElementById('modal-edit-username').value = data.admin.Username;
+                
+                var chkActive = document.getElementById('modal-edit-active');
+                var lblActive = document.getElementById('lbl-edit-active');
+                var hdnActive = document.getElementById('modal-edit-active-hidden');
+                
+                var chkSuper = document.getElementById('modal-edit-superadmin');
+                var lblSuper = document.getElementById('lbl-edit-superadmin');
+                
+                chkActive.checked = data.admin.Active;
+                chkSuper.checked = data.admin.Superadmin;
+                
+                // Admin access control logic
+                if(!currentSessionIsSuperAdmin) {
+                    chkActive.disabled = true;
+                    chkActive.classList.add('opacity-50', 'cursor-not-allowed');
+                    lblActive.classList.add('opacity-50', 'cursor-not-allowed');
+                    hdnActive.disabled = false;
+                    hdnActive.value = data.admin.active;
+
+                    chkSuper.disabled = true;
+                    chkSuper.classList.add('opacity-50', 'cursor-not-allowed');
+                    lblSuper.classList.add('opacity-50', 'cursor-not-allowed');
+                } else {
+                    chkActive.disabled = false;
+                    chkActive.classList.remove('opacity-50', 'cursor-not-allowed');
+                    lblActive.classList.remove('opacity-50', 'cursor-not-allowed');
+                    hdnActive.disabled = true;
+
+                    chkSuper.disabled = false;
+                    chkSuper.classList.remove('opacity-50', 'cursor-not-allowed');
+                    lblSuper.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+
+                // Render Domains List dynamically
+                var container = document.getElementById('modal-edit-domains-container');
+                container.innerHTML = '';
+                if(data.domains && data.domains.length > 0) {
+                    var html = '';
+                    data.domains.forEach(function(d) {
+                        var checkedStr = d.assigned ? 'checked' : '';
+                        html += `
+                        <div class="flex items-center bg-white p-2 border border-gray-200">
+                            <input type="checkbox" id="modal-edit-domain-${d.domain}" name="domains" value="${d.domain}" ${checkedStr}
+                                class="w-4 h-4 border-2 border-brand-text cursor-pointer text-brand-primary focus:ring-brand-primary edit-domain-checkbox">
+                            <label for="modal-edit-domain-${d.domain}" class="ml-2 text-xs font-medium cursor-pointer select-none truncate" title="${d.domain}">
+                                ${d.domain}
+                            </label>
+                        </div>`;
+                    });
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = `<div class="col-span-full text-center text-xs text-gray-500 py-2">{{ T $.Lang "Admins_DomainsNone" }}</div>`;
+                }
+
+                toggleEditAdminDomains();
+
+                // Show form, hide loading, enable button
+                document.getElementById('modal-edit-admin-loading').classList.add('hidden');
+                document.getElementById('modalEditAdminForm').classList.remove('hidden');
+                
+                var btn = document.getElementById('btn-update-admin');
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            })
+            .catch(function(err) {
+                document.getElementById('modal-edit-admin-loading').classList.add('hidden');
+                var errBox = document.getElementById('modal-edit-admin-error');
+                document.getElementById('modal-edit-admin-error-text').textContent = err.message || 'Error occurred';
+                errBox.classList.remove('hidden');
+            });
+    }
+
+    function closeEditAdminModal() {
+        document.getElementById('editAdminModal').classList.add('hidden');
+    }
+
+    function toggleEditAdminDomains() {
+        var isSuper = document.getElementById('modal-edit-superadmin').checked;
+        var card = document.getElementById('modal-edit-domains-card');
+        if(isSuper || !currentSessionIsSuperAdmin) {
+            card.classList.add('opacity-50', 'pointer-events-none');
+            if(isSuper) {
+                document.querySelectorAll('.edit-domain-checkbox').forEach(c => c.checked = true);
+            }
+        } else {
+            card.classList.remove('opacity-50', 'pointer-events-none');
+        }
+    }
+
+    function generateEditAdminPassword() {
+        App.generatePassword({
+            passwordId: 'modal-edit-password',
+            confirmId: 'modal-edit-password-confirm',
+            failMsg: `{{ T $.Lang "Admins_JsPwdGenFail" }}`,
+            onSuccess: function () {
+                App.checkPasswordChangeIntention(editAdminIntentionOpts);
+                App.checkPasswordStrength(editAdminStrengthOpts);
+                App.checkPasswordMatch(editAdminMatchOpts);
+            }
+        });
+    }
+
+    document.getElementById('modalEditAdminForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var form = this;
+        var btn = document.getElementById('btn-update-admin');
+        var errBox = document.getElementById('modal-edit-admin-error');
+        var errText = document.getElementById('modal-edit-admin-error-text');
+        var usernameId = document.getElementById('modal-edit-admin-id').value;
+
+        errBox.classList.add('hidden');
+        btn.disabled = true;
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+        var formData = new FormData(form);
+        
+        fetch('/api/admins/' + encodeURIComponent(usernameId), {
+            method: 'POST',
+            body: formData,
+            headers: { 'Accept': 'application/json' }
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                errText.textContent = data.error || 'Failed to update admin';
+                errBox.classList.remove('hidden');
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        })
+        .catch(function(err) {
+            errText.textContent = 'Network or server error occurred.';
+            errBox.classList.remove('hidden');
+            btn.disabled = false;
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            console.error('Update admin error:', err);
+        });
+    });
+</script>
+{{end}}

@@ -18,7 +18,7 @@ func (h *Handler) Logs(c *echo.Context) error {
 	username := middleware.GetUsername(c, middleware.SessionName)
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
 
-	return c.Render(http.StatusOK, "logs.html", map[string]interface{}{
+	return c.Render(http.StatusOK, "logs/logs.html", map[string]interface{}{
 		"IsSuperAdmin": isSuperAdmin,
 		"SessionUser":  username,
 		"Username":     username,

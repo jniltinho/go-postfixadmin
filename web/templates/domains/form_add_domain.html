@@ -1,0 +1,224 @@
+{{define "form_add_domain"}}
+<!-- Add Domain Modal -->
+<div id="addDomainModal" class="fixed inset-0 z-50 hidden">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/50" onclick="closeAddDomainModal()"></div>
+    <!-- Modal Box -->
+    <div class="relative z-10 flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white border-4 border-brand-text w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <!-- Header -->
+            <div class="bg-brand-primary px-6 py-4 flex items-center justify-between flex-shrink-0">
+                <h3 class="text-lg font-mono font-black uppercase tracking-tight text-white flex items-center">
+                    <i data-lucide="plus-circle" class="w-5 h-5 mr-2"></i>
+                    {{ T $.Lang `Domains_AddTitle` }}
+                </h3>
+                <button onclick="closeAddDomainModal()" class="text-white hover:text-gray-200 transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Scrollable Body -->
+            <div class="overflow-y-auto flex-1">
+                <!-- Error Area -->
+                <div id="modal-domain-error"
+                    class="hidden mx-6 mt-4 bg-red-50 border-2 border-red-600 p-3 flex items-start">
+                    <i data-lucide="alert-circle" class="w-4 h-4 text-red-600 mr-2 mt-0.5 flex-shrink-0"></i>
+                    <p id="modal-domain-error-text" class="text-sm text-red-700 font-medium"></p>
+                </div>
+
+                <form id="modalAddDomainForm" class="p-6 space-y-5">
+                    <!-- Basic Information Card -->
+                    <div class="border-2 border-brand-text p-4 space-y-4">
+                        <h4 class="text-sm font-mono font-black uppercase tracking-tight flex items-center">
+                            <i data-lucide="info" class="w-4 h-4 mr-2"></i>
+                            {{ T $.Lang `Domains_InfoTitle` }}
+                        </h4>
+
+                        <!-- Domain Name -->
+                        <div>
+                            <label for="modal-add-domain"
+                                class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                                {{ T $.Lang `Domains_LblDomain` }} <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="modal-add-domain" name="domain" required
+                                placeholder="{{ T $.Lang `Domains_PhDomain` }}"
+                                class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm">
+                            <p class="text-[10px] text-gray-500 mt-1">{{ T $.Lang `Domains_HelpDomain` }}</p>
+                        </div>
+
+                        <!-- Description -->
+                        <div>
+                            <label for="modal-add-description"
+                                class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                                {{ T $.Lang `Domains_LblDescription` }}
+                            </label>
+                            <input type="text" id="modal-add-description" name="description"
+                                placeholder="{{ T $.Lang `Domains_PhDescription` }}"
+                                class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm">
+                        </div>
+
+                        <!-- Active Toggle -->
+                        <div class="flex items-center">
+                            <input type="checkbox" id="modal-add-active" name="active" value="true" checked
+                                class="w-5 h-5 border-2 border-brand-text cursor-pointer">
+                            <label for="modal-add-active" class="ml-2 text-sm font-bold cursor-pointer">
+                                {{ T $.Lang `Domains_LblActive` }}
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Settings Card (Collapsible) -->
+                    <details class="border-2 border-brand-text group">
+                        <summary
+                            class="p-3 cursor-pointer font-bold uppercase tracking-tight text-sm flex items-center bg-gray-50 hover:bg-gray-100 transition-colors">
+                            <i data-lucide="settings" class="w-4 h-4 mr-2"></i>
+                            {{ T $.Lang `Domains_AdvancedTitle` }}
+                            <i data-lucide="chevron-down"
+                                class="w-4 h-4 ml-auto group-open:rotate-180 transition-transform"></i>
+                        </summary>
+
+                        <div class="p-4 space-y-4 border-t-2 border-brand-text">
+                            <div class="grid grid-cols-2 gap-4">
+                                <!-- Aliases Limit -->
+                                <div>
+                                    <label for="modal-add-aliases"
+                                        class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                                        {{ T $.Lang `Domains_LblAliases` }}
+                                    </label>
+                                    <input type="number" id="modal-add-aliases" name="aliases" min="0" value="10"
+                                        class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm">
+                                    <p class="text-[10px] text-gray-500 mt-1">{{ T $.Lang `Domains_HelpAliases` }}</p>
+                                </div>
+
+                                <!-- Mailboxes Limit -->
+                                <div>
+                                    <label for="modal-add-mailboxes"
+                                        class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                                        {{ T $.Lang `Domains_LblMailboxes` }}
+                                    </label>
+                                    <input type="number" id="modal-add-mailboxes" name="mailboxes" min="0" value="10"
+                                        class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm">
+                                    <p class="text-[10px] text-gray-500 mt-1">{{ T $.Lang `Domains_HelpMailboxes` }}</p>
+                                </div>
+
+                                <!-- Quota Limit -->
+                                <div>
+                                    <label for="modal-add-quota"
+                                        class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                                        {{ T $.Lang `Domains_LblQuota` }}
+                                    </label>
+                                    <input type="number" id="modal-add-quota" name="quota" min="0" value="2048"
+                                        class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm">
+                                    <p class="text-[10px] text-gray-500 mt-1">{{ T $.Lang `Domains_HelpQuota` }}</p>
+                                </div>
+
+                                <!-- Password Expiry -->
+                                <div>
+                                    <label for="modal-add-password-expiry"
+                                        class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                                        {{ T $.Lang `Domains_LblPasswordExpiry` }}
+                                    </label>
+                                    <input type="number" id="modal-add-password-expiry" name="password_expiry" min="0"
+                                        value="365"
+                                        class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm">
+                                    <p class="text-[10px] text-gray-500 mt-1">{{ T $.Lang `Domains_HelpPasswordExpiry`
+                                        }}</p>
+                                </div>
+                            </div>
+
+                            <!-- Backup MX -->
+                            <div class="flex items-center pt-2">
+                                <input type="checkbox" id="modal-add-backupmx" name="backupmx" value="true"
+                                    class="w-5 h-5 border-2 border-brand-text cursor-pointer">
+                                <label for="modal-add-backupmx" class="ml-2 text-sm font-bold cursor-pointer">
+                                    {{ T $.Lang `Domains_LblBackupMx` }}
+                                </label>
+                                <p class="ml-auto text-[10px] text-gray-500 hidden sm:block">{{ T $.Lang
+                                    `Domains_HelpBackupMx` }}</p>
+                            </div>
+                        </div>
+                    </details>
+                </form>
+            </div>
+
+            <!-- Footer / Actions -->
+            <div
+                class="bg-gray-50 px-6 py-4 flex items-center justify-end space-x-3 border-t-2 border-brand-text flex-shrink-0">
+                <button type="button" onclick="closeAddDomainModal()"
+                    class="bg-white hover:bg-gray-100 text-brand-text border-2 border-brand-text font-black px-6 py-2.5 shadow-[2px_2px_0px_#1E293B] hover:translate-y-px hover:shadow-[1px_1px_0px_#1E293B] active:translate-y-0.5 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center">
+                    <i data-lucide="x" class="w-4 h-4 mr-2"></i>
+                    {{ T $.Lang `Domains_BtnCancel` }}
+                </button>
+                <button type="submit" form="modalAddDomainForm" id="btn-save-domain"
+                    class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-6 py-2.5 shadow-[2px_2px_0px_#1E293B] hover:translate-y-px hover:shadow-[1px_1px_0px_#1E293B] active:translate-y-0.5 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center">
+                    <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>
+                    {{ T $.Lang `Domains_BtnSave` }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openAddDomainModal() {
+        document.getElementById('addDomainModal').classList.remove('hidden');
+        document.getElementById('modal-domain-error').classList.add('hidden');
+        document.getElementById('modalAddDomainForm').reset();
+
+        lucide.createIcons();
+    }
+
+    function closeAddDomainModal() {
+        document.getElementById('addDomainModal').classList.add('hidden');
+    }
+
+    document.getElementById('modalAddDomainForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var form = this;
+        var btn = document.getElementById('btn-save-domain');
+        var errBox = document.getElementById('modal-domain-error');
+        var errText = document.getElementById('modal-domain-error-text');
+
+        // Reset error state
+        errBox.classList.add('hidden');
+
+        // Simple client-side validation
+        if (!document.getElementById('modal-add-domain').value) {
+            errText.textContent = 'Domain is required.';
+            errBox.classList.remove('hidden');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+        var formData = new FormData(form);
+
+        // The API returns JSON
+        fetch('/api/domains', {
+            method: 'POST',
+            body: formData,
+            headers: { 'Accept': 'application/json' }
+        })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                if (data.success) {
+                    // Flash message is set by backend, just reload
+                    window.location.reload();
+                } else {
+                    errText.textContent = data.error || 'Failed to create domain';
+                    errBox.classList.remove('hidden');
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            })
+            .catch(function (err) {
+                errText.textContent = 'Network or server error occurred.';
+                errBox.classList.remove('hidden');
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                console.error('Add domain error:', err);
+            });
+    });
+</script>
+{{end}}

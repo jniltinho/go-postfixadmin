@@ -31,11 +31,11 @@ func (h *Handler) ListMailboxes(c *echo.Context) error {
 		mailboxes, _, err = utils.GetAllMailboxes(h.DB, SessionUser, isSuperAdmin, domainFilter)
 		if err != nil {
 			if err.Error() == "access denied to this domain" {
-				return c.Render(http.StatusForbidden, "mailboxes.html", map[string]interface{}{
+				return c.Render(http.StatusForbidden, "mailboxes/mailboxes.html", map[string]interface{}{
 					"Error": "Access denied to this domain",
 				})
 			}
-			return c.Render(http.StatusInternalServerError, "mailboxes.html", map[string]interface{}{
+			return c.Render(http.StatusInternalServerError, "mailboxes/mailboxes.html", map[string]interface{}{
 				"Error": "Failed to fetch mailboxes: " + err.Error(),
 			})
 		}
@@ -47,7 +47,7 @@ func (h *Handler) ListMailboxes(c *echo.Context) error {
 		domains, _, _ = utils.GetActiveDomains(h.DB, SessionUser, isSuperAdmin)
 	}
 
-	return c.Render(http.StatusOK, "mailboxes.html", map[string]interface{}{
+	return c.Render(http.StatusOK, "mailboxes/mailboxes.html", map[string]interface{}{
 		"Mailboxes":       mailboxes,
 		"Domains":         domains,
 		"DomainFilter":    domainFilter, // Para exibir no template

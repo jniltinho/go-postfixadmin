@@ -29,7 +29,7 @@ func (h *Handler) AddFetchmailGET(c *echo.Context) error {
 		"IsSuperAdmin": isSuper,
 	}
 
-	return c.Render(http.StatusOK, "add_fetchmail.html", renderData)
+	return c.Render(http.StatusOK, "fetchmail/add_fetchmail.html", renderData)
 }
 
 // AddFetchmailPOST processes the form submission to create a new fetchmail entry
@@ -147,5 +147,5 @@ func renderFetchmailFormWithError(c *echo.Context, h *Handler, errorMsg string) 
 		"IsSuperAdmin": isSuper,
 	}
 
-	return c.Render(http.StatusBadRequest, "add_fetchmail.html", renderData)
+	return c.Render(http.StatusBadRequest, "fetchmail/add_fetchmail.html", renderData)
 }

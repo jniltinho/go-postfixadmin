@@ -32,7 +32,7 @@ func (h *Handler) ListDomains(c *echo.Context) error {
 
 	allowedDomains, _, err := utils.GetAllowedDomains(h.DB, username, isSuperAdmin)
 	if err != nil {
-		return c.Render(http.StatusInternalServerError, "domains.html", map[string]interface{}{
+		return c.Render(http.StatusInternalServerError, "domains/domains.html", map[string]interface{}{
 			"Error": "Failed to check permissions: " + err.Error(),
 		})
 	}
@@ -67,7 +67,7 @@ func (h *Handler) ListDomains(c *echo.Context) error {
 			})
 		}
 	}
-	return c.Render(http.StatusOK, "domains.html", map[string]interface{}{
+	return c.Render(http.StatusOK, "domains/domains.html", map[string]interface{}{
 		"Domains":      displayDomains,
 		"IsSuperAdmin": isSuperAdmin,
 		"SessionUser":  username,
@@ -76,26 +76,13 @@ func (h *Handler) ListDomains(c *echo.Context) error {
 	})
 }
 
-// AddDomainForm exibe o formulário de adicionar domínio
-func (h *Handler) AddDomainForm(c *echo.Context) error {
+// AddDomainAPI processa a criação de um novo domínio via JSON API
+func (h *Handler) AddDomainAPI(c *echo.Context) error {
 	// Security: Only Superadmins can add domains
 	username := middleware.GetUsername(c, middleware.SessionName)
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
 	if !isSuperAdmin {
-		return c.Render(http.StatusForbidden, "domains.html", map[string]interface{}{"Error": "Access denied: Only Superadmins can create domains"})
-	}
-	return c.Render(http.StatusOK, "add_domain.html", map[string]interface{}{
-		"SessionUser": username,
-	})
-}
-
-// AddDomain processa a criação de um novo domínio
-func (h *Handler) AddDomain(c *echo.Context) error {
-	// Security: Only Superadmins can add domains
-	username := middleware.GetUsername(c, middleware.SessionName)
-	isSuperAdmin := middleware.GetIsSuperAdmin(c)
-	if !isSuperAdmin {
-		return c.Render(http.StatusForbidden, "domains.html", map[string]interface{}{"Error": "Access denied"})
+		return c.JSON(http.StatusForbidden, map[string]interface{}{"error": "Access denied: Only Superadmins can create domains"})
 	}
 
 	// Parse form data
@@ -119,10 +106,6 @@ func (h *Handler) AddDomain(c *echo.Context) error {
 		}
 	}
 
-	// Parse quota (in MB, store as MB or Bytes? DB schema says int64, usually postfixadmin uses MB)
-	// standard postfixadmin uses MB in the UI and stores MB in the DB (quota field).
-	// MaxQuota is usually Bytes? Let's check model. Domain struct has Quota int64.
-	// Let's assume input is MB.
 	quota := int64(2048) // Default
 	if val := c.FormValue("quota"); val != "" {
 		if parsed, err := strconv.ParseInt(val, 10, 64); err == nil {
@@ -139,47 +122,19 @@ func (h *Handler) AddDomain(c *echo.Context) error {
 
 	// Validation: domain is required
 	if domainName == "" {
-		return c.Render(http.StatusBadRequest, "add_domain.html", map[string]interface{}{
-			"Error":       "Domain name is required",
-			"Domain":      domainName,
-			"Description": description,
-			"Active":      active,
-			"BackupMX":    backupMX,
-			"Aliases":     aliases,
-			"Mailboxes":   mailboxes,
-			"SessionUser": username,
-		})
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "Domain name is required"})
 	}
 
-	// Validation: basic DNS format (simplified)
+	// Validation: basic DNS format
 	domainRegex := regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?(\.[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?)+$`)
 	if !domainRegex.MatchString(domainName) {
-		return c.Render(http.StatusBadRequest, "add_domain.html", map[string]interface{}{
-			"Error":       "Invalid domain format. Please enter a valid domain name (e.g., example.com)",
-			"Domain":      domainName,
-			"Description": description,
-			"Active":      active,
-			"BackupMX":    backupMX,
-			"Aliases":     aliases,
-			"Mailboxes":   mailboxes,
-			"SessionUser": username,
-		})
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "Invalid domain format. Please enter a valid domain name (e.g., example.com)"})
 	}
 
 	// Check if domain already exists
 	var existingDomain models.Domain
-	result := h.DB.Where("domain = ?", domainName).First(&existingDomain)
-	if result.Error == nil {
-		return c.Render(http.StatusBadRequest, "add_domain.html", map[string]interface{}{
-			"Error":       "Domain already exists",
-			"Domain":      domainName,
-			"Description": description,
-			"Active":      active,
-			"BackupMX":    backupMX,
-			"Aliases":     aliases,
-			"Mailboxes":   mailboxes,
-			"SessionUser": username,
-		})
+	if err := h.DB.Where("domain = ?", domainName).First(&existingDomain).Error; err == nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "Domain already exists"})
 	}
 
 	// Create new domain
@@ -189,8 +144,8 @@ func (h *Handler) AddDomain(c *echo.Context) error {
 		Description:    description,
 		Aliases:        aliases,
 		Mailboxes:      mailboxes,
-		MaxQuota:       0,     // Not used in this form yet? Or is Quota the max quota for the domain?
-		Quota:          quota, // Domain quota
+		MaxQuota:       0,
+		Quota:          quota,
 		Transport:      "",
 		BackupMX:       backupMX,
 		Created:        now,
@@ -200,16 +155,7 @@ func (h *Handler) AddDomain(c *echo.Context) error {
 	}
 
 	if err := h.DB.Create(&newDomain).Error; err != nil {
-		return c.Render(http.StatusInternalServerError, "add_domain.html", map[string]interface{}{
-			"Error":       "Failed to create domain: " + err.Error(),
-			"Domain":      domainName,
-			"Description": description,
-			"Active":      active,
-			"BackupMX":    backupMX,
-			"Aliases":     aliases,
-			"Mailboxes":   mailboxes,
-			"SessionUser": username,
-		})
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "Failed to create domain: " + err.Error()})
 	}
 
 	// Log Action
@@ -219,41 +165,37 @@ func (h *Handler) AddDomain(c *echo.Context) error {
 
 	middleware.SetFlash(c, "message", "Domain created successfully")
 
-	// Redirect to domains list on success
-	return c.Redirect(http.StatusFound, "/domains")
+	return c.JSON(http.StatusOK, map[string]interface{}{"success": true})
 }
 
-// EditDomainForm exibe o formulário de edição de domínio
-func (h *Handler) EditDomainForm(c *echo.Context) error {
+// GetDomainAPI retorna os dados de um domínio para popular o modal de edição
+func (h *Handler) GetDomainAPI(c *echo.Context) error {
 	// Security: Only Superadmins can edit domains
-	username := middleware.GetUsername(c, middleware.SessionName)
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
 	if !isSuperAdmin {
-		return c.Render(http.StatusForbidden, "domains.html", map[string]interface{}{"Error": "Access denied: Only Superadmins can edit domains"})
+		return c.JSON(http.StatusForbidden, map[string]interface{}{"error": "Access denied"})
 	}
 
 	domainName := c.Param("domain")
 
 	var domain models.Domain
 	if err := h.DB.Where("domain = ?", domainName).First(&domain).Error; err != nil {
-		return c.Render(http.StatusNotFound, "add_domain.html", map[string]interface{}{
-			"Error": "Domain not found",
-		})
+		return c.JSON(http.StatusNotFound, map[string]interface{}{"error": "Domain not found"})
 	}
 
-	return c.Render(http.StatusOK, "edit_domain.html", map[string]interface{}{
-		"Domain":      domain,
-		"SessionUser": username,
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"success": true,
+		"domain":  domain,
 	})
 }
 
-// EditDomain processa a edição de um domínio existente
-func (h *Handler) EditDomain(c *echo.Context) error {
+// EditDomainAPI processa a edição de um domínio existente via JSON API
+func (h *Handler) EditDomainAPI(c *echo.Context) error {
 	// Security: Only Superadmins can edit domains
 	username := middleware.GetUsername(c, middleware.SessionName)
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
 	if !isSuperAdmin {
-		return c.Render(http.StatusForbidden, "domains.html", map[string]interface{}{"Error": "Access denied"})
+		return c.JSON(http.StatusForbidden, map[string]interface{}{"error": "Access denied"})
 	}
 
 	domainName := c.Param("domain")
@@ -261,9 +203,7 @@ func (h *Handler) EditDomain(c *echo.Context) error {
 	// Find existing domain
 	var domain models.Domain
 	if err := h.DB.Where("domain = ?", domainName).First(&domain).Error; err != nil {
-		return c.Render(http.StatusNotFound, "edit_domain.html", map[string]interface{}{
-			"Error": "Domain not found",
-		})
+		return c.JSON(http.StatusNotFound, map[string]interface{}{"error": "Domain not found"})
 	}
 
 	// Parse form data
@@ -271,8 +211,6 @@ func (h *Handler) EditDomain(c *echo.Context) error {
 	active := c.FormValue("active") == "true"
 	backupMX := c.FormValue("backupmx") == "true"
 
-	// ...
-	// Parse numeric fields
 	aliases := 10
 	if val := c.FormValue("aliases"); val != "" {
 		if parsed, err := strconv.Atoi(val); err == nil {
@@ -287,14 +225,11 @@ func (h *Handler) EditDomain(c *echo.Context) error {
 		}
 	}
 
-	var quota int64
-	// Default to existing quota if not provided? Or parse from form?
+	quota := domain.Quota
 	if val := c.FormValue("quota"); val != "" {
 		if parsed, err := strconv.ParseInt(val, 10, 64); err == nil {
 			quota = parsed
 		}
-	} else {
-		quota = domain.Quota
 	}
 
 	var passwordExpiry *int
@@ -317,14 +252,12 @@ func (h *Handler) EditDomain(c *echo.Context) error {
 	domain.Active = active
 	domain.PasswordExpiry = passwordExpiry
 
-	// Use transaction to ensure atomicity (especially for cascading updates)
+	// Use transaction to ensure atomicity
 	err := h.DB.Transaction(func(tx *gorm.DB) error {
 		if activeChanged {
-			// Update all mailboxes for this domain to match the new domain active state
 			if err := tx.Model(&models.Mailbox{}).Where("domain = ?", domain.Domain).Update("active", active).Error; err != nil {
 				return err
 			}
-			// Update all aliases for this domain to match the new domain active state
 			if err := tx.Model(&models.Alias{}).Where("domain = ?", domain.Domain).Update("active", active).Error; err != nil {
 				return err
 			}
@@ -334,26 +267,19 @@ func (h *Handler) EditDomain(c *echo.Context) error {
 			return err
 		}
 
-		// Log Action
 		if err := utils.LogAction(tx, username, c.RealIP(), domainName, "edit_domain", domainName); err != nil {
 			fmt.Printf("Failed to log edit_domain: %v\n", err)
-			return nil
 		}
 		return nil
 	})
 
 	if err != nil {
-		return c.Render(http.StatusInternalServerError, "edit_domain.html", map[string]interface{}{
-			"Error":       "Failed to update domain: " + err.Error(),
-			"Domain":      domain,
-			"SessionUser": username,
-		})
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "Failed to update domain: " + err.Error()})
 	}
 
 	middleware.SetFlash(c, "message", "Domain updated successfully")
 
-	// Redirect to domains list on success
-	return c.Redirect(http.StatusFound, "/domains")
+	return c.JSON(http.StatusOK, map[string]interface{}{"success": true})
 }
 
 // DeleteDomain remove um domínio e todos os dados associados (aliases e mailboxes)

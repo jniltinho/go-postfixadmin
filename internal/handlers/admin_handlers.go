@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 
 	"go-postfixadmin/internal/middleware"
@@ -29,7 +30,7 @@ func (h *Handler) ListAdmins(c *echo.Context) error {
 	var admins []models.Admin
 
 	if h.DB == nil {
-		return c.Render(http.StatusInternalServerError, "admins.html", map[string]interface{}{
+		return c.Render(http.StatusInternalServerError, "admins/admins.html", map[string]interface{}{
 			"error": "Database connection unavailable",
 		})
 	}
@@ -41,7 +42,7 @@ func (h *Handler) ListAdmins(c *echo.Context) error {
 	}
 
 	if err := query.Find(&admins).Error; err != nil {
-		return c.Render(http.StatusInternalServerError, "admins.html", map[string]interface{}{
+		return c.Render(http.StatusInternalServerError, "admins/admins.html", map[string]interface{}{
 			"error": "Failed to fetch administrators",
 		})
 	}
@@ -64,8 +65,14 @@ func (h *Handler) ListAdmins(c *echo.Context) error {
 		})
 	}
 
-	return c.Render(http.StatusOK, "admins.html", map[string]interface{}{
+	var domains []models.Domain
+	if h.DB != nil && isSuper {
+		h.DB.Where("domain != ?", "ALL").Where("active = ?", true).Order("domain ASC").Find(&domains)
+	}
+
+	return c.Render(http.StatusOK, "admins/admins.html", map[string]interface{}{
 		"Admins":       adminList,
+		"Domains":      domains,
 		"IsSuperAdmin": isSuper,
 		"SessionUser":  username,
 		"Message":      middleware.GetFlash(c, "message"),
@@ -73,36 +80,13 @@ func (h *Handler) ListAdmins(c *echo.Context) error {
 	})
 }
 
-// AddAdminForm displays the form to add a new administrator
-// AddAdminForm displays the form to add a new administrator
-func (h *Handler) AddAdminForm(c *echo.Context) error {
-	// Security: Only Superadmins
-	username := middleware.GetUsername(c, middleware.SessionName)
-	isSuper, err := utils.IsSuperAdmin(h.DB, username)
-	if err != nil || !isSuper {
-		return c.Render(http.StatusForbidden, "admins.html", map[string]interface{}{"Error": "Access denied"})
-	}
-
-	var domains []models.Domain
-
-	if h.DB != nil {
-		h.DB.Where("domain != ? AND active = ?", "ALL", true).Order("domain ASC").Find(&domains)
-	}
-
-	return c.Render(http.StatusOK, "add_admin.html", map[string]interface{}{
-		"Domains":      domains,
-		"IsSuperAdmin": true,
-		"SessionUser":  username,
-	})
-}
-
-// AddAdmin processes the creation of a new administrator
-func (h *Handler) AddAdmin(c *echo.Context) error {
+// AddAdminAPI processes the creation of a new administrator via JSON API
+func (h *Handler) AddAdminAPI(c *echo.Context) error {
 	// Security: Only Superadmins
 	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
 	isSuper, err := utils.IsSuperAdmin(h.DB, loggedInUser)
 	if err != nil || !isSuper {
-		return c.Render(http.StatusForbidden, "admins.html", map[string]interface{}{"Error": "Access denied"})
+		return c.JSON(http.StatusForbidden, map[string]interface{}{"success": false, "error": "Access denied"})
 	}
 
 	// Get form values
@@ -115,25 +99,25 @@ func (h *Handler) AddAdmin(c *echo.Context) error {
 
 	// Basic Validation
 	if username == "" {
-		return h.renderAddAdminError(c, "O nome de usuário é obrigatório", username)
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "error": "Username is required"})
 	}
 	if len(password) < 8 {
-		return h.renderAddAdminError(c, "A senha deve ter no mínimo 8 caracteres", username)
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "error": "Password must be at least 8 characters"})
 	}
 	if password != passwordConfirm {
-		return h.renderAddAdminError(c, "As senhas não conferem", username)
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "error": "Passwords do not match"})
 	}
 
 	// Check if admin already exists
 	var existingAdmin models.Admin
 	if err := h.DB.Where("username = ?", username).First(&existingAdmin).Error; err == nil {
-		return h.renderAddAdminError(c, "O administrador já existe", username)
+		return c.JSON(http.StatusConflict, map[string]interface{}{"success": false, "error": "Admin already exists"})
 	}
 
 	// Hash password
 	crypted, err := utils.HashPassword(password)
 	if err != nil {
-		return h.renderAddAdminError(c, "Falha ao gerar hash da senha: "+err.Error(), username)
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to hash password"})
 	}
 
 	// Begin transaction
@@ -152,7 +136,7 @@ func (h *Handler) AddAdmin(c *echo.Context) error {
 
 	if err := tx.Create(&newAdmin).Error; err != nil {
 		tx.Rollback()
-		return h.renderAddAdminError(c, "Falha ao criar administrador: "+err.Error(), username)
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to create administrator"})
 	}
 
 	// Assign Domains
@@ -166,7 +150,7 @@ func (h *Handler) AddAdmin(c *echo.Context) error {
 		}
 		if err := tx.Create(&da).Error; err != nil {
 			tx.Rollback()
-			return h.renderAddAdminError(c, "Falha ao atribuir domínio ALL: "+err.Error(), username)
+			return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to assign ALL domain"})
 		}
 	} else if len(domains) > 0 {
 		// Normal admin gets selected domains
@@ -179,42 +163,22 @@ func (h *Handler) AddAdmin(c *echo.Context) error {
 			}
 			if err := tx.Create(&da).Error; err != nil {
 				tx.Rollback()
-				return h.renderAddAdminError(c, "Falha ao atribuir domínio "+d+": "+err.Error(), username)
+				return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to assign domain " + d})
 			}
 		}
 	}
 
 	// Log Action
 	if err := utils.LogAction(tx, loggedInUser, c.RealIP(), "ALL", "create_admin", username); err != nil {
-		// Log error but don't fail transaction? Or fail?
-		// Usually logging failure shouldn't block action, but for audit strictness maybe it should.
-		// For now, let's just log it.
-		// Actually, let's include it in transaction for data integrity.
 		tx.Rollback()
-		return h.renderAddAdminError(c, "Falha ao registrar log: "+err.Error(), username)
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to log action"})
 	}
 
 	tx.Commit()
 
 	middleware.SetFlash(c, "message", "Admin created successfully")
 
-	return c.Redirect(http.StatusFound, "/admins")
-}
-
-// renderAddAdminError helper to render the form with error message
-func (h *Handler) renderAddAdminError(c *echo.Context, errorMsg, username string) error {
-	var domains []models.Domain
-	if h.DB != nil {
-		h.DB.Where("domain != ? AND active = ?", "ALL", true).Order("domain ASC").Find(&domains)
-	}
-
-	return c.Render(http.StatusBadRequest, "add_admin.html", map[string]interface{}{
-		"Error":        errorMsg,
-		"Username":     username,
-		"Domains":      domains,
-		"IsSuperAdmin": true,
-		"SessionUser":  middleware.GetUsername(c, middleware.SessionName),
-	})
+	return c.JSON(http.StatusOK, map[string]interface{}{"success": true})
 }
 
 // DeleteAdmin handles the deletion of an administrator
@@ -226,7 +190,7 @@ func (h *Handler) DeleteAdmin(c *echo.Context) error {
 		return c.JSON(http.StatusForbidden, map[string]interface{}{"error": "Access denied"})
 	}
 
-	username := c.Param("username")
+	username, _ := url.PathUnescape(c.Param("username"))
 	if username == "" {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"success": false,
@@ -281,27 +245,26 @@ func (h *Handler) DeleteAdmin(c *echo.Context) error {
 	})
 }
 
-// EditAdminForm displays the form to edit an administrator
-func (h *Handler) EditAdminForm(c *echo.Context) error {
-	// Security: Superadmins OR Self
+// GetAdminAPI fetches a single administrator details for the edit modal
+func (h *Handler) GetAdminAPI(c *echo.Context) error {
 	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
 	isSuper, err := utils.IsSuperAdmin(h.DB, loggedInUser)
 	if err != nil {
-		return c.Render(http.StatusForbidden, "admins.html", map[string]interface{}{"Error": "Permission check failed"})
+		return c.JSON(http.StatusForbidden, map[string]interface{}{"error": "Permission check failed"})
 	}
 
-	targetUsername := c.Param("username")
+	targetUsername, _ := url.PathUnescape(c.Param("username"))
 	if !isSuper && loggedInUser != targetUsername {
-		return c.Render(http.StatusForbidden, "admins.html", map[string]interface{}{"Error": "Access denied"})
+		return c.JSON(http.StatusForbidden, map[string]interface{}{"error": "Access denied"})
 	}
 
 	if targetUsername == "" {
-		return c.Redirect(http.StatusFound, "/admins")
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "Username required"})
 	}
 
 	var admin models.Admin
 	if err := h.DB.First(&admin, "username = ?", targetUsername).Error; err != nil {
-		return c.Redirect(http.StatusFound, "/admins")
+		return c.JSON(http.StatusNotFound, map[string]interface{}{"error": "Admin not found"})
 	}
 
 	// Fetch all domains
@@ -318,8 +281,8 @@ func (h *Handler) EditAdminForm(c *echo.Context) error {
 	}
 
 	type DomainOption struct {
-		Domain   string
-		Assigned bool
+		Domain   string `json:"domain"`
+		Assigned bool   `json:"assigned"`
 	}
 
 	var domainOptions []DomainOption
@@ -330,37 +293,36 @@ func (h *Handler) EditAdminForm(c *echo.Context) error {
 		})
 	}
 
-	return c.Render(http.StatusOK, "edit_admin.html", map[string]interface{}{
-		"Admin":        admin,
-		"Domains":      domainOptions,
-		"IsSuperAdmin": isSuper,
-		"SessionUser":  loggedInUser,
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"admin":   admin,
+		"domains": domainOptions,
 	})
 }
 
-// EditAdmin processes the update of an administrator
-func (h *Handler) EditAdmin(c *echo.Context) error {
+// EditAdminAPI processes the update of an administrator via JSON API
+func (h *Handler) EditAdminAPI(c *echo.Context) error {
 	// Security: Superadmins OR Self
 	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
 	isSuper, err := utils.IsSuperAdmin(h.DB, loggedInUser)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "Permission check failed"})
+		return c.JSON(http.StatusForbidden, map[string]interface{}{"success": false, "error": "Permission check failed"})
 	}
 
-	targetUsername := c.Param("username")
+	targetUsername, _ := url.PathUnescape(c.Param("username"))
 	if !isSuper && loggedInUser != targetUsername {
-		return c.JSON(http.StatusForbidden, map[string]interface{}{"error": "Access denied"})
+		return c.JSON(http.StatusForbidden, map[string]interface{}{"success": false, "error": "Access denied"})
 	}
 
 	if targetUsername == "" {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "Username required"})
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "error": "Username required"})
 	}
 
 	// Get form values
 	password := c.FormValue("password")
 	active := c.FormValue("active") == "true"
 	superadmin := c.FormValue("superadmin") == "true"
-	domains := c.Request().Form["domains"] // Helper to get multiple values for checkbox array
+	changePassword := c.FormValue("change_password") == "true"
+	domains := c.Request().Form["domains"]
 
 	// Using a transaction
 	tx := h.DB.Begin()
@@ -377,25 +339,18 @@ func (h *Handler) EditAdmin(c *echo.Context) error {
 		updates["superadmin"] = superadmin
 	}
 
-	if password != "" {
+	if changePassword && password != "" {
 		crypted, err := utils.HashPassword(password)
 		if err != nil {
 			tx.Rollback()
-			return c.Render(http.StatusOK, "edit_admin.html", map[string]interface{}{
-				"Admin":        models.Admin{Username: targetUsername},
-				"Error":        "Failed to hash password",
-				"IsSuperAdmin": isSuper,
-			})
+			return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to hash password"})
 		}
 		updates["password"] = crypted
 	}
 
 	if err := tx.Model(&models.Admin{}).Where("username = ?", targetUsername).Updates(updates).Error; err != nil {
 		tx.Rollback()
-		return c.Render(http.StatusOK, "edit_admin.html", map[string]interface{}{
-			"Error":        "Failed to update admin: " + err.Error(),
-			"IsSuperAdmin": isSuper,
-		})
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to update admin"})
 	}
 
 	// 2. Update Domain Assignments - Only for Superadmins
@@ -403,15 +358,11 @@ func (h *Handler) EditAdmin(c *echo.Context) error {
 		// First, remove all existing assignments
 		if err := tx.Where("username = ?", targetUsername).Delete(&models.DomainAdmin{}).Error; err != nil {
 			tx.Rollback()
-			return c.Render(http.StatusOK, "edit_admin.html", map[string]interface{}{
-				"Error":        "Failed to update domain permissions: " + err.Error(),
-				"IsSuperAdmin": isSuper,
-			})
+			return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to clear domain permissions"})
 		}
 
 		// Assign Domains
 		if superadmin {
-			// Superadmin gets "ALL" domain
 			da := models.DomainAdmin{
 				Username: targetUsername,
 				Domain:   "ALL",
@@ -420,13 +371,9 @@ func (h *Handler) EditAdmin(c *echo.Context) error {
 			}
 			if err := tx.Create(&da).Error; err != nil {
 				tx.Rollback()
-				return c.Render(http.StatusOK, "edit_admin.html", map[string]interface{}{
-					"Error":        "Failed to assign domain ALL: " + err.Error(),
-					"IsSuperAdmin": isSuper,
-				})
+				return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to assign ALL domain"})
 			}
 		} else if len(domains) > 0 {
-			// Normal admin gets selected domains
 			for _, d := range domains {
 				da := models.DomainAdmin{
 					Username: targetUsername,
@@ -436,10 +383,7 @@ func (h *Handler) EditAdmin(c *echo.Context) error {
 				}
 				if err := tx.Create(&da).Error; err != nil {
 					tx.Rollback()
-					return c.Render(http.StatusOK, "edit_admin.html", map[string]interface{}{
-						"Error":        "Failed to assign domain " + d + ": " + err.Error(),
-						"IsSuperAdmin": isSuper,
-					})
+					return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to assign domain " + d})
 				}
 			}
 		}
@@ -448,15 +392,12 @@ func (h *Handler) EditAdmin(c *echo.Context) error {
 	// Log Action
 	if err := utils.LogAction(tx, loggedInUser, c.RealIP(), "ALL", "edit_admin", targetUsername); err != nil {
 		tx.Rollback()
-		return c.Render(http.StatusOK, "edit_admin.html", map[string]interface{}{
-			"Error":        "Failed to log action: " + err.Error(),
-			"IsSuperAdmin": isSuper,
-		})
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to log action"})
 	}
 
 	tx.Commit()
 
 	middleware.SetFlash(c, "message", "Admin updated successfully")
 
-	return c.Redirect(http.StatusFound, "/admins")
+	return c.JSON(http.StatusOK, map[string]interface{}{"success": true})
 }

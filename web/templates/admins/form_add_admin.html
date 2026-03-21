@@ -1,0 +1,279 @@
+{{define "form_add_admin"}}
+<!-- Add Admin Modal -->
+<div id="addAdminModal" class="fixed inset-0 z-50 hidden">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/50" onclick="closeAddAdminModal()"></div>
+    <!-- Modal Box -->
+    <div class="relative z-10 flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white border-4 border-brand-text w-full max-w-4xl max-h-[90vh] flex flex-col">
+            <!-- Header -->
+            <div class="bg-brand-primary px-6 py-4 flex items-center justify-between flex-shrink-0">
+                <h3 class="text-lg font-mono font-black uppercase tracking-tight text-white flex items-center">
+                    <i data-lucide="user-plus" class="w-5 h-5 mr-2"></i>
+                    {{ T $.Lang `Admins_AddTitle` }}
+                </h3>
+                <button onclick="closeAddAdminModal()" class="text-white hover:text-gray-200 transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Scrollable Body -->
+            <div class="overflow-y-auto flex-1">
+                <!-- Error Area -->
+                <div id="modal-admin-error"
+                    class="hidden mx-6 mt-4 bg-red-50 border-2 border-red-600 p-3 flex items-start">
+                    <i data-lucide="alert-circle" class="w-4 h-4 text-red-600 mr-2 mt-0.5 flex-shrink-0"></i>
+                    <p id="modal-admin-error-text" class="text-sm text-red-700 font-medium"></p>
+                </div>
+
+                <form id="modalAddAdminForm" class="p-6 space-y-5">
+                    <!-- Basic Information Card -->
+                    <div class="border-2 border-brand-text p-4 space-y-4">
+                        <h4 class="text-sm font-mono font-black uppercase tracking-tight flex items-center">
+                            <i data-lucide="info" class="w-4 h-4 mr-2"></i>
+                            {{ T $.Lang `Admins_DetailsTitle` }}
+                        </h4>
+
+                        <!-- Username -->
+                        <div>
+                            <label for="modal-add-username"
+                                class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                                {{ T $.Lang `Admins_LblUsername` }} <span class="text-red-500">*</span>
+                            </label>
+                            <input type="email" id="modal-add-username" name="username" required
+                                placeholder="{{ T $.Lang `Admins_PhUsername` }}"
+                                class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm">
+                        </div>
+
+                        <!-- Options Grid -->
+                        <div class="flex flex-wrap gap-6 pt-2">
+                            <!-- Active -->
+                            <div class="flex items-center">
+                                <input type="checkbox" id="modal-add-active" name="active" value="true" checked
+                                    class="w-5 h-5 border-2 border-brand-text cursor-pointer">
+                                <label for="modal-add-active" class="ml-2 text-sm font-bold cursor-pointer">
+                                    {{ T $.Lang `Admins_LblEnabled` }}
+                                </label>
+                            </div>
+
+                            <!-- Superadmin -->
+                            <div class="flex items-center" title="{{ T $.Lang `Admins_TitleSuperAdmin` }}">
+                                <input type="checkbox" id="modal-add-superadmin" name="superadmin" value="true"
+                                    class="w-5 h-5 border-2 border-brand-text cursor-pointer" onchange="toggleAddAdminDomains()">
+                                <label for="modal-add-superadmin" class="ml-2 text-sm font-bold cursor-pointer">
+                                    {{ T $.Lang `Admins_LblSuperAdmin` }}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Password Section Card -->
+                    <div class="border-2 border-brand-text p-4 space-y-4">
+                        <h4 class="text-sm font-mono font-black uppercase tracking-tight flex items-center">
+                            <i data-lucide="key" class="w-4 h-4 mr-2"></i>
+                            {{ T $.Lang `Admins_PwdTitle` }}
+                        </h4>
+
+                        <div class="flex gap-2 items-center">
+                            <!-- Password Input -->
+                            <div class="relative flex-1">
+                                <input type="password" id="modal-add-password" name="password" minlength="8" required
+                                    placeholder="{{ T $.Lang `Admins_PhNewPwd` }}"
+                                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm pr-10">
+                                <button type="button" onclick="App.togglePassword('modal-add-password', event.currentTarget)"
+                                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary transition-colors">
+                                    <i data-lucide="eye" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+
+                            <!-- Confirm Password Input -->
+                            <div class="relative flex-1">
+                                <input type="password" id="modal-add-password-confirm" name="password_confirm" minlength="8"
+                                    required placeholder="{{ T $.Lang `Admins_PhRepeatPwd` }}"
+                                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm pr-10">
+                                <button type="button" onclick="App.togglePassword('modal-add-password-confirm', event.currentTarget)"
+                                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary transition-colors">
+                                    <i data-lucide="eye" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+
+                            <!-- Generate Button -->
+                            <button type="button" onclick="generateAddAdminPassword()" title="Generate strong password"
+                                class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white text-xs font-black px-3 h-10 border-2 border-brand-text cursor-pointer uppercase tracking-widest flex items-center gap-1 whitespace-nowrap flex-shrink-0 transition-colors">
+                                <i data-lucide="wand-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <p id="modal-add-match-indicator" class="text-[10px] mt-1 hidden"></p>
+
+                        <!-- Password Strength Meter -->
+                        <div id="modal-add-strength-meter" class="hidden">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-[10px] font-black uppercase tracking-widest text-brand-text">{{ T $.Lang `Admins_JsPwdStrength` }}</span>
+                                <span id="modal-add-strength-text" class="text-[10px] font-bold uppercase tracking-wider"></span>
+                            </div>
+                            <div class="h-1.5 bg-gray-200 border border-brand-text overflow-hidden">
+                                <div id="modal-add-strength-bar" class="h-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Domains Card -->
+                    <div id="modal-add-domains-card" class="border-2 border-brand-text p-4">
+                        <h4 class="text-sm font-mono font-black uppercase tracking-tight flex items-center mb-2">
+                            <i data-lucide="globe" class="w-4 h-4 mr-2"></i>
+                            {{ T $.Lang `Admins_DomainsTitle` }}
+                        </h4>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">{{ T $.Lang `Admins_DomainsSubtitle` }}</p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 max-h-48 overflow-y-auto p-3 border-2 border-gray-100 bg-gray-50">
+                            {{range .Domains}}
+                            <div class="flex items-center bg-white p-2 border border-gray-200">
+                                <input type="checkbox" id="modal-add-domain-{{.Domain}}" name="domains" value="{{.Domain}}"
+                                    class="w-4 h-4 border-2 border-brand-text cursor-pointer text-brand-primary focus:ring-brand-primary add-domain-checkbox">
+                                <label for="modal-add-domain-{{.Domain}}" class="ml-2 text-xs font-medium cursor-pointer select-none truncate" title="{{.Domain}}">
+                                    {{.Domain}}
+                                </label>
+                            </div>
+                            {{else}}
+                            <div class="col-span-full text-center text-xs text-gray-500 py-2">{{ T $.Lang `Admins_DomainsNone` }}</div>
+                            {{end}}
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Footer / Actions -->
+            <div
+                class="bg-gray-50 px-6 py-4 flex items-center justify-end space-x-3 border-t-2 border-brand-text flex-shrink-0">
+                <button type="button" onclick="closeAddAdminModal()"
+                    class="bg-white hover:bg-gray-100 text-brand-text border-2 border-brand-text font-black px-6 py-2.5 shadow-[2px_2px_0px_#1E293B] hover:translate-y-px hover:shadow-[1px_1px_0px_#1E293B] active:translate-y-0.5 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center">
+                    <i data-lucide="x" class="w-4 h-4 mr-2"></i>
+                    {{ T $.Lang `Admins_BtnCancel` }}
+                </button>
+                <button type="submit" form="modalAddAdminForm" id="btn-save-admin"
+                    class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-6 py-2.5 shadow-[2px_2px_0px_#1E293B] hover:translate-y-px hover:shadow-[1px_1px_0px_#1E293B] active:translate-y-0.5 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center">
+                    <i data-lucide="save" class="w-4 h-4 mr-2"></i>
+                    {{ T $.Lang `Admins_BtnSaveNew` }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var addAdminStrengthOpts, addAdminMatchOpts;
+
+    function openAddAdminModal() {
+        document.getElementById('addAdminModal').classList.remove('hidden');
+        document.getElementById('modal-admin-error').classList.add('hidden');
+        document.getElementById('modalAddAdminForm').reset();
+        toggleAddAdminDomains();
+
+        if(!addAdminStrengthOpts) {
+            addAdminStrengthOpts = {
+                passwordId: 'modal-add-password', meterId: 'modal-add-strength-meter',
+                barId: 'modal-add-strength-bar', textId: 'modal-add-strength-text',
+                labels: {
+                    weak: `{{ T $.Lang "Admins_JsPwdWeak" }}`,
+                    medium: `{{ T $.Lang "Admins_JsPwdMedium" }}`,
+                    good: `{{ T $.Lang "Admins_JsPwdGood" }}`,
+                    strong: `{{ T $.Lang "Admins_JsPwdStrong" }}`
+                }
+            };
+            addAdminMatchOpts = {
+                passwordId: 'modal-add-password', confirmId: 'modal-add-password-confirm',
+                indicatorId: 'modal-add-match-indicator', submitBtnId: 'btn-save-admin',
+                labels: {
+                    match: `{{ T $.Lang "Admins_JsPwdMatchOk" }}`,
+                    noMatch: `{{ T $.Lang "Admins_JsPwdMatchFail" }}`
+                }
+            };
+            
+            App.initPasswordForm({
+                passwordId: 'modal-add-password', confirmId: 'modal-add-password-confirm',
+                meterId: 'modal-add-strength-meter', barId: 'modal-add-strength-bar', textId: 'modal-add-strength-text',
+                indicatorId: 'modal-add-match-indicator', submitBtnId: 'btn-save-admin',
+                formId: 'modalAddAdminForm',
+                labels: addAdminStrengthOpts.labels,
+                validationMsgs: {
+                    minLen: `{{ T $.Lang "Admins_JsPwdMinLen" }}`,
+                    noMatch: `{{ T $.Lang "Admins_JsPwdNoMatch" }}`
+                }
+            });
+        }
+        lucide.createIcons();
+    }
+
+    function closeAddAdminModal() {
+        document.getElementById('addAdminModal').classList.add('hidden');
+    }
+
+    function toggleAddAdminDomains() {
+        var isSuper = document.getElementById('modal-add-superadmin').checked;
+        var card = document.getElementById('modal-add-domains-card');
+        if(isSuper) {
+            card.classList.add('opacity-50', 'pointer-events-none');
+            document.querySelectorAll('.add-domain-checkbox').forEach(c => c.checked = false);
+        } else {
+            card.classList.remove('opacity-50', 'pointer-events-none');
+        }
+    }
+
+    function generateAddAdminPassword() {
+        App.generatePassword({
+            passwordId: 'modal-add-password',
+            confirmId: 'modal-add-password-confirm',
+            failMsg: `{{ T $.Lang "Admins_JsPwdGenFail" }}`,
+            onSuccess: function () {
+                App.checkPasswordStrength(addAdminStrengthOpts);
+                App.checkPasswordMatch(addAdminMatchOpts);
+            }
+        });
+    }
+
+    document.getElementById('modalAddAdminForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var form = this;
+        var btn = document.getElementById('btn-save-admin');
+        var errBox = document.getElementById('modal-admin-error');
+        var errText = document.getElementById('modal-admin-error-text');
+
+        errBox.classList.add('hidden');
+
+        if (!document.getElementById('modal-add-username').value) {
+            errText.textContent = 'Username is required.';
+            errBox.classList.remove('hidden');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+        var formData = new FormData(form);
+
+        fetch('/api/admins', {
+            method: 'POST',
+            body: formData,
+            headers: { 'Accept': 'application/json' }
+        })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    errText.textContent = data.error || 'Failed to create admin';
+                    errBox.classList.remove('hidden');
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            })
+            .catch(function (err) {
+                errText.textContent = 'Network or server error occurred.';
+                errBox.classList.remove('hidden');
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                console.error('Add admin error:', err);
+            });
+    });
+</script>
+{{end}}

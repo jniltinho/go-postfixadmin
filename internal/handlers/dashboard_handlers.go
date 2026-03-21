@@ -16,7 +16,7 @@ func (h *Handler) Dashboard(c *echo.Context) error {
 	username := middleware.GetUsername(c, middleware.SessionName)
 	allowedDomains, isSuperAdmin, err := utils.GetAllowedDomains(h.DB, username, middleware.GetIsSuperAdmin(c))
 	if err != nil {
-		return c.Render(http.StatusInternalServerError, "dashboard.html", map[string]interface{}{
+		return c.Render(http.StatusInternalServerError, "dashboard/dashboard.html", map[string]interface{}{
 			"Error": "Failed to check permissions: " + err.Error(),
 		})
 	}
@@ -63,7 +63,7 @@ func (h *Handler) Dashboard(c *echo.Context) error {
 		logQuery.Find(&logs)
 	}
 
-	return c.Render(http.StatusOK, "dashboard.html", map[string]interface{}{
+	return c.Render(http.StatusOK, "dashboard/dashboard.html", map[string]interface{}{
 		"DomainCount":  domainCount,
 		"MailboxCount": mailboxCount,
 		"IsSuperAdmin": isSuperAdmin,

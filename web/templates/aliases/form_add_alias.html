@@ -1,0 +1,168 @@
+{{define "form_add_alias"}}
+<!-- Add Alias Modal -->
+<div id="addAliasModal" class="fixed inset-0 z-50 hidden">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/50" onclick="closeAddAliasModal()"></div>
+    <!-- Modal Box -->
+    <div class="relative z-10 flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white border-4 border-brand-text w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <!-- Header -->
+            <div class="bg-brand-primary px-6 py-4 flex items-center justify-between flex-shrink-0">
+                <h3 class="text-lg font-mono font-black uppercase tracking-tight text-white flex items-center">
+                    <i data-lucide="plus-circle" class="w-5 h-5 mr-2"></i>
+                    {{ T $.Lang `Aliases_AddTitle` }}
+                </h3>
+                <button onclick="closeAddAliasModal()" class="text-white hover:text-gray-200 transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Scrollable Body -->
+            <div class="overflow-y-auto flex-1">
+                <!-- Error Area -->
+                <div id="modal-alias-error"
+                    class="hidden mx-6 mt-4 bg-red-50 border-2 border-red-600 p-3 flex items-start">
+                    <i data-lucide="alert-circle" class="w-4 h-4 text-red-600 mr-2 mt-0.5 flex-shrink-0"></i>
+                    <p id="modal-alias-error-text" class="text-sm text-red-700 font-medium"></p>
+                </div>
+
+                <form id="modalAddAliasForm" class="p-6 space-y-5">
+                    <!-- Basic Information Card -->
+                    <div class="border-2 border-brand-text p-4 space-y-4">
+                        <h4 class="text-sm font-mono font-black uppercase tracking-tight flex items-center">
+                            <i data-lucide="info" class="w-4 h-4 mr-2"></i>
+                            {{ T $.Lang `Aliases_InfoTitle` }}
+                        </h4>
+
+                        <!-- Alias & Domain Row -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                            <!-- Alias Local Part -->
+                            <div>
+                                <label for="modal-add-local_part"
+                                    class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                                    {{ T $.Lang `Aliases_LblAlias` }} <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" id="modal-add-local_part" name="local_part" required
+                                    placeholder="{{ T $.Lang `Aliases_PhAlias` }}"
+                                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm">
+                                <p class="text-[10px] text-gray-500 mt-1">
+                                    {{ T $.Lang `Aliases_HelpAlias` }}
+                                </p>
+                            </div>
+
+                            <!-- Domain Select -->
+                            <div>
+                                <label for="modal-add-domain"
+                                    class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                                    {{ T $.Lang `Aliases_LblDomain` }} <span class="text-red-500">*</span>
+                                </label>
+                                <select id="modal-add-domain" name="domain" required
+                                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors bg-white cursor-pointer text-sm">
+                                    <option value="" disabled selected>{{ T $.Lang `Aliases_PhSelectDomain` }}</option>
+                                    {{range .Domains}}
+                                    <option value="{{.Domain}}">{{.Domain}}</option>
+                                    {{end}}
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Goto (To) -->
+                        <div>
+                            <label for="modal-add-goto" class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                                {{ T $.Lang `Aliases_LblTo` }} <span class="text-red-500">*</span>
+                            </label>
+                            <textarea id="modal-add-goto" name="goto" rows="4" required placeholder="{{ T $.Lang `Aliases_PhTo` }}"
+                                class="w-full px-3 py-2 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors resize-y text-sm"></textarea>
+                            <p class="text-[10px] text-gray-500 mt-1">
+                                {{ T $.Lang `Aliases_HelpTo` | unescapeHTML }}
+                            </p>
+                        </div>
+
+                        <!-- Active Toggle -->
+                        <div class="flex items-center pt-2">
+                            <input type="checkbox" id="modal-add-active" name="active" value="true" checked
+                                class="w-5 h-5 border-2 border-brand-text cursor-pointer">
+                            <label for="modal-add-active" class="ml-2 text-sm font-bold cursor-pointer">
+                                {{ T $.Lang `Aliases_LblActive` }}
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Footer / Actions -->
+            <div
+                class="bg-gray-50 px-6 py-4 flex items-center justify-end space-x-3 border-t-2 border-brand-text flex-shrink-0">
+                <button type="button" onclick="closeAddAliasModal()"
+                    class="bg-white hover:bg-gray-100 text-brand-text border-2 border-brand-text font-black px-6 py-2.5 shadow-[2px_2px_0px_#1E293B] hover:translate-y-px hover:shadow-[1px_1px_0px_#1E293B] active:translate-y-0.5 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center">
+                    <i data-lucide="x" class="w-4 h-4 mr-2"></i>
+                    {{ T $.Lang `Aliases_BtnCancel` }}
+                </button>
+                <button type="submit" form="modalAddAliasForm" id="btn-save-alias"
+                    class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-6 py-2.5 shadow-[2px_2px_0px_#1E293B] hover:translate-y-px hover:shadow-[1px_1px_0px_#1E293B] active:translate-y-0.5 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center">
+                    <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>
+                    {{ T $.Lang `Aliases_BtnCreate` }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openAddAliasModal() {
+        document.getElementById('addAliasModal').classList.remove('hidden');
+        document.getElementById('modal-alias-error').classList.add('hidden');
+        document.getElementById('modalAddAliasForm').reset();
+        lucide.createIcons();
+    }
+
+    function closeAddAliasModal() {
+        document.getElementById('addAliasModal').classList.add('hidden');
+    }
+
+    document.getElementById('modalAddAliasForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var form = this;
+        var btn = document.getElementById('btn-save-alias');
+        var errBox = document.getElementById('modal-alias-error');
+        var errText = document.getElementById('modal-alias-error-text');
+
+        errBox.classList.add('hidden');
+
+        if (!document.getElementById('modal-add-local_part').value || !document.getElementById('modal-add-domain').value || !document.getElementById('modal-add-goto').value) {
+            errText.textContent = 'Please fill out all required fields.';
+            errBox.classList.remove('hidden');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+        var formData = new FormData(form);
+
+        fetch('/api/aliases', {
+            method: 'POST',
+            body: formData,
+            headers: { 'Accept': 'application/json' }
+        })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    errText.textContent = data.error || 'Failed to create alias';
+                    errBox.classList.remove('hidden');
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            })
+            .catch(function (err) {
+                errText.textContent = 'Network or server error occurred.';
+                errBox.classList.remove('hidden');
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                console.error('Add alias error:', err);
+            });
+    });
+</script>
+{{end}}

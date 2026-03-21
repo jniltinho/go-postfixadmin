@@ -32,7 +32,7 @@ func (h *Handler) ListAliases(c *echo.Context) error {
 		username := middleware.GetUsername(c, middleware.SessionName)
 		allowedDomains, isSuper, err := utils.GetAllowedDomains(h.DB, username, middleware.GetIsSuperAdmin(c))
 		if err != nil {
-			return c.Render(http.StatusInternalServerError, "aliases.html", map[string]interface{}{
+			return c.Render(http.StatusInternalServerError, "aliases/aliases.html", map[string]interface{}{
 				"Error": "Failed to check permissions: " + err.Error(),
 			})
 		}
@@ -59,7 +59,7 @@ func (h *Handler) ListAliases(c *echo.Context) error {
 				}
 				if !allowed {
 					// User requested a forbidden domain filter
-					return c.Render(http.StatusForbidden, "aliases.html", map[string]interface{}{
+					return c.Render(http.StatusForbidden, "aliases/aliases.html", map[string]interface{}{
 						"Error": "Access denied to this domain",
 					})
 				}
@@ -105,7 +105,7 @@ func (h *Handler) ListAliases(c *echo.Context) error {
 		domainQuery.Find(&domains)
 	}
 
-	return c.Render(http.StatusOK, "aliases.html", map[string]interface{}{
+	return c.Render(http.StatusOK, "aliases/aliases.html", map[string]interface{}{
 		"Aliases":      aliases,
 		"Domains":      domains,
 		"DomainFilter": domainFilter,
@@ -116,51 +116,17 @@ func (h *Handler) ListAliases(c *echo.Context) error {
 	})
 }
 
-// AddAliasForm renders the add alias form
-func (h *Handler) AddAliasForm(c *echo.Context) error {
-	var domains []models.Domain
-	var isSuperAdmin bool
-
-	if h.DB != nil {
-		// Security: Filter domains
-		username := middleware.GetUsername(c, middleware.SessionName)
-		allowedDomains, isSuper, err := utils.GetAllowedDomains(h.DB, username, middleware.GetIsSuperAdmin(c))
-		if err != nil {
-			return c.Render(http.StatusInternalServerError, "add_alias.html", map[string]interface{}{"Error": "Permission check failed"})
-		}
-		isSuperAdmin = isSuper
-
-		query := h.DB.Where("domain != ?", "ALL").Where("active = ?", true).Order("domain ASC")
-		if !isSuperAdmin {
-			if len(allowedDomains) == 0 {
-				query = query.Where("1 = 0")
-			} else {
-				query = query.Where("domain IN ?", allowedDomains)
-			}
-		}
-		query.Find(&domains)
-	}
-
-	return c.Render(http.StatusOK, "add_alias.html", map[string]interface{}{
-		"Domains":      domains,
-		"IsSuperAdmin": isSuperAdmin,
-		"SessionUser":  middleware.GetUsername(c, middleware.SessionName),
-	})
-}
-
-// AddAlias processes the addition of a new alias
-func (h *Handler) AddAlias(c *echo.Context) error {
-	// Parse form data
+// AddAliasAPI processes the addition of a new alias via JSON API
+func (h *Handler) AddAliasAPI(c *echo.Context) error {
 	localPart := strings.ToLower(strings.TrimSpace(c.FormValue("local_part")))
 	domain := strings.TrimSpace(c.FormValue("domain"))
 	gotoRaw := c.FormValue("goto")
 	active := c.FormValue("active") == "true"
 
-	// Security: Validate domain access
 	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
 	allowedDomains, isSuperAdmin, err := utils.GetAllowedDomains(h.DB, loggedInUser, middleware.GetIsSuperAdmin(c))
 	if err != nil {
-		return renderAddAliasError(c, "Permission check failed", localPart, domain, gotoRaw, nil, isSuperAdmin)
+		return c.JSON(http.StatusForbidden, map[string]interface{}{"success": false, "error": "Permission check failed"})
 	}
 
 	if !isSuperAdmin {
@@ -172,95 +138,47 @@ func (h *Handler) AddAlias(c *echo.Context) error {
 			}
 		}
 		if !allowed {
-			return renderAddAliasError(c, "Access denied to this domain", localPart, domain, gotoRaw, nil, isSuperAdmin)
+			return c.JSON(http.StatusForbidden, map[string]interface{}{"success": false, "error": "Access denied to this domain"})
 		}
 	}
 
-	// Load domains for re-rendering on error
-	var domains []models.Domain
-	if h.DB != nil {
-		query := h.DB.Where("domain != ?", "ALL").Where("active = ?", true).Order("domain ASC")
-		if !isSuperAdmin {
-			if len(allowedDomains) == 0 {
-				query = query.Where("1 = 0")
-			} else {
-				query = query.Where("domain IN ?", allowedDomains)
-			}
-		}
-		query.Find(&domains)
-	}
-
-	// Basic Validation
-	if localPart == "" && domain != "" {
-		// Catch-all alias logic? "Para criar um alias global, use '*'" - checking models/handlers usually implies specific logic.
-		// User screenshot showed "Alias" input and "Domain" select.
-		// If localPart is empty but intended to be catch-all, usually it's explicitly "*"
-	}
-
-	if domain == "" {
-		return renderAddAliasError(c, "O domínio é obrigatório", localPart, domain, gotoRaw, domains, isSuperAdmin)
-	}
-
-	if gotoRaw == "" {
-		return renderAddAliasError(c, "O destino (Para) é obrigatório", localPart, domain, gotoRaw, domains, isSuperAdmin)
-	}
-
-	// Construct Address
-	var address string
-	if localPart == "" || localPart == "*" {
-		// Validating if * is allowed? Assuming yes based on standard PostfixAdmin
-		address = fmt.Sprintf("@%s", domain) // Or "*@domain"? PostfixAdmin usually uses "@domain.tld" for catch-all
-		// Wait, Postfix usually uses "@domain.tld" for catch-all in alias table?
-		// Actually typical catchall is `*@domain.tld` or just `@domain.tld`.
-		// Let's assume standard construction: local_part@domain
-		if localPart == "*" {
-			// Actually check if user typed *
-		}
-	}
-
-	// If localPart does not contain @, append domain.
-	// The form usually splits local_part and domain.
 	if localPart == "" {
-		// If empty, user might imply catch-all if allowed, or it's an error.
-		// "Para criar um alias global, use '*'" -> so user must type *
-		return renderAddAliasError(c, "O alias é obrigatório", localPart, domain, gotoRaw, domains, isSuperAdmin)
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "error": "Alias local part is required"})
+	}
+	if domain == "" {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "error": "Domain is required"})
+	}
+	if gotoRaw == "" {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "error": "To (Recipients) is required"})
 	}
 
-	address = fmt.Sprintf("%s@%s", localPart, domain)
+	address := fmt.Sprintf("%s@%s", localPart, domain)
 
-	// Process "To" (Goto) field - split lines, trim, join with comma
 	var recipients []string
 	lines := strings.Split(gotoRaw, "\n")
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
-		line = strings.Trim(line, ",") // Remove trailing commas if user added them
+		line = strings.Trim(line, ",")
 		if line != "" {
 			recipients = append(recipients, line)
 		}
 	}
 
 	if len(recipients) == 0 {
-		return renderAddAliasError(c, "Pelo menos um destinatário válido é necessário", localPart, domain, gotoRaw, domains, isSuperAdmin)
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "error": "At least one valid recipient is required"})
 	}
-
 	gotoFinal := strings.Join(recipients, ",")
 
-	// Check if alias already exists
 	var existingAlias models.Alias
 	if err := h.DB.Where("address = ?", address).First(&existingAlias).Error; err == nil {
-		return renderAddAliasError(c, "O alias já existe", localPart, domain, gotoRaw, domains, isSuperAdmin)
+		return c.JSON(http.StatusConflict, map[string]interface{}{"success": false, "error": "Alias already exists"})
 	}
 
-	// Check if it conflicts with a mailbox (if we want to enforce pure aliases vs mailboxes)
-	// PostfixAdmin usually prevents creating an alias if a mailbox exists with same email,
-	// UNLESS it's the mailbox alias itself (which is auto-created).
-	// If we create an alias clashing with mailbox, it might break mail delivery or be redundant.
 	var existingMailbox models.Mailbox
 	if err := h.DB.Where("username = ?", address).First(&existingMailbox).Error; err == nil {
-		return renderAddAliasError(c, "Já existe uma caixa de correio com este endereço", localPart, domain, gotoRaw, domains, isSuperAdmin)
+		return c.JSON(http.StatusConflict, map[string]interface{}{"success": false, "error": "A mailbox already exists with this address"})
 	}
 
-	// Create Alias
 	now := time.Now()
 	newAlias := models.Alias{
 		Address:  address,
@@ -272,35 +190,31 @@ func (h *Handler) AddAlias(c *echo.Context) error {
 	}
 
 	if err := h.DB.Create(&newAlias).Error; err != nil {
-		return renderAddAliasError(c, "Falha ao criar alias: "+err.Error(), localPart, domain, gotoRaw, domains, isSuperAdmin)
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to create alias"})
 	}
 
-	// Log Action
-	if err := utils.LogAction(h.DB, middleware.GetUsername(c, middleware.SessionName), c.RealIP(), domain, "create_alias", address); err != nil {
+	if err := utils.LogAction(h.DB, loggedInUser, c.RealIP(), domain, "create_alias", address); err != nil {
 		fmt.Printf("Failed to log create_alias: %v\n", err)
 	}
 
 	middleware.SetFlash(c, "message", "Alias created successfully")
 
-	return c.Redirect(http.StatusFound, "/aliases")
+	return c.JSON(http.StatusOK, map[string]interface{}{"success": true})
 }
 
-// EditAliasForm renders the edit alias form
-func (h *Handler) EditAliasForm(c *echo.Context) error {
-	address := c.Param("address")
+// GetAliasAPI fetches alias details via JSON
+func (h *Handler) GetAliasAPI(c *echo.Context) error {
+	address, _ := url.PathUnescape(c.Param("address"))
 
 	var alias models.Alias
 	if err := h.DB.Where("address = ?", address).First(&alias).Error; err != nil {
-		return c.Render(http.StatusNotFound, "add_alias.html", map[string]interface{}{
-			"Error": "Alias not found",
-		})
+		return c.JSON(http.StatusNotFound, map[string]interface{}{"error": "Alias not found"})
 	}
 
-	// Security: Check permission
 	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
 	allowedDomains, isSuperAdmin, err := utils.GetAllowedDomains(h.DB, loggedInUser, middleware.GetIsSuperAdmin(c))
 	if err != nil {
-		return c.Render(http.StatusInternalServerError, "add_alias.html", map[string]interface{}{"Error": "Permission check failed"})
+		return c.JSON(http.StatusForbidden, map[string]interface{}{"error": "Permission check failed"})
 	}
 	if !isSuperAdmin {
 		allowed := false
@@ -311,36 +225,28 @@ func (h *Handler) EditAliasForm(c *echo.Context) error {
 			}
 		}
 		if !allowed {
-			return c.Render(http.StatusForbidden, "aliases.html", map[string]interface{}{"Error": "Access denied"})
+			return c.JSON(http.StatusForbidden, map[string]interface{}{"error": "Access denied"})
 		}
 	}
 
-	// Format Goto for display (comma to newline)
 	alias.Goto = strings.ReplaceAll(alias.Goto, ",", "\n")
 
-	return c.Render(http.StatusOK, "edit_alias.html", map[string]interface{}{
-		"Alias":        alias,
-		"IsSuperAdmin": isSuperAdmin,
-		"SessionUser":  loggedInUser,
-	})
+	return c.JSON(http.StatusOK, map[string]interface{}{"alias": alias})
 }
 
-// EditAlias processes the alias update
-func (h *Handler) EditAlias(c *echo.Context) error {
-	address := c.Param("address")
+// EditAliasAPI processes the alias update via JSON API
+func (h *Handler) EditAliasAPI(c *echo.Context) error {
+	address, _ := url.PathUnescape(c.Param("address"))
 
 	var alias models.Alias
 	if err := h.DB.Where("address = ?", address).First(&alias).Error; err != nil {
-		return c.Render(http.StatusNotFound, "edit_alias.html", map[string]interface{}{
-			"Error": "Alias not found",
-		})
+		return c.JSON(http.StatusNotFound, map[string]interface{}{"success": false, "error": "Alias not found"})
 	}
 
-	// Security: Check permission
 	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
 	allowedDomains, isSuperAdmin, err := utils.GetAllowedDomains(h.DB, loggedInUser, middleware.GetIsSuperAdmin(c))
 	if err != nil {
-		return c.Render(http.StatusInternalServerError, "edit_alias.html", map[string]interface{}{"Error": "Permission check failed"})
+		return c.JSON(http.StatusForbidden, map[string]interface{}{"success": false, "error": "Permission check failed"})
 	}
 	if !isSuperAdmin {
 		allowed := false
@@ -351,73 +257,53 @@ func (h *Handler) EditAlias(c *echo.Context) error {
 			}
 		}
 		if !allowed {
-			return c.Render(http.StatusForbidden, "aliases.html", map[string]interface{}{"Error": "Access denied"})
+			return c.JSON(http.StatusForbidden, map[string]interface{}{"success": false, "error": "Access denied"})
 		}
 	}
 
-	// Parse form data
 	gotoRaw := c.FormValue("goto")
 	active := c.FormValue("active") == "true"
 
-	// Validate Goto
 	if gotoRaw == "" {
-		return c.Render(http.StatusBadRequest, "edit_alias.html", map[string]interface{}{
-			"Error":        "To (Recipients) is required",
-			"Alias":        alias,
-			"IsSuperAdmin": isSuperAdmin,
-			"SessionUser":  loggedInUser,
-		})
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "error": "To (Recipients) is required"})
 	}
 
-	// Process "To" (Goto) field - split lines, trim, join with comma
 	var recipients []string
 	lines := strings.Split(gotoRaw, "\n")
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
-		line = strings.Trim(line, ",") // Remove trailing commas
+		line = strings.Trim(line, ",")
 		if line != "" {
 			recipients = append(recipients, line)
 		}
 	}
 
 	if len(recipients) == 0 {
-		return c.Render(http.StatusBadRequest, "edit_alias.html", map[string]interface{}{
-			"Error":        "At least one valid recipient is required",
-			"Alias":        alias,
-			"IsSuperAdmin": isSuperAdmin,
-			"SessionUser":  loggedInUser,
-		})
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "error": "At least one valid recipient is required"})
 	}
 
 	gotoFinal := strings.Join(recipients, ",")
 
-	// Update Alias
 	alias.Goto = gotoFinal
 	alias.Active = active
 	alias.Modified = time.Now()
 
 	if err := h.DB.Save(&alias).Error; err != nil {
-		return c.Render(http.StatusInternalServerError, "edit_alias.html", map[string]interface{}{
-			"Error":        "Failed to update alias: " + err.Error(),
-			"Alias":        alias,
-			"IsSuperAdmin": isSuperAdmin,
-			"SessionUser":  loggedInUser,
-		})
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to update alias"})
 	}
 
-	// Log Action
-	if err := utils.LogAction(h.DB, middleware.GetUsername(c, middleware.SessionName), c.RealIP(), alias.Domain, "edit_alias", address); err != nil {
+	if err := utils.LogAction(h.DB, loggedInUser, c.RealIP(), alias.Domain, "edit_alias", address); err != nil {
 		fmt.Printf("Failed to log edit_alias: %v\n", err)
 	}
 
 	middleware.SetFlash(c, "message", "Alias updated successfully")
 
-	return c.Redirect(http.StatusFound, "/aliases")
+	return c.JSON(http.StatusOK, map[string]interface{}{"success": true})
 }
 
 // DeleteAlias handles alias deletion
 func (h *Handler) DeleteAlias(c *echo.Context) error {
-	address := c.Param("address")
+	address, _ := url.PathUnescape(c.Param("address"))
 
 	// URL Decode the address to ensure we have the correct string
 	decodedAddress, err := url.QueryUnescape(address)
@@ -489,14 +375,3 @@ func (h *Handler) DeleteAlias(c *echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]interface{}{"success": true})
 }
 
-func renderAddAliasError(c *echo.Context, errorMsg, localPart, domain, gotoRaw string, domains []models.Domain, isSuperAdmin bool) error {
-	return c.Render(http.StatusBadRequest, "add_alias.html", map[string]interface{}{
-		"Error":        errorMsg,
-		"LocalPart":    localPart,
-		"Domain":       domain,
-		"Goto":         gotoRaw,
-		"Domains":      domains,
-		"IsSuperAdmin": isSuperAdmin,
-		"SessionUser":  middleware.GetUsername(c, middleware.SessionName),
-	})
-}

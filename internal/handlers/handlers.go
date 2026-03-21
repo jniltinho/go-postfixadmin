@@ -27,26 +27,26 @@ func (h *Handler) Login(c *echo.Context) error {
 		var admin models.Admin
 
 		if h.DB == nil {
-			return c.Render(http.StatusServiceUnavailable, "login.html", map[string]interface{}{"errorKey": "Login_ErrDbUnavailable"})
+			return c.Render(http.StatusServiceUnavailable, "auth/login.html", map[string]interface{}{"errorKey": "Login_ErrDbUnavailable"})
 		}
 
 		if err := h.DB.Where("username = ? AND active = ?", username, true).First(&admin).Error; err != nil {
-			return c.Render(http.StatusUnauthorized, "login.html", map[string]interface{}{"errorKey": "Login_ErrInvalidCredentials"})
+			return c.Render(http.StatusUnauthorized, "auth/login.html", map[string]interface{}{"errorKey": "Login_ErrInvalidCredentials"})
 		}
 
 		match, err := utils.CheckPassword(password, admin.Password)
 		if err != nil || !match {
-			return c.Render(http.StatusUnauthorized, "login.html", map[string]interface{}{"errorKey": "Login_ErrInvalidCredentials"})
+			return c.Render(http.StatusUnauthorized, "auth/login.html", map[string]interface{}{"errorKey": "Login_ErrInvalidCredentials"})
 		}
 
 		// Set session
 		if err := middleware.SetSession(c, middleware.SessionName, admin.Username, admin.Superadmin); err != nil {
-			return c.Render(http.StatusInternalServerError, "login.html", map[string]interface{}{"errorKey": "Login_ErrSession"})
+			return c.Render(http.StatusInternalServerError, "auth/login.html", map[string]interface{}{"errorKey": "Login_ErrSession"})
 		}
 
 		return c.Redirect(http.StatusFound, "/dashboard")
 	}
-	return c.Render(http.StatusOK, "login.html", nil)
+	return c.Render(http.StatusOK, "auth/login.html", nil)
 }
 
 // Logout encerra a sessão

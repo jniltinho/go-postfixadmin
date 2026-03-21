@@ -19,7 +19,7 @@ func (h *Handler) MailLog(c *echo.Context) error {
 	username := middleware.GetUsername(c, middleware.SessionName)
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
 
-	return c.Render(http.StatusOK, "maillog.html", map[string]interface{}{
+	return c.Render(http.StatusOK, "logs/maillog.html", map[string]interface{}{
 		"IsSuperAdmin": isSuperAdmin,
 		"SessionUser":  username,
 		"Username":     username,

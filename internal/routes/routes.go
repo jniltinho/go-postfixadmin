@@ -39,10 +39,9 @@ func RegisterRoutes(e *echo.Echo, h *handlers.Handler) {
 
 	// Domains
 	adminGroup.GET("/domains", h.ListDomains)
-	adminGroup.GET("/domains/add", h.AddDomainForm)
-	adminGroup.POST("/domains/add", h.AddDomain)
-	adminGroup.GET("/domains/edit/:domain", h.EditDomainForm)
-	adminGroup.POST("/domains/edit/:domain", h.EditDomain)
+	adminGroup.POST("/api/domains", h.AddDomainAPI)
+	adminGroup.GET("/api/domains/:domain", h.GetDomainAPI)
+	adminGroup.POST("/api/domains/:domain", h.EditDomainAPI)
 	adminGroup.DELETE("/domains/delete/:domain", h.DeleteDomain)
 
 	// Mailboxes
@@ -54,26 +53,23 @@ func RegisterRoutes(e *echo.Echo, h *handlers.Handler) {
 
 	// Admins
 	adminGroup.GET("/admins", h.ListAdmins)
-	adminGroup.GET("/admins/add", h.AddAdminForm)
-	adminGroup.POST("/admins/add", h.AddAdmin)
-	adminGroup.GET("/admins/edit/:username", h.EditAdminForm)
-	adminGroup.POST("/admins/edit/:username", h.EditAdmin)
+	adminGroup.POST("/api/admins", h.AddAdminAPI)
+	adminGroup.GET("/api/admins/:username", h.GetAdminAPI)
+	adminGroup.POST("/api/admins/:username", h.EditAdminAPI)
 	adminGroup.DELETE("/admins/delete/:username", h.DeleteAdmin)
 
 	// Aliases
 	adminGroup.GET("/aliases", h.ListAliases)
-	adminGroup.GET("/aliases/add", h.AddAliasForm)
-	adminGroup.POST("/aliases/add", h.AddAlias)
-	adminGroup.GET("/aliases/edit/:address", h.EditAliasForm)
-	adminGroup.POST("/aliases/edit/:address", h.EditAlias)
+	adminGroup.POST("/api/aliases", h.AddAliasAPI)
+	adminGroup.GET("/api/aliases/:address", h.GetAliasAPI)
+	adminGroup.POST("/api/aliases/:address", h.EditAliasAPI)
 	adminGroup.DELETE("/aliases/delete/:address", h.DeleteAlias)
 
 	// Alias Domains
 	adminGroup.GET("/alias-domains", h.ListAliasDomains)
-	adminGroup.GET("/alias-domains/add", h.AddAliasDomainForm)
-	adminGroup.POST("/alias-domains/add", h.AddAliasDomain)
-	adminGroup.GET("/alias-domains/edit/:alias_domain", h.EditAliasDomainForm)
-	adminGroup.POST("/alias-domains/edit/:alias_domain", h.EditAliasDomain)
+	adminGroup.POST("/api/alias-domains", h.AddAliasDomainAPI)
+	adminGroup.GET("/api/alias-domains/:alias_domain", h.GetAliasDomainAPI)
+	adminGroup.POST("/api/alias-domains/:alias_domain", h.EditAliasDomainAPI)
 	adminGroup.DELETE("/alias-domains/delete/:alias_domain", h.DeleteAliasDomain)
 
 	// Fetchmail
