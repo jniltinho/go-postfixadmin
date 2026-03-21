@@ -112,7 +112,7 @@ var App = (function ($) {
     // opts: { passwordId, confirmId, onSuccess (callback), failMsg }
     function generatePassword(opts) {
         var chars = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%&*';
-        var pwd = Array.from({ length: 16 }, function () {
+        var pwd = Array.from({ length: 14 }, function () {
             return chars[Math.floor(Math.random() * chars.length)];
         }).join('');
 
