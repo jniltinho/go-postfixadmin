@@ -8,7 +8,9 @@
     <title>{{ T $.Lang `Login_Title` }} - Go-PostfixAdmin</title>
     <link rel="icon" type="image/png" href="/static/images/favicon.png">
     <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/jquery.toast.min.css">
     <script src="/static/js/jquery-4.0.0.min.js"></script>
+    <script src="/static/js/jquery.toast.min.js"></script>
     <script src="/static/js/lucide.min.js"></script>
     <style>
         .dot-pattern {
@@ -53,18 +55,11 @@
             <h2 class="text-xl font-bold mb-6 uppercase tracking-widest">{{ T $.Lang `Login_Title` }}</h2>
 
             {{if .errorKey}}
-            <div id="error-alert"
-                class="error-alert bg-red-50 border-2 border-red-500 text-red-700 p-4 mb-6 flex items-start justify-between">
-                <div class="flex items-start">
-                    <i data-lucide="alert-circle" class="w-5 h-5 mr-3 shrink-0 mt-0.5"></i>
-                    <span class="text-sm font-bold uppercase tracking-tight">{{ T $.Lang .errorKey }}</span>
-                </div>
-                <button type="button" onclick="dismissError()"
-                    class="ml-4 shrink-0 text-red-400 hover:text-red-700 transition-colors cursor-pointer"
-                    aria-label="Fechar">
-                    <i data-lucide="x" class="w-4 h-4"></i>
-                </button>
-            </div>
+            <script>
+                $(function() {
+                    App.showToast('Error', '{{ T $.Lang .errorKey }}', 'error');
+                });
+            </script>
             {{end}}
 
             <form action="/login" method="POST" class="space-y-6">
@@ -128,7 +123,6 @@
     <script>
         $(function () {
             lucide.createIcons();
-            window.dismissError = App.fadeAlert('#error-alert');
         });
     </script>
 </body>

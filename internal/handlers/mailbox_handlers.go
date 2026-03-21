@@ -54,6 +54,8 @@ func (h *Handler) ListMailboxes(c *echo.Context) error {
 		"IsSuperAdmin":    isSuperAdmin,
 		"SessionUser":     SessionUser,
 		"QuotaMultiplier": float64(utils.GetQuotaMultiplier()),
+		"Message":         middleware.GetFlash(c, "message"),
+		"Error":           middleware.GetFlash(c, "error"),
 	})
 }
 
@@ -175,6 +177,8 @@ func (h *Handler) AddMailboxAPI(c *echo.Context) error {
 		}
 	}
 
+	middleware.SetFlash(c, "message", "Mailbox created successfully")
+
 	return c.JSON(http.StatusOK, map[string]interface{}{"success": true, "domain": domain})
 }
 
@@ -294,6 +298,8 @@ func (h *Handler) EditMailboxAPI(c *echo.Context) error {
 		fmt.Printf("Failed to log edit_mailbox: %v\n", err)
 	}
 
+	middleware.SetFlash(c, "message", "Mailbox updated successfully")
+
 	return c.JSON(http.StatusOK, map[string]interface{}{"success": true, "domain": mailbox.Domain})
 }
 
@@ -370,6 +376,8 @@ func (h *Handler) DeleteMailbox(c *echo.Context) error {
 			fmt.Printf("Warning: Failed to clean up orphaned directory for %s: %v\n", username, cleanupErr)
 		}
 	}
+
+	middleware.SetFlash(c, "message", "Mailbox deleted successfully")
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"success": true,

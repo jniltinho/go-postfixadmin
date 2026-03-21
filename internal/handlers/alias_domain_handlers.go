@@ -49,6 +49,8 @@ func (h *Handler) ListAliasDomains(c *echo.Context) error {
 		"AliasDomains": aliasDomains,
 		"IsSuperAdmin": isSuperAdmin,
 		"SessionUser":  middleware.GetUsername(c, middleware.SessionName),
+		"Message":      middleware.GetFlash(c, "message"),
+		"Error":        middleware.GetFlash(c, "error"),
 	})
 }
 
@@ -166,6 +168,8 @@ func (h *Handler) AddAliasDomain(c *echo.Context) error {
 		fmt.Printf("Failed to log create_alias_domain: %v\n", err)
 	}
 
+	middleware.SetFlash(c, "message", "Alias Domain created successfully")
+
 	return c.Redirect(http.StatusFound, "/alias-domains")
 }
 
@@ -219,6 +223,8 @@ func (h *Handler) DeleteAliasDomain(c *echo.Context) error {
 	if err := utils.LogAction(h.DB, middleware.GetUsername(c, middleware.SessionName), c.RealIP(), aliasDomain.TargetDomain, "delete_alias_domain", aliasDomainName); err != nil {
 		fmt.Printf("Failed to log delete_alias_domain: %v\n", err)
 	}
+
+	middleware.SetFlash(c, "message", "Alias Domain deleted successfully")
 
 	return c.JSON(http.StatusOK, map[string]interface{}{"success": true})
 }
@@ -389,6 +395,8 @@ func (h *Handler) EditAliasDomain(c *echo.Context) error {
 	if err := utils.LogAction(h.DB, middleware.GetUsername(c, middleware.SessionName), c.RealIP(), targetDomain, "edit_alias_domain", aliasDomainName); err != nil {
 		fmt.Printf("Failed to log edit_alias_domain: %v\n", err)
 	}
+
+	middleware.SetFlash(c, "message", "Alias Domain updated successfully")
 
 	return c.Redirect(http.StatusFound, "/alias-domains")
 }

@@ -68,6 +68,8 @@ func (h *Handler) ListAdmins(c *echo.Context) error {
 		"Admins":       adminList,
 		"IsSuperAdmin": isSuper,
 		"SessionUser":  username,
+		"Message":      middleware.GetFlash(c, "message"),
+		"Error":        middleware.GetFlash(c, "error"),
 	})
 }
 
@@ -194,6 +196,8 @@ func (h *Handler) AddAdmin(c *echo.Context) error {
 
 	tx.Commit()
 
+	middleware.SetFlash(c, "message", "Admin created successfully")
+
 	return c.Redirect(http.StatusFound, "/admins")
 }
 
@@ -269,6 +273,8 @@ func (h *Handler) DeleteAdmin(c *echo.Context) error {
 	}
 
 	tx.Commit()
+
+	middleware.SetFlash(c, "message", "Admin deleted successfully")
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"success": true,
@@ -449,6 +455,8 @@ func (h *Handler) EditAdmin(c *echo.Context) error {
 	}
 
 	tx.Commit()
+
+	middleware.SetFlash(c, "message", "Admin updated successfully")
 
 	return c.Redirect(http.StatusFound, "/admins")
 }

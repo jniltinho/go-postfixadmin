@@ -8,7 +8,9 @@
     <title>{{ T $.Lang `UserLogin_Title` }} - Go-PostfixAdmin</title>
     <link rel="icon" type="image/png" href="/static/images/favicon.png">
     <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/jquery.toast.min.css">
     <script src="/static/js/jquery-4.0.0.min.js"></script>
+    <script src="/static/js/jquery.toast.min.js"></script>
     <script src="/static/js/lucide.min.js"></script>
     <style>
         .dot-pattern {
@@ -53,11 +55,11 @@
             <h2 class="text-xl font-bold mb-6 uppercase tracking-widest">{{ T $.Lang `UserLogin_Title` }}</h2>
 
             {{if .errorKey}}
-            <div
-                class="bg-red-50 border-2 border-red-500 text-red-700 p-4 mb-6 flex items-start flash-message transition-opacity duration-500">
-                <i data-lucide="alert-circle" class="w-5 h-5 mr-3 shrink-0"></i>
-                <span class="text-sm font-bold uppercase tracking-tight">{{ T $.Lang .errorKey }}</span>
-            </div>
+            <script>
+                $(function() {
+                    App.showToast('Error', '{{ T $.Lang .errorKey }}', 'error');
+                });
+            </script>
             {{end}}
 
             <form action="/users/login" method="POST" class="space-y-6">
@@ -116,7 +118,6 @@
     <script>
         $(function () {
             lucide.createIcons();
-            App.flashMessages('.flash-message', { delay: 5000 });
         });
     </script>
 </body>

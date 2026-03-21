@@ -71,6 +71,8 @@ func (h *Handler) ListDomains(c *echo.Context) error {
 		"Domains":      displayDomains,
 		"IsSuperAdmin": isSuperAdmin,
 		"SessionUser":  username,
+		"Message":      middleware.GetFlash(c, "message"),
+		"Error":        middleware.GetFlash(c, "error"),
 	})
 }
 
@@ -215,6 +217,8 @@ func (h *Handler) AddDomain(c *echo.Context) error {
 		fmt.Printf("Failed to log create_domain: %v\n", err)
 	}
 
+	middleware.SetFlash(c, "message", "Domain created successfully")
+
 	// Redirect to domains list on success
 	return c.Redirect(http.StatusFound, "/domains")
 }
@@ -346,6 +350,8 @@ func (h *Handler) EditDomain(c *echo.Context) error {
 		})
 	}
 
+	middleware.SetFlash(c, "message", "Domain updated successfully")
+
 	// Redirect to domains list on success
 	return c.Redirect(http.StatusFound, "/domains")
 }
@@ -377,6 +383,8 @@ func (h *Handler) DeleteDomain(c *echo.Context) error {
 			"error":   "Failed to delete domain: " + err.Error(),
 		})
 	}
+
+	middleware.SetFlash(c, "message", "Domain deleted successfully")
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"success": true,

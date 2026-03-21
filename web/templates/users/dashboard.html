@@ -10,21 +10,6 @@
             }}</p>
     </div>
 
-    {{if .Error}}
-    <div
-        class="mb-4 bg-red-50 border-2 border-red-600 px-4 py-3 flex items-center flash-message transition-opacity duration-500">
-        <i data-lucide="alert-circle" class="w-5 h-5 text-red-600 mr-3 shrink-0"></i>
-        <span class="text-sm font-bold text-red-700">{{.Error}}</span>
-    </div>
-    {{end}}
-
-    {{if .Message}}
-    <div
-        class="mb-4 bg-green-50 border-2 border-green-600 px-4 py-3 flex items-center flash-message transition-opacity duration-500">
-        <i data-lucide="check-circle" class="w-5 h-5 text-green-600 mr-3 shrink-0"></i>
-        <span class="text-sm font-bold text-green-700">{{.Message}}</span>
-    </div>
-    {{end}}
 
     <!-- User Info Card -->
     <div class="bg-white border-4 border-brand-text neo-shadow-sm px-8 py-4 mb-8">

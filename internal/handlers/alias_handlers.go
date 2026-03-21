@@ -111,6 +111,8 @@ func (h *Handler) ListAliases(c *echo.Context) error {
 		"DomainFilter": domainFilter,
 		"IsSuperAdmin": isSuperAdmin,
 		"SessionUser":  middleware.GetUsername(c, middleware.SessionName),
+		"Message":      middleware.GetFlash(c, "message"),
+		"Error":        middleware.GetFlash(c, "error"),
 	})
 }
 
@@ -278,6 +280,8 @@ func (h *Handler) AddAlias(c *echo.Context) error {
 		fmt.Printf("Failed to log create_alias: %v\n", err)
 	}
 
+	middleware.SetFlash(c, "message", "Alias created successfully")
+
 	return c.Redirect(http.StatusFound, "/aliases")
 }
 
@@ -406,6 +410,8 @@ func (h *Handler) EditAlias(c *echo.Context) error {
 		fmt.Printf("Failed to log edit_alias: %v\n", err)
 	}
 
+	middleware.SetFlash(c, "message", "Alias updated successfully")
+
 	return c.Redirect(http.StatusFound, "/aliases")
 }
 
@@ -477,6 +483,8 @@ func (h *Handler) DeleteAlias(c *echo.Context) error {
 		// Just log error
 		fmt.Printf("Failed to log delete_alias: %v\n", err)
 	}
+
+	middleware.SetFlash(c, "message", "Alias deleted successfully")
 
 	return c.JSON(http.StatusOK, map[string]interface{}{"success": true})
 }

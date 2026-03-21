@@ -143,13 +143,31 @@ var App = (function ($) {
             contentType: 'application/json'
         }).done(function (data) {
             if (data.success) {
-                alert(opts.msgs.success);
+                // Success message will be set in flash session by backend and shown on reload.
                 window.location.reload();
             } else {
-                alert(opts.msgs.error + (data.error || 'Unknown error'));
+                showToast('Error', opts.msgs.error + (data.error || 'Unknown error'), 'error');
             }
         }).fail(function (err) {
-            alert(opts.msgs.requestError + err.statusText);
+            showToast('Error', opts.msgs.requestError + err.statusText, 'error');
+        });
+    }
+
+    /**
+     * Show a toast notification.
+     * @param {string} heading - Toast heading (Success / Error).
+     * @param {string} text - Toast body text.
+     * @param {string} icon - Icon type: 'success' | 'error' | 'warning' | 'info'.
+     */
+    function showToast(heading, text, icon) {
+        $.toast({
+            heading: heading,
+            text: text,
+            showHideTransition: 'slide',
+            icon: icon || 'info', // O icone determina a cor gerada pela biblioteca.
+            position: 'top-right',
+            hideAfter: 3000,
+            allowToastClose: true,
         });
     }
 
@@ -317,6 +335,7 @@ var App = (function ($) {
         confirmDeleteResource: confirmDeleteResource,
         fadeAlert: fadeAlert,
         flashMessages: flashMessages,
+        showToast: showToast,
         checkPasswordChangeIntention: checkPasswordChangeIntention,
         updateEmailPreview: updateEmailPreview,
         validateEmail: validateEmail,
