@@ -1,10 +1,12 @@
 # Stage 1: Build CSS with Tailwind
-FROM node:20-alpine AS css-builder
+FROM debian:bookworm AS css-builder
+RUN apt-get update && apt install -y curl
+
 WORKDIR /app
-COPY package*.json ./
-RUN npm install
+RUN curl -ksLO https://github.com/tailwindlabs/tailwindcss/releases/download/v4.2.0/tailwindcss-linux-x64 && \
+    chmod +x tailwindcss-linux-x64 && mv tailwindcss-linux-x64 /usr/local/bin/tailwindcss
 COPY . .
-RUN npx @tailwindcss/cli -i ./public/css/input.css -o ./public/css/style.css
+RUN tailwindcss -i ./web/static/css/input.css -o ./web/static/css/style.css --minify
 
 # Stage 2: Build the Go application
 FROM golang:1.26-alpine AS go-builder

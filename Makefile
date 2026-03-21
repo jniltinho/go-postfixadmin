@@ -32,11 +32,11 @@ run:
 
 css:
 	@echo "Building CSS with Tailwind..."
-	npx @tailwindcss/cli -i ./web/static/css/input.css -o ./web/static/css/style.css --minify
+	tailwindcss -i ./web/static/css/input.css -o ./web/static/css/style.css --minify
 
 watch-css:
 	@echo "Watching CSS changes..."
-	npx tailwindcss -i ./web/static/css/input.css -o ./web/static/css/style.css --watch
+	tailwindcss -i ./web/static/css/input.css -o ./web/static/css/style.css --watch
 
 clean:
 	@echo "Cleaning up..."
