@@ -68,8 +68,8 @@ func (h *Handler) UserDashboard(c *echo.Context) error {
 		"SessionUser": username,
 		"User":        mailbox, // Still needed if dashboard body requires mailbox fields but header uses SessionUser
 		"Alias":       alias,
-		"Message":     middleware.GetFlash(c, "message"),
-		"Error":       middleware.GetFlash(c, "error"),
+		"Message":     GetFlash(c, "message"),
+		"Error":       GetFlash(c, "error"),
 	})
 }
 
@@ -81,7 +81,7 @@ func (h *Handler) UpdateUserPassword(c *echo.Context) error {
 	confirmPassword := c.FormValue("confirm_password")
 
 	if newPassword != confirmPassword {
-		middleware.SetFlash(c, "error", "As senhas não conferem")
+		SetFlash(c, "error", "As senhas não conferem")
 		return c.Redirect(http.StatusFound, "/users/dashboard")
 	}
 
@@ -92,19 +92,19 @@ func (h *Handler) UpdateUserPassword(c *echo.Context) error {
 
 	match, err := utils.CheckPassword(currentPassword, mailbox.Password)
 	if err != nil || !match {
-		middleware.SetFlash(c, "error", "Senha atual incorreta")
+		SetFlash(c, "error", "Senha atual incorreta")
 		return c.Redirect(http.StatusFound, "/users/dashboard")
 	}
 
 	hashedPassword, err := utils.HashPassword(newPassword)
 	if err != nil {
-		middleware.SetFlash(c, "error", "Falha ao processar a nova senha")
+		SetFlash(c, "error", "Falha ao processar a nova senha")
 		return c.Redirect(http.StatusFound, "/users/dashboard")
 	}
 
 	mailbox.Password = hashedPassword
 	if err := h.DB.Save(&mailbox).Error; err != nil {
-		middleware.SetFlash(c, "error", "Falha ao atualizar a senha")
+		SetFlash(c, "error", "Falha ao atualizar a senha")
 		return c.Redirect(http.StatusFound, "/users/dashboard")
 	}
 
@@ -116,7 +116,7 @@ func (h *Handler) UpdateUserPassword(c *echo.Context) error {
 	}
 	utils.LogAction(h.DB, username, c.RealIP(), domain, "USER_EDIT_PASSWORD", username)
 
-	middleware.SetFlash(c, "message", "Senha atualizada com sucesso")
+	SetFlash(c, "message", "Senha atualizada com sucesso")
 	return c.Redirect(http.StatusFound, "/users/dashboard")
 }
 
@@ -132,7 +132,7 @@ func (h *Handler) UpdateUserForwarding(c *echo.Context) error {
 		parts := strings.Split(username, "@")
 		if len(parts) != 2 {
 			tx.Rollback()
-			middleware.SetFlash(c, "error", "Formato de usuário inválido")
+			SetFlash(c, "error", "Formato de usuário inválido")
 			return c.Redirect(http.StatusFound, "/users/dashboard")
 		}
 		domain := parts[1]
@@ -164,7 +164,7 @@ func (h *Handler) UpdateUserForwarding(c *echo.Context) error {
 
 	if err := tx.Save(&alias).Error; err != nil {
 		tx.Rollback()
-		middleware.SetFlash(c, "error", "Falha ao atualizar o redirecionamento")
+		SetFlash(c, "error", "Falha ao atualizar o redirecionamento")
 		return c.Redirect(http.StatusFound, "/users/dashboard")
 	}
 
@@ -180,7 +180,7 @@ func (h *Handler) UpdateUserForwarding(c *echo.Context) error {
 	}
 
 	tx.Commit()
-	middleware.SetFlash(c, "message", "Redirecionamento atualizado com sucesso")
+	SetFlash(c, "message", "Redirecionamento atualizado com sucesso")
 	return c.Redirect(http.StatusFound, "/users/dashboard")
 }
 
@@ -196,8 +196,8 @@ func (h *Handler) UserVacation(c *echo.Context) error {
 
 	templateData := map[string]interface{}{
 		"SessionUser": username,
-		"Message":     middleware.GetFlash(c, "message"),
-		"Error":       middleware.GetFlash(c, "error"),
+		"Message":     GetFlash(c, "message"),
+		"Error":       GetFlash(c, "error"),
 	}
 
 	if err == nil {
@@ -224,7 +224,7 @@ func (h *Handler) UpdateUserVacation(c *echo.Context) error {
 
 	parts := strings.Split(username, "@")
 	if len(parts) != 2 {
-		middleware.SetFlash(c, "error", "Formato de usuário inválido")
+		SetFlash(c, "error", "Formato de usuário inválido")
 		return c.Redirect(http.StatusFound, "/users/vacation")
 	}
 	domain := parts[1]
@@ -280,7 +280,7 @@ func (h *Handler) UpdateUserVacation(c *echo.Context) error {
 	// Assuming 'Upsert' behavior or simply Save
 	if err := tx.Save(&vacation).Error; err != nil {
 		tx.Rollback()
-		middleware.SetFlash(c, "error", "Falha ao salvar configuração da resposta automática")
+		SetFlash(c, "error", "Falha ao salvar configuração da resposta automática")
 		return c.Redirect(http.StatusFound, "/users/vacation")
 	}
 
@@ -296,7 +296,7 @@ func (h *Handler) UpdateUserVacation(c *echo.Context) error {
 		_ = utils.SyncSingleVacationSieve(h.DB, username, "")
 	}
 
-	middleware.SetFlash(c, "message", "Resposta automática salva com sucesso")
+	SetFlash(c, "message", "Resposta automática salva com sucesso")
 	return c.Redirect(http.StatusFound, "/users/vacation")
 }
 
@@ -317,7 +317,7 @@ func (h *Handler) DeleteUserVacation(c *echo.Context) error {
 
 	if err := tx.Where("email = ?", username).Delete(&models.Vacation{}).Error; err != nil {
 		tx.Rollback()
-		middleware.SetFlash(c, "error", "Falha ao remover resposta automática")
+		SetFlash(c, "error", "Falha ao remover resposta automática")
 		return c.Redirect(http.StatusFound, "/users/vacation")
 	}
 
@@ -330,6 +330,6 @@ func (h *Handler) DeleteUserVacation(c *echo.Context) error {
 		_ = utils.SyncSingleVacationSieve(h.DB, username, "")
 	}
 
-	middleware.SetFlash(c, "message", "Resposta automática removida com sucesso")
+	SetFlash(c, "message", "Resposta automática removida com sucesso")
 	return c.Redirect(http.StatusFound, "/users/dashboard")
 }

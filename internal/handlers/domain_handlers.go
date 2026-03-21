@@ -71,8 +71,8 @@ func (h *Handler) ListDomains(c *echo.Context) error {
 		"Domains":      displayDomains,
 		"IsSuperAdmin": isSuperAdmin,
 		"SessionUser":  username,
-		"Message":      middleware.GetFlash(c, "message"),
-		"Error":        middleware.GetFlash(c, "error"),
+		"Message":      GetFlash(c, "message"),
+		"Error":        GetFlash(c, "error"),
 	})
 }
 
@@ -163,7 +163,7 @@ func (h *Handler) AddDomainAPI(c *echo.Context) error {
 		fmt.Printf("Failed to log create_domain: %v\n", err)
 	}
 
-	middleware.SetFlash(c, "message", "Domain created successfully")
+	SetFlash(c, "message", "Domain created successfully")
 
 	return c.JSON(http.StatusOK, map[string]interface{}{"success": true})
 }
@@ -277,7 +277,7 @@ func (h *Handler) EditDomainAPI(c *echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "Failed to update domain: " + err.Error()})
 	}
 
-	middleware.SetFlash(c, "message", "Domain updated successfully")
+	SetFlash(c, "message", "Domain updated successfully")
 
 	return c.JSON(http.StatusOK, map[string]interface{}{"success": true})
 }
@@ -310,7 +310,7 @@ func (h *Handler) DeleteDomain(c *echo.Context) error {
 		})
 	}
 
-	middleware.SetFlash(c, "message", "Domain deleted successfully")
+	SetFlash(c, "message", "Domain deleted successfully")
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"success": true,

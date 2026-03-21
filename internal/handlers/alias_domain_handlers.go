@@ -49,8 +49,8 @@ func (h *Handler) ListAliasDomains(c *echo.Context) error {
 		"AliasDomains": aliasDomains,
 		"IsSuperAdmin": isSuperAdmin,
 		"SessionUser":  middleware.GetUsername(c, middleware.SessionName),
-		"Message":      middleware.GetFlash(c, "message"),
-		"Error":        middleware.GetFlash(c, "error"),
+		"Message":      GetFlash(c, "message"),
+		"Error":        GetFlash(c, "error"),
 	})
 }
 
@@ -116,7 +116,7 @@ func (h *Handler) AddAliasDomainAPI(c *echo.Context) error {
 		fmt.Printf("Failed to log create_alias_domain: %v\n", err)
 	}
 
-	middleware.SetFlash(c, "message", "Alias Domain created successfully")
+	SetFlash(c, "message", "Alias Domain created successfully")
 	return c.JSON(http.StatusOK, map[string]interface{}{"success": true})
 }
 
@@ -171,7 +171,7 @@ func (h *Handler) DeleteAliasDomain(c *echo.Context) error {
 		fmt.Printf("Failed to log delete_alias_domain: %v\n", err)
 	}
 
-	middleware.SetFlash(c, "message", "Alias Domain deleted successfully")
+	SetFlash(c, "message", "Alias Domain deleted successfully")
 
 	return c.JSON(http.StatusOK, map[string]interface{}{"success": true})
 }
@@ -303,7 +303,6 @@ func (h *Handler) EditAliasDomainAPI(c *echo.Context) error {
 		fmt.Printf("Failed to log edit_alias_domain: %v\n", err)
 	}
 
-	middleware.SetFlash(c, "message", "Alias Domain updated successfully")
+	SetFlash(c, "message", "Alias Domain updated successfully")
 	return c.JSON(http.StatusOK, map[string]interface{}{"success": true})
 }
-
