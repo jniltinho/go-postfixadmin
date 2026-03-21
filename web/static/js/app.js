@@ -111,21 +111,17 @@ var App = (function ($) {
     // ─── Generate Password ───────────────────────────────────────
     // opts: { passwordId, confirmId, onSuccess (callback), failMsg }
     function generatePassword(opts) {
-        $.ajax({
-            url: '/api/generate-password',
-            method: 'GET',
-            dataType: 'json'
-        }).done(function (data) {
-            $('#' + opts.passwordId).val(data.password);
-            $('#' + opts.confirmId).val(data.password);
+        var chars = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%&*';
+        var pwd = Array.from({ length: 16 }, function () {
+            return chars[Math.floor(Math.random() * chars.length)];
+        }).join('');
 
-            if (typeof opts.onSuccess === 'function') {
-                opts.onSuccess(data.password);
-            }
-        }).fail(function (err) {
-            console.error('Failed to generate password:', err);
-            alert(opts.failMsg || 'Failed to generate password');
-        });
+        $('#' + opts.passwordId).val(pwd);
+        $('#' + opts.confirmId).val(pwd);
+
+        if (typeof opts.onSuccess === 'function') {
+            opts.onSuccess(pwd);
+        }
     }
 
     // ─── Confirm Delete Resource ─────────────────────────────────

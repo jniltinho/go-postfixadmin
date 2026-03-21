@@ -1,0 +1,334 @@
+{{define "modal_add_mailbox"}}
+<!-- Add Mailbox Modal -->
+<div id="addMailboxModal" class="fixed inset-0 z-50 hidden">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/50" onclick="closeAddMailboxModal()"></div>
+    <!-- Modal Box -->
+    <div class="relative z-10 flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white border-4 border-brand-text w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <!-- Header -->
+            <div class="bg-brand-primary px-6 py-4 flex items-center justify-between flex-shrink-0">
+                <h3 class="text-lg font-mono font-black uppercase tracking-tight text-white flex items-center">
+                    <i data-lucide="plus-circle" class="w-5 h-5 mr-2"></i>
+                    {{ T $.Lang `Mailboxes_AddMailboxBtn` }}
+                </h3>
+                <button onclick="closeAddMailboxModal()" class="text-white hover:text-gray-200 transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Scrollable Body -->
+            <div class="overflow-y-auto flex-1">
+                <!-- Error Area -->
+                <div id="modal-error" class="hidden mx-6 mt-4 bg-red-50 border-2 border-red-600 p-3 flex items-start">
+                    <i data-lucide="alert-circle" class="w-4 h-4 text-red-600 mr-2 mt-0.5 flex-shrink-0"></i>
+                    <p id="modal-error-text" class="text-sm text-red-700 font-medium"></p>
+                </div>
+
+                <form id="modalMailboxForm" class="p-6 space-y-5">
+                    <!-- Email Account Section -->
+                    <div class="border-2 border-brand-text p-4 space-y-4">
+                        <h4 class="text-sm font-mono font-black uppercase tracking-tight flex items-center">
+                            <i data-lucide="mail" class="w-4 h-4 mr-2"></i>
+                            {{ T $.Lang `Mailboxes_InfoTitle` }}
+                        </h4>
+
+                        <!-- Username + Domain -->
+                        <div class="grid grid-cols-2 gap-3 items-start">
+                            <div>
+                                <label for="modal-local_part" class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                                    {{ T $.Lang `Mailboxes_LblUsername` }} <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" id="modal-local_part" name="local_part" required minlength="4"
+                                    placeholder="{{ T $.Lang `Mailboxes_PhUsername` }}"
+                                    pattern="[a-z0-9._-]{4,}"
+                                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm lowercase"
+                                    style="text-transform: lowercase;">
+                                <p class="text-[10px] text-gray-400 mt-1">{{ T $.Lang `Mailboxes_HelpUsername` }}</p>
+                            </div>
+                            <div>
+                                <label for="modal-domain" class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                                    {{ T $.Lang `Mailboxes_LblDomain` }} <span class="text-red-500">*</span>
+                                </label>
+                                <select id="modal-domain" name="domain" required
+                                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors cursor-pointer text-sm">
+                                    <option value="">{{ T $.Lang `Mailboxes_PhSelectDomain` }}</option>
+                                    {{range .Domains}}
+                                    <option value="{{.Domain}}">{{.Domain}}</option>
+                                    {{end}}
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Email Preview -->
+                        <div class="bg-gray-50 border border-gray-300 px-3 h-10 flex items-center gap-2">
+                            <span class="text-xs font-bold uppercase tracking-widest text-gray-400 whitespace-nowrap">{{ T $.Lang `Mailboxes_LblFullEmailPreview` }}:</span>
+                            <p class="font-mono text-sm font-bold">
+                                <span id="modal-localPartPreview" class="text-brand-primary">user</span>@<span id="modal-domainPreview" class="text-brand-primary">domain.com</span>
+                            </p>
+                        </div>
+
+                        <!-- Display Name -->
+                        <div>
+                            <label for="modal-name" class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                                {{ T $.Lang `Mailboxes_LblDisplayName` }}
+                            </label>
+                            <input type="text" id="modal-name" name="name"
+                                placeholder="{{ T $.Lang `Mailboxes_PhDisplayName` }}"
+                                class="w-full px-3 py-2 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm">
+                        </div>
+
+                        <!-- Active -->
+                        <div class="flex items-center">
+                            <input type="checkbox" id="modal-active" name="active" value="true" checked
+                                class="w-5 h-5 border-2 border-brand-text cursor-pointer">
+                            <label for="modal-active" class="ml-2 text-sm font-bold cursor-pointer">{{ T $.Lang `Mailboxes_LblActive` }}</label>
+                        </div>
+                    </div>
+
+                    <!-- Password Section -->
+                    <div class="border-2 border-brand-text p-4 space-y-3">
+                        <h4 class="text-sm font-mono font-black uppercase tracking-tight flex items-center">
+                            <i data-lucide="key" class="w-4 h-4 mr-2"></i>
+                            {{ T $.Lang `Mailboxes_PwdTitle` }}
+                        </h4>
+
+                        <div class="flex gap-2 items-center">
+                            <!-- Password -->
+                            <div class="relative flex-1">
+                                <input type="password" id="modal-password" name="password" required minlength="8"
+                                    placeholder="{{ T $.Lang `Mailboxes_PhNewPwd` }}"
+                                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm pr-10">
+                                <button type="button" onclick="togglePassword('modal-password')"
+                                    class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary transition-colors">
+                                    <i data-lucide="eye" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                            <!-- Confirm -->
+                            <div class="relative flex-1">
+                                <input type="password" id="modal-password_confirm" name="password_confirm" required minlength="8"
+                                    placeholder="{{ T $.Lang `Mailboxes_PhRepeatPwd` }}"
+                                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm pr-10">
+                                <button type="button" onclick="togglePassword('modal-password_confirm')"
+                                    class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary transition-colors">
+                                    <i data-lucide="eye" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                            <!-- Generate -->
+                            <button type="button" onclick="modalGeneratePassword()"
+                                class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-black px-3 h-10 border-2 border-blue-600 cursor-pointer uppercase tracking-widest flex items-center gap-1 whitespace-nowrap flex-shrink-0 transition-colors">
+                                <i data-lucide="wand-2" class="w-3 h-3"></i>
+                                {{ T $.Lang `Mailboxes_BtnGenerate` }}
+                            </button>
+                        </div>
+
+                        <p id="modal-matchIndicator" class="text-xs hidden"></p>
+
+                        <!-- Strength Meter -->
+                        <div id="modal-strengthMeter" class="hidden">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-xs font-black uppercase tracking-widest text-brand-text">{{ T $.Lang `Mailboxes_PwdStrength` }}</span>
+                                <span id="modal-strengthText" class="text-xs font-bold uppercase tracking-wider"></span>
+                            </div>
+                            <div class="h-2 bg-gray-200 border border-brand-text overflow-hidden">
+                                <div id="modal-strengthBar" class="h-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Settings -->
+                    <details class="border-2 border-brand-text">
+                        <summary class="px-4 py-3 cursor-pointer font-bold uppercase tracking-tight text-xs flex items-center hover:bg-gray-50 transition-colors">
+                            <i data-lucide="settings" class="w-3 h-3 mr-2"></i>
+                            {{ T $.Lang `Mailboxes_AdvancedTitle` }}
+                            <i data-lucide="chevron-down" class="w-3 h-3 ml-auto"></i>
+                        </summary>
+                        <div class="px-4 pb-4 pt-2 space-y-3 border-t-2 border-brand-text">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label for="modal-quota" class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                                        {{ T $.Lang `Mailboxes_LblQuota` }}
+                                    </label>
+                                    <input type="number" id="modal-quota" name="quota" min="0" value="1024"
+                                        class="w-full px-3 py-2 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm">
+                                    <p class="text-xs text-gray-500 mt-1">{{ T $.Lang `Mailboxes_HelpQuota` }}</p>
+                                </div>
+                                <div class="flex items-center pt-5">
+                                    <input type="checkbox" id="modal-smtp_active" name="smtp_active" value="true" checked
+                                        class="w-5 h-5 border-2 border-brand-text cursor-pointer">
+                                    <label for="modal-smtp_active" class="ml-2 text-sm font-bold cursor-pointer">{{ T $.Lang `Mailboxes_LblSmtpActive` }}</label>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="modal-email_other" class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                                    {{ T $.Lang `Mailboxes_LblAlternativeEmail` }}
+                                </label>
+                                <input type="email" id="modal-email_other" name="email_other"
+                                    placeholder="{{ T $.Lang `Mailboxes_PhAlternativeEmail` }}"
+                                    class="w-full px-3 py-2 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm">
+                            </div>
+                        </div>
+                    </details>
+                </form>
+            </div>
+
+            <!-- Footer Buttons -->
+            <div class="flex items-center justify-end space-x-3 px-6 py-4 border-t-2 border-brand-text flex-shrink-0">
+                <button type="button" onclick="closeAddMailboxModal()"
+                    class="bg-white hover:bg-gray-50 text-brand-text border-2 border-brand-text font-black px-6 py-3 shadow-[2px_2px_0px_#1E293B] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm">
+                    <i data-lucide="x" class="w-4 h-4 mr-2"></i>
+                    {{ T $.Lang `Mailboxes_BtnCancel` }}
+                </button>
+                <button type="button" id="modal-submitBtn" onclick="submitAddMailboxModal()"
+                    class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-6 py-3 shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm">
+                    <i data-lucide="save" class="w-4 h-4 mr-2"></i>
+                    {{ T $.Lang `Mailboxes_BtnSave` }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openAddMailboxModal() {
+        $('#addMailboxModal').removeClass('hidden');
+        $('body').css('overflow', 'hidden');
+        lucide.createIcons();
+    }
+
+    function closeAddMailboxModal() {
+        $('#addMailboxModal').addClass('hidden');
+        $('body').css('overflow', '');
+        $('#modalMailboxForm')[0].reset();
+        $('#modal-localPartPreview').text('user');
+        $('#modal-domainPreview').text('domain.com');
+        $('#modal-error').addClass('hidden');
+        $('#modal-strengthMeter').addClass('hidden');
+        $('#modal-matchIndicator').addClass('hidden').text('');
+    }
+
+    function togglePassword(fieldId) { App.togglePassword(fieldId, event.currentTarget); }
+
+    function modalGeneratePassword() {
+        App.generatePassword({
+            passwordId: 'modal-password',
+            confirmId: 'modal-password_confirm',
+            failMsg: `{{ T $.Lang "Mailboxes_JsPwdGenFail" }}`,
+            onSuccess: function () {
+                App.checkPasswordStrength(_modalStrengthOpts);
+                App.checkPasswordMatch(_modalMatchOpts);
+            }
+        });
+    }
+
+    var _modalStrengthOpts = {
+        passwordId: 'modal-password', meterId: 'modal-strengthMeter',
+        barId: 'modal-strengthBar', textId: 'modal-strengthText',
+        labels: {
+            weak: `{{ T $.Lang "Mailboxes_JsPwdWeak" }}`,
+            medium: `{{ T $.Lang "Mailboxes_JsPwdFair" }}`,
+            good: `{{ T $.Lang "Mailboxes_JsPwdGood" }}`,
+            strong: `{{ T $.Lang "Mailboxes_JsPwdStrong" }}`
+        }
+    };
+    var _modalMatchOpts = {
+        passwordId: 'modal-password', confirmId: 'modal-password_confirm',
+        indicatorId: 'modal-matchIndicator', submitBtnId: 'modal-submitBtn',
+        labels: {
+            match: `{{ T $.Lang "Mailboxes_JsPwdMatchOk" }}`,
+            noMatch: `{{ T $.Lang "Mailboxes_JsPwdMatchFail" }}`
+        }
+    };
+
+    function submitAddMailboxModal() {
+        var localPart = $('#modal-local_part').val().toLowerCase().trim();
+        var domain = $('#modal-domain').val();
+        var password = $('#modal-password').val();
+        var passwordConfirm = $('#modal-password_confirm').val();
+
+        if (!localPart || localPart.length < 4) {
+            showModalError(`{{ T $.Lang "Mailboxes_JsErrUsernameLen" }}`);
+            return;
+        }
+        if (!domain) {
+            showModalError(`{{ T $.Lang "Mailboxes_PhSelectDomain" }}`);
+            return;
+        }
+        if (!password || password.length < 8) {
+            showModalError(`{{ T $.Lang "Mailboxes_JsErrPwdLen" }}`);
+            return;
+        }
+        if (password !== passwordConfirm) {
+            showModalError(`{{ T $.Lang "Mailboxes_JsErrPwdMatch" }}`);
+            return;
+        }
+
+        var formData = new FormData($('#modalMailboxForm')[0]);
+        formData.set('local_part', localPart);
+
+        $('#modal-submitBtn').prop('disabled', true);
+
+        $.ajax({
+            url: '/api/mailboxes',
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (res) {
+                if (res.success) {
+                    var redirect = '/mailboxes';
+                    if (res.domain) redirect += '?domain=' + encodeURIComponent(res.domain);
+                    window.location.href = redirect;
+                } else {
+                    showModalError(res.error || 'Unknown error');
+                    $('#modal-submitBtn').prop('disabled', false);
+                }
+            },
+            error: function (xhr) {
+                var msg = 'Request failed';
+                try { msg = JSON.parse(xhr.responseText).error || msg; } catch (e) {}
+                showModalError(msg);
+                $('#modal-submitBtn').prop('disabled', false);
+            }
+        });
+    }
+
+    function showModalError(msg) {
+        $('#modal-error-text').text(msg);
+        $('#modal-error').removeClass('hidden');
+    }
+
+    $(function () {
+        $('#modal-local_part').on('input', function () {
+            $(this).val($(this).val().toLowerCase());
+            $('#modal-localPartPreview').text($(this).val() || 'user');
+        });
+        $('#modal-domain').on('change', function () {
+            $('#modal-domainPreview').text($(this).val() || 'domain.com');
+        });
+
+        App.initPasswordForm({
+            passwordId: 'modal-password', confirmId: 'modal-password_confirm',
+            meterId: 'modal-strengthMeter', barId: 'modal-strengthBar', textId: 'modal-strengthText',
+            indicatorId: 'modal-matchIndicator', submitBtnId: 'modal-submitBtn',
+            formId: 'modalMailboxForm',
+            labels: {
+                weak: `{{ T $.Lang "Mailboxes_JsPwdWeak" }}`,
+                medium: `{{ T $.Lang "Mailboxes_JsPwdFair" }}`,
+                good: `{{ T $.Lang "Mailboxes_JsPwdGood" }}`,
+                strong: `{{ T $.Lang "Mailboxes_JsPwdStrong" }}`,
+                match: `{{ T $.Lang "Mailboxes_JsPwdMatchOk" }}`,
+                noMatch: `{{ T $.Lang "Mailboxes_JsPwdMatchFail" }}`
+            },
+            validationMsgs: {
+                minLen: `{{ T $.Lang "Mailboxes_JsErrPwdLen" }}`,
+                noMatch: `{{ T $.Lang "Mailboxes_JsErrPwdMatch" }}`
+            }
+        });
+
+        $(document).on('keydown', function (e) {
+            if (e.key === 'Escape') closeAddMailboxModal();
+        });
+    });
+</script>
+{{end}}

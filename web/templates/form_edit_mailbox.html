@@ -1,0 +1,319 @@
+{{define "modal_edit_mailbox"}}
+<!-- Edit Mailbox Modal -->
+<div id="editMailboxModal" class="fixed inset-0 z-50 hidden">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/50" onclick="closeEditMailboxModal()"></div>
+    <!-- Modal Box -->
+    <div class="relative z-10 flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white border-4 border-brand-text w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <!-- Header -->
+            <div class="bg-brand-primary px-6 py-4 flex items-center justify-between flex-shrink-0">
+                <h3 class="text-lg font-mono font-black uppercase tracking-tight text-white flex items-center">
+                    <i data-lucide="edit" class="w-5 h-5 mr-2"></i>
+                    {{ T $.Lang `Mailboxes_EditTitle` }}
+                </h3>
+                <button onclick="closeEditMailboxModal()" class="text-white hover:text-gray-200 transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Scrollable Body -->
+            <div class="overflow-y-auto flex-1">
+                <!-- Error Area -->
+                <div id="edit-modal-error" class="hidden mx-6 mt-4 bg-red-50 border-2 border-red-600 p-3 flex items-start">
+                    <i data-lucide="alert-circle" class="w-4 h-4 text-red-600 mr-2 mt-0.5 flex-shrink-0"></i>
+                    <p id="edit-modal-error-text" class="text-sm text-red-700 font-medium"></p>
+                </div>
+
+                <form id="editModalMailboxForm" class="p-6 space-y-5">
+                    <input type="hidden" id="edit-modal-username" name="username" value="">
+                    <input type="hidden" id="edit-modal-domain" name="domain" value="">
+
+                    <!-- Email Account Section -->
+                    <div class="border-2 border-brand-text p-4 space-y-4">
+                        <h4 class="text-sm font-mono font-black uppercase tracking-tight flex items-center">
+                            <i data-lucide="mail" class="w-4 h-4 mr-2"></i>
+                            {{ T $.Lang `Mailboxes_InfoTitle` }}
+                        </h4>
+
+                        <!-- Email (read-only) -->
+                        <div>
+                            <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                                {{ T $.Lang `Mailboxes_LblEmailAddress` }}
+                            </label>
+                            <div id="edit-modal-email-display" class="h-10 px-3 flex items-center border-2 border-gray-300 bg-gray-50 font-mono text-sm font-medium text-gray-700"></div>
+                        </div>
+
+                        <!-- Display Name -->
+                        <div>
+                            <label for="edit-modal-name" class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                                {{ T $.Lang `Mailboxes_LblDisplayName` }}
+                            </label>
+                            <input type="text" id="edit-modal-name" name="name"
+                                placeholder="{{ T $.Lang `Mailboxes_PhDisplayName` }}"
+                                class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm">
+                        </div>
+
+                        <!-- Active -->
+                        <div class="flex items-center">
+                            <input type="checkbox" id="edit-modal-active" name="active" value="true"
+                                class="w-5 h-5 border-2 border-brand-text cursor-pointer">
+                            <label for="edit-modal-active" class="ml-2 text-sm font-bold cursor-pointer">{{ T $.Lang `Mailboxes_LblEnabled` }}</label>
+                        </div>
+                    </div>
+
+                    <!-- Change Password (collapsible) -->
+                    <details class="border-2 border-brand-text">
+                        <summary class="px-4 py-3 cursor-pointer font-bold uppercase tracking-tight text-xs flex items-center hover:bg-gray-50 transition-colors">
+                            <i data-lucide="key" class="w-3 h-3 mr-2"></i>
+                            {{ T $.Lang `Mailboxes_PwdChangeTitle` }}
+                            <i data-lucide="chevron-down" class="w-3 h-3 ml-auto"></i>
+                        </summary>
+                        <input type="hidden" name="change_password" id="edit-modal-change_password" value="false">
+                        <div class="px-4 pb-4 pt-3 space-y-3 border-t-2 border-brand-text">
+                            <div class="flex gap-2 items-center">
+                                <!-- Password -->
+                                <div class="relative flex-1">
+                                    <input type="password" id="edit-modal-password" name="password" minlength="8"
+                                        placeholder="{{ T $.Lang `Mailboxes_PhNewPwd` }}"
+                                        class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm pr-10">
+                                    <button type="button" onclick="togglePassword('edit-modal-password')"
+                                        class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary transition-colors">
+                                        <i data-lucide="eye" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                                <!-- Confirm -->
+                                <div class="relative flex-1">
+                                    <input type="password" id="edit-modal-password_confirm" name="password_confirm" minlength="8"
+                                        placeholder="{{ T $.Lang `Mailboxes_PhRepeatPwd` }}"
+                                        class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm pr-10">
+                                    <button type="button" onclick="togglePassword('edit-modal-password_confirm')"
+                                        class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary transition-colors">
+                                        <i data-lucide="eye" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                                <!-- Generate -->
+                                <button type="button" onclick="editModalGeneratePassword()"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-black px-3 h-10 border-2 border-blue-600 cursor-pointer uppercase tracking-widest flex items-center gap-1 whitespace-nowrap flex-shrink-0 transition-colors">
+                                    <i data-lucide="wand-2" class="w-3 h-3"></i>
+                                    {{ T $.Lang `Mailboxes_BtnGenerate` }}
+                                </button>
+                            </div>
+
+                            <p id="edit-modal-matchIndicator" class="text-xs hidden"></p>
+
+                            <!-- Strength Meter -->
+                            <div id="edit-modal-strengthMeter" class="hidden">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-xs font-black uppercase tracking-widest text-brand-text">{{ T $.Lang `Mailboxes_PwdStrength` }}</span>
+                                    <span id="edit-modal-strengthText" class="text-xs font-bold uppercase tracking-wider"></span>
+                                </div>
+                                <div class="h-2 bg-gray-200 border border-brand-text overflow-hidden">
+                                    <div id="edit-modal-strengthBar" class="h-full transition-all duration-300" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+
+                    <!-- Advanced Settings -->
+                    <details class="border-2 border-brand-text" open>
+                        <summary class="px-4 py-3 cursor-pointer font-bold uppercase tracking-tight text-xs flex items-center hover:bg-gray-50 transition-colors">
+                            <i data-lucide="settings" class="w-3 h-3 mr-2"></i>
+                            {{ T $.Lang `Mailboxes_AdvancedTitle` }}
+                            <i data-lucide="chevron-down" class="w-3 h-3 ml-auto"></i>
+                        </summary>
+                        <div class="px-4 pb-4 pt-2 space-y-3 border-t-2 border-brand-text">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label for="edit-modal-quota" class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                                        {{ T $.Lang `Mailboxes_LblQuota` }}
+                                    </label>
+                                    <input type="number" id="edit-modal-quota" name="quota" min="0"
+                                        class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm">
+                                    <p class="text-[10px] text-gray-400 mt-1">{{ T $.Lang `Mailboxes_HelpQuota` }}</p>
+                                </div>
+                                <div class="flex items-center pt-5">
+                                    <input type="checkbox" id="edit-modal-smtp_active" name="smtp_active" value="true"
+                                        class="w-5 h-5 border-2 border-brand-text cursor-pointer">
+                                    <label for="edit-modal-smtp_active" class="ml-2 text-sm font-bold cursor-pointer">{{ T $.Lang `Mailboxes_LblSmtpActive` }}</label>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="edit-modal-email_other" class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                                    {{ T $.Lang `Mailboxes_LblAlternativeEmail` }}
+                                </label>
+                                <input type="email" id="edit-modal-email_other" name="email_other"
+                                    placeholder="{{ T $.Lang `Mailboxes_PhAlternativeEmail` }}"
+                                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm">
+                            </div>
+                        </div>
+                    </details>
+                </form>
+            </div>
+
+            <!-- Footer Buttons -->
+            <div class="flex items-center justify-end space-x-3 px-6 py-4 border-t-2 border-brand-text flex-shrink-0">
+                <button type="button" onclick="closeEditMailboxModal()"
+                    class="bg-white hover:bg-gray-50 text-brand-text border-2 border-brand-text font-black px-6 py-3 shadow-[2px_2px_0px_#1E293B] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm">
+                    <i data-lucide="x" class="w-4 h-4 mr-2"></i>
+                    {{ T $.Lang `Mailboxes_BtnCancel` }}
+                </button>
+                <button type="button" id="edit-modal-submitBtn" onclick="submitEditMailboxModal()"
+                    class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-6 py-3 shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm">
+                    <i data-lucide="save" class="w-4 h-4 mr-2"></i>
+                    {{ T $.Lang `Mailboxes_BtnUpdate` }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openEditMailboxModal(username) {
+        $.ajax({
+            url: '/api/mailboxes/' + encodeURIComponent(username),
+            method: 'GET',
+            success: function (data) {
+                $('#edit-modal-username').val(data.username);
+                $('#edit-modal-domain').val(data.domain);
+                $('#edit-modal-email-display').text(data.username);
+                $('#edit-modal-name').val(data.name);
+                $('#edit-modal-quota').val(data.quota);
+                $('#edit-modal-email_other').val(data.emailOther);
+                $('#edit-modal-active').prop('checked', data.active);
+                $('#edit-modal-smtp_active').prop('checked', data.smtpActive);
+
+                // Reset password fields
+                $('#edit-modal-password, #edit-modal-password_confirm').val('');
+                $('#edit-modal-change_password').val('false');
+                $('#edit-modal-strengthMeter, #edit-modal-matchIndicator').addClass('hidden');
+                $('#edit-modal-error').addClass('hidden');
+                $('#edit-modal-submitBtn').prop('disabled', false);
+
+                $('#editMailboxModal').removeClass('hidden');
+                $('body').css('overflow', 'hidden');
+                lucide.createIcons();
+            },
+            error: function (xhr) {
+                var msg = 'Failed to load mailbox data';
+                try { msg = JSON.parse(xhr.responseText).error || msg; } catch (e) {}
+                alert(msg);
+            }
+        });
+    }
+
+    function closeEditMailboxModal() {
+        $('#editMailboxModal').addClass('hidden');
+        $('body').css('overflow', '');
+        $('#editModalMailboxForm')[0].reset();
+        $('#edit-modal-error').addClass('hidden');
+        $('#edit-modal-strengthMeter, #edit-modal-matchIndicator').addClass('hidden');
+    }
+
+    function editModalGeneratePassword() {
+        App.generatePassword({
+            passwordId: 'edit-modal-password',
+            confirmId: 'edit-modal-password_confirm',
+            onSuccess: function () {
+                $('#edit-modal-change_password').val('true');
+                App.checkPasswordStrength(_editStrengthOpts);
+                App.checkPasswordMatch(_editMatchOpts);
+            }
+        });
+    }
+
+    var _editStrengthOpts = {
+        passwordId: 'edit-modal-password', meterId: 'edit-modal-strengthMeter',
+        barId: 'edit-modal-strengthBar', textId: 'edit-modal-strengthText',
+        labels: {
+            weak: `{{ T $.Lang "Mailboxes_JsPwdWeak" }}`,
+            medium: `{{ T $.Lang "Mailboxes_JsPwdFair" }}`,
+            good: `{{ T $.Lang "Mailboxes_JsPwdGood" }}`,
+            strong: `{{ T $.Lang "Mailboxes_JsPwdStrong" }}`
+        }
+    };
+    var _editMatchOpts = {
+        passwordId: 'edit-modal-password', confirmId: 'edit-modal-password_confirm',
+        indicatorId: 'edit-modal-matchIndicator', submitBtnId: 'edit-modal-submitBtn',
+        labels: {
+            match: `{{ T $.Lang "Mailboxes_JsPwdMatchOk" }}`,
+            noMatch: `{{ T $.Lang "Mailboxes_JsPwdMatchFail" }}`
+        }
+    };
+
+    function submitEditMailboxModal() {
+        var username = $('#edit-modal-username').val();
+        var changePassword = $('#edit-modal-change_password').val() === 'true';
+
+        if (changePassword) {
+            var password = $('#edit-modal-password').val();
+            var passwordConfirm = $('#edit-modal-password_confirm').val();
+            if (!password || password.length < 8) {
+                showEditModalError(`{{ T $.Lang "Mailboxes_JsErrPwdLen" }}`);
+                return;
+            }
+            if (password !== passwordConfirm) {
+                showEditModalError(`{{ T $.Lang "Mailboxes_JsErrPwdMatch" }}`);
+                return;
+            }
+        }
+
+        var formData = new FormData($('#editModalMailboxForm')[0]);
+        $('#edit-modal-submitBtn').prop('disabled', true);
+
+        $.ajax({
+            url: '/api/mailboxes/' + encodeURIComponent(username),
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (res) {
+                if (res.success) {
+                    var redirect = '/mailboxes';
+                    if (res.domain) redirect += '?domain=' + encodeURIComponent(res.domain);
+                    window.location.href = redirect;
+                } else {
+                    showEditModalError(res.error || 'Unknown error');
+                    $('#edit-modal-submitBtn').prop('disabled', false);
+                }
+            },
+            error: function (xhr) {
+                var msg = 'Request failed';
+                try { msg = JSON.parse(xhr.responseText).error || msg; } catch (e) {}
+                showEditModalError(msg);
+                $('#edit-modal-submitBtn').prop('disabled', false);
+            }
+        });
+    }
+
+    function showEditModalError(msg) {
+        $('#edit-modal-error-text').text(msg);
+        $('#edit-modal-error').removeClass('hidden');
+    }
+
+    $(function () {
+        App.initPasswordForm({
+            passwordId: 'edit-modal-password', confirmId: 'edit-modal-password_confirm',
+            meterId: 'edit-modal-strengthMeter', barId: 'edit-modal-strengthBar', textId: 'edit-modal-strengthText',
+            indicatorId: 'edit-modal-matchIndicator', submitBtnId: 'edit-modal-submitBtn',
+            changeInputId: 'edit-modal-change_password',
+            labels: {
+                weak: `{{ T $.Lang "Mailboxes_JsPwdWeak" }}`,
+                medium: `{{ T $.Lang "Mailboxes_JsPwdFair" }}`,
+                good: `{{ T $.Lang "Mailboxes_JsPwdGood" }}`,
+                strong: `{{ T $.Lang "Mailboxes_JsPwdStrong" }}`,
+                match: `{{ T $.Lang "Mailboxes_JsPwdMatchOk" }}`,
+                noMatch: `{{ T $.Lang "Mailboxes_JsPwdMatchFail" }}`
+            },
+            validationMsgs: {
+                minLen: `{{ T $.Lang "Mailboxes_JsErrPwdLen" }}`,
+                noMatch: `{{ T $.Lang "Mailboxes_JsErrPwdMatch" }}`
+            }
+        });
+
+        $(document).on('keydown', function (e) {
+            if (e.key === 'Escape') closeEditMailboxModal();
+        });
+    });
+</script>
+{{end}}

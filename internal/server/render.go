@@ -67,6 +67,8 @@ func (t *Template) Render(c *echo.Context, w io.Writer, name string, data any) e
 }
 
 // loadTemplates parses all view templates from the embedded filesystem.
+// Files named form_*.html are treated as partials: they are not registered as
+// standalone templates but are automatically included in every page template set.
 func loadTemplates(embeddedFiles embed.FS) (*Template, error) {
 	t := &Template{
 		templates: make(map[string]*template.Template),
@@ -76,6 +78,16 @@ func loadTemplates(embeddedFiles embed.FS) (*Template, error) {
 
 	layout := "web/templates/layout.html"
 	userLayout := "web/templates/users/layout.html"
+
+	// Collect partial templates (form_*.html) from the root templates directory.
+	var partials []string
+	if entries, err := fs.ReadDir(embeddedFiles, "web/templates"); err == nil {
+		for _, e := range entries {
+			if !e.IsDir() && strings.HasPrefix(e.Name(), "form_") {
+				partials = append(partials, "web/templates/"+e.Name())
+			}
+		}
+	}
 
 	err := fs.WalkDir(embeddedFiles, "web/templates", func(filePath string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -87,6 +99,10 @@ func loadTemplates(embeddedFiles embed.FS) (*Template, error) {
 
 		name := d.Name()
 		if filePath == "web/templates/layout.html" || filePath == "web/templates/users/layout.html" {
+			return nil
+		}
+		// Partials are included in other templates, not registered standalone.
+		if strings.HasPrefix(name, "form_") {
 			return nil
 		}
 
@@ -106,7 +122,8 @@ func loadTemplates(embeddedFiles embed.FS) (*Template, error) {
 			if name == "login.html" {
 				tmpl, parseErr = template.New(tmplKey).Funcs(funcMap).ParseFS(embeddedFiles, filePath)
 			} else {
-				tmpl, parseErr = template.New(tmplKey).Funcs(funcMap).ParseFS(embeddedFiles, layout, filePath)
+				parseFiles := append([]string{layout}, append(partials, filePath)...)
+				tmpl, parseErr = template.New(tmplKey).Funcs(funcMap).ParseFS(embeddedFiles, parseFiles...)
 			}
 		}
 

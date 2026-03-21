@@ -8,11 +8,11 @@
         <h2 class="text-4xl font-mono font-black uppercase tracking-tight mb-2">{{ T $.Lang `Mailboxes_Title` }}</h2>
         <p class="text-xs font-bold uppercase tracking-widest text-gray-400">{{ T $.Lang `Mailboxes_Subtitle` }}</p>
     </div>
-    <a href="/mailboxes/add"
+    <button onclick="openAddMailboxModal()"
         class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-8 py-5 shadow-[3px_3px_0px_#1E293B] flex items-center transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest">
         <i data-lucide="plus-circle" class="w-5 h-5 mr-3"></i>
         {{ T $.Lang `Mailboxes_AddMailboxBtn` }}
-    </a>
+    </button>
 </div>
 
 <!-- Filter by Domain -->
@@ -96,10 +96,10 @@
                     </td>
                     <td class="py-1 px-2">
                         <div class="flex items-center justify-end space-x-2">
-                            <a href="/mailboxes/edit/{{.Username}}"
+                            <button onclick="openEditMailboxModal('{{.Username}}')"
                                 class="bg-blue-600 hover:bg-white hover:text-blue-600 text-white text-xs border border-brand-text font-black px-2 py-1 shadow-[1px_1px_0px_#1E293B] flex items-center transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[2px_2px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest">
                                 <i data-lucide="edit" class="w-3 h-3 mr-2"></i> {{ T $.Lang `Mailboxes_Edit` }}
-                            </a>
+                            </button>
                             <button onclick="confirmDeleteMailbox('{{.Username}}')"
                                 class="bg-red-600 hover:bg-white hover:text-red-600 text-white text-xs border border-brand-text font-black px-2 py-1 shadow-[1px_1px_0px_#1E293B] flex items-center transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[2px_2px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest">
                                 <i data-lucide="trash-2" class="w-3 h-3 mr-2"></i> {{ T $.Lang `Mailboxes_Delete` }}
@@ -112,6 +112,9 @@
         </table>
     </div>
 </div>
+
+{{template "modal_add_mailbox" .}}
+{{template "modal_edit_mailbox" .}}
 
 <script>
     function confirmDeleteMailbox(username) {

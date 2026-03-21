@@ -47,10 +47,9 @@ func RegisterRoutes(e *echo.Echo, h *handlers.Handler) {
 
 	// Mailboxes
 	adminGroup.GET("/mailboxes", h.ListMailboxes)
-	adminGroup.GET("/mailboxes/add", h.AddMailboxForm)
-	adminGroup.POST("/mailboxes/add", h.AddMailbox)
-	adminGroup.GET("/mailboxes/edit/:username", h.EditMailboxForm)
-	adminGroup.POST("/mailboxes/edit/:username", h.EditMailbox)
+	adminGroup.POST("/api/mailboxes", h.AddMailboxAPI)
+	adminGroup.GET("/api/mailboxes/:username", h.GetMailboxAPI)
+	adminGroup.POST("/api/mailboxes/:username", h.EditMailboxAPI)
 	adminGroup.DELETE("/mailboxes/delete/:username", h.DeleteMailbox)
 
 	// Admins
