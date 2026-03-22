@@ -8,6 +8,7 @@ import (
 
 	"go-postfixadmin/internal/middleware"
 	"go-postfixadmin/internal/models"
+	"go-postfixadmin/internal/repositories"
 	"go-postfixadmin/internal/utils"
 
 	"github.com/labstack/echo/v5"
@@ -16,6 +17,7 @@ import (
 // ListAliasDomains lists all alias domains
 func (h *Handler) ListAliasDomains(c *echo.Context) error {
 	var aliasDomains []models.AliasDomain
+	var domains []models.Domain
 	var isSuperAdmin bool
 
 	if h.DB != nil {
@@ -26,7 +28,7 @@ func (h *Handler) ListAliasDomains(c *echo.Context) error {
 
 		// Security: Filter by allowed domains
 		username := middleware.GetUsername(c, middleware.SessionName)
-		allowedDomains, isSuper, err := utils.GetAllowedDomains(h.DB, username, middleware.GetIsSuperAdmin(c))
+		allowedDomains, isSuper, err := repositories.GetAllowedDomains(h.DB, username, middleware.GetIsSuperAdmin(c))
 		if err != nil {
 			return c.Render(http.StatusInternalServerError, "alias_domains/alias_domains.html", map[string]interface{}{
 				"Error": "Failed to check permissions: " + err.Error(),
@@ -43,10 +45,19 @@ func (h *Handler) ListAliasDomains(c *echo.Context) error {
 		}
 
 		query.Find(&aliasDomains)
+
+		domains, _, err = repositories.GetActiveDomains(h.DB, username, middleware.GetIsSuperAdmin(c))
+		if err != nil {
+			return c.Render(http.StatusInternalServerError, "alias_domains/alias_domains.html", map[string]interface{}{
+				"AliasDomains": aliasDomains,
+				"Error":        "Failed to load domains: " + err.Error(),
+			})
+		}
 	}
 
 	return c.Render(http.StatusOK, "alias_domains/alias_domains.html", map[string]interface{}{
 		"AliasDomains": aliasDomains,
+		"Domains":      domains,
 		"IsSuperAdmin": isSuperAdmin,
 		"SessionUser":  middleware.GetUsername(c, middleware.SessionName),
 		"Message":      GetFlash(c, "message"),
@@ -61,7 +72,7 @@ func (h *Handler) AddAliasDomainAPI(c *echo.Context) error {
 	active := c.FormValue("active") == "true"
 
 	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
-	allowedDomains, isSuperAdmin, err := utils.GetAllowedDomains(h.DB, loggedInUser, middleware.GetIsSuperAdmin(c))
+	allowedDomains, isSuperAdmin, err := repositories.GetAllowedDomains(h.DB, loggedInUser, middleware.GetIsSuperAdmin(c))
 	if err != nil {
 		return c.JSON(http.StatusForbidden, map[string]interface{}{"success": false, "error": "Permission check failed"})
 	}
@@ -144,7 +155,7 @@ func (h *Handler) DeleteAliasDomain(c *echo.Context) error {
 	}
 
 	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
-	allowedDomains, isSuperAdmin, err := utils.GetAllowedDomains(h.DB, loggedInUser, middleware.GetIsSuperAdmin(c))
+	allowedDomains, isSuperAdmin, err := repositories.GetAllowedDomains(h.DB, loggedInUser, middleware.GetIsSuperAdmin(c))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "Permission check failed"})
 	}
@@ -176,7 +187,6 @@ func (h *Handler) DeleteAliasDomain(c *echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]interface{}{"success": true})
 }
 
-
 // GetAliasDomainAPI fetches alias domain details for the edit modal via JSON
 func (h *Handler) GetAliasDomainAPI(c *echo.Context) error {
 	aliasDomainName, _ := url.PathUnescape(c.Param("alias_domain"))
@@ -193,7 +203,7 @@ func (h *Handler) GetAliasDomainAPI(c *echo.Context) error {
 	var domains []models.Domain
 	if h.DB != nil {
 		loggedInUser := middleware.GetUsername(c, middleware.SessionName)
-		allowedDomains, isSuperAdmin, err := utils.GetAllowedDomains(h.DB, loggedInUser, middleware.GetIsSuperAdmin(c))
+		allowedDomains, isSuperAdmin, err := repositories.GetAllowedDomains(h.DB, loggedInUser, middleware.GetIsSuperAdmin(c))
 		if err != nil {
 			return c.JSON(http.StatusForbidden, map[string]interface{}{"error": "Permission check failed"})
 		}
@@ -242,7 +252,7 @@ func (h *Handler) EditAliasDomainAPI(c *echo.Context) error {
 	}
 
 	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
-	allowedDomains, isSuperAdmin, err := utils.GetAllowedDomains(h.DB, loggedInUser, middleware.GetIsSuperAdmin(c))
+	allowedDomains, isSuperAdmin, err := repositories.GetAllowedDomains(h.DB, loggedInUser, middleware.GetIsSuperAdmin(c))
 	if err != nil {
 		return c.JSON(http.StatusForbidden, map[string]interface{}{"success": false, "error": "Permission check failed"})
 	}

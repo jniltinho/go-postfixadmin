@@ -8,6 +8,7 @@ import (
 
 	"go-postfixadmin/internal/middleware"
 	"go-postfixadmin/internal/models"
+	"go-postfixadmin/internal/repositories"
 	"go-postfixadmin/internal/utils"
 
 	"github.com/labstack/echo/v5"
@@ -22,7 +23,7 @@ type AdminData struct {
 func (h *Handler) ListAdmins(c *echo.Context) error {
 	// Security: Superadmins see all, Admins see only themselves
 	username := middleware.GetUsername(c, middleware.SessionName)
-	isSuper, err := utils.IsSuperAdmin(h.DB, username)
+	isSuper, err := repositories.IsSuperAdmin(h.DB, username)
 	if err != nil {
 		return c.Render(http.StatusInternalServerError, "dashboard.html", map[string]interface{}{"Error": "Permission check failed"})
 	}
@@ -84,7 +85,7 @@ func (h *Handler) ListAdmins(c *echo.Context) error {
 func (h *Handler) AddAdminAPI(c *echo.Context) error {
 	// Security: Only Superadmins
 	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
-	isSuper, err := utils.IsSuperAdmin(h.DB, loggedInUser)
+	isSuper, err := repositories.IsSuperAdmin(h.DB, loggedInUser)
 	if err != nil || !isSuper {
 		return c.JSON(http.StatusForbidden, map[string]interface{}{"success": false, "error": "Access denied"})
 	}
@@ -185,7 +186,7 @@ func (h *Handler) AddAdminAPI(c *echo.Context) error {
 func (h *Handler) DeleteAdmin(c *echo.Context) error {
 	// Security: Only Superadmins
 	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
-	isSuper, err := utils.IsSuperAdmin(h.DB, loggedInUser)
+	isSuper, err := repositories.IsSuperAdmin(h.DB, loggedInUser)
 	if err != nil || !isSuper {
 		return c.JSON(http.StatusForbidden, map[string]interface{}{"error": "Access denied"})
 	}
@@ -248,7 +249,7 @@ func (h *Handler) DeleteAdmin(c *echo.Context) error {
 // GetAdminAPI fetches a single administrator details for the edit modal
 func (h *Handler) GetAdminAPI(c *echo.Context) error {
 	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
-	isSuper, err := utils.IsSuperAdmin(h.DB, loggedInUser)
+	isSuper, err := repositories.IsSuperAdmin(h.DB, loggedInUser)
 	if err != nil {
 		return c.JSON(http.StatusForbidden, map[string]interface{}{"error": "Permission check failed"})
 	}
@@ -303,7 +304,7 @@ func (h *Handler) GetAdminAPI(c *echo.Context) error {
 func (h *Handler) EditAdminAPI(c *echo.Context) error {
 	// Security: Superadmins OR Self
 	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
-	isSuper, err := utils.IsSuperAdmin(h.DB, loggedInUser)
+	isSuper, err := repositories.IsSuperAdmin(h.DB, loggedInUser)
 	if err != nil {
 		return c.JSON(http.StatusForbidden, map[string]interface{}{"success": false, "error": "Permission check failed"})
 	}

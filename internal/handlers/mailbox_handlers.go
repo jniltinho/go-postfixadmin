@@ -11,6 +11,7 @@ import (
 
 	"go-postfixadmin/internal/middleware"
 	"go-postfixadmin/internal/models"
+	"go-postfixadmin/internal/repositories"
 	"go-postfixadmin/internal/utils"
 
 	"github.com/labstack/echo/v5"
@@ -28,7 +29,7 @@ func (h *Handler) ListMailboxes(c *echo.Context) error {
 
 	if h.DB != nil {
 		var err error
-		mailboxes, _, err = utils.GetAllMailboxes(h.DB, SessionUser, isSuperAdmin, domainFilter)
+		mailboxes, _, err = repositories.GetAllMailboxes(h.DB, SessionUser, isSuperAdmin, domainFilter)
 		if err != nil {
 			if err.Error() == "access denied to this domain" {
 				return c.Render(http.StatusForbidden, "mailboxes/mailboxes.html", map[string]interface{}{
@@ -44,7 +45,7 @@ func (h *Handler) ListMailboxes(c *echo.Context) error {
 	// Fetch domains for the filter dropdown
 	var domains []models.Domain
 	if h.DB != nil {
-		domains, _, _ = utils.GetActiveDomains(h.DB, SessionUser, isSuperAdmin)
+		domains, _, _ = repositories.GetActiveDomains(h.DB, SessionUser, isSuperAdmin)
 	}
 
 	return c.Render(http.StatusOK, "mailboxes/mailboxes.html", map[string]interface{}{
@@ -67,7 +68,7 @@ func (h *Handler) AddMailboxAPI(c *echo.Context) error {
 	SessionUser := middleware.GetUsername(c, middleware.SessionName)
 
 	// Security: Validate domain access
-	allowedDomains, _, err := utils.GetAllowedDomains(h.DB, SessionUser, isSuperAdmin)
+	allowedDomains, _, err := repositories.GetAllowedDomains(h.DB, SessionUser, isSuperAdmin)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "Permission check failed"})
 	}
@@ -193,7 +194,7 @@ func (h *Handler) GetMailboxAPI(c *echo.Context) error {
 		return c.JSON(http.StatusNotFound, map[string]interface{}{"error": "Mailbox not found"})
 	}
 
-	allowedDomains, _, err := utils.GetAllowedDomains(h.DB, SessionUser, isSuperAdmin)
+	allowedDomains, _, err := repositories.GetAllowedDomains(h.DB, SessionUser, isSuperAdmin)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "Permission check failed"})
 	}
@@ -233,7 +234,7 @@ func (h *Handler) EditMailboxAPI(c *echo.Context) error {
 		return c.JSON(http.StatusNotFound, map[string]interface{}{"error": "Mailbox not found"})
 	}
 
-	allowedDomains, _, err := utils.GetAllowedDomains(h.DB, SessionUser, isSuperAdmin)
+	allowedDomains, _, err := repositories.GetAllowedDomains(h.DB, SessionUser, isSuperAdmin)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "Permission check failed"})
 	}
@@ -319,7 +320,7 @@ func (h *Handler) DeleteMailbox(c *echo.Context) error {
 	// Security: Check permission
 	SessionUser := middleware.GetUsername(c, middleware.SessionName)
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
-	allowedDomains, _, err := utils.GetAllowedDomains(h.DB, SessionUser, isSuperAdmin)
+	allowedDomains, _, err := repositories.GetAllowedDomains(h.DB, SessionUser, isSuperAdmin)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "Permission check failed"})
 	}

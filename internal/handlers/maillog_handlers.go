@@ -9,7 +9,7 @@ import (
 
 	"go-postfixadmin/internal/middleware"
 	"go-postfixadmin/internal/models"
-	"go-postfixadmin/internal/utils"
+	"go-postfixadmin/internal/repositories"
 
 	"github.com/labstack/echo/v5"
 )
@@ -31,7 +31,7 @@ func (h *Handler) MailLogData(c *echo.Context) error {
 	username := middleware.GetUsername(c, middleware.SessionName)
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
 
-	allowedDomains, _, err := utils.GetAllowedDomains(h.DB, username, isSuperAdmin)
+	allowedDomains, _, err := repositories.GetAllowedDomains(h.DB, username, isSuperAdmin)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to check permissions"})
 	}

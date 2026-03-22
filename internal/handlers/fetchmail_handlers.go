@@ -8,7 +8,7 @@ import (
 
 	"go-postfixadmin/internal/middleware"
 	"go-postfixadmin/internal/models"
-	"go-postfixadmin/internal/utils"
+	"go-postfixadmin/internal/repositories"
 
 	"github.com/labstack/echo/v5"
 )
@@ -16,7 +16,7 @@ import (
 // AddFetchmailGET renders the form to create a new fetchmail entry
 func (h *Handler) AddFetchmailGET(c *echo.Context) error {
 	username := middleware.GetUsername(c, middleware.SessionName)
-	mailboxes, isSuper, err := utils.GetAllMailboxes(h.DB, username, middleware.GetIsSuperAdmin(c), "")
+	mailboxes, isSuper, err := repositories.GetAllMailboxes(h.DB, username, middleware.GetIsSuperAdmin(c), "")
 	if err != nil {
 		slog.Error("Failed to fetch mailboxes", "error", err)
 	}
@@ -121,7 +121,7 @@ func (h *Handler) AddFetchmailPOST(c *echo.Context) error {
 // Helper to re-render form with error state
 func renderFetchmailFormWithError(c *echo.Context, h *Handler, errorMsg string) error {
 	username := middleware.GetUsername(c, middleware.SessionName)
-	mailboxes, isSuper, _ := utils.GetAllMailboxes(h.DB, username, middleware.GetIsSuperAdmin(c), "")
+	mailboxes, isSuper, _ := repositories.GetAllMailboxes(h.DB, username, middleware.GetIsSuperAdmin(c), "")
 
 	pollTime, _ := strconv.Atoi(c.FormValue("poll_time"))
 	srcPort, _ := strconv.Atoi(c.FormValue("src_port"))

@@ -10,6 +10,7 @@ import (
 
 	"go-postfixadmin/internal/middleware"
 	"go-postfixadmin/internal/models"
+	"go-postfixadmin/internal/repositories"
 	"go-postfixadmin/internal/utils"
 
 	"github.com/labstack/echo/v5"
@@ -30,7 +31,7 @@ func (h *Handler) ListDomains(c *echo.Context) error {
 	username := middleware.GetUsername(c, middleware.SessionName)
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
 
-	allowedDomains, _, err := utils.GetAllowedDomains(h.DB, username, isSuperAdmin)
+	allowedDomains, _, err := repositories.GetAllowedDomains(h.DB, username, isSuperAdmin)
 	if err != nil {
 		return c.Render(http.StatusInternalServerError, "domains/domains.html", map[string]interface{}{
 			"Error": "Failed to check permissions: " + err.Error(),
@@ -303,7 +304,7 @@ func (h *Handler) DeleteDomain(c *echo.Context) error {
 	}
 
 	// Use utility function to delete domain and all associated data
-	if err := utils.DeleteDomain(h.DB, domainName, username, c.RealIP()); err != nil {
+	if err := repositories.DeleteDomain(h.DB, domainName, username, c.RealIP()); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"success": false,
 			"error":   "Failed to delete domain: " + err.Error(),
