@@ -101,8 +101,8 @@ func (h *Handler) AddAdminAPI(c *echo.Context) error {
 	if username == "" {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "error": "Username is required"})
 	}
-	if len(password) < 8 {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "error": "Password must be at least 8 characters"})
+	if validationErr := ValidatePassword(password); validationErr != "" {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "error": validationErr})
 	}
 	if password != passwordConfirm {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "error": "Passwords do not match"})
@@ -319,6 +319,7 @@ func (h *Handler) EditAdminAPI(c *echo.Context) error {
 
 	// Get form values
 	password := c.FormValue("password")
+	passwordConfirm := c.FormValue("password_confirm")
 	active := c.FormValue("active") == "true"
 	superadmin := c.FormValue("superadmin") == "true"
 	changePassword := c.FormValue("change_password") == "true"
@@ -340,6 +341,14 @@ func (h *Handler) EditAdminAPI(c *echo.Context) error {
 	}
 
 	if changePassword && password != "" {
+		if validationErr := ValidatePassword(password); validationErr != "" {
+			tx.Rollback()
+			return c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "error": validationErr})
+		}
+		if password != passwordConfirm {
+			tx.Rollback()
+			return c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "error": "Passwords do not match"})
+		}
 		crypted, err := utils.HashPassword(password)
 		if err != nil {
 			tx.Rollback()

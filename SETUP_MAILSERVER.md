@@ -31,10 +31,32 @@ FLUSH PRIVILEGES;
 ./postfixadmin --generate-config
 
 ## Adjust the generated config.toml file with the saved database password ("your_password")
+## You can also enable verbose SQL logging during setup/troubleshooting:
+## [database]
+## debug = true
+##
 ## And then run the migration:
 ./postfixadmin migrate
 ## The Go-PostfixAdmin binary creates tables automatically based on config.toml
 ```
+
+Example `config.toml` database section:
+
+```toml
+[database]
+url = "postfix:your_password@tcp(localhost:3306)/postfix?charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=True&loc=Local"
+debug = false
+```
+
+Password policy enforced by the backend:
+
+- Minimum 8 characters
+- At least 1 uppercase letter
+- At least 1 lowercase letter
+- At least 1 number
+- At least 1 special character
+
+The web interface password generator already follows the same rules, so generated passwords are valid for mailbox, admin, and user password updates.
 
 ---
 
@@ -309,3 +331,5 @@ systemctl restart postfix dovecot rsyslog
 | **MySQL Support in Postfix** | Verify with `postconf -m \| grep mysql`. If missing, install `postfix-mysql` |
 | **Permissions of SQL files** | Keep `640` with owner `root:postfix` for security |
 | **TLS** | Always use `smtpd_tls_auth_only = yes` to prevent credential transmission without encryption |
+| **Database debug logging** | Set `database.debug = true` in `config.toml` to enable verbose GORM SQL logs during troubleshooting |
+| **Password policy** | Password changes and creations are validated by the backend with the same 8+ chars / upper / lower / number / special rule |

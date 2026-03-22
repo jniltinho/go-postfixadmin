@@ -238,6 +238,96 @@ msgstr "Update your mailbox password."
 msgid "DashboardUser_CurrentPassword"
 msgstr "Current Password"
 
+msgid "Alias Domain created successfully"
+msgstr "Alias domain created successfully"
+
+msgid "Alias Domain deleted successfully"
+msgstr "Alias domain deleted successfully"
+
+msgid "Alias Domain updated successfully"
+msgstr "Alias domain updated successfully"
+
+msgid "Domain created successfully"
+msgstr "Domain created successfully"
+
+msgid "Domain updated successfully"
+msgstr "Domain updated successfully"
+
+msgid "Admin created successfully"
+msgstr "Administrator created successfully"
+
+msgid "Admin deleted successfully"
+msgstr "Administrator deleted successfully"
+
+msgid "Admin updated successfully"
+msgstr "Administrator updated successfully"
+
+msgid "Alias created successfully"
+msgstr "Alias created successfully"
+
+msgid "Alias updated successfully"
+msgstr "Alias updated successfully"
+
+msgid "Mailbox created successfully"
+msgstr "Mailbox created successfully"
+
+msgid "Mailbox updated successfully"
+msgstr "Mailbox updated successfully"
+
+msgid "Passwords do not match"
+msgstr "Passwords do not match"
+
+msgid "Current password is incorrect"
+msgstr "Current password is incorrect"
+
+msgid "Failed to process the new password"
+msgstr "Failed to process the new password"
+
+msgid "Failed to update the password"
+msgstr "Failed to update the password"
+
+msgid "Password updated successfully"
+msgstr "Password updated successfully"
+
+msgid "Invalid user format"
+msgstr "Invalid user format"
+
+msgid "Failed to update forwarding"
+msgstr "Failed to update forwarding"
+
+msgid "Forwarding updated successfully"
+msgstr "Forwarding updated successfully"
+
+msgid "Failed to save auto-reply settings"
+msgstr "Failed to save auto-reply settings"
+
+msgid "Auto-reply saved successfully"
+msgstr "Auto-reply saved successfully"
+
+msgid "Failed to remove auto-reply"
+msgstr "Failed to remove auto-reply"
+
+msgid "Auto-reply removed successfully"
+msgstr "Auto-reply removed successfully"
+
+msgid "Login required"
+msgstr "Login required"
+
+msgid "Password must be at least 8 characters long"
+msgstr "Password must be at least 8 characters long"
+
+msgid "Password must contain at least one uppercase letter"
+msgstr "Password must contain at least one uppercase letter"
+
+msgid "Password must contain at least one lowercase letter"
+msgstr "Password must contain at least one lowercase letter"
+
+msgid "Password must contain at least one number"
+msgstr "Password must contain at least one number"
+
+msgid "Password must contain at least one special character"
+msgstr "Password must contain at least one special character"
+
 msgid "DashboardUser_CurrentPasswordPlaceholder"
 msgstr "Your current password"
 

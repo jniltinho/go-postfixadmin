@@ -19,9 +19,6 @@ func RegisterRoutes(e *echo.Echo, h *handlers.Handler) {
 	// Static files and utils (public)
 	e.GET("/lang/:code", h.SetLanguage)
 
-	// API Routes
-	e.GET("/api/generate-password", h.GeneratePassword)
-
 	// Protected Admin Routes
 	adminGroup := e.Group("")
 	adminGroup.Use(middleware.AuthMiddleware)

@@ -12,6 +12,7 @@ func generateConfig() {
 [database]
 # Format: user:password@tcp(host:port)/dbname?args | driver = "mysql" # mysql or postgres (default: mysql)
 url = "postfix:postfixPassword@tcp(localhost:3306)/postfix?charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=True&loc=Local"
+debug = false # Enable full GORM SQL debug logging
 
 [server]
 # Server Port (default 8080)

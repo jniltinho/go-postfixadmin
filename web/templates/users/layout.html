@@ -8,7 +8,9 @@
     <title>{{block "title" .}}{{ T $.Lang `LayoutUser_UserPortal` }} - Go-PostfixAdmin{{end}}</title>
     <link rel="icon" type="image/png" href="/static/images/favicon.png">
     <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/jquery.toast.min.css">
     <script src="/static/js/jquery-4.0.0.min.js"></script>
+    <script src="/static/js/jquery.toast.min.js"></script>
     <script src="/static/js/lucide.min.js"></script>
     <script>window.AppLang = "{{$.Lang}}";</script>
     <style>
@@ -91,6 +93,20 @@
     <script>
         $(function () { lucide.createIcons(); });
     </script>
+    {{if .Error}}
+    <script>
+        $(function() {
+            App.showToast('Error', '{{.Error}}', 'error');
+        });
+    </script>
+    {{end}}
+    {{if .Message}}
+    <script>
+        $(function() {
+            App.showToast('Success', '{{.Message}}', 'success');
+        });
+    </script>
+    {{end}}
 </body>
 
 </html>

@@ -97,6 +97,7 @@ Go-PostfixAdmin will manage the database structure (tables, domains, accounts, a
    [database]
    # Format: user:password@tcp(host:port)/dbname?args | driver = "mysql"
    url = "postfix:your_secure_password@tcp(localhost:3306)/postfix?charset=utf8mb4&parseTime=True&loc=Local"
+   debug = false # Set to true to enable verbose GORM SQL logs during troubleshooting
    
    [server]
    # Web Server Configuration. For SSL use port 443
@@ -135,6 +136,15 @@ Go-PostfixAdmin will manage the database structure (tables, domains, accounts, a
    port    = 25
    type    = "plain" # type: plain | tls | starttls
    ```
+
+   Password policy enforced by the backend:
+   - Minimum 8 characters
+   - At least 1 uppercase letter
+   - At least 1 lowercase letter
+   - At least 1 number
+   - At least 1 special character
+
+   The web interface password generator already follows the same rules, so generated passwords are valid for mailbox, admin, and user password changes.
 
 3. **Run Migrations:**
    Before starting the service, create the necessary tables by running migrations:
@@ -609,6 +619,7 @@ The binary shares the same `config.toml` as Go-PostfixAdmin. Make sure the follo
 [database]
 # Must use parseTime=True so vacation date columns are parsed correctly
 url = "postfix:your_secure_password@tcp(localhost:3306)/postfix?charset=utf8mb4&parseTime=True&loc=Local"
+debug = false
 
 [server]
 mail_base = "/var/vmail"  # Maildir base path (default: /var/vmail)
@@ -675,4 +686,3 @@ sudo -u vmail /opt/go-postfixadmin/dovecot-vacation
 ```
 
 ---
-

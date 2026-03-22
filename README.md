@@ -8,6 +8,8 @@ Professional Email Administration System built with Go, Echo, and Tailwind CSS.
 *   **Role-Based Access Control (RBAC)**: Differentiation between Superadmins and Domain Admins.
 *   **Modern Design**: Clean and responsive interface built with Tailwind CSS.
 *   **Security**: Strong password hashing and protection against common attacks.
+*   **Password Policy Enforcement**: Backend validation requires at least 8 characters, including uppercase, lowercase, number, and special character.
+*   **Frontend Password Generation**: Password generation is handled entirely in JavaScript and produces values compatible with the backend password policy.
 *   **Integrated CLI**: Command-line tools for automation and access recovery.
 *   **Welcome Emails**: Optional automatic welcome emails sent upon mailbox creation.
 *   **Auto-Reply (Vacation)**: Integrated Dovecot Sieve script generation for automatic vacation responses.
@@ -127,6 +129,30 @@ DB_URL="user:password@tcp(localhost:3306)/dbname?charset=utf8mb4&parseTime=True&
 ```bash
 DB_URL="host=localhost user=gorm password=gorm dbname=gorm port=9920 sslmode=disable TimeZone=America/Sao_Paulo"
 ```
+
+### Database Debug Logging
+
+You can enable verbose GORM SQL logging in `config.toml`:
+
+```toml
+[database]
+url = "postfix:postfixPassword@tcp(mysql:3306)/postfix?charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=True&loc=Local"
+debug = true
+```
+
+This flag enables full database query logging independently of the global `--debug` CLI flag.
+
+### Password Rules
+
+The backend validates all mailbox, admin, and user password changes using the same rules:
+
+- At least 8 characters
+- At least 1 uppercase letter
+- At least 1 lowercase letter
+- At least 1 number
+- At least 1 special character
+
+The UI password generator already follows the same policy, so generated passwords are accepted by the backend without additional adjustment.
 
 ### 4. Deployment with Systemd (Linux)
 

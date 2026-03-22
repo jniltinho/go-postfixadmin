@@ -4,6 +4,105 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Language: pt_BR\n"
 
+msgid "Alias Domain created successfully"
+msgstr "Domínio de alias criado com sucesso"
+
+msgid "Alias Domain deleted successfully"
+msgstr "Domínio de alias removido com sucesso"
+
+msgid "Alias Domain updated successfully"
+msgstr "Domínio de alias atualizado com sucesso"
+
+msgid "Domain created successfully"
+msgstr "Domínio criado com sucesso"
+
+msgid "Domain updated successfully"
+msgstr "Domínio atualizado com sucesso"
+
+msgid "Domain deleted successfully"
+msgstr "Domínio removido com sucesso"
+
+msgid "Admin created successfully"
+msgstr "Administrador criado com sucesso"
+
+msgid "Admin deleted successfully"
+msgstr "Administrador removido com sucesso"
+
+msgid "Admin updated successfully"
+msgstr "Administrador atualizado com sucesso"
+
+msgid "Alias created successfully"
+msgstr "Alias criado com sucesso"
+
+msgid "Alias updated successfully"
+msgstr "Alias atualizado com sucesso"
+
+msgid "Alias deleted successfully"
+msgstr "Alias removido com sucesso"
+
+msgid "Mailbox created successfully"
+msgstr "Caixa postal criada com sucesso"
+
+msgid "Mailbox updated successfully"
+msgstr "Caixa postal atualizada com sucesso"
+
+msgid "Mailbox deleted successfully"
+msgstr "Caixa postal removida com sucesso"
+
+msgid "Passwords do not match"
+msgstr "As senhas não conferem"
+
+msgid "Current password is incorrect"
+msgstr "Senha atual incorreta"
+
+msgid "Failed to process the new password"
+msgstr "Falha ao processar a nova senha"
+
+msgid "Failed to update the password"
+msgstr "Falha ao atualizar a senha"
+
+msgid "Password updated successfully"
+msgstr "Senha atualizada com sucesso"
+
+msgid "Invalid user format"
+msgstr "Formato de usuário inválido"
+
+msgid "Failed to update forwarding"
+msgstr "Falha ao atualizar o redirecionamento"
+
+msgid "Forwarding updated successfully"
+msgstr "Redirecionamento atualizado com sucesso"
+
+msgid "Failed to save auto-reply settings"
+msgstr "Falha ao salvar configuração da resposta automática"
+
+msgid "Auto-reply saved successfully"
+msgstr "Resposta automática salva com sucesso"
+
+msgid "Failed to remove auto-reply"
+msgstr "Falha ao remover resposta automática"
+
+msgid "Auto-reply removed successfully"
+msgstr "Resposta automática removida com sucesso"
+
+msgid "Login required"
+msgstr "Login obrigatório"
+
+msgid "Password must be at least 8 characters long"
+msgstr "A senha deve ter no mínimo 8 caracteres"
+
+msgid "Password must contain at least one uppercase letter"
+msgstr "A senha deve conter ao menos uma letra maiúscula"
+
+msgid "Password must contain at least one lowercase letter"
+msgstr "A senha deve conter ao menos uma letra minúscula"
+
+msgid "Password must contain at least one number"
+msgstr "A senha deve conter ao menos um número"
+
+msgid "Password must contain at least one special character"
+msgstr "A senha deve conter ao menos um caractere especial"
+
 msgid "Vacation_Title"
 msgstr "Resposta Automática"
 
@@ -587,7 +686,7 @@ msgid "Mailboxes_PhUsername"
 msgstr "usuario"
 
 msgid "Mailboxes_HelpUsername"
-msgstr "Parte antes do @ (mínimo 4 caracteres, apenas letras minúsculas)"
+msgstr "Parte antes do @ (mínimo 4 caracteres)"
 
 msgid "Mailboxes_HelpUsernameTitle"
 msgstr "Mínimo 4 caracteres, apenas letras minúsculas"

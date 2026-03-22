@@ -106,11 +106,11 @@ func (h *Handler) AddMailboxAPI(c *echo.Context) error {
 	if len(localPart) < 4 {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "Username must be at least 4 characters"})
 	}
-	if len(password) < 8 {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "Password must be at least 8 characters"})
+	if validationErr := ValidatePassword(password); validationErr != "" {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": validationErr})
 	}
 	if password != passwordConfirm {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "Password and confirmation do not match"})
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "Passwords do not match"})
 	}
 
 	localPartRegex := regexp.MustCompile(`^[a-zA-Z0-9._-]+$`)
@@ -268,11 +268,11 @@ func (h *Handler) EditMailboxAPI(c *echo.Context) error {
 		password := c.FormValue("password")
 		passwordConfirm := c.FormValue("password_confirm")
 
-		if len(password) < 8 {
-			return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "Password must be at least 8 characters"})
+		if validationErr := ValidatePassword(password); validationErr != "" {
+			return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": validationErr})
 		}
 		if password != passwordConfirm {
-			return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "Password and confirmation do not match"})
+			return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "Passwords do not match"})
 		}
 
 		hashedPassword, err := utils.HashPassword(password)
@@ -382,14 +382,6 @@ func (h *Handler) DeleteMailbox(c *echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"success": true,
 		"message": "Mailbox deleted successfully",
-	})
-}
-
-// GeneratePassword API endpoint para gerar senha complexa
-func (h *Handler) GeneratePassword(c *echo.Context) error {
-	password := utils.GenerateComplexPassword()
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"password": password,
 	})
 }
 

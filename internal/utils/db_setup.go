@@ -36,7 +36,7 @@ func ConnectDB(dsn string, driver string) (*gorm.DB, error) {
 	}
 
 	gormConfig := &gorm.Config{}
-	if viper.GetBool("debug") {
+	if viper.GetBool("database.debug") || viper.GetBool("debug") {
 		gormConfig.Logger = logger.Default.LogMode(logger.Info)
 	}
 

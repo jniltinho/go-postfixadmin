@@ -111,13 +111,51 @@ var App = (function ($) {
     // ─── Generate Password ───────────────────────────────────────
     // opts: { passwordId, confirmId, onSuccess (callback), failMsg }
     function generatePassword(opts) {
-        var chars = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%&*';
-        var pwd = Array.from({ length: 14 }, function () {
-            return chars[Math.floor(Math.random() * chars.length)];
-        }).join('');
+        var upperChars = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+        var lowerChars = 'abcdefghijkmnpqrstuvwxyz';
+        var digitChars = '23456789';
+        var specialChars = '!@#$%&*';
+        var allChars = upperChars + lowerChars + digitChars + specialChars;
+        var length = 14;
 
-        $('#' + opts.passwordId).val(pwd);
-        $('#' + opts.confirmId).val(pwd);
+        function randomChar(chars) {
+            return chars[Math.floor(Math.random() * chars.length)];
+        }
+
+        function shuffle(chars) {
+            for (var i = chars.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var tmp = chars[i];
+                chars[i] = chars[j];
+                chars[j] = tmp;
+            }
+            return chars;
+        }
+
+        var pwdChars = [
+            randomChar(upperChars),
+            randomChar(lowerChars),
+            randomChar(digitChars),
+            randomChar(specialChars)
+        ];
+
+        while (pwdChars.length < length) {
+            pwdChars.push(randomChar(allChars));
+        }
+
+        var pwd = shuffle(pwdChars).join('');
+
+        var $password = $('#' + opts.passwordId);
+        var $confirm = $('#' + opts.confirmId);
+
+        $password.attr('type', 'text');
+        $confirm.attr('type', 'text');
+        $password.siblings('button').find('i').attr('data-lucide', 'eye-off');
+        $confirm.siblings('button').find('i').attr('data-lucide', 'eye-off');
+
+        $password.val(pwd).attr('value', pwd).trigger('input').trigger('change');
+        $confirm.val(pwd).attr('value', pwd).trigger('input').trigger('change');
+        lucide.createIcons();
 
         if (typeof opts.onSuccess === 'function') {
             opts.onSuccess(pwd);

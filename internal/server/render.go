@@ -56,8 +56,10 @@ func (t *Template) Render(c *echo.Context, w io.Writer, name string, data any) e
 
 	// Determine layout
 	layout := "base"
-	if name == "auth/login.html" || name == "users/login.html" {
+	if name == "auth/login.html" {
 		layout = "login.html"
+	} else if name == "users/login.html" {
+		layout = "users/login.html"
 	} else if strings.HasPrefix(name, "users/") {
 		layout = "user_base"
 	}
@@ -106,7 +108,7 @@ func loadTemplates(embeddedFiles embed.FS) (*Template, error) {
 
 		// Use the path relative to web/templates/ as the key
 		tmplKey := strings.TrimPrefix(filePath, "web/templates/")
-		
+
 		var tmpl *template.Template
 		var parseErr error
 

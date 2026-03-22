@@ -43,7 +43,7 @@
             </h3>
             <p class="text-xs text-gray-500 mb-6">{{ T $.Lang `DashboardUser_ForwardingDesc` }}</p>
 
-            <form action="/users/forwarding" method="POST" class="space-y-6">
+            <form action="/users/forwarding" method="POST" class="space-y-6" id="forwardingForm">
                 <div>
                     <label for="forwarding"
                         class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
@@ -92,7 +92,7 @@
                 </div>
 
                 <!-- New Password Inputs Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-4 items-start">
                     <div>
                         <div class="flex items-center mb-2 h-7">
                             <label for="new_password"
@@ -109,20 +109,17 @@
                                 <i data-lucide="eye" class="w-5 h-5"></i>
                             </button>
                         </div>
+                        <div class="mt-2 min-h-[20px]">
+                            <p id="matchIndicator" class="text-xs hidden"></p>
+                        </div>
                     </div>
 
                     <div>
-                        <div class="flex items-center justify-between mb-2 h-7">
+                        <div class="flex items-center mb-2 h-7">
                             <label for="confirm_password"
                                 class="block text-xs font-black uppercase tracking-widest text-brand-text">
                                 {{ T $.Lang `DashboardUser_ConfirmPassword` }} <span class="text-red-500">*</span>
                             </label>
-                            <button type="button" onclick="generatePassword()"
-                                title="{{ T $.Lang `DashboardUser_GenerateHelp` }}"
-                                class="bg-brand-secondary hover:bg-white hover:text-brand-secondary text-white text-[10px] font-black px-3 py-1 border-2 border-brand-text shadow-[1px_1px_0px_#1E3A8A] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[2px_2px_0px_#1E3A8A] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center">
-                                <i data-lucide="wand-2" class="w-3 h-3 mr-1"></i>
-                                {{ T $.Lang `DashboardUser_Generate` }}
-                            </button>
                         </div>
                         <div class="relative">
                             <input type="password" id="confirm_password" name="confirm_password" required minlength="8"
@@ -133,7 +130,18 @@
                                 <i data-lucide="eye" class="w-5 h-5"></i>
                             </button>
                         </div>
-                        <p id="matchIndicator" class="text-xs mt-2 hidden"></p>
+                        <div class="mt-2 min-h-[20px]"></div>
+                    </div>
+
+                    <div class="md:w-12">
+                        <div class="hidden md:block mb-2 h-7"></div>
+                        <button type="button" onclick="generatePassword()"
+                            title="{{ T $.Lang `DashboardUser_GenerateHelp` }}"
+                            aria-label="{{ T $.Lang `DashboardUser_Generate` }}"
+                            class="w-full md:w-12 h-[52px] bg-brand-secondary hover:bg-white hover:text-brand-secondary text-white border-2 border-brand-text shadow-[1px_1px_0px_#1E3A8A] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[2px_2px_0px_#1E3A8A] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer flex items-center justify-center">
+                            <i data-lucide="wand-2" class="w-4 h-4"></i>
+                        </button>
+                        <div class="hidden md:block mt-2 min-h-[20px]"></div>
                     </div>
                 </div>
 
@@ -221,6 +229,43 @@
             }
         });
 
+        $('#passwordForm').on('submit', function (e) {
+            e.preventDefault();
+
+            var $form = $(this);
+            var $submitBtn = $('#submitBtn');
+
+            $submitBtn.prop('disabled', true).addClass('opacity-50 cursor-not-allowed');
+
+            $.ajax({
+                url: '/users/password',
+                method: 'POST',
+                data: $form.serialize(),
+                headers: { 'Accept': 'application/json' }
+            }).done(function (res) {
+                if (res.success) {
+                    App.showToast('Success', res.message || 'Password updated successfully', 'success');
+                    $('#current_password, #new_password, #confirm_password').val('');
+                    $('#strengthMeter, #matchIndicator').addClass('hidden');
+                    $('#strengthBar').css('width', '0%');
+                    $('#strengthText').text('');
+                    if (res.redirect) {
+                        setTimeout(function () {
+                            window.location.href = res.redirect;
+                        }, 800);
+                    }
+                } else {
+                    App.showToast('Error', res.error || 'Request failed', 'error');
+                }
+            }).fail(function (xhr) {
+                var msg = 'Request failed';
+                try { msg = JSON.parse(xhr.responseText).error || msg; } catch (err) {}
+                App.showToast('Error', msg, 'error');
+            }).always(function () {
+                $submitBtn.prop('disabled', false).removeClass('opacity-50 cursor-not-allowed');
+            });
+        });
+
         // Forwarding textarea validation
         var $fwdTextarea = $('#forwarding');
         var $fwdBtn = $('#saveForwardingBtn');
@@ -249,6 +294,37 @@
         }
         $fwdTextarea.on('input', checkForwarding);
         checkForwarding();
+
+        $('#forwardingForm').on('submit', function (e) {
+            e.preventDefault();
+
+            var $form = $(this);
+
+            if ($fwdBtn.prop('disabled')) {
+                return;
+            }
+
+            $fwdBtn.prop('disabled', true).addClass('opacity-50 cursor-not-allowed');
+
+            $.ajax({
+                url: '/users/forwarding',
+                method: 'POST',
+                data: $form.serialize(),
+                headers: { 'Accept': 'application/json' }
+            }).done(function (res) {
+                if (res.success) {
+                    App.showToast('Success', res.message || 'Forwarding updated successfully', 'success');
+                } else {
+                    App.showToast('Error', res.error || 'Request failed', 'error');
+                }
+            }).fail(function (xhr) {
+                var msg = 'Request failed';
+                try { msg = JSON.parse(xhr.responseText).error || msg; } catch (err) {}
+                App.showToast('Error', msg, 'error');
+            }).always(function () {
+                checkForwarding();
+            });
+        });
     });
 </script>
 {{end}}
