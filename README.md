@@ -1,22 +1,33 @@
-# Go-Postfixadmin
+# Go-PostfixAdmin
 
 Professional Email Administration System built with Go, Echo, and Tailwind CSS.
 
-## ✨ Features
+## What This Document Covers
 
-*   **Complete Management**: Domains, Mailboxes, and Aliases.
-*   **Role-Based Access Control (RBAC)**: Differentiation between Superadmins and Domain Admins.
-*   **Modern Design**: Clean and responsive interface built with Tailwind CSS.
-*   **Security**: Strong password hashing and protection against common attacks.
-*   **Password Policy Enforcement**: Backend validation requires at least 8 characters, including uppercase, lowercase, number, and special character.
-*   **Frontend Password Generation**: Password generation is handled entirely in JavaScript and produces values compatible with the backend password policy.
-*   **Integrated CLI**: Command-line tools for automation and access recovery.
-*   **Welcome Emails**: Optional automatic welcome emails sent upon mailbox creation.
-*   **Auto-Reply (Vacation)**: Integrated Dovecot Sieve script generation for automatic vacation responses.
-*   **Mail Log Viewer**: Built-in admin panel page to browse Postfix filter log entries (`/maillog`) with server-side DataTables pagination, search, and sorting.
-*   **Mail Log Reader (`readlog`)**: CLI daemon that parses `FILTER:` entries from `/var/log/mail.log` and stores them in the `maillog` database table (runs every 5 minutes via internal ticker).
-*   **Internationalization (i18n)**: Multi-language support (PT, EN, ES) powered by [gotext](https://github.com/leonelquinteros/gotext) with GNU Gettext `.po` files and dynamic locale loading.
+This is the main entry point for the project documentation. It covers the product overview, build options, runtime basics, and links to the detailed guides.
 
+## Overview
+
+Go-PostfixAdmin provides a web UI and CLI for managing domains, mailboxes, aliases, admins, vacation rules, and operational mail logs in Postfix/Dovecot environments.
+
+For the full feature list, see [FEATURES.md](FEATURES.md).
+
+## Highlights
+
+- Go + Echo backend with Tailwind CSS UI
+- MariaDB and PostgreSQL support
+- Admin panel and user self-service portal
+- Shared backend password policy with frontend-compatible password generation
+- Vacation / auto-reply support with Dovecot Sieve integration
+- CLI utilities for migrations, SQL import, admin recovery, and mail log ingestion
+- i18n support for Portuguese, English, and Spanish
+
+## Documentation
+
+- [Features](FEATURES.md)
+- [Quick mail server setup](SETUP_MAILSERVER.md)
+- [Complete setup guide](DOCUMENTS/setup/README.md)
+- [Contributing](CONTRIBUTING.md)
 
 ## 🛠 Development Tools
 
@@ -83,23 +94,23 @@ This command runs a multi-stage build that:
 
 ### 3. Quick Start with Docker Compose
 
-The fastest way to get a full environment running (MariaDB + Go-Postfixadmin).
+The fastest way to get a full environment running (MariaDB + Go-PostfixAdmin).
 
 **Requirements:** Docker and Docker Compose installed.
 
 ```bash
 make build-docker
-docker-compose up
+docker compose up
 ```
 
 This will:
 - Start a MariaDB container.
-- Build and start the Go-Postfixadmin container.
+- Build and start the Go-PostfixAdmin container.
 - **Automatically** wait for the DB to be ready.
 - **Automatically** run database migrations.
 - **Automatically** create an initial superadmin (default: `admin@example.com` / `adminpassword`).
 
-You can customize the environment variables and port mappings in the `docker-compose.yml` file.
+You can customize the environment variables and port mappings in `docker-compose.yml`.
 
 ---
 
@@ -154,7 +165,7 @@ The backend validates all mailbox, admin, and user password changes using the sa
 
 The UI password generator already follows the same policy, so generated passwords are accepted by the backend without additional adjustment.
 
-### 4. Deployment with Systemd (Linux)
+### Deployment with Systemd (Linux)
 
 To deploy the application natively on a Linux server, you can use the included Systemd service file.
 
@@ -187,7 +198,7 @@ tail -f /opt/go-postfixadmin/postfixadmin.log
 Below are the available flags when running the `./postfixadmin` binary:
 
 ```text
-A command line interface for Go-Postfixadmin application.
+A command line interface for the Go-PostfixAdmin application.
 
 Usage:
   postfixadmin [command]
@@ -272,7 +283,7 @@ The `maillog` table stores: timestamp, sender, recipient, sender domain, recipie
 
 ## 📸 Screenshots
 
-![Go-Postfixadmin Login Screen](DOCUMENTS/screenshots/postfixadmin_01.png)
+![Go-PostfixAdmin Login Screen](DOCUMENTS/screenshots/postfixadmin_01.png)
 
 Check out more images in the [screenshots](DOCUMENTS/screenshots) folder.
 

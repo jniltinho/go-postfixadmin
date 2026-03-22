@@ -1,6 +1,16 @@
 # Installation Guide: Email Server (Ubuntu) + Go-PostfixAdmin
 
-This step-by-step guide teaches you how to prepare a complete email server on Ubuntu using **Postfix**, **Dovecot**, **MariaDB**, and how to manage everything via **Go-PostfixAdmin**.
+This guide walks through a full email server setup on Ubuntu using **Postfix**, **Dovecot**, **MariaDB**, and **Go-PostfixAdmin**.
+
+## What This Document Covers
+
+This is the complete setup guide. Use it when you need the full installation flow, from OS packages to service validation.
+
+Related documents:
+
+- [Project README](../../README.md)
+- [Features](../../FEATURES.md)
+- [Quick setup summary](../../SETUP_MAILSERVER.md)
 
 ---
 
@@ -26,7 +36,7 @@ First, run the secure installation script to improve security:
 sudo mariadb-secure-installation
 ```
 
-During the wizard, you can adjust several security configurations by answering the prompted questions. Here is what you can do during the process:
+During the wizard, you can improve the default security posture by answering the prompted questions appropriately:
 - Validate password strength to prevent users from using weak credentials.
 - Disallow root login remotely, allowing database access only from localhost.
 - Delete anonymous user accounts, which enable all users to log in to your database. 
@@ -77,7 +87,7 @@ Go-PostfixAdmin will manage the database structure (tables, domains, accounts, a
    sudo certbot certonly --standalone -d mail.example.com
    ```
 
-3. **Configure the Environment (config.toml):**
+3. **Configure the Environment (`config.toml`):**
    You can generate a default config file using the native CLI command or copy the example file.
    
    *Generating via CLI:*
@@ -91,7 +101,7 @@ Go-PostfixAdmin will manage the database structure (tables, domains, accounts, a
    cp download/config.toml.example /opt/go-postfixadmin/config.toml
    ```
 
-   After that, edit the generated (`config*.toml`) or copied file and add the necessary database and session settings to make it work properly:
+   Then edit the generated (`config*.toml`) or copied file and add the database and session settings required for your environment:
    
    ```toml
    [database]
@@ -153,7 +163,7 @@ Go-PostfixAdmin will manage the database structure (tables, domains, accounts, a
    ./postfixadmin migrate
    ```
 
-4. **Configure the Systemd Service:**
+4. **Configure the systemd Service:**
    Copy the service file (provided in `DOCUMENTS/setup/postfixadmin.service`) to systemd:
    ```bash
    wget https://raw.githubusercontent.com/jniltinho/go-postfixadmin/refs/heads/main/DOCUMENTS/setup/postfixadmin.service
@@ -161,7 +171,7 @@ Go-PostfixAdmin will manage the database structure (tables, domains, accounts, a
    sudo systemctl daemon-reload
    sudo systemctl enable --now postfixadmin.service
    ```
-   *Check the logs with: `tail -f /opt/go-postfixadmin/postfixadmin.log`*
+   *Check logs with: `tail -f /opt/go-postfixadmin/postfixadmin.log`*
 
 ---
 

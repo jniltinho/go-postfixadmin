@@ -1,7 +1,16 @@
 # SETUP_MAILSERVER.md
 
-> Complete email server setup guide with **Postfix + Dovecot + Go-PostfixAdmin + MySQL**
-> For the full, detailed, step-by-step setup guide, please see [DOCUMENTS/setup/README.md](DOCUMENTS/setup/README.md).
+Quick mail server setup for **Postfix + Dovecot + Go-PostfixAdmin + MySQL**.
+
+## What This Document Covers
+
+This is the short operational setup for a working mail server. For the full walkthrough, use [DOCUMENTS/setup/README.md](DOCUMENTS/setup/README.md).
+
+Related documents:
+
+- [Project README](README.md)
+- [Features](FEATURES.md)
+- [Complete setup guide](DOCUMENTS/setup/README.md)
 
 ---
 
