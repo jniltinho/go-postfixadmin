@@ -10,7 +10,7 @@ Related documents:
 
 - [Project README](README.md)
 - [Features](FEATURES.md)
-- [Complete setup guide](DOCUMENTS/setup/README.md)
+- [Complete setup guide](README.md)
 
 ---
 
