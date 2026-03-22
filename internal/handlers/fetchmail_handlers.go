@@ -107,7 +107,7 @@ func (h *Handler) AddFetchmailPOST(c *echo.Context) error {
 	}
 
 	// Save to database
-	if err := h.DB.Create(&newFetchmail).Error; err != nil {
+	if err := repositories.CreateFetchmail(h.DB, newFetchmail); err != nil {
 		slog.Error("Failed to create fetchmail entry", "error", err, "username", username)
 		return renderFetchmailFormWithError(c, h, "Falha ao salvar registro no banco de dados. Tente novamente.")
 	}

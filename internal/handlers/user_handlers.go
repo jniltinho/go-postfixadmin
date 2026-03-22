@@ -7,6 +7,7 @@ import (
 
 	"go-postfixadmin/internal/middleware"
 	"go-postfixadmin/internal/models"
+	"go-postfixadmin/internal/repositories"
 	"go-postfixadmin/internal/utils"
 
 	"github.com/labstack/echo/v5"
@@ -19,13 +20,12 @@ func (h *Handler) UserLogin(c *echo.Context) error {
 		username := c.FormValue("username")
 		password := c.FormValue("password")
 
-		var mailbox models.Mailbox
-
 		if h.DB == nil {
 			return c.Render(http.StatusServiceUnavailable, "users/login.html", map[string]interface{}{"errorKey": "Login_ErrDbUnavailable"})
 		}
 
-		if err := h.DB.Where("username = ? AND active = ?", username, true).First(&mailbox).Error; err != nil {
+		mailbox, err := repositories.GetMailboxByUsername(h.DB, username)
+		if err != nil || !mailbox.Active {
 			return c.Render(http.StatusUnauthorized, "users/login.html", map[string]interface{}{"errorKey": "Login_ErrInvalidCredentials"})
 		}
 
@@ -60,17 +60,16 @@ func (h *Handler) UserDashboard(c *echo.Context) error {
 }
 
 func (h *Handler) renderUserDashboard(c *echo.Context, username, message, errorMsg string) error {
-	var mailbox models.Mailbox
-	if err := h.DB.First(&mailbox, "username = ?", username).Error; err != nil {
+	mailbox, err := repositories.GetMailboxByUsername(h.DB, username)
+	if err != nil {
 		return c.Redirect(http.StatusFound, "/users/login")
 	}
 
-	var alias models.Alias
-	h.DB.First(&alias, "address = ?", username)
+	alias, _ := repositories.GetAliasByAddress(h.DB, username)
 
 	return c.Render(http.StatusOK, "users/dashboard.html", map[string]interface{}{
 		"SessionUser": username,
-		"User":        mailbox, // Still needed if dashboard body requires mailbox fields but header uses SessionUser
+		"User":        mailbox,
 		"Alias":       alias,
 		"Message":     message,
 		"Error":       errorMsg,
@@ -89,8 +88,8 @@ func (h *Handler) UpdateUserPassword(c *echo.Context) error {
 	newPassword := c.FormValue("new_password")
 	confirmPassword := c.FormValue("confirm_password")
 
-	var mailbox models.Mailbox
-	if err := h.DB.First(&mailbox, "username = ?", username).Error; err != nil {
+	mailbox, err := repositories.GetMailboxByUsername(h.DB, username)
+	if err != nil {
 		SetFlash(c, "error", "Login required")
 		return c.JSON(http.StatusUnauthorized, map[string]interface{}{"success": false, "error": GetFlash(c, "error")})
 	}
@@ -118,18 +117,10 @@ func (h *Handler) UpdateUserPassword(c *echo.Context) error {
 	}
 
 	mailbox.Password = hashedPassword
-	if err := h.DB.Save(&mailbox).Error; err != nil {
+	if err := repositories.SaveMailbox(h.DB, mailbox, "USER_EDIT_PASSWORD", username, c.RealIP()); err != nil {
 		SetFlash(c, "error", "Failed to update the password")
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": GetFlash(c, "error")})
 	}
-
-	// Log action
-	parts := strings.Split(username, "@")
-	domain := ""
-	if len(parts) == 2 {
-		domain = parts[1]
-	}
-	utils.LogAction(h.DB, username, c.RealIP(), domain, "USER_EDIT_PASSWORD", username)
 
 	SetFlash(c, "message", "Password updated successfully")
 	message := GetFlash(c, "message")
@@ -149,63 +140,31 @@ func (h *Handler) UpdateUserForwarding(c *echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, map[string]interface{}{"success": false, "error": GetFlash(c, "error")})
 	}
 
-	forwarding := c.FormValue("forwarding")
-
-	tx := h.DB.Begin()
-
-	var alias models.Alias
-	if err := tx.First(&alias, "address = ?", username).Error; err != nil {
-		parts := strings.Split(username, "@")
-		if len(parts) != 2 {
-			tx.Rollback()
-			SetFlash(c, "error", "Invalid user format")
-			return c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "error": GetFlash(c, "error")})
-		}
-		domain := parts[1]
-
-		alias = models.Alias{
-			Address:  username,
-			Goto:     username,
-			Domain:   domain,
-			Created:  time.Now(),
-			Modified: time.Now(),
-			Active:   true,
-		}
+	parts := strings.Split(username, "@")
+	if len(parts) != 2 {
+		SetFlash(c, "error", "Invalid user format")
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "error": GetFlash(c, "error")})
 	}
+	domain := parts[1]
 
+	forwarding := c.FormValue("forwarding")
 	if strings.TrimSpace(forwarding) == "" {
 		forwarding = username
 	}
 
-	// Convert newlines to comma-separated for DB storage
-	lines := strings.Split(forwarding, "\n")
 	var addresses []string
-	for _, line := range lines {
-		line = strings.TrimSpace(line)
-		if line != "" {
+	for _, line := range strings.Split(forwarding, "\n") {
+		if line = strings.TrimSpace(line); line != "" {
 			addresses = append(addresses, line)
 		}
 	}
-	alias.Goto = strings.Join(addresses, ",")
+	gotoStr := strings.Join(addresses, ",")
 
-	if err := tx.Save(&alias).Error; err != nil {
-		tx.Rollback()
+	if err := repositories.UpdateUserForwarding(h.DB, username, gotoStr, domain, username, c.RealIP()); err != nil {
 		SetFlash(c, "error", "Failed to update forwarding")
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": GetFlash(c, "error")})
 	}
 
-	// Log action
-	parts := strings.Split(username, "@")
-	domain := ""
-	if len(parts) == 2 {
-		domain = parts[1]
-	}
-	if err := utils.LogAction(tx, username, c.RealIP(), domain, "USER_EDIT_ALIAS", alias.Goto); err != nil {
-		// Log error but don't fail transaction? Or should we?
-		// PostfixAdmin logs are usually best-effort.
-	}
-
-	tx.Commit()
 	SetFlash(c, "message", "Forwarding updated successfully")
 	return c.JSON(http.StatusOK, map[string]interface{}{"success": true, "message": GetFlash(c, "message")})
 }
@@ -217,17 +176,14 @@ func (h *Handler) UserVacation(c *echo.Context) error {
 		return c.Redirect(http.StatusFound, "/users/login")
 	}
 
-	var vacation models.Vacation
-	err := h.DB.First(&vacation, "email = ?", username).Error
-
 	templateData := map[string]interface{}{
 		"SessionUser": username,
 		"Message":     GetFlash(c, "message"),
 		"Error":       GetFlash(c, "error"),
 	}
 
+	vacation, err := repositories.GetVacationByEmail(h.DB, username)
 	if err == nil {
-		// Found vacation config
 		templateData["Vacation"] = map[string]interface{}{
 			"Subject":      vacation.Subject,
 			"Body":         vacation.Body,
@@ -262,40 +218,33 @@ func (h *Handler) UpdateUserVacation(c *echo.Context) error {
 	intervalTimeStr := c.FormValue("interval_time")
 	activeStr := c.FormValue("active")
 
-	// Try parsing with both minutes precision (default datetime-local) and seconds precision (fallback)
 	activeFrom, err := time.ParseInLocation("2006-01-02T15:04", activeFromStr, time.Local)
 	if err != nil {
-		activeFrom, err = time.ParseInLocation("2006-01-02T15:04:05", activeFromStr, time.Local)
-		if err != nil {
+		if activeFrom, err = time.ParseInLocation("2006-01-02T15:04:05", activeFromStr, time.Local); err != nil {
 			activeFrom = time.Now()
 		}
 	}
 
 	activeUntil, err := time.ParseInLocation("2006-01-02T15:04", activeUntilStr, time.Local)
 	if err != nil {
-		activeUntil, err = time.ParseInLocation("2006-01-02T15:04:05", activeUntilStr, time.Local)
-		if err != nil {
+		if activeUntil, err = time.ParseInLocation("2006-01-02T15:04:05", activeUntilStr, time.Local); err != nil {
 			activeUntil = time.Now()
 		}
 	}
 
 	intervalTime := 0
 	if intervalTimeStr == "86400" {
-		intervalTime = 86400 // 1 day
+		intervalTime = 86400
 	} else if intervalTimeStr == "604800" {
-		intervalTime = 604800 // 7 days
+		intervalTime = 604800
 	}
-
-	active := activeStr == "true" || activeStr == "on" || activeStr == "1"
-
-	tx := h.DB.Begin()
 
 	vacation := models.Vacation{
 		Email:        username,
 		Subject:      subject,
 		Body:         body,
 		Domain:       domain,
-		Active:       active,
+		Active:       activeStr == "true" || activeStr == "on" || activeStr == "1",
 		ActiveFrom:   activeFrom,
 		ActiveUntil:  activeUntil,
 		IntervalTime: intervalTime,
@@ -303,21 +252,11 @@ func (h *Handler) UpdateUserVacation(c *echo.Context) error {
 		Modified:     time.Now(),
 	}
 
-	// Assuming 'Upsert' behavior or simply Save
-	if err := tx.Save(&vacation).Error; err != nil {
-		tx.Rollback()
+	if err := repositories.UpsertVacation(h.DB, vacation, username, c.RealIP()); err != nil {
 		SetFlash(c, "error", "Failed to save auto-reply settings")
 		return c.Redirect(http.StatusFound, "/users/vacation")
 	}
 
-	// We also typically need an alias to route emails to the vacation script handling
-	// in many PostfixAdmin implementations. However, just matching exact existing design constraint:
-	// We'll trust PostfixAdmin aliases cover it or we just add the DB entry as requested.
-	utils.LogAction(tx, username, c.RealIP(), domain, "USER_UPDATE_VACATION", username)
-
-	tx.Commit()
-
-	// Update sieve script for this user if vacation is enabled globally
 	if viper.GetBool("vacation.enabled") {
 		_ = utils.SyncSingleVacationSieve(h.DB, username, "")
 	}
@@ -339,19 +278,11 @@ func (h *Handler) DeleteUserVacation(c *echo.Context) error {
 		domain = parts[1]
 	}
 
-	tx := h.DB.Begin()
-
-	if err := tx.Where("email = ?", username).Delete(&models.Vacation{}).Error; err != nil {
-		tx.Rollback()
+	if err := repositories.DeleteVacation(h.DB, username, domain, username, c.RealIP()); err != nil {
 		SetFlash(c, "error", "Failed to remove auto-reply")
 		return c.Redirect(http.StatusFound, "/users/vacation")
 	}
 
-	utils.LogAction(tx, username, c.RealIP(), domain, "USER_DELETE_VACATION", username)
-
-	tx.Commit()
-
-	// Remove sieve script for this user if vacation is enabled globally
 	if viper.GetBool("vacation.enabled") {
 		_ = utils.SyncSingleVacationSieve(h.DB, username, "")
 	}

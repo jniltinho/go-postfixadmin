@@ -16,12 +16,11 @@ import (
 
 	"github.com/labstack/echo/v5"
 	"github.com/spf13/viper"
-	"gorm.io/gorm"
 )
 
 // ListMailboxes lista mailboxes com filtro opcional por domínio
 func (h *Handler) ListMailboxes(c *echo.Context) error {
-	domainFilter := c.QueryParam("domain") // Query parameter opcional
+	domainFilter := c.QueryParam("domain")
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
 	SessionUser := middleware.GetUsername(c, middleware.SessionName)
 
@@ -42,7 +41,6 @@ func (h *Handler) ListMailboxes(c *echo.Context) error {
 		}
 	}
 
-	// Fetch domains for the filter dropdown
 	var domains []models.Domain
 	if h.DB != nil {
 		domains, _, _ = repositories.GetActiveDomains(h.DB, SessionUser, isSuperAdmin)
@@ -51,7 +49,7 @@ func (h *Handler) ListMailboxes(c *echo.Context) error {
 	return c.Render(http.StatusOK, "mailboxes/mailboxes.html", map[string]interface{}{
 		"Mailboxes":       mailboxes,
 		"Domains":         domains,
-		"DomainFilter":    domainFilter, // Para exibir no template
+		"DomainFilter":    domainFilter,
 		"IsSuperAdmin":    isSuperAdmin,
 		"SessionUser":     SessionUser,
 		"QuotaMultiplier": float64(utils.GetQuotaMultiplier()),
@@ -67,7 +65,6 @@ func (h *Handler) AddMailboxAPI(c *echo.Context) error {
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
 	SessionUser := middleware.GetUsername(c, middleware.SessionName)
 
-	// Security: Validate domain access
 	allowedDomains, _, err := repositories.GetAllowedDomains(h.DB, SessionUser, isSuperAdmin)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "Permission check failed"})
@@ -113,7 +110,6 @@ func (h *Handler) AddMailboxAPI(c *echo.Context) error {
 	if password != passwordConfirm {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "Passwords do not match"})
 	}
-
 	localPartRegex := regexp.MustCompile(`^[a-zA-Z0-9._-]+$`)
 	if !localPartRegex.MatchString(localPart) {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "Invalid local part format. Use only letters, numbers, dots, hyphens, and underscores"})
@@ -121,8 +117,7 @@ func (h *Handler) AddMailboxAPI(c *echo.Context) error {
 
 	username := fmt.Sprintf("%s@%s", localPart, domain)
 
-	var existingMailbox models.Mailbox
-	if err := h.DB.Where("username = ?", username).First(&existingMailbox).Error; err == nil {
+	if _, err := repositories.GetMailboxByUsername(h.DB, username); err == nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "Mailbox already exists"})
 	}
 
@@ -131,40 +126,25 @@ func (h *Handler) AddMailboxAPI(c *echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "Failed to hash password: " + err.Error()})
 	}
 
-	maildir := generateMaildir(domain, localPart)
 	now := time.Now()
-	defaultDate := time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)
+	newMailbox := models.Mailbox{
+		Username:       username,
+		Password:       hashedPassword,
+		Name:           name,
+		Maildir:        fmt.Sprintf("%s/%s/", domain, localPart),
+		Quota:          quota,
+		LocalPart:      localPart,
+		Domain:         domain,
+		Created:        now,
+		Modified:       now,
+		Active:         active,
+		EmailOther:     emailOther,
+		SMTPActive:     smtpActive,
+		TokenValidity:  now.Add(3 * time.Hour),
+		PasswordExpiry: time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
+	}
 
-	err = h.DB.Transaction(func(tx *gorm.DB) error {
-		newMailbox := models.Mailbox{
-			Username:       username,
-			Password:       hashedPassword,
-			Name:           name,
-			Maildir:        maildir,
-			Quota:          quota,
-			LocalPart:      localPart,
-			Domain:         domain,
-			Created:        now,
-			Modified:       now,
-			Active:         active,
-			EmailOther:     emailOther,
-			SMTPActive:     smtpActive,
-			TokenValidity:  time.Now().Add(3 * time.Hour),
-			PasswordExpiry: defaultDate,
-		}
-		if err := tx.Create(&newMailbox).Error; err != nil {
-			return err
-		}
-		if err := createMailboxAlias(tx, username, domain); err != nil {
-			return err
-		}
-		if err := utils.LogAction(tx, SessionUser, c.RealIP(), domain, "create_mailbox", username); err != nil {
-			return err
-		}
-		return nil
-	})
-
-	if err != nil {
+	if err := repositories.CreateMailbox(h.DB, newMailbox, SessionUser, c.RealIP()); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "Failed to create mailbox: " + err.Error()})
 	}
 
@@ -179,7 +159,6 @@ func (h *Handler) AddMailboxAPI(c *echo.Context) error {
 	}
 
 	SetFlash(c, "message", "Mailbox created successfully")
-
 	return c.JSON(http.StatusOK, map[string]interface{}{"success": true, "domain": domain})
 }
 
@@ -189,8 +168,8 @@ func (h *Handler) GetMailboxAPI(c *echo.Context) error {
 	SessionUser := middleware.GetUsername(c, middleware.SessionName)
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
 
-	var mailbox models.Mailbox
-	if err := h.DB.Where("username = ?", username).First(&mailbox).Error; err != nil {
+	mailbox, err := repositories.GetMailboxByUsername(h.DB, username)
+	if err != nil {
 		return c.JSON(http.StatusNotFound, map[string]interface{}{"error": "Mailbox not found"})
 	}
 
@@ -229,8 +208,8 @@ func (h *Handler) EditMailboxAPI(c *echo.Context) error {
 	SessionUser := middleware.GetUsername(c, middleware.SessionName)
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
 
-	var mailbox models.Mailbox
-	if err := h.DB.Where("username = ?", username).First(&mailbox).Error; err != nil {
+	mailbox, err := repositories.GetMailboxByUsername(h.DB, username)
+	if err != nil {
 		return c.JSON(http.StatusNotFound, map[string]interface{}{"error": "Mailbox not found"})
 	}
 
@@ -268,14 +247,12 @@ func (h *Handler) EditMailboxAPI(c *echo.Context) error {
 	if changePassword {
 		password := c.FormValue("password")
 		passwordConfirm := c.FormValue("password_confirm")
-
 		if validationErr := ValidatePassword(password); validationErr != "" {
 			return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": validationErr})
 		}
 		if password != passwordConfirm {
 			return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "Passwords do not match"})
 		}
-
 		hashedPassword, err := utils.HashPassword(password)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "Failed to hash password: " + err.Error()})
@@ -291,16 +268,11 @@ func (h *Handler) EditMailboxAPI(c *echo.Context) error {
 	mailbox.Modified = time.Now()
 	mailbox.TokenValidity = time.Now().Add(3 * time.Hour)
 
-	if err := h.DB.Save(&mailbox).Error; err != nil {
+	if err := repositories.SaveMailbox(h.DB, mailbox, "edit_mailbox", SessionUser, c.RealIP()); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "Failed to update mailbox: " + err.Error()})
 	}
 
-	if err := utils.LogAction(h.DB, SessionUser, c.RealIP(), mailbox.Domain, "edit_mailbox", username); err != nil {
-		fmt.Printf("Failed to log edit_mailbox: %v\n", err)
-	}
-
 	SetFlash(c, "message", "Mailbox updated successfully")
-
 	return c.JSON(http.StatusOK, map[string]interface{}{"success": true, "domain": mailbox.Domain})
 }
 
@@ -308,16 +280,11 @@ func (h *Handler) EditMailboxAPI(c *echo.Context) error {
 func (h *Handler) DeleteMailbox(c *echo.Context) error {
 	username, _ := url.PathUnescape(c.Param("username"))
 
-	// Check if mailbox exists
-	var mailbox models.Mailbox
-	if err := h.DB.Where("username = ?", username).First(&mailbox).Error; err != nil {
-		return c.JSON(http.StatusNotFound, map[string]interface{}{
-			"success": false,
-			"error":   "Mailbox not found",
-		})
+	mailbox, err := repositories.GetMailboxByUsername(h.DB, username)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]interface{}{"success": false, "error": "Mailbox not found"})
 	}
 
-	// Security: Check permission
 	SessionUser := middleware.GetUsername(c, middleware.SessionName)
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
 	allowedDomains, _, err := repositories.GetAllowedDomains(h.DB, SessionUser, isSuperAdmin)
@@ -337,49 +304,17 @@ func (h *Handler) DeleteMailbox(c *echo.Context) error {
 		}
 	}
 
-	err = repositories.DeleteMailbox(h.DB, mailbox, SessionUser, c.RealIP())
-
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"success": false,
-			"error":   "Failed to delete mailbox: " + err.Error(),
-		})
+	if err := repositories.DeleteMailbox(h.DB, mailbox, SessionUser, c.RealIP()); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to delete mailbox: " + err.Error()})
 	}
 
-	// Attempt to clean up the physical mailbox directory without failing the request on error,
-	// since the actual intention (deleting the record) was successful.
 	if viper.GetBool("server.cleanup_maildir") {
-		baseDir := "/var/vmail" // TODO: This should probably come from config
+		baseDir := "/var/vmail"
 		if cleanupErr := utils.CleanupOrphanedMaildir(h.DB, baseDir, mailbox.Domain, mailbox.LocalPart); cleanupErr != nil {
 			fmt.Printf("Warning: Failed to clean up orphaned directory for %s: %v\n", username, cleanupErr)
 		}
 	}
 
 	SetFlash(c, "message", "Mailbox deleted successfully")
-
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"success": true,
-		"message": "Mailbox deleted successfully",
-	})
-}
-
-// Helper Functions
-
-// generateMaildir gera o caminho do maildir no formato domain/localpart/
-func generateMaildir(domain, localPart string) string {
-	return fmt.Sprintf("%s/%s/", domain, localPart)
-}
-
-// createMailboxAlias cria um alias automático para o mailbox
-func createMailboxAlias(tx *gorm.DB, username, domain string) error {
-	now := time.Now()
-	alias := models.Alias{
-		Address:  username,
-		Goto:     username,
-		Domain:   domain,
-		Created:  now,
-		Modified: now,
-		Active:   true,
-	}
-	return tx.Create(&alias).Error
+	return c.JSON(http.StatusOK, map[string]interface{}{"success": true, "message": "Mailbox deleted successfully"})
 }

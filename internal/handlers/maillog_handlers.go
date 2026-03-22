@@ -1,14 +1,11 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"go-postfixadmin/internal/middleware"
-	"go-postfixadmin/internal/models"
 	"go-postfixadmin/internal/repositories"
 
 	"github.com/labstack/echo/v5"
@@ -31,11 +28,6 @@ func (h *Handler) MailLogData(c *echo.Context) error {
 	username := middleware.GetUsername(c, middleware.SessionName)
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
 
-	allowedDomains, _, err := repositories.GetAllowedDomains(h.DB, username, isSuperAdmin)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to check permissions"})
-	}
-
 	draw, _ := strconv.Atoi(c.QueryParam("draw"))
 	start, _ := strconv.Atoi(c.QueryParam("start"))
 	length, _ := strconv.Atoi(c.QueryParam("length"))
@@ -47,51 +39,19 @@ func (h *Handler) MailLogData(c *echo.Context) error {
 	orderColumnIdx := c.QueryParam("order[0][column]")
 	orderDir := c.QueryParam("order[0][dir]")
 
-	var totalRecords, filteredRecords int64
-	var logs []models.Maillog
-
-	// Total sem filtro de busca
-	totalQ := h.DB.Model(&models.Maillog{})
-	if !isSuperAdmin {
-		if len(allowedDomains) == 0 {
-			totalQ = totalQ.Where("1 = 0")
-		} else {
-			totalQ = totalQ.Where("domain_to IN ?", allowedDomains)
-		}
-	}
-	totalQ.Count(&totalRecords)
-
-	// Query base com busca
-	filteredQ := h.DB.Model(&models.Maillog{})
-	if !isSuperAdmin {
-		if len(allowedDomains) == 0 {
-			filteredQ = filteredQ.Where("1 = 0")
-		} else {
-			filteredQ = filteredQ.Where("domain_to IN ?", allowedDomains)
-		}
-	}
-	if searchValue != "" {
-		like := "%" + searchValue + "%"
-		filteredQ = filteredQ.Where(
-			h.DB.Where("m_from LIKE ?", like).
-				Or("m_to LIKE ?", like).
-				Or("host_ip LIKE ?", like).
-				Or("host_name LIKE ?", like).
-				Or("helo LIKE ?", like),
-		)
-	}
-	filteredQ.Count(&filteredRecords)
-
 	columns := []string{"tstamp", "m_from", "m_to", "domain_from", "domain_to", "host_ip", "host_name", "helo", "msgsize"}
 	orderField := "tstamp"
 	if idx, err := strconv.Atoi(orderColumnIdx); err == nil && idx >= 0 && idx < len(columns) {
 		orderField = columns[idx]
 	}
-	if strings.ToLower(orderDir) != "asc" {
-		orderDir = "desc"
-	}
 
-	filteredQ.Order(fmt.Sprintf("%s %s", orderField, orderDir)).Offset(start).Limit(length).Find(&logs)
+	logs, totalRecords, filteredRecords, err := repositories.GetMailLogs(
+		h.DB, username, isSuperAdmin,
+		searchValue, orderField, orderDir, start, length,
+	)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to fetch maillogs"})
+	}
 
 	type row struct {
 		LogDate    string `json:"logdate"`
