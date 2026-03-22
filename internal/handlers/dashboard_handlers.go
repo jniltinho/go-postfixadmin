@@ -15,7 +15,7 @@ func (h *Handler) Dashboard(c *echo.Context) error {
 	username := middleware.GetUsername(c, middleware.SessionName)
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
 
-	domainCount, mailboxCount, err := repositories.GetDashboardCounts(h.DB, username, isSuperAdmin)
+	domainCount, mailboxCount, aliasCount, err := repositories.GetDashboardCounts(h.DB, username, isSuperAdmin)
 	if err != nil {
 		return c.Render(http.StatusInternalServerError, "dashboard/dashboard.html", map[string]interface{}{
 			"Error": "Failed to check permissions: " + err.Error(),
@@ -27,6 +27,7 @@ func (h *Handler) Dashboard(c *echo.Context) error {
 	return c.Render(http.StatusOK, "dashboard/dashboard.html", map[string]interface{}{
 		"DomainCount":  domainCount,
 		"MailboxCount": mailboxCount,
+		"AliasCount":   aliasCount,
 		"IsSuperAdmin": isSuperAdmin,
 		"Username":     username,
 		"SessionUser":  username,

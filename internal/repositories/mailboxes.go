@@ -43,26 +43,30 @@ func SaveMailbox(db *gorm.DB, mailbox models.Mailbox, action, actorUsername, ip 
 	return utils.LogAction(db, actorUsername, ip, mailbox.Domain, action, mailbox.Username)
 }
 
-func GetDashboardCounts(db *gorm.DB, username string, isSuperAdmin bool) (domainCount, mailboxCount int64, err error) {
+func GetDashboardCounts(db *gorm.DB, username string, isSuperAdmin bool) (domainCount, mailboxCount, aliasCount int64, err error) {
 	allowedDomains, _, err := GetAllowedDomains(db, username, isSuperAdmin)
 	if err != nil {
-		return 0, 0, err
+		return 0, 0, 0, err
 	}
 
 	domainQ := db.Model(&models.Domain{}).Where("active = ? AND domain != ?", true, "ALL")
 	mailboxQ := db.Model(&models.Mailbox{}).Where("active = ?", true)
+	aliasQ := db.Model(&models.Alias{}).Where("active = ?", true).
+		Where("address NOT IN (SELECT username FROM mailbox)")
 
 	if !isSuperAdmin {
 		if len(allowedDomains) == 0 {
-			return 0, 0, nil
+			return 0, 0, 0, nil
 		}
 		domainQ = domainQ.Where("domain IN ?", allowedDomains)
 		mailboxQ = mailboxQ.Where("domain IN ?", allowedDomains)
+		aliasQ = aliasQ.Where("domain IN ?", allowedDomains)
 	}
 
 	domainQ.Count(&domainCount)
 	mailboxQ.Count(&mailboxCount)
-	return domainCount, mailboxCount, nil
+	aliasQ.Count(&aliasCount)
+	return domainCount, mailboxCount, aliasCount, nil
 }
 
 func GetRecentLogs(db *gorm.DB, username string, isSuperAdmin bool, since time.Time) ([]models.Log, error) {

@@ -9,7 +9,7 @@
     </p>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
     <!-- Domains Card -->
     <div
         class="bg-white border-2 border-brand-text p-5 neo-shadow-sm group hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[3px_3px_0px_#1E293B] transition-all duration-300 cursor-pointer">
@@ -43,6 +43,24 @@
         <div class="flex items-baseline space-x-2">
             <h3 class="text-4xl font-mono font-black text-brand-text">{{.MailboxCount}}</h3>
             <span class="text-xs font-bold uppercase text-gray-400 tracking-tighter">{{ T $.Lang `DashboardAdmin_MailboxesLabel` }}</span>
+        </div>
+    </div>
+
+    <!-- Aliases Card -->
+    <div
+        class="bg-white border-2 border-brand-text p-5 neo-shadow-sm group hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[3px_3px_0px_#1E293B] transition-all duration-300 cursor-pointer">
+        <div class="flex items-center justify-between mb-3">
+            <div
+                class="w-10 h-10 bg-brand-primary border-2 border-brand-text flex items-center justify-center text-white transition-all">
+                <i data-lucide="corner-up-right" class="w-5 h-5"></i>
+            </div>
+            <span
+                class="text-xs font-black text-white bg-green-500 border-2 border-brand-text px-2 py-0.5 uppercase tracking-widest">Active</span>
+        </div>
+        <p class="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">{{ T $.Lang `DashboardAdmin_AliasesSubtitle` }}</p>
+        <div class="flex items-baseline space-x-2">
+            <h3 class="text-4xl font-mono font-black text-brand-text">{{.AliasCount}}</h3>
+            <span class="text-xs font-bold uppercase text-gray-400 tracking-tighter">{{ T $.Lang `DashboardAdmin_AliasesLabel` }}</span>
         </div>
     </div>
 

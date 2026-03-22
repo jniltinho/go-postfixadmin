@@ -250,6 +250,12 @@ msgstr "Cuentas de Correo"
 msgid "DashboardAdmin_MailboxesLabel"
 msgstr "cuentas"
 
+msgid "DashboardAdmin_AliasesSubtitle"
+msgstr "Total de Alias"
+
+msgid "DashboardAdmin_AliasesLabel"
+msgstr "alias"
+
 msgid "DashboardAdmin_NewDomain"
 msgstr "¿Nuevo Dominio?"
 
