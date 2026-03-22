@@ -68,11 +68,3 @@ tail -f /opt/go-postfixadmin/postfixadmin.log
 ![Go-PostfixAdmin Login Screen](DOCUMENTS/screenshots/postfixadmin_01.png)
 
 Check out more images in the [screenshots](DOCUMENTS/screenshots) folder.
-
----
-
-## 📖 Installation and Configuration Guide
-
-For complete step-by-step instructions on how to set up an email server on Ubuntu with Postfix, Dovecot, MariaDB, and integrate it with Go-PostfixAdmin, see our [Complete Setup Guide](DOCUMENTS/setup/README.md).
-
-You can also find our guide for setting up a complete webmail environment with [Nginx, SOGo, and MariaDB here](DOCUMENTS/setup/nginx-sogo-mysql.md).
