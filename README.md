@@ -10,17 +10,7 @@ This is the main entry point for the project documentation. It covers the produc
 
 Go-PostfixAdmin provides a web UI and CLI for managing domains, mailboxes, aliases, admins, vacation rules, and operational mail logs in Postfix/Dovecot environments.
 
-For the full feature list, see [FEATURES.md](FEATURES.md).
-
-## Highlights
-
-- Go + Echo backend with Tailwind CSS UI
-- MariaDB and PostgreSQL support
-- Admin panel and user self-service portal
-- Shared backend password policy with frontend-compatible password generation
-- Vacation / auto-reply support with Dovecot Sieve integration
-- CLI utilities for migrations, SQL import, admin recovery, and mail log ingestion
-- i18n support for Portuguese, English, and Spanish
+For the full feature list and capability breakdown, see [FEATURES.md](FEATURES.md).
 
 ## Documentation
 
@@ -127,43 +117,6 @@ Or via Docker:
 ```bash
 docker run -p 8080:8080 -e DB_URL="your-dsn" postfixadmin:latest
 ```
-
-### DB_URL Examples
-
-**MariaDB:**
-```bash
-# Standard format
-DB_URL="user:password@tcp(localhost:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local"
-```
-
-**PostgreSQL:**
-```bash
-DB_URL="host=localhost user=gorm password=gorm dbname=gorm port=9920 sslmode=disable TimeZone=America/Sao_Paulo"
-```
-
-### Database Debug Logging
-
-You can enable verbose GORM SQL logging in `config.toml`:
-
-```toml
-[database]
-url = "postfix:postfixPassword@tcp(mysql:3306)/postfix?charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=True&loc=Local"
-debug = true
-```
-
-This flag enables full database query logging independently of the global `--debug` CLI flag.
-
-### Password Rules
-
-The backend validates all mailbox, admin, and user password changes using the same rules:
-
-- At least 8 characters
-- At least 1 uppercase letter
-- At least 1 lowercase letter
-- At least 1 number
-- At least 1 special character
-
-The UI password generator already follows the same policy, so generated passwords are accepted by the backend without additional adjustment.
 
 ### Deployment with Systemd (Linux)
 
