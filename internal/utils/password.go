@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/GehirnInc/crypt"
-	_ "github.com/GehirnInc/crypt/md5_crypt"
-	_ "github.com/GehirnInc/crypt/sha512_crypt"
+	"go-postfixadmin/pkg/crypt"
+	_ "go-postfixadmin/pkg/crypt/md5_crypt"
+	_ "go-postfixadmin/pkg/crypt/sha512_crypt"
 	"golang.org/x/crypto/bcrypt"
 )
 

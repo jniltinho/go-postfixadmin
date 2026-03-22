@@ -3,7 +3,6 @@ module go-postfixadmin
 go 1.26
 
 require (
-	github.com/GehirnInc/crypt v0.0.0-20230320061759-8cc1b52080c5
 	github.com/gorilla/sessions v1.4.0
 	github.com/jedib0t/go-pretty/v6 v6.7.8
 	github.com/labstack/echo-contrib v0.50.0
