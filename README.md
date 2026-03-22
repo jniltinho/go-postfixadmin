@@ -36,32 +36,6 @@ Or via Docker:
 docker run -p 8080:8080 -e DB_URL="your-dsn" postfixadmin:latest
 ```
 
-### Deployment with Systemd (Linux)
-
-To deploy the application natively on a Linux server, you can use the included Systemd service file.
-
-The pre-configured file is located at `DOCUMENTS/setup/postfixadmin.service`. It expects the application to be placed in the `/opt/go-postfixadmin` directory and will read environment variables from a `config.toml` file in this same directory.
-
-**Service Installation:**
-
-```bash
-# 1. Copy the file to the systemd services directory
-sudo cp DOCUMENTS/setup/postfixadmin.service /etc/systemd/system/
-
-# 2. Reload systemd configurations
-sudo systemctl daemon-reload
-
-# 3. Enable the service to run on boot
-sudo systemctl enable postfixadmin.service
-
-# 4. Start the service
-sudo systemctl start postfixadmin.service
-
-# 5. Monitor logs in real-time
-# The service directs output to the postfixadmin.log file
-tail -f /opt/go-postfixadmin/postfixadmin.log
-```
-
 ---
 ## 📸 Screenshots
 
