@@ -80,5 +80,19 @@ func templateFuncMap() template.FuncMap {
 		"unescapeHTML": func(s string) template.HTML {
 			return template.HTML(s)
 		},
+		// navLinkClass returns the sidebar link CSS classes based on whether the current path matches.
+		"navLinkClass": func(currentPath, href string) string {
+			if currentPath == href || (href != "/" && strings.HasPrefix(currentPath, href+"/")) {
+				return "sidebar-active"
+			}
+			return "border-transparent"
+		},
+		// navIconClass returns the sidebar icon CSS classes based on whether the current path matches.
+		"navIconClass": func(currentPath, href string) string {
+			if currentPath == href || (href != "/" && strings.HasPrefix(currentPath, href+"/")) {
+				return "text-brand-text"
+			}
+			return "text-gray-400 group-hover:text-brand-text"
+		},
 	}
 }

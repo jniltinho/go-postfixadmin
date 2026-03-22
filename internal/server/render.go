@@ -41,16 +41,20 @@ func (t *Template) Render(c *echo.Context, w io.Writer, name string, data any) e
 
 	fetchmailEnabled := viper.GetBool("features.fetchmail")
 
+	currentPath := c.Request().URL.Path
+
 	var viewData any = data
 	if data == nil {
-		viewData = map[string]any{"Lang": lang, "FetchmailEnabled": fetchmailEnabled}
+		viewData = map[string]any{"Lang": lang, "FetchmailEnabled": fetchmailEnabled, "CurrentPath": currentPath}
 	} else if m, ok := data.(map[string]any); ok {
 		m["Lang"] = lang
 		m["FetchmailEnabled"] = fetchmailEnabled
+		m["CurrentPath"] = currentPath
 		viewData = m
 	} else if m, ok := data.(map[string]interface{}); ok {
 		m["Lang"] = lang
 		m["FetchmailEnabled"] = fetchmailEnabled
+		m["CurrentPath"] = currentPath
 		viewData = m
 	}
 
