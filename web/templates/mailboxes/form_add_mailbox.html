@@ -220,32 +220,19 @@
         App.generatePassword({
             passwordId: 'modal-password',
             confirmId: 'modal-password_confirm',
-            failMsg: `{{ T $.Lang "Mailboxes_JsPwdGenFail" }}`,
             onSuccess: function () {
-                App.checkPasswordStrength(_modalStrengthOpts);
-                App.checkPasswordMatch(_modalMatchOpts);
+                App.checkPasswordStrength(_modalPasswordOpts);
+                App.checkPasswordMatch(_modalPasswordOpts);
             }
         });
     }
 
-    var _modalStrengthOpts = {
+    var _modalPasswordOpts = App.buildPasswordOpts({
         passwordId: 'modal-password', meterId: 'modal-strengthMeter',
         barId: 'modal-strengthBar', textId: 'modal-strengthText',
-        labels: {
-            weak: `{{ T $.Lang "Mailboxes_JsPwdWeak" }}`,
-            medium: `{{ T $.Lang "Mailboxes_JsPwdFair" }}`,
-            good: `{{ T $.Lang "Mailboxes_JsPwdGood" }}`,
-            strong: `{{ T $.Lang "Mailboxes_JsPwdStrong" }}`
-        }
-    };
-    var _modalMatchOpts = {
-        passwordId: 'modal-password', confirmId: 'modal-password_confirm',
-        indicatorId: 'modal-matchIndicator', submitBtnId: 'modal-submitBtn',
-        labels: {
-            match: `{{ T $.Lang "Mailboxes_JsPwdMatchOk" }}`,
-            noMatch: `{{ T $.Lang "Mailboxes_JsPwdMatchFail" }}`
-        }
-    };
+        confirmId: 'modal-password_confirm',
+        indicatorId: 'modal-matchIndicator', submitBtnId: 'modal-submitBtn'
+    });
 
     function submitAddMailboxModal() {
         var localPart = $('#modal-local_part').val().toLowerCase().trim();
@@ -314,24 +301,9 @@
             $('#modal-domainPreview').text($(this).val() || 'domain.com');
         });
 
-        App.initPasswordForm({
-            passwordId: 'modal-password', confirmId: 'modal-password_confirm',
-            meterId: 'modal-strengthMeter', barId: 'modal-strengthBar', textId: 'modal-strengthText',
-            indicatorId: 'modal-matchIndicator', submitBtnId: 'modal-submitBtn',
-            formId: 'modalMailboxForm',
-            labels: {
-                weak: `{{ T $.Lang "Mailboxes_JsPwdWeak" }}`,
-                medium: `{{ T $.Lang "Mailboxes_JsPwdFair" }}`,
-                good: `{{ T $.Lang "Mailboxes_JsPwdGood" }}`,
-                strong: `{{ T $.Lang "Mailboxes_JsPwdStrong" }}`,
-                match: `{{ T $.Lang "Mailboxes_JsPwdMatchOk" }}`,
-                noMatch: `{{ T $.Lang "Mailboxes_JsPwdMatchFail" }}`
-            },
-            validationMsgs: {
-                minLen: `{{ T $.Lang "Mailboxes_JsErrPwdLen" }}`,
-                noMatch: `{{ T $.Lang "Mailboxes_JsErrPwdMatch" }}`
-            }
-        });
+        App.initPasswordForm($.extend({}, _modalPasswordOpts, {
+            formId: 'modalMailboxForm'
+        }));
 
         $(document).on('keydown', function (e) {
             if (e.key === 'Escape') closeAddMailboxModal();

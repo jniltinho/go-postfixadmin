@@ -12,6 +12,25 @@
     <script src="/static/js/jquery-4.0.0.min.js"></script>
     <script src="/static/js/jquery.toast.min.js"></script>
     <script src="/static/js/lucide.min.js"></script>
+    <script>
+        window.AppI18n = window.AppI18n || {};
+        window.AppI18n.Password = {
+            genFail: `{{ T $.Lang "Password_JsGenFail" }}`,
+            weak: `{{ T $.Lang "Password_JsWeak" }}`,
+            medium: `{{ T $.Lang "Password_JsMedium" }}`,
+            good: `{{ T $.Lang "Password_JsGood" }}`,
+            strong: `{{ T $.Lang "Password_JsStrong" }}`,
+            match: `{{ T $.Lang "Password_JsMatchOk" }}`,
+            noMatch: `{{ T $.Lang "Password_JsMatchFail" }}`,
+            minChars: `{{ T $.Lang "Password_JsMinChars" }}`,
+            uppercase: `{{ T $.Lang "Password_JsUppercase" }}`,
+            lowercase: `{{ T $.Lang "Password_JsLowercase" }}`,
+            number: `{{ T $.Lang "Password_JsNumber" }}`,
+            special: `{{ T $.Lang "Password_JsSpecial" }}`,
+            minLen: `{{ T $.Lang "Password_JsMinLen" }}`,
+            noMatchAlert: `{{ T $.Lang "Password_JsNoMatch" }}`
+        };
+    </script>
     <script src="/static/js/app.js"></script>
     <script>window.AppLang = "{{$.Lang}}";</script>
     <style>

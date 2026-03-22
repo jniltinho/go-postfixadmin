@@ -169,7 +169,7 @@
 </div>
 
 <script>
-    var editAdminStrengthOpts, editAdminMatchOpts, editAdminIntentionOpts;
+    var editAdminPasswordOpts, editAdminIntentionOpts;
     var currentSessionIsSuperAdmin = {{.IsSuperAdmin}};
 
     function openEditAdminModal(username) {
@@ -182,43 +182,23 @@
 
         lucide.createIcons();
 
-        if(!editAdminStrengthOpts) {
-            editAdminStrengthOpts = {
+        if(!editAdminPasswordOpts) {
+            editAdminPasswordOpts = App.buildPasswordOpts({
                 passwordId: 'modal-edit-password', meterId: 'modal-edit-strength-meter',
                 barId: 'modal-edit-strength-bar', textId: 'modal-edit-strength-text',
-                labels: {
-                    weak: `{{ T $.Lang "Admins_JsPwdWeak" }}`,
-                    medium: `{{ T $.Lang "Admins_JsPwdMedium" }}`,
-                    good: `{{ T $.Lang "Admins_JsPwdGood" }}`,
-                    strong: `{{ T $.Lang "Admins_JsPwdStrong" }}`
-                }
-            };
-            editAdminMatchOpts = {
-                passwordId: 'modal-edit-password', confirmId: 'modal-edit-password-confirm',
-                indicatorId: 'modal-edit-match-indicator', submitBtnId: 'btn-update-admin',
-                labels: {
-                    match: `{{ T $.Lang "Admins_JsPwdMatchOk" }}`,
-                    noMatch: `{{ T $.Lang "Admins_JsPwdMatchFail" }}`
-                }
-            };
+                confirmId: 'modal-edit-password-confirm',
+                indicatorId: 'modal-edit-match-indicator', submitBtnId: 'btn-update-admin'
+            });
             editAdminIntentionOpts = {
                 passwordId: 'modal-edit-password', confirmId: 'modal-edit-password-confirm',
                 changeInputId: 'modal-edit-change-password', meterId: 'modal-edit-strength-meter',
                 indicatorId: 'modal-edit-match-indicator'
             };
             
-            App.initPasswordForm({
-                passwordId: 'modal-edit-password', confirmId: 'modal-edit-password-confirm',
-                meterId: 'modal-edit-strength-meter', barId: 'modal-edit-strength-bar', textId: 'modal-edit-strength-text',
-                indicatorId: 'modal-edit-match-indicator', submitBtnId: 'btn-update-admin',
+            App.initPasswordForm($.extend({}, editAdminPasswordOpts, {
                 formId: 'modalEditAdminForm',
-                changeInputId: 'modal-edit-change-password',
-                labels: editAdminStrengthOpts.labels,
-                validationMsgs: {
-                    minLen: `{{ T $.Lang "Admins_JsPwdMinLen" }}`,
-                    noMatch: `{{ T $.Lang "Admins_JsPwdNoMatch" }}`
-                }
-            });
+                changeInputId: 'modal-edit-change-password'
+            }));
         }
 
         fetch('/api/admins/' + encodeURIComponent(username))
@@ -324,11 +304,10 @@
         App.generatePassword({
             passwordId: 'modal-edit-password',
             confirmId: 'modal-edit-password-confirm',
-            failMsg: `{{ T $.Lang "Admins_JsPwdGenFail" }}`,
             onSuccess: function () {
                 App.checkPasswordChangeIntention(editAdminIntentionOpts);
-                App.checkPasswordStrength(editAdminStrengthOpts);
-                App.checkPasswordMatch(editAdminMatchOpts);
+                App.checkPasswordStrength(editAdminPasswordOpts);
+                App.checkPasswordMatch(editAdminPasswordOpts);
             }
         });
     }

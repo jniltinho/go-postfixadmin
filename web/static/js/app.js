@@ -7,6 +7,64 @@
 var App = (function ($) {
     'use strict';
 
+    function getPasswordI18n() {
+        var i18n = window.AppI18n && window.AppI18n.Password;
+
+        return $.extend({
+            genFail: 'Failed to generate password. Please try again.',
+            weak: 'Weak',
+            medium: 'Medium',
+            good: 'Good',
+            strong: 'Strong',
+            match: '✓ Passwords match',
+            noMatch: '✗ Passwords do not match',
+            minChars: 'Minimum 9 characters',
+            uppercase: 'Must include at least one uppercase letter',
+            lowercase: 'Must include at least one lowercase letter',
+            number: 'Must include at least one number',
+            special: 'Must include at least one special character (!@#$%...)',
+            minLen: 'The password must be at least 8 characters long',
+            noMatchAlert: 'Passwords do not match'
+        }, i18n || {});
+    }
+
+    function resolvePasswordLabels(labels) {
+        var i18n = getPasswordI18n();
+
+        return $.extend({
+            weak: i18n.weak,
+            medium: i18n.medium,
+            good: i18n.good,
+            strong: i18n.strong,
+            match: i18n.match,
+            noMatch: i18n.noMatch,
+            passwordMinChars: i18n.minChars,
+            passwordUppercase: i18n.uppercase,
+            passwordLowercase: i18n.lowercase,
+            passwordNumber: i18n.number,
+            passwordSpecial: i18n.special
+        }, labels || {});
+    }
+
+    function resolvePasswordValidationMsgs(msgs) {
+        var i18n = getPasswordI18n();
+
+        return $.extend({
+            minLen: i18n.minLen,
+            noMatch: i18n.noMatchAlert
+        }, msgs || {});
+    }
+
+    function buildPasswordOpts(opts) {
+        var base = opts || {};
+
+        return $.extend({}, base, {
+            labels: resolvePasswordLabels(base.labels),
+            validationMsgs: resolvePasswordValidationMsgs(base.validationMsgs),
+            failMsg: base.failMsg || getPasswordI18n().genFail
+        });
+    }
+
     // ─── Toggle Password Visibility ──────────────────────────────
     function togglePassword(fieldId, btn) {
         var $field = $('#' + fieldId);
@@ -37,6 +95,7 @@ var App = (function ($) {
     // ─── Password Strength Checker ───────────────────────────────
     // opts: { passwordId, meterId, barId, textId, labels: { weak, medium, good, strong } }
     function checkPasswordStrength(opts) {
+        var labels = resolvePasswordLabels(opts.labels);
         var password = $('#' + opts.passwordId).val();
         var $meter = $('#' + opts.meterId);
         var $bar = $('#' + opts.barId);
@@ -59,16 +118,16 @@ var App = (function ($) {
 
         var label, color;
         if (strength < 40) {
-            label = opts.labels.weak;
+            label = labels.weak;
             color = '#DC2626';
         } else if (strength < 60) {
-            label = opts.labels.medium;
+            label = labels.medium;
             color = '#F59E0B';
         } else if (strength < 80) {
-            label = opts.labels.good;
+            label = labels.good;
             color = '#10B981';
         } else {
-            label = opts.labels.strong;
+            label = labels.strong;
             color = '#059669';
         }
 
@@ -76,13 +135,41 @@ var App = (function ($) {
         $text.text(label).css('color', color);
     }
 
+    /**
+     * Retorna uma mensagem de erro se a senha nao atender aos requisitos,
+     * ou `null` se estiver ok.
+     */
+    function passwordMsg(password, labels) {
+        var msgs = resolvePasswordLabels(labels);
+
+        if (password.length < 9) {
+            return msgs.passwordMinChars || 'Minimum 9 characters';
+        }
+        if (!/[A-Z]/.test(password)) {
+            return msgs.passwordUppercase || 'Must include at least one uppercase letter';
+        }
+        if (!/[a-z]/.test(password)) {
+            return msgs.passwordLowercase || 'Must include at least one lowercase letter';
+        }
+        if (!/[0-9]/.test(password)) {
+            return msgs.passwordNumber || 'Must include at least one number';
+        }
+        if (!/[^A-Za-z0-9]/.test(password)) {
+            return msgs.passwordSpecial || 'Must include at least one special character (!@#$%...)';
+        }
+
+        return null;
+    }
+
     // ─── Password Match Checker ──────────────────────────────────
-    // opts: { passwordId, confirmId, indicatorId, submitBtnId?, labels: { match, noMatch } }
+    // opts: { passwordId, confirmId, indicatorId, submitBtnId?, labels: { match, noMatch, ...password validation labels } }
     function checkPasswordMatch(opts) {
+        var labels = resolvePasswordLabels(opts.labels);
         var password = $('#' + opts.passwordId).val();
         var confirm = $('#' + opts.confirmId).val();
         var $indicator = $('#' + opts.indicatorId);
         var $submit = opts.submitBtnId ? $('#' + opts.submitBtnId) : null;
+        var err = passwordMsg(password, labels);
 
         if (confirm.length === 0) {
             $indicator.addClass('hidden');
@@ -91,15 +178,25 @@ var App = (function ($) {
 
         $indicator.removeClass('hidden');
 
+        if (err) {
+            $indicator.text(err)
+                .attr('class', 'text-xs mt-2 font-bold text-red-600');
+            if ($submit) {
+                $submit.prop('disabled', true)
+                    .addClass('opacity-50 cursor-not-allowed');
+            }
+            return;
+        }
+
         if (password === confirm) {
-            $indicator.text(opts.labels.match)
+            $indicator.text(labels.match)
                 .attr('class', 'text-xs mt-2 font-bold text-green-600');
             if ($submit) {
                 $submit.prop('disabled', false)
                     .removeClass('opacity-50 cursor-not-allowed');
             }
         } else {
-            $indicator.text(opts.labels.noMatch)
+            $indicator.text(labels.noMatch)
                 .attr('class', 'text-xs mt-2 font-bold text-red-600');
             if ($submit) {
                 $submit.prop('disabled', true)
@@ -300,12 +397,14 @@ var App = (function ($) {
     //         formId?, changeInputId?, labels: { weak, medium, good, strong, match, noMatch },
     //         validationMsgs?: { minLen, noMatch }, minLen? }
     function initPasswordForm(opts) {
+        var labels = resolvePasswordLabels(opts.labels);
+        var validationMsgs = resolvePasswordValidationMsgs(opts.validationMsgs);
         var strengthOpts = {
             passwordId: opts.passwordId,
             meterId: opts.meterId,
             barId: opts.barId,
             textId: opts.textId,
-            labels: opts.labels
+            labels: labels
         };
 
         var matchOpts = {
@@ -314,8 +413,13 @@ var App = (function ($) {
             indicatorId: opts.indicatorId,
             submitBtnId: opts.submitBtnId,
             labels: {
-                match: opts.labels.match,
-                noMatch: opts.labels.noMatch
+                match: labels.match,
+                noMatch: labels.noMatch,
+                passwordMinChars: labels.passwordMinChars,
+                passwordUppercase: labels.passwordUppercase,
+                passwordLowercase: labels.passwordLowercase,
+                passwordNumber: labels.passwordNumber,
+                passwordSpecial: labels.passwordSpecial
             }
         };
 
@@ -339,7 +443,7 @@ var App = (function ($) {
         });
 
         // Form validation on submit
-        if (opts.formId && opts.validationMsgs) {
+        if (opts.formId) {
             $('#' + opts.formId).on('submit', function (e) {
                 var isEdit = opts.changeInputId && $('#' + opts.changeInputId).val() !== 'true';
                 if (isEdit) return; // Skip validation if not changing password
@@ -350,13 +454,13 @@ var App = (function ($) {
 
                 if (password.length < minLen) {
                     e.preventDefault();
-                    alert(opts.validationMsgs.minLen);
+                    alert(validationMsgs.minLen);
                     return false;
                 }
 
                 if (password !== confirm) {
                     e.preventDefault();
-                    alert(opts.validationMsgs.noMatch);
+                    alert(validationMsgs.noMatch);
                     return false;
                 }
             });
@@ -369,6 +473,7 @@ var App = (function ($) {
         toggleDomains: toggleDomains,
         checkPasswordStrength: checkPasswordStrength,
         checkPasswordMatch: checkPasswordMatch,
+        passwordMsg: passwordMsg,
         generatePassword: generatePassword,
         confirmDeleteResource: confirmDeleteResource,
         fadeAlert: fadeAlert,
@@ -377,7 +482,8 @@ var App = (function ($) {
         checkPasswordChangeIntention: checkPasswordChangeIntention,
         updateEmailPreview: updateEmailPreview,
         validateEmail: validateEmail,
-        initPasswordForm: initPasswordForm
+        initPasswordForm: initPasswordForm,
+        buildPasswordOpts: buildPasswordOpts
     };
 
 })(jQuery);

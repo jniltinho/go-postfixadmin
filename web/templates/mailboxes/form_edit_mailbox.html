@@ -216,30 +216,18 @@
             confirmId: 'edit-modal-password_confirm',
             onSuccess: function () {
                 $('#edit-modal-change_password').val('true');
-                App.checkPasswordStrength(_editStrengthOpts);
-                App.checkPasswordMatch(_editMatchOpts);
+                App.checkPasswordStrength(_editPasswordOpts);
+                App.checkPasswordMatch(_editPasswordOpts);
             }
         });
     }
 
-    var _editStrengthOpts = {
+    var _editPasswordOpts = App.buildPasswordOpts({
         passwordId: 'edit-modal-password', meterId: 'edit-modal-strengthMeter',
         barId: 'edit-modal-strengthBar', textId: 'edit-modal-strengthText',
-        labels: {
-            weak: `{{ T $.Lang "Mailboxes_JsPwdWeak" }}`,
-            medium: `{{ T $.Lang "Mailboxes_JsPwdFair" }}`,
-            good: `{{ T $.Lang "Mailboxes_JsPwdGood" }}`,
-            strong: `{{ T $.Lang "Mailboxes_JsPwdStrong" }}`
-        }
-    };
-    var _editMatchOpts = {
-        passwordId: 'edit-modal-password', confirmId: 'edit-modal-password_confirm',
-        indicatorId: 'edit-modal-matchIndicator', submitBtnId: 'edit-modal-submitBtn',
-        labels: {
-            match: `{{ T $.Lang "Mailboxes_JsPwdMatchOk" }}`,
-            noMatch: `{{ T $.Lang "Mailboxes_JsPwdMatchFail" }}`
-        }
-    };
+        confirmId: 'edit-modal-password_confirm',
+        indicatorId: 'edit-modal-matchIndicator', submitBtnId: 'edit-modal-submitBtn'
+    });
 
     function submitEditMailboxModal() {
         var username = $('#edit-modal-username').val();
@@ -292,24 +280,9 @@
     }
 
     $(function () {
-        App.initPasswordForm({
-            passwordId: 'edit-modal-password', confirmId: 'edit-modal-password_confirm',
-            meterId: 'edit-modal-strengthMeter', barId: 'edit-modal-strengthBar', textId: 'edit-modal-strengthText',
-            indicatorId: 'edit-modal-matchIndicator', submitBtnId: 'edit-modal-submitBtn',
-            changeInputId: 'edit-modal-change_password',
-            labels: {
-                weak: `{{ T $.Lang "Mailboxes_JsPwdWeak" }}`,
-                medium: `{{ T $.Lang "Mailboxes_JsPwdFair" }}`,
-                good: `{{ T $.Lang "Mailboxes_JsPwdGood" }}`,
-                strong: `{{ T $.Lang "Mailboxes_JsPwdStrong" }}`,
-                match: `{{ T $.Lang "Mailboxes_JsPwdMatchOk" }}`,
-                noMatch: `{{ T $.Lang "Mailboxes_JsPwdMatchFail" }}`
-            },
-            validationMsgs: {
-                minLen: `{{ T $.Lang "Mailboxes_JsErrPwdLen" }}`,
-                noMatch: `{{ T $.Lang "Mailboxes_JsErrPwdMatch" }}`
-            }
-        });
+        App.initPasswordForm($.extend({}, _editPasswordOpts, {
+            changeInputId: 'edit-modal-change_password'
+        }));
 
         $(document).on('keydown', function (e) {
             if (e.key === 'Escape') closeEditMailboxModal();

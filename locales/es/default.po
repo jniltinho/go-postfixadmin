@@ -364,33 +364,6 @@ msgstr "Fuerza"
 msgid "DashboardUser_ChangePasswordBtn"
 msgstr "Cambiar Contraseña"
 
-msgid "DashboardUser_JsPwdGenFail"
-msgstr "Error al generar la contraseña. Por favor, inténtelo de nuevo."
-
-msgid "DashboardUser_JsPwdWeak"
-msgstr "Débil"
-
-msgid "DashboardUser_JsPwdMedium"
-msgstr "Regular"
-
-msgid "DashboardUser_JsPwdGood"
-msgstr "Buena"
-
-msgid "DashboardUser_JsPwdStrong"
-msgstr "Fuerte"
-
-msgid "DashboardUser_JsPwdMatchOk"
-msgstr "✓ Las contraseñas coinciden"
-
-msgid "DashboardUser_JsPwdMatchFail"
-msgstr "✗ Las contraseñas no coinciden"
-
-msgid "DashboardUser_JsPwdMinLen"
-msgstr "La contraseña debe tener al menos 8 caracteres"
-
-msgid "DashboardUser_JsPwdNoMatch"
-msgstr "Las contraseñas no coinciden"
-
 msgid "Layout_System"
 msgstr "Sistema"
 
@@ -778,27 +751,6 @@ msgstr "Guardar Cuenta de Correo"
 msgid "Mailboxes_BtnUpdate"
 msgstr "Actualizar Cuenta de Correo"
 
-msgid "Mailboxes_JsPwdGenFail"
-msgstr "Error al generar la contraseña. Por favor, inténtelo de nuevo."
-
-msgid "Mailboxes_JsPwdWeak"
-msgstr "Débil"
-
-msgid "Mailboxes_JsPwdFair"
-msgstr "Aceptable"
-
-msgid "Mailboxes_JsPwdGood"
-msgstr "Buena"
-
-msgid "Mailboxes_JsPwdStrong"
-msgstr "Fuerte"
-
-msgid "Mailboxes_JsPwdMatchOk"
-msgstr "✓ Las contraseñas coinciden"
-
-msgid "Mailboxes_JsPwdMatchFail"
-msgstr "✗ Las contraseñas no coinciden"
-
 msgid "Mailboxes_JsErrUsernameLen"
 msgstr "El nombre de usuario debe tener al menos 4 caracteres"
 
@@ -1153,33 +1105,6 @@ msgstr "Administrador"
 msgid "Admins_EditUsernameHelp"
 msgstr "El nombre de usuario no se puede cambiar"
 
-msgid "Admins_JsPwdMinLen"
-msgstr "La contraseña debe tener al menos 8 caracteres de largo"
-
-msgid "Admins_JsPwdNoMatch"
-msgstr "Las contraseñas no coinciden"
-
-msgid "Admins_JsPwdGenFail"
-msgstr "Error al generar la contraseña. Por favor, inténtelo de nuevo."
-
-msgid "Admins_JsPwdWeak"
-msgstr "Débil"
-
-msgid "Admins_JsPwdMedium"
-msgstr "Aceptable"
-
-msgid "Admins_JsPwdGood"
-msgstr "Buena"
-
-msgid "Admins_JsPwdStrong"
-msgstr "Fuerte"
-
-msgid "Admins_JsPwdMatchOk"
-msgstr "✓ Las contraseñas coinciden"
-
-msgid "Admins_JsPwdMatchFail"
-msgstr "✗ Las contraseñas no coinciden"
-
 msgid "Admins_JsPwdStrength"
 msgstr "Fuerza de la Contraseña"
 
@@ -1341,3 +1266,44 @@ msgstr "¡Bienvenido(a)!"
 
 msgid "Hi,\n\nWelcome to your new email account."
 msgstr "Hola,\n\nBienvenido(a) a tu nueva cuenta de correo electrónico."
+msgid "Password_JsGenFail"
+msgstr "No se pudo generar la contraseña. Inténtelo de nuevo."
+
+msgid "Password_JsWeak"
+msgstr "Débil"
+
+msgid "Password_JsMedium"
+msgstr "Media"
+
+msgid "Password_JsGood"
+msgstr "Buena"
+
+msgid "Password_JsStrong"
+msgstr "Fuerte"
+
+msgid "Password_JsMatchOk"
+msgstr "✓ Las contraseñas coinciden"
+
+msgid "Password_JsMatchFail"
+msgstr "✗ Las contraseñas no coinciden"
+
+msgid "Password_JsMinChars"
+msgstr "Mínimo 9 caracteres"
+
+msgid "Password_JsUppercase"
+msgstr "Debe incluir al menos una letra mayúscula"
+
+msgid "Password_JsLowercase"
+msgstr "Debe incluir al menos una letra minúscula"
+
+msgid "Password_JsNumber"
+msgstr "Debe incluir al menos un número"
+
+msgid "Password_JsSpecial"
+msgstr "Debe incluir al menos un carácter especial (!@#$%...)"
+
+msgid "Password_JsMinLen"
+msgstr "La contraseña debe tener al menos 8 caracteres"
+
+msgid "Password_JsNoMatch"
+msgstr "Las contraseñas no coinciden"

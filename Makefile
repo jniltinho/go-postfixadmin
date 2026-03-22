@@ -21,14 +21,14 @@ LDFLAGS    := -ldflags "-s -w -X $(PREFIX).Version=$(VERSION) -X $(PREFIX).Build
 
 .PHONY: all build run clean css help install-tailwind install-upx
 
-all: css build-prod
+all: clean css build-prod
 
 build: clean css
 	@echo "Building Go application..."
 	CGO_ENABLED=0 go build -o $(BIN) $(LDFLAGS)
 
 
-build-prod: clean css
+build-prod:
 	@echo "Building Go application..."
 	CGO_ENABLED=0 go build -o $(BIN) $(LDFLAGS)
 	upx --best --lzma $(BIN)

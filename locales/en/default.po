@@ -355,33 +355,6 @@ msgstr "Strength"
 msgid "DashboardUser_ChangePasswordBtn"
 msgstr "Change Password"
 
-msgid "DashboardUser_JsPwdGenFail"
-msgstr "Failed to generate password. Please try again."
-
-msgid "DashboardUser_JsPwdWeak"
-msgstr "Weak"
-
-msgid "DashboardUser_JsPwdMedium"
-msgstr "Average"
-
-msgid "DashboardUser_JsPwdGood"
-msgstr "Good"
-
-msgid "DashboardUser_JsPwdStrong"
-msgstr "Strong"
-
-msgid "DashboardUser_JsPwdMatchOk"
-msgstr "✓ Passwords match"
-
-msgid "DashboardUser_JsPwdMatchFail"
-msgstr "✗ Passwords do not match"
-
-msgid "DashboardUser_JsPwdMinLen"
-msgstr "The password must be at least 8 characters long"
-
-msgid "DashboardUser_JsPwdNoMatch"
-msgstr "Passwords do not match"
-
 msgid "Layout_System"
 msgstr "System"
 
@@ -769,27 +742,6 @@ msgstr "Save Email Account"
 msgid "Mailboxes_BtnUpdate"
 msgstr "Update Email Account"
 
-msgid "Mailboxes_JsPwdGenFail"
-msgstr "Failed to generate password. Please try again."
-
-msgid "Mailboxes_JsPwdWeak"
-msgstr "Weak"
-
-msgid "Mailboxes_JsPwdFair"
-msgstr "Fair"
-
-msgid "Mailboxes_JsPwdGood"
-msgstr "Good"
-
-msgid "Mailboxes_JsPwdStrong"
-msgstr "Strong"
-
-msgid "Mailboxes_JsPwdMatchOk"
-msgstr "✓ Passwords match"
-
-msgid "Mailboxes_JsPwdMatchFail"
-msgstr "✗ Passwords do not match"
-
 msgid "Mailboxes_JsErrUsernameLen"
 msgstr "Username must be at least 4 characters"
 
@@ -1144,33 +1096,6 @@ msgstr "Administrator"
 msgid "Admins_EditUsernameHelp"
 msgstr "The username cannot be changed"
 
-msgid "Admins_JsPwdMinLen"
-msgstr "The password must be at least 8 characters long"
-
-msgid "Admins_JsPwdNoMatch"
-msgstr "Passwords do not match"
-
-msgid "Admins_JsPwdGenFail"
-msgstr "Failed to generate password. Please try again."
-
-msgid "Admins_JsPwdWeak"
-msgstr "Weak"
-
-msgid "Admins_JsPwdMedium"
-msgstr "Fair"
-
-msgid "Admins_JsPwdGood"
-msgstr "Good"
-
-msgid "Admins_JsPwdStrong"
-msgstr "Strong"
-
-msgid "Admins_JsPwdMatchOk"
-msgstr "✓ Passwords match"
-
-msgid "Admins_JsPwdMatchFail"
-msgstr "✗ Passwords do not match"
-
 msgid "Admins_JsPwdStrength"
 msgstr "Password Strength"
 
@@ -1332,3 +1257,44 @@ msgstr "Welcome!"
 
 msgid "Hi,\n\nWelcome to your new email account."
 msgstr "Hi,\n\nWelcome to your new email account."
+msgid "Password_JsGenFail"
+msgstr "Failed to generate password. Please try again."
+
+msgid "Password_JsWeak"
+msgstr "Weak"
+
+msgid "Password_JsMedium"
+msgstr "Medium"
+
+msgid "Password_JsGood"
+msgstr "Good"
+
+msgid "Password_JsStrong"
+msgstr "Strong"
+
+msgid "Password_JsMatchOk"
+msgstr "✓ Passwords match"
+
+msgid "Password_JsMatchFail"
+msgstr "✗ Passwords do not match"
+
+msgid "Password_JsMinChars"
+msgstr "Minimum 9 characters"
+
+msgid "Password_JsUppercase"
+msgstr "Must include at least one uppercase letter"
+
+msgid "Password_JsLowercase"
+msgstr "Must include at least one lowercase letter"
+
+msgid "Password_JsNumber"
+msgstr "Must include at least one number"
+
+msgid "Password_JsSpecial"
+msgstr "Must include at least one special character (!@#$%...)"
+
+msgid "Password_JsMinLen"
+msgstr "The password must be at least 8 characters long"
+
+msgid "Password_JsNoMatch"
+msgstr "Passwords do not match"

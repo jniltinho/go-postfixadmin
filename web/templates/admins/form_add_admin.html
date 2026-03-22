@@ -161,7 +161,7 @@
 </div>
 
 <script>
-    var addAdminStrengthOpts, addAdminMatchOpts;
+    var addAdminPasswordOpts;
 
     function openAddAdminModal() {
         document.getElementById('addAdminModal').classList.remove('hidden');
@@ -169,37 +169,17 @@
         document.getElementById('modalAddAdminForm').reset();
         toggleAddAdminDomains();
 
-        if(!addAdminStrengthOpts) {
-            addAdminStrengthOpts = {
+        if(!addAdminPasswordOpts) {
+            addAdminPasswordOpts = App.buildPasswordOpts({
                 passwordId: 'modal-add-password', meterId: 'modal-add-strength-meter',
                 barId: 'modal-add-strength-bar', textId: 'modal-add-strength-text',
-                labels: {
-                    weak: `{{ T $.Lang "Admins_JsPwdWeak" }}`,
-                    medium: `{{ T $.Lang "Admins_JsPwdMedium" }}`,
-                    good: `{{ T $.Lang "Admins_JsPwdGood" }}`,
-                    strong: `{{ T $.Lang "Admins_JsPwdStrong" }}`
-                }
-            };
-            addAdminMatchOpts = {
-                passwordId: 'modal-add-password', confirmId: 'modal-add-password-confirm',
-                indicatorId: 'modal-add-match-indicator', submitBtnId: 'btn-save-admin',
-                labels: {
-                    match: `{{ T $.Lang "Admins_JsPwdMatchOk" }}`,
-                    noMatch: `{{ T $.Lang "Admins_JsPwdMatchFail" }}`
-                }
-            };
-            
-            App.initPasswordForm({
-                passwordId: 'modal-add-password', confirmId: 'modal-add-password-confirm',
-                meterId: 'modal-add-strength-meter', barId: 'modal-add-strength-bar', textId: 'modal-add-strength-text',
-                indicatorId: 'modal-add-match-indicator', submitBtnId: 'btn-save-admin',
-                formId: 'modalAddAdminForm',
-                labels: addAdminStrengthOpts.labels,
-                validationMsgs: {
-                    minLen: `{{ T $.Lang "Admins_JsPwdMinLen" }}`,
-                    noMatch: `{{ T $.Lang "Admins_JsPwdNoMatch" }}`
-                }
+                confirmId: 'modal-add-password-confirm',
+                indicatorId: 'modal-add-match-indicator', submitBtnId: 'btn-save-admin'
             });
+            
+            App.initPasswordForm($.extend({}, addAdminPasswordOpts, {
+                formId: 'modalAddAdminForm'
+            }));
         }
         lucide.createIcons();
     }
@@ -223,10 +203,9 @@
         App.generatePassword({
             passwordId: 'modal-add-password',
             confirmId: 'modal-add-password-confirm',
-            failMsg: `{{ T $.Lang "Admins_JsPwdGenFail" }}`,
             onSuccess: function () {
-                App.checkPasswordStrength(addAdminStrengthOpts);
-                App.checkPasswordMatch(addAdminMatchOpts);
+                App.checkPasswordStrength(addAdminPasswordOpts);
+                App.checkPasswordMatch(addAdminPasswordOpts);
             }
         });
     }

@@ -175,59 +175,31 @@
         App.generatePassword({
             passwordId: 'new_password',
             confirmId: 'confirm_password',
-            failMsg: `{{ T $.Lang "DashboardUser_JsPwdGenFail" }}`,
             onSuccess: function () {
                 $('#new_password').attr('type', 'text');
                 $('#confirm_password').attr('type', 'text');
-                App.checkPasswordStrength(_strengthOpts);
-                App.checkPasswordMatch(_matchOpts);
+                App.checkPasswordStrength(_passwordOpts);
+                App.checkPasswordMatch(_passwordOpts);
                 lucide.createIcons();
             }
         });
     }
 
-    var _strengthOpts = {
+    var _passwordOpts = App.buildPasswordOpts({
         passwordId: 'new_password', meterId: 'strengthMeter',
         barId: 'strengthBar', textId: 'strengthText',
-        labels: {
-            weak: `{{ T $.Lang "DashboardUser_JsPwdWeak" }}`,
-            medium: `{{ T $.Lang "DashboardUser_JsPwdMedium" }}`,
-            good: `{{ T $.Lang "DashboardUser_JsPwdGood" }}`,
-            strong: `{{ T $.Lang "DashboardUser_JsPwdStrong" }}`
-        }
-    };
-    var _matchOpts = {
-        passwordId: 'new_password', confirmId: 'confirm_password',
-        indicatorId: 'matchIndicator', submitBtnId: 'submitBtn',
-        labels: {
-            match: `{{ T $.Lang "DashboardUser_JsPwdMatchOk" }}`,
-            noMatch: `{{ T $.Lang "DashboardUser_JsPwdMatchFail" }}`
-        }
-    };
+        confirmId: 'confirm_password',
+        indicatorId: 'matchIndicator', submitBtnId: 'submitBtn'
+    });
 
     $(function () {
         // Auto-dismiss flash messages
         App.flashMessages();
 
         // Password form
-        App.initPasswordForm({
-            passwordId: 'new_password', confirmId: 'confirm_password',
-            meterId: 'strengthMeter', barId: 'strengthBar', textId: 'strengthText',
-            indicatorId: 'matchIndicator', submitBtnId: 'submitBtn',
-            formId: 'passwordForm',
-            labels: {
-                weak: `{{ T $.Lang "DashboardUser_JsPwdWeak" }}`,
-                medium: `{{ T $.Lang "DashboardUser_JsPwdMedium" }}`,
-                good: `{{ T $.Lang "DashboardUser_JsPwdGood" }}`,
-                strong: `{{ T $.Lang "DashboardUser_JsPwdStrong" }}`,
-                match: `{{ T $.Lang "DashboardUser_JsPwdMatchOk" }}`,
-                noMatch: `{{ T $.Lang "DashboardUser_JsPwdMatchFail" }}`
-            },
-            validationMsgs: {
-                minLen: `{{ T $.Lang "DashboardUser_JsPwdMinLen" }}`,
-                noMatch: `{{ T $.Lang "DashboardUser_JsPwdNoMatch" }}`
-            }
-        });
+        App.initPasswordForm($.extend({}, _passwordOpts, {
+            formId: 'passwordForm'
+        }));
 
         $('#passwordForm').on('submit', function (e) {
             e.preventDefault();
