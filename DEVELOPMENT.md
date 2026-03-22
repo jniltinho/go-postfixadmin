@@ -8,7 +8,7 @@ Related documents:
 
 - [Project README](README.md)
 - [Features](FEATURES.md)
-- [Quick mail server setup](SETUP_MAILSERVER.md)
+- [Quick mail server setup](DOCUMENTS/setup/SETUP_MAILSERVER.md)
 - [Complete setup guide](DOCUMENTS/setup/README.md)
 
 ## Development Tools

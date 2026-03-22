@@ -10,7 +10,7 @@ Related documents:
 
 - [Project README](../../README.md)
 - [Features](../../FEATURES.md)
-- [Quick setup summary](../../SETUP_MAILSERVER.md)
+- [Quick setup summary](SETUP_MAILSERVER.md)
 
 ---
 
