@@ -15,92 +15,10 @@ For the full feature list and capability breakdown, see [FEATURES.md](FEATURES.m
 ## Documentation
 
 - [Features](FEATURES.md)
+- [Development guide](DEVELOPMENT.md)
 - [Quick mail server setup](SETUP_MAILSERVER.md)
 - [Complete setup guide](DOCUMENTS/setup/README.md)
 - [Contributing](CONTRIBUTING.md)
-
-## 🛠 Development Tools
-
-To compile the project locally (without Docker), you will need to install the following tools:
-
-1.  **Go (v1.21 or higher)**: Main language of the project.
-    *   [Download Go](https://go.dev/dl/)
-2.  **Node.js (v20 or higher)**: Required for CSS processing with Tailwind.
-    *   [Download Node.js](https://nodejs.org/)
-3.  **Make**: Utility for command automation (native on Linux/macOS).
-4.  **UPX (Optional)**: Used by the Makefile to compress the final binary.
-    *   `sudo apt install upx-ucl` (Debian/Ubuntu)
-
----
-
-## 🏗 How to Build
-
-This project offers two main ways to build: using `make` (local) or `docker`.
-
-### 1. Native Build with Makefile
-
-The local build automates CSS generation and Go binary compilation.
-
-#### Dependency Installation
-
-To install all dependencies (Recommended):
-
-```bash
-make deps
-```
-
-If you prefer to install manually:
-
-```bash
-go mod download
-npm install
-```
-
-### Compilation
-```bash
-# Generate CSS and compile the binary
-make build-prod
-
-# To clean generated files
-make clean
-```
-
-### 2. Build with Docker
-
-Ideal for generating an isolated, production-ready final version without needing to install Go or Node.js on your machine.
-
-**Requirements:** Docker installed.
-
-```bash
-# Generate the professional docker image (optimized to ~14MB)
-make build-docker
-```
-
-This command runs a multi-stage build that:
-1.  Compiles static assets (Tailwind).
-2.  Compiles the Go binary (Generates a static binary).
-3.  Compresses the binary with `upx`.
-4.  Generates a final image based on Alpine Linux.
-
-### 3. Quick Start with Docker Compose
-
-The fastest way to get a full environment running (MariaDB + Go-PostfixAdmin).
-
-**Requirements:** Docker and Docker Compose installed.
-
-```bash
-make build-docker
-docker compose up
-```
-
-This will:
-- Start a MariaDB container.
-- Build and start the Go-PostfixAdmin container.
-- **Automatically** wait for the DB to be ready.
-- **Automatically** run database migrations.
-- **Automatically** create an initial superadmin (default: `admin@example.com` / `adminpassword`).
-
-You can customize the environment variables and port mappings in `docker-compose.yml`.
 
 ---
 
@@ -217,20 +135,6 @@ Parses `FILTER:` entries from `/var/log/mail.log` and stores them in the `maillo
 ```
 
 The `maillog` table stores: timestamp, sender, recipient, sender domain, recipient domain, host IP, hostname, HELO string, and message size.
-
----
-
-## 💻 Useful Makefile Commands
-
-| Command | Description |
-| :--- | :--- |
-| `make build-prod` | Compiles CSS and the local binary |
-| `make build-docker` | Generates the optimized Docker image |
-| `make run` | Compiles and starts the server locally |
-| `make watch-css` | Starts the Tailwind watcher for UI development |
-| `make clean` | Removes the generated binary and CSS files |
-| `make tidy` | Cleans and organizes Go dependencies |
-| `make deps` | Installs all required dependencies |
 
 ---
 
