@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"go-postfixadmin/internal/models"
+	"go-postfixadmin/internal/utils"
 
 	"gorm.io/gorm"
 )
@@ -47,4 +48,26 @@ func GetAllMailboxes(db *gorm.DB, username string, isSuperAdmin bool, domainFilt
 	}
 
 	return mailboxes, isSuper, nil
+}
+
+func DeleteMailbox(db *gorm.DB, mailbox models.Mailbox, actorUsername, actorIP string) error {
+	return db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("address = ?", mailbox.Username).Delete(&models.Alias{}).Error; err != nil {
+			return err
+		}
+
+		if err := tx.Where("email = ?", mailbox.Username).Delete(&models.Vacation{}).Error; err != nil {
+			return err
+		}
+
+		if err := tx.Where("username = ?", mailbox.Username).Delete(&models.Mailbox{}).Error; err != nil {
+			return err
+		}
+
+		if err := utils.LogAction(tx, actorUsername, actorIP, mailbox.Domain, "delete_mailbox", mailbox.Username); err != nil {
+			return err
+		}
+
+		return nil
+	})
 }

@@ -337,30 +337,7 @@ func (h *Handler) DeleteMailbox(c *echo.Context) error {
 		}
 	}
 
-	// Use transaction to ensure atomicity
-	err = h.DB.Transaction(func(tx *gorm.DB) error {
-		// Delete corresponding alias
-		if err := tx.Where("address = ?", username).Delete(&models.Alias{}).Error; err != nil {
-			return err
-		}
-
-		// Delete Vacation
-		if err := tx.Where("email = ?", username).Delete(&models.Vacation{}).Error; err != nil {
-			return err
-		}
-
-		// Delete the mailbox
-		if err := tx.Where("username = ?", username).Delete(&models.Mailbox{}).Error; err != nil {
-			return err
-		}
-
-		// Log Action inside transaction
-		if err := utils.LogAction(tx, SessionUser, c.RealIP(), mailbox.Domain, "delete_mailbox", username); err != nil {
-			return err
-		}
-
-		return nil
-	})
+	err = repositories.DeleteMailbox(h.DB, mailbox, SessionUser, c.RealIP())
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{

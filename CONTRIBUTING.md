@@ -76,6 +76,7 @@ Typical locations:
 │   ├── i18n/             # Internationalization (gotext wrapper)
 │   ├── middleware/       # HTTP middleware (auth, logging, etc.)
 │   ├── models/           # GORM database models
+│   ├── repositories/     # Database access helpers and query-oriented data operations
 │   ├── routes/           # Route definitions
 │   ├── server/           # HTTP server setup and render helpers
 │   └── utils/            # Shared utilities (mailer, DB connection, quota, vacation helpers)
@@ -129,6 +130,7 @@ Before opening a pull request, verify the items relevant to your change:
 - new flash messages are written in English in Go code
 - new user-facing strings are added to the `.po` files
 - templates, handlers, and JS stay aligned for any form flow you changed
+- handlers, repositories, and models stay aligned when changing data access logic
 - setup or config changes are documented in the correct markdown files
 
 ---
@@ -152,7 +154,7 @@ The SMTP connection supports three modes (`smtp.type` in `config.toml`):
 
 ## 🔐 Password Policy
 
-Backend password validation is enforced centrally in the handlers layer. Passwords must contain:
+Backend password validation is enforced centrally in the handlers layer, while password UI behavior lives in shared frontend code. Passwords must contain:
 
 - at least 8 characters
 - at least one uppercase letter
