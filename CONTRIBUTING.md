@@ -38,6 +38,7 @@ Have an idea to make Go-PostfixAdmin better?
 4. **Test your changes**:
    - Run `go test ./...`.
    - Run `make run` when the change affects the running application or UI.
+   - Run `make build-prod` when your change affects embedded assets, build flow, or release packaging.
    - Ensure the UI looks good across different screen sizes.
 5. **Submit your PR**:
    - Provide a concise title and detailed description of your changes.
@@ -68,16 +69,16 @@ Typical locations:
 
 ```
 .
-├── cmd/                  # Cobra CLI commands (root, server, admin, version, migrate-import, config-generator)
+├── cmd/                  # Cobra CLI commands (root, server, admin, version, migrate, importsql, config-generator)
 ├── admin/                # Admin CLI logic: listing, cleanup, quota report
 ├── internal/
 │   ├── handlers/         # HTTP route handlers
 │   ├── i18n/             # Internationalization (gotext wrapper)
-│   ├── middleware/        # HTTP middleware (auth, logging, etc.)
+│   ├── middleware/       # HTTP middleware (auth, logging, etc.)
 │   ├── models/           # GORM database models
 │   ├── routes/           # Route definitions
 │   ├── server/           # HTTP server setup and render helpers
-│   └── utils/            # Shared utilities (mailer, DB connection, quota)
+│   └── utils/            # Shared utilities (mailer, DB connection, quota, vacation helpers)
 ├── locales/              # GNU Gettext .po translation files
 ├── web/
 │   ├── static/           # Static assets (CSS, JS, images)
@@ -117,6 +118,18 @@ type   = "plain"   # Options: plain | tls | starttls
 ```
 
 For build commands, CLI usage, and local workflow details, see [DEVELOPMENT.md](DEVELOPMENT.md).
+
+---
+
+## ✅ Change Checklist
+
+Before opening a pull request, verify the items relevant to your change:
+
+- backend validation and frontend UX still match
+- new flash messages are written in English in Go code
+- new user-facing strings are added to the `.po` files
+- templates, handlers, and JS stay aligned for any form flow you changed
+- setup or config changes are documented in the correct markdown files
 
 ---
 
@@ -182,18 +195,7 @@ We use a **Neo-Brutalism** design aesthetic:
 
 ## 🛠 Useful Commands
 
-| Command | Description |
-|---|---|
-| `make run` | Build (with CSS) and start the server (`./postfixadmin server`) |
-| `make build` | Compile the binary (with CSS, no UPX) |
-| `make build-prod` | Compile and compress with UPX for production |
-| `make css` | Build Tailwind CSS (minified) |
-| `make watch-css` | Watch for CSS changes and rebuild automatically |
-| `make deps` | Install Go modules and NPM packages |
-| `make tidy` | Run `go mod tidy` |
-| `make certs` | Generate self-signed SSL certificates |
-| `make clean` | Remove the binary and generated CSS |
-| `make build-docker` | Build the Docker image |
+For the current build, Makefile, and CLI command reference, see [DEVELOPMENT.md](DEVELOPMENT.md).
 
 ---
 
