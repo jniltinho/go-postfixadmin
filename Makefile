@@ -1,6 +1,16 @@
+## Variables for Tailwind CSS and UPX
+TAILWIND_VERSION := v4.2.0
+TAILWIND_BIN     := /usr/local/bin/tailwindcss
+TAILWIND_URL     := https://github.com/tailwindlabs/tailwindcss/releases/download/$(TAILWIND_VERSION)/tailwindcss-linux-x64
+UPX_VERSION      := 5.1.1
+UPX_ARCHIVE      := upx-$(UPX_VERSION)-amd64_linux.tar.xz
+UPX_DIR          := upx-$(UPX_VERSION)-amd64_linux
+UPX_BIN          := /usr/local/bin/upx
+UPX_URL          := https://github.com/upx/upx/releases/download/v$(UPX_VERSION)/$(UPX_ARCHIVE)
+
+## Variables for Go application
 APP        := postfixadmin
 BIN        := bin/$(APP)
-
 PREFIX     := go-postfixadmin/cmd
 VERSION    := $(shell git describe --tags --abbrev=0 2>/dev/null || echo "dev")
 BUILD_TIME := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -9,19 +19,17 @@ GIT_COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 
 LDFLAGS    := -ldflags "-s -w -X $(PREFIX).Version=$(VERSION) -X $(PREFIX).BuildDate=$(BUILD_TIME) -X $(PREFIX).GitCommit=$(GIT_COMMIT)"
 
-.PHONY: all build run clean css help
+.PHONY: all build run clean css help install-tailwind install-upx
 
 all: css build-prod
 
-build: css
+build: clean css
 	@echo "Building Go application..."
-	rm -f $(BIN)
 	CGO_ENABLED=0 go build -o $(BIN) $(LDFLAGS)
 
 
-build-prod: css
+build-prod: clean css
 	@echo "Building Go application..."
-	rm -f $(BIN)
 	CGO_ENABLED=0 go build -o $(BIN) $(LDFLAGS)
 	upx --best --lzma $(BIN)
 
@@ -67,15 +75,33 @@ build-docker-prod:
 	CGO_ENABLED=0 go build -o $(BIN) $(LDFLAGS)
 	upx --best --lzma $(BIN)
 
+## For Development and Build/Production
+install-tailwind:
+	@echo "Installing Tailwind CSS binary..."
+	curl -ksSL "$(TAILWIND_URL)" -o tailwindcss-linux-x64
+	chmod +x tailwindcss-linux-x64
+	mv tailwindcss-linux-x64 "$(TAILWIND_BIN)"
+
+install-upx:
+	@echo "Installing UPX binary..."
+	curl -ksSL "$(UPX_URL)" -o "$(UPX_ARCHIVE)"
+	tar -xf "$(UPX_ARCHIVE)"
+	chmod +x "$(UPX_DIR)/upx"
+	mv "$(UPX_DIR)/upx" "$(UPX_BIN)"
+	rm -rf "$(UPX_DIR)" "$(UPX_ARCHIVE)"
+
+
 
 help:
 	@echo "Makefile commands:"
-	@echo "  build         - Build the Go application"
-	@echo "  run           - Build and run the application"
-	@echo "  css           - Build the CSS using Tailwind"
-	@echo "  watch-css     - Watch for CSS changes"
-	@echo "  clean         - Remove binary and generated CSS"
-	@echo "  tidy          - Run go mod tidy"
-	@echo "  deps          - Install Go and NPM dependencies"
-	@echo "  certs         - Generate self-signed SSL certificates"
-	@echo "  build-docker  - Build the Docker image"
+	@echo "  build            - Build the Go application"
+	@echo "  run              - Build and run the application"
+	@echo "  css              - Build the CSS using Tailwind"
+	@echo "  watch-css        - Watch for CSS changes"
+	@echo "  clean            - Remove binary and generated CSS"
+	@echo "  tidy             - Run go mod tidy"
+	@echo "  deps             - Install Go dependencies, Tailwind CSS, and UPX"
+	@echo "  install-tailwind - Install the Tailwind CSS binary"
+	@echo "  install-upx      - Install the UPX binary"
+	@echo "  certs            - Generate self-signed SSL certificates"
+	@echo "  build-docker     - Build the Docker image"
