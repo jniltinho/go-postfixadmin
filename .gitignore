@@ -34,6 +34,9 @@ config_*.toml
 bin/
 web/static/css/style.css
 
+## vs code
+.vscode/
+
 # Docker data
 DOCUMENTS/docker/_dbdata/
 DOCUMENTS/docker/_dbdata/*
