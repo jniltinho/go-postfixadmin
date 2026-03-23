@@ -1,0 +1,208 @@
+{{define "form_vacation"}}
+<!-- Vacation Modal -->
+<div id="vacationModal" class="fixed inset-0 z-50 hidden">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/50" onclick="closeVacationModal()"></div>
+    <!-- Modal Box -->
+    <div class="relative z-10 flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white border-4 border-brand-text w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <!-- Header -->
+            <div class="bg-brand-secondary px-6 py-4 flex items-center justify-between flex-shrink-0">
+                <h3 class="text-lg font-mono font-black uppercase tracking-tight text-white flex items-center">
+                    <i data-lucide="plane-takeoff" class="w-5 h-5 mr-2"></i>
+                    {{ T $.Lang `Vacation_ConfigTitle` }}
+                </h3>
+                <button onclick="closeVacationModal()" class="text-white hover:text-gray-200 transition-colors cursor-pointer">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Scrollable Body -->
+            <div class="overflow-y-auto flex-1">
+                <!-- Error Area -->
+                <div id="vacation-modal-error" class="hidden mx-6 mt-4 bg-red-50 border-2 border-red-600 p-3 flex items-start">
+                    <i data-lucide="alert-circle" class="w-4 h-4 text-red-600 mr-2 mt-0.5 flex-shrink-0"></i>
+                    <p id="vacation-modal-error-text" class="text-sm text-red-700 font-medium"></p>
+                </div>
+
+                <form id="vacationModalForm" class="p-6 space-y-5">
+
+                    <!-- Dates Section -->
+                    <div class="border-2 border-brand-text p-4 space-y-4">
+                        <h4 class="text-sm font-mono font-black uppercase tracking-tight flex items-center">
+                            <i data-lucide="calendar" class="w-4 h-4 mr-2"></i>
+                            {{ T $.Lang `Vacation_StartDate` }} / {{ T $.Lang `Vacation_EndDate` }}
+                        </h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label for="vm_activefrom" class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                                    {{ T $.Lang `Vacation_StartDate` }}
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                        <i data-lucide="calendar" class="w-4 h-4"></i>
+                                    </div>
+                                    <input type="datetime-local" id="vm_activefrom" name="activefrom"
+                                        value="{{if .Vacation}}{{ .Vacation.ActiveFrom }}{{end}}" required
+                                        class="w-full h-10 pl-9 pr-3 border-2 border-brand-text focus:border-brand-secondary focus:outline-none font-medium transition-colors text-sm">
+                                </div>
+                            </div>
+                            <div>
+                                <label for="vm_activeuntil" class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                                    {{ T $.Lang `Vacation_EndDate` }}
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                        <i data-lucide="calendar-check" class="w-4 h-4"></i>
+                                    </div>
+                                    <input type="datetime-local" id="vm_activeuntil" name="activeuntil"
+                                        value="{{if .Vacation}}{{ .Vacation.ActiveUntil }}{{end}}" required
+                                        class="w-full h-10 pl-9 pr-3 border-2 border-brand-text focus:border-brand-secondary focus:outline-none font-medium transition-colors text-sm">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Message Section -->
+                    <div class="border-2 border-brand-text p-4 space-y-4">
+                        <h4 class="text-sm font-mono font-black uppercase tracking-tight flex items-center">
+                            <i data-lucide="message-square-dashed" class="w-4 h-4 mr-2"></i>
+                            {{ T $.Lang `Vacation_MessageBody` }}
+                        </h4>
+
+                        <!-- Reply Interval -->
+                        <div>
+                            <label for="vm_interval_time" class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                                {{ T $.Lang `Vacation_ReplyOption` }}
+                            </label>
+                            <div class="relative">
+                                <select id="vm_interval_time" name="interval_time"
+                                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-secondary focus:outline-none font-medium transition-colors appearance-none bg-white text-sm cursor-pointer">
+                                    <option value="0" {{if and .Vacation (eq .Vacation.IntervalTime 0)}}selected{{end}}>{{ T $.Lang `Vacation_ReplyOnce` }}</option>
+                                    <option value="86400" {{if and .Vacation (eq .Vacation.IntervalTime 86400)}}selected{{end}}>{{ T $.Lang `Vacation_ReplyEveryDay` }}</option>
+                                    <option value="604800" {{if and .Vacation (eq .Vacation.IntervalTime 604800)}}selected{{end}}>{{ T $.Lang `Vacation_ReplyEvery7Days` }}</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-brand-text">
+                                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Subject -->
+                        <div>
+                            <label for="vm_subject" class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                                {{ T $.Lang `Vacation_Subject` }}
+                            </label>
+                            <input type="text" id="vm_subject" name="subject"
+                                value="{{if .Vacation}}{{.Vacation.Subject}}{{else}}{{ T $.Lang `Vacation_Subject_Placeholder` }}{{end}}"
+                                required
+                                class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-secondary focus:outline-none font-medium transition-colors text-sm">
+                        </div>
+
+                        <!-- Body -->
+                        <div>
+                            <label for="vm_body" class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                                {{ T $.Lang `Vacation_MessageBody` }}
+                            </label>
+                            <textarea id="vm_body" name="body" rows="5" required
+                                class="w-full px-3 py-2 border-2 border-brand-text focus:border-brand-secondary focus:outline-none font-medium transition-colors resize-y text-sm"
+                                placeholder="{{ T $.Lang `Vacation_MessageBody_Placeholder` }}">{{if .Vacation}}{{.Vacation.Body}}{{else}}{{ T $.Lang `Vacation_MessageBody_Placeholder` }}{{end}}</textarea>
+                        </div>
+
+                        <!-- Active -->
+                        <div class="flex items-center">
+                            <input type="checkbox" id="vm_active" name="active" value="true"
+                                class="w-5 h-5 border-2 border-brand-text cursor-pointer"
+                                {{if or (not .Vacation) .Vacation.Active}}checked{{end}}>
+                            <label for="vm_active" class="ml-2 text-sm font-bold cursor-pointer">
+                                {{ T $.Lang `Vacation_Active` }}
+                            </label>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+
+            <!-- Footer Buttons -->
+            <div class="flex items-center justify-end space-x-3 px-6 py-4 border-t-2 border-brand-text flex-shrink-0">
+                <button type="button" onclick="closeVacationModal()"
+                    class="bg-white hover:bg-gray-50 text-brand-text border-2 border-brand-text font-black px-6 py-3 shadow-[2px_2px_0px_#1E293B] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm">
+                    <i data-lucide="x" class="w-4 h-4 mr-2"></i>
+                    {{ T $.Lang `Vacation_CancelBtn` }}
+                </button>
+                <button type="button" id="vacationSaveBtn" onclick="submitVacationModal()"
+                    class="bg-brand-secondary hover:bg-white hover:text-brand-secondary text-white border-2 border-brand-text font-black px-6 py-3 shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm">
+                    <i data-lucide="save" class="w-4 h-4 mr-2"></i>
+                    {{ T $.Lang `Vacation_SaveBtn` }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.AppI18n = window.AppI18n || {};
+    window.AppI18n.Vacation = {
+        saved:  `{{ T $.Lang "Vacation_JsSaved" }}`,
+        failed: `{{ T $.Lang "Vacation_JsFailed" }}`
+    };
+
+    function openVacationModal() {
+        $('#vacationModal').removeClass('hidden');
+        $('body').css('overflow', 'hidden');
+
+        var now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        var formattedDate = now.toISOString().slice(0, 16);
+
+        if (!$('#vm_activefrom').val()) $('#vm_activefrom').val(formattedDate);
+
+        if (!$('#vm_activeuntil').val()) {
+            var future = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+            future.setMinutes(future.getMinutes());
+            $('#vm_activeuntil').val(future.toISOString().slice(0, 16));
+        }
+
+        lucide.createIcons();
+    }
+
+    function closeVacationModal() {
+        $('#vacationModal').addClass('hidden');
+        $('body').css('overflow', '');
+        $('#vacation-modal-error').addClass('hidden');
+    }
+
+    function submitVacationModal() {
+        var $btn = $('#vacationSaveBtn');
+        $btn.prop('disabled', true);
+
+        $.ajax({
+            url: '/users/vacation',
+            method: 'POST',
+            data: $('#vacationModalForm').serialize(),
+            headers: { 'Accept': 'application/json' }
+        }).done(function (res) {
+            if (res.success) {
+                App.showToast('Success', res.message || window.AppI18n.Vacation.saved, 'success');
+                closeVacationModal();
+            } else {
+                $('#vacation-modal-error-text').text(res.error || window.AppI18n.Vacation.failed);
+                $('#vacation-modal-error').removeClass('hidden');
+            }
+        }).fail(function (xhr) {
+            var msg = window.AppI18n.Vacation.failed;
+            try { msg = JSON.parse(xhr.responseText).error || msg; } catch (e) {}
+            $('#vacation-modal-error-text').text(msg);
+            $('#vacation-modal-error').removeClass('hidden');
+        }).always(function () {
+            $btn.prop('disabled', false);
+        });
+    }
+
+    $(function () {
+        $(document).on('keydown', function (e) {
+            if (e.key === 'Escape') closeVacationModal();
+        });
+    });
+</script>
+{{end}}

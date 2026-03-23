@@ -25,25 +25,25 @@
                 </div>
             </div>
             <div>
-                <a href="/users/vacation" title="Configure an out-of-office message or other auto-reply."
+                <button type="button" onclick="openVacationModal()" title="Configure an out-of-office message or other auto-reply."
                     class="bg-brand-secondary hover:bg-white hover:text-brand-secondary text-white border-2 border-brand-text font-black px-6 py-3 shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center justify-center text-center text-sm w-full sm:w-auto">
                     <i data-lucide="plane-takeoff" class="w-5 h-5 mr-2"></i>
                     {{ T $.Lang `DashboardUser_ConfigureVacation` }}
-                </a>
+                </button>
             </div>
         </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <!-- Forwarding Configuration Card -->
-        <div class="bg-white border-4 border-brand-text neo-shadow-sm p-8">
+        <div class="bg-white border-4 border-brand-text neo-shadow-sm p-8 h-full flex flex-col">
             <h3 class="text-xl font-mono font-black uppercase tracking-tight mb-6 flex items-center">
                 <i data-lucide="corner-up-right" class="w-5 h-5 mr-2"></i>
                 {{ T $.Lang `DashboardUser_ForwardingTitle` }}
             </h3>
             <p class="text-xs text-gray-500 mb-6">{{ T $.Lang `DashboardUser_ForwardingDesc` }}</p>
 
-            <form action="/users/forwarding" method="POST" class="space-y-6" id="forwardingForm">
+            <form action="/users/forwarding" method="POST" class="space-y-6 flex-1 flex flex-col" id="forwardingForm">
                 <div>
                     <label for="forwarding"
                         class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
@@ -67,14 +67,22 @@
         </div>
 
         <!-- Change Password Card -->
-        <div class="bg-white border-4 border-brand-text neo-shadow-sm p-8">
+        <div class="bg-white border-4 border-brand-text neo-shadow-sm p-8 h-full flex flex-col">
             <h3 class="text-xl font-mono font-black uppercase tracking-tight mb-6 flex items-center">
                 <i data-lucide="key" class="w-5 h-5 mr-2"></i>
                 {{ T $.Lang `DashboardUser_PasswordTitle` }}
             </h3>
             <p class="text-xs text-gray-500 mb-6">{{ T $.Lang `DashboardUser_PasswordDesc` }}</p>
 
-            <form action="/users/password" method="POST" class="space-y-6" id="passwordForm">
+            <form action="/users/password" method="POST" class="space-y-4 flex-1 flex flex-col" id="passwordForm">
+                <!--
+                <div id="passwordError"
+                    class="hidden bg-red-50 border-2 border-red-600 p-3 flex items-start">
+                    <i data-lucide="alert-circle" class="w-4 h-4 text-red-600 mr-2 mt-0.5 flex-shrink-0"></i>
+                    <p id="passwordErrorText" class="text-sm text-red-700 font-medium"></p>
+                </div>
+                -->
+                
                 <div>
                     <label for="current_password"
                         class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
@@ -87,78 +95,71 @@
                         </div>
                         <input type="password" name="current_password" id="current_password" required
                             placeholder="{{ T $.Lang `DashboardUser_CurrentPasswordPlaceholder` }}"
-                            class="w-full pl-11 pr-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors">
+                            class="w-full pl-11 pr-4 py-2 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors">
                     </div>
                 </div>
 
-                <!-- New Password Inputs Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-4 items-start">
-                    <div>
-                        <div class="flex items-center mb-2 h-7">
+                <div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
+                        <div>
                             <label for="new_password"
-                                class="block text-xs font-black uppercase tracking-widest text-brand-text">
+                                class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
                                 {{ T $.Lang `DashboardUser_NewPassword` }} <span class="text-red-500">*</span>
                             </label>
                         </div>
-                        <div class="relative">
-                            <input type="password" id="new_password" name="new_password" required minlength="8"
-                                placeholder="{{ T $.Lang `DashboardUser_NewPasswordPlaceholder` }}"
-                                class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors pr-12">
-                            <button type="button" onclick="togglePassword('new_password')"
-                                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary transition-colors cursor-pointer">
-                                <i data-lucide="eye" class="w-5 h-5"></i>
-                            </button>
-                        </div>
-                        <div class="mt-2 min-h-[20px]">
-                            <p id="matchIndicator" class="text-xs hidden"></p>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="flex items-center mb-2 h-7">
+                        <div>
                             <label for="confirm_password"
-                                class="block text-xs font-black uppercase tracking-widest text-brand-text">
+                                class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
                                 {{ T $.Lang `DashboardUser_ConfirmPassword` }} <span class="text-red-500">*</span>
                             </label>
                         </div>
-                        <div class="relative">
-                            <input type="password" id="confirm_password" name="confirm_password" required minlength="8"
-                                placeholder="{{ T $.Lang `DashboardUser_ConfirmPasswordPlaceholder` }}"
-                                class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors pr-12">
-                            <button type="button" onclick="togglePassword('confirm_password')"
-                                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary transition-colors cursor-pointer">
-                                <i data-lucide="eye" class="w-5 h-5"></i>
-                            </button>
-                        </div>
-                        <div class="mt-2 min-h-[20px]"></div>
                     </div>
 
-                    <div class="md:w-12">
-                        <div class="hidden md:block mb-2 h-7"></div>
+                    <div class="flex flex-col md:flex-row gap-2 items-stretch md:items-center">
+                        <div class="relative flex-1">
+                            <input type="password" id="new_password" name="new_password" required minlength="8"
+                                placeholder="{{ T $.Lang `DashboardUser_NewPasswordPlaceholder` }}"
+                                class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm pr-10">
+                            <button type="button" onclick="togglePassword('new_password')"
+                                class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary transition-colors cursor-pointer">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+
+                        <div class="relative flex-1">
+                            <input type="password" id="confirm_password" name="confirm_password" required minlength="8"
+                                placeholder="{{ T $.Lang `DashboardUser_ConfirmPasswordPlaceholder` }}"
+                                class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm pr-10">
+                            <button type="button" onclick="togglePassword('confirm_password')"
+                                class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary transition-colors cursor-pointer">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+
                         <button type="button" onclick="generatePassword()"
                             title="{{ T $.Lang `DashboardUser_GenerateHelp` }}"
                             aria-label="{{ T $.Lang `DashboardUser_Generate` }}"
-                            class="w-full md:w-12 h-[52px] bg-brand-secondary hover:bg-white hover:text-brand-secondary text-white border-2 border-brand-text shadow-[1px_1px_0px_#1E3A8A] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[2px_2px_0px_#1E3A8A] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer flex items-center justify-center">
-                            <i data-lucide="wand-2" class="w-4 h-4"></i>
+                            class="bg-brand-secondary hover:bg-white hover:text-brand-secondary text-white text-xs font-black px-3 h-10 border-2 border-brand-text cursor-pointer uppercase tracking-widest flex items-center justify-center gap-1 whitespace-nowrap flex-shrink-0 transition-colors">
+                            <i data-lucide="wand-2" class="w-3 h-3"></i>
                         </button>
-                        <div class="hidden md:block mt-2 min-h-[20px]"></div>
                     </div>
                 </div>
 
-                <!-- Password Strength Meter -->
-                <div id="strengthMeter" class="hidden">
-                    <div class="flex items-center justify-between mb-2">
+                <p id="matchIndicator" class="text-xs hidden -mt-1"></p>
+
+                <div id="strengthMeter" class="hidden -mt-2">
+                    <div class="flex items-center justify-between mb-0.5">
                         <span class="text-xs font-black uppercase tracking-widest text-brand-text">{{ T $.Lang
                             `DashboardUser_Strength` }}</span>
                         <span id="strengthText" class="text-xs font-bold uppercase tracking-wider"></span>
                     </div>
-                    <div class="h-2 bg-gray-200 border-2 border-brand-text overflow-hidden">
+                    <div class="h-2 bg-gray-200 border border-brand-text overflow-hidden">
                         <div id="strengthBar" class="h-full transition-all duration-300" style="width: 0%"></div>
                     </div>
                 </div>
 
                 <button type="submit" id="submitBtn"
-                    class="w-full bg-brand-cta hover:bg-white hover:text-brand-cta text-white border-2 border-brand-text font-black py-4 shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center justify-center">
+                    class="w-full mt-auto bg-brand-cta hover:bg-white hover:text-brand-cta text-white border-2 border-brand-text font-black py-4 shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center justify-center">
                     <i data-lucide="shield" class="w-5 h-5 mr-2"></i>
                     {{ T $.Lang `DashboardUser_ChangePasswordBtn` }}
                 </button>
@@ -169,134 +170,5 @@
     </div>
 </div>
 
-<script>
-    function togglePassword(fieldId) { App.togglePassword(fieldId, event.currentTarget); }
-    function generatePassword() {
-        App.generatePassword({
-            passwordId: 'new_password',
-            confirmId: 'confirm_password',
-            onSuccess: function () {
-                $('#new_password').attr('type', 'text');
-                $('#confirm_password').attr('type', 'text');
-                App.checkPasswordStrength(_passwordOpts);
-                App.checkPasswordMatch(_passwordOpts);
-                lucide.createIcons();
-            }
-        });
-    }
-
-    var _passwordOpts = App.buildPasswordOpts({
-        passwordId: 'new_password', meterId: 'strengthMeter',
-        barId: 'strengthBar', textId: 'strengthText',
-        confirmId: 'confirm_password',
-        indicatorId: 'matchIndicator', submitBtnId: 'submitBtn'
-    });
-
-    $(function () {
-        // Auto-dismiss flash messages
-        App.flashMessages();
-
-        // Password form
-        App.initPasswordForm($.extend({}, _passwordOpts, {
-            formId: 'passwordForm'
-        }));
-
-        $('#passwordForm').on('submit', function (e) {
-            e.preventDefault();
-
-            var $form = $(this);
-            var $submitBtn = $('#submitBtn');
-
-            $submitBtn.prop('disabled', true).addClass('opacity-50 cursor-not-allowed');
-
-            $.ajax({
-                url: '/users/password',
-                method: 'POST',
-                data: $form.serialize(),
-                headers: { 'Accept': 'application/json' }
-            }).done(function (res) {
-                if (res.success) {
-                    App.showToast('Success', res.message || 'Password updated successfully', 'success');
-                    $('#current_password, #new_password, #confirm_password').val('');
-                    $('#strengthMeter, #matchIndicator').addClass('hidden');
-                    $('#strengthBar').css('width', '0%');
-                    $('#strengthText').text('');
-                    if (res.redirect) {
-                        setTimeout(function () {
-                            window.location.href = res.redirect;
-                        }, 800);
-                    }
-                } else {
-                    App.showToast('Error', res.error || 'Request failed', 'error');
-                }
-            }).fail(function (xhr) {
-                var msg = 'Request failed';
-                try { msg = JSON.parse(xhr.responseText).error || msg; } catch (err) {}
-                App.showToast('Error', msg, 'error');
-            }).always(function () {
-                $submitBtn.prop('disabled', false).removeClass('opacity-50 cursor-not-allowed');
-            });
-        });
-
-        // Forwarding textarea validation
-        var $fwdTextarea = $('#forwarding');
-        var $fwdBtn = $('#saveForwardingBtn');
-
-        function checkForwarding() {
-            var lines = $fwdTextarea.val().trim().split('\n').filter(function (line) {
-                return line.trim() !== '';
-            });
-            var empty = lines.length === 0;
-            var allValid = lines.every(function (line) {
-                return App.validateEmail(line.trim());
-            });
-
-            $fwdBtn.prop('disabled', empty || !allValid);
-            if (empty || !allValid) {
-                $fwdBtn.addClass('opacity-50 cursor-not-allowed');
-                if (lines.length > 0 && !allValid) {
-                    $fwdTextarea.addClass('border-red-500');
-                } else {
-                    $fwdTextarea.removeClass('border-red-500');
-                }
-            } else {
-                $fwdBtn.removeClass('opacity-50 cursor-not-allowed');
-                $fwdTextarea.removeClass('border-red-500');
-            }
-        }
-        $fwdTextarea.on('input', checkForwarding);
-        checkForwarding();
-
-        $('#forwardingForm').on('submit', function (e) {
-            e.preventDefault();
-
-            var $form = $(this);
-
-            if ($fwdBtn.prop('disabled')) {
-                return;
-            }
-
-            $fwdBtn.prop('disabled', true).addClass('opacity-50 cursor-not-allowed');
-
-            $.ajax({
-                url: '/users/forwarding',
-                method: 'POST',
-                data: $form.serialize(),
-                headers: { 'Accept': 'application/json' }
-            }).done(function (res) {
-                if (res.success) {
-                    App.showToast('Success', res.message || 'Forwarding updated successfully', 'success');
-                } else {
-                    App.showToast('Error', res.error || 'Request failed', 'error');
-                }
-            }).fail(function (xhr) {
-                var msg = 'Request failed';
-                try { msg = JSON.parse(xhr.responseText).error || msg; } catch (err) {}
-                App.showToast('Error', msg, 'error');
-            }).always(function () {
-                checkForwarding();
-            });
-        });
-    });
-</script>
+{{template "form_vacation" .}}
 {{end}}

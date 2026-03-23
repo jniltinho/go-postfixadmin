@@ -86,9 +86,14 @@ func loadTemplates(embeddedFiles embed.FS) (*Template, error) {
 
 	// Collect partial templates (form_*.html) from all directories.
 	var partials []string
+	var userPartials []string
 	fs.WalkDir(embeddedFiles, "web/templates", func(filePath string, d fs.DirEntry, err error) error {
 		if err == nil && !d.IsDir() && strings.HasPrefix(d.Name(), "form_") {
-			partials = append(partials, filePath)
+			if strings.HasPrefix(filePath, "web/templates/users/") {
+				userPartials = append(userPartials, filePath)
+			} else {
+				partials = append(partials, filePath)
+			}
 		}
 		return nil
 	})
@@ -120,7 +125,8 @@ func loadTemplates(embeddedFiles embed.FS) (*Template, error) {
 			if name == "login.html" {
 				tmpl, parseErr = template.New(name).Funcs(funcMap).ParseFS(embeddedFiles, filePath)
 			} else {
-				tmpl, parseErr = template.New(name).Funcs(funcMap).ParseFS(embeddedFiles, userLayout, filePath)
+				parseFiles := append([]string{userLayout}, append(userPartials, filePath)...)
+				tmpl, parseErr = template.New(name).Funcs(funcMap).ParseFS(embeddedFiles, parseFiles...)
 			}
 		} else {
 			if name == "login.html" {

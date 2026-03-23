@@ -163,6 +163,12 @@ msgstr "Tem certeza de que deseja remover a resposta automática?"
 msgid "Vacation_SaveBtn"
 msgstr "Editar / Definir Mensagem"
 
+msgid "Vacation_JsSaved"
+msgstr "Resposta automática salva com sucesso"
+
+msgid "Vacation_JsFailed"
+msgstr "Falha ao salvar resposta automática"
+
 msgid "Login_Title"
 msgstr "Login"
 

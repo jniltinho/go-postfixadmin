@@ -2,12 +2,13 @@ package handlers
 
 import (
 	"net/http"
+	"strings"
+	"time"
 
+	"go-postfixadmin/internal/i18n"
 	"go-postfixadmin/internal/middleware"
 	"go-postfixadmin/internal/models"
 	"go-postfixadmin/internal/utils"
-
-	"time"
 
 	"github.com/labstack/echo/v5"
 	"gorm.io/gorm"
@@ -16,6 +17,24 @@ import (
 // Handler é o controlador principal da aplicação
 type Handler struct {
 	DB *gorm.DB
+}
+
+// getLang returns the user's preferred language from cookie or Accept-Language header.
+func getLang(c *echo.Context) string {
+	if cookie, err := c.Cookie("lang"); err == nil {
+		if v := cookie.Value; v == "en" || v == "pt" || v == "es" {
+			return v
+		}
+	}
+	if strings.HasPrefix(strings.ToLower(c.Request().Header.Get("Accept-Language")), "en") {
+		return "en"
+	}
+	return "pt"
+}
+
+// T translates a message ID using the request's language.
+func T(c *echo.Context, msgID string) string {
+	return i18n.Translate(getLang(c), msgID, nil)
 }
 
 // Login processa autenticação de administradores

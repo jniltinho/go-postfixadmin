@@ -64,6 +64,12 @@ msgstr "Are you sure you want to remove the auto-reply?"
 msgid "Vacation_SaveBtn"
 msgstr "Edit / Set Message"
 
+msgid "Vacation_JsSaved"
+msgstr "Auto-reply saved successfully"
+
+msgid "Vacation_JsFailed"
+msgstr "Failed to save auto-reply"
+
 msgid "Login_Title"
 msgstr "Login"
 

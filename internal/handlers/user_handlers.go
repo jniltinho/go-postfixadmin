@@ -67,13 +67,27 @@ func (h *Handler) renderUserDashboard(c *echo.Context, username, message, errorM
 
 	alias, _ := repositories.GetAliasByAddress(h.DB, username)
 
-	return c.Render(http.StatusOK, "users/dashboard.html", map[string]interface{}{
+	data := map[string]interface{}{
 		"SessionUser": username,
 		"User":        mailbox,
 		"Alias":       alias,
 		"Message":     message,
 		"Error":       errorMsg,
-	})
+	}
+
+	vacation, err := repositories.GetVacationByEmail(h.DB, username)
+	if err == nil {
+		data["Vacation"] = map[string]interface{}{
+			"Subject":      vacation.Subject,
+			"Body":         vacation.Body,
+			"ActiveFrom":   vacation.ActiveFrom.Format("2006-01-02T15:04"),
+			"ActiveUntil":  vacation.ActiveUntil.Format("2006-01-02T15:04"),
+			"IntervalTime": vacation.IntervalTime,
+			"Active":       vacation.Active,
+		}
+	}
+
+	return c.Render(http.StatusOK, "users/dashboard.html", data)
 }
 
 // UpdateUserPassword changes the user's password
@@ -169,32 +183,13 @@ func (h *Handler) UpdateUserForwarding(c *echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]interface{}{"success": true, "message": GetFlash(c, "message")})
 }
 
-// UserVacation displays the user's vacation/auto-reply configuration form
+// UserVacation redirects to the dashboard where the vacation form is now a modal
 func (h *Handler) UserVacation(c *echo.Context) error {
 	username := middleware.GetUsername(c, middleware.UserSessionName)
 	if username == "" {
 		return c.Redirect(http.StatusFound, "/users/login")
 	}
-
-	templateData := map[string]interface{}{
-		"SessionUser": username,
-		"Message":     GetFlash(c, "message"),
-		"Error":       GetFlash(c, "error"),
-	}
-
-	vacation, err := repositories.GetVacationByEmail(h.DB, username)
-	if err == nil {
-		templateData["Vacation"] = map[string]interface{}{
-			"Subject":      vacation.Subject,
-			"Body":         vacation.Body,
-			"ActiveFrom":   vacation.ActiveFrom.Format("2006-01-02T15:04"),
-			"ActiveUntil":  vacation.ActiveUntil.Format("2006-01-02T15:04"),
-			"IntervalTime": vacation.IntervalTime,
-			"Active":       vacation.Active,
-		}
-	}
-
-	return c.Render(http.StatusOK, "users/vacation.html", templateData)
+	return c.Redirect(http.StatusFound, "/users/dashboard")
 }
 
 // UpdateUserVacation upserts the user's vacation configuration
@@ -252,17 +247,27 @@ func (h *Handler) UpdateUserVacation(c *echo.Context) error {
 		Modified:     time.Now(),
 	}
 
+	isJSON := strings.Contains(c.Request().Header.Get("Accept"), "application/json")
+
 	if err := repositories.UpsertVacation(h.DB, vacation, username, c.RealIP()); err != nil {
-		SetFlash(c, "error", "Failed to save auto-reply settings")
-		return c.Redirect(http.StatusFound, "/users/vacation")
+		msg := T(c, "Vacation_JsFailed")
+		if isJSON {
+			return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": msg})
+		}
+		SetFlash(c, "error", msg)
+		return c.Redirect(http.StatusFound, "/users/dashboard")
 	}
 
 	if viper.GetBool("vacation.enabled") {
 		_ = utils.SyncSingleVacationSieve(h.DB, username, "")
 	}
 
-	SetFlash(c, "message", "Auto-reply saved successfully")
-	return c.Redirect(http.StatusFound, "/users/vacation")
+	msg := T(c, "Vacation_JsSaved")
+	if isJSON {
+		return c.JSON(http.StatusOK, map[string]interface{}{"success": true, "message": msg})
+	}
+	SetFlash(c, "message", msg)
+	return c.Redirect(http.StatusFound, "/users/dashboard")
 }
 
 // DeleteUserVacation removes the user's vacation configuration
