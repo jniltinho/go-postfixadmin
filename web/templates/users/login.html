@@ -101,7 +101,12 @@
                 </div>
             </form>
 
-            <div class="mt-8 pt-6 border-t-2 border-gray-100 text-center">
+            <div class="mt-8 pt-6 border-t-2 border-gray-100 text-center space-y-3">
+                <p class="text-xs text-gray-500">
+                    {{ T $.Lang `UserLogin_AdminLinkText1` }}<a href="/login"
+                        class="text-brand-secondary font-bold hover:underline">{{ T $.Lang `UserLogin_AdminLinkText2` }}</a>{{
+                    T $.Lang `UserLogin_AdminLinkText3` }}
+                </p>
                 <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
                     {{ T $.Lang `UserLogin_AccessPortal` }}
                 </p>

@@ -229,6 +229,15 @@ msgstr "Entrar"
 msgid "UserLogin_AccessPortal"
 msgstr "Portal de Acceso de Usuario"
 
+msgid "UserLogin_AdminLinkText1"
+msgstr "Los administradores deben "
+
+msgid "UserLogin_AdminLinkText2"
+msgstr "hacer clic aquí"
+
+msgid "UserLogin_AdminLinkText3"
+msgstr " para acceder al panel de administración."
+
 msgid "DashboardAdmin_Title"
 msgstr "Panel de Control"
 

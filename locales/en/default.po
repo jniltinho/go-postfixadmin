@@ -130,6 +130,15 @@ msgstr "Login"
 msgid "UserLogin_AccessPortal"
 msgstr "User Access Portal"
 
+msgid "UserLogin_AdminLinkText1"
+msgstr "Administrators should "
+
+msgid "UserLogin_AdminLinkText2"
+msgstr "click here"
+
+msgid "UserLogin_AdminLinkText3"
+msgstr " to access the admin dashboard."
+
 msgid "DashboardAdmin_Title"
 msgstr "Dashboard"
 
