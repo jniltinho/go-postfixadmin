@@ -33,7 +33,7 @@ After building, you can run the binary directly:
 Or via Docker:
 
 ```bash
-docker run -p 8080:8080 -e DB_URL="your-dsn" postfixadmin:latest
+make build-docker; docker run -p 8080:8080 -e DB_URL="your-dsn" jniltinho/postfixadmin:latest
 ```
 
 ---
