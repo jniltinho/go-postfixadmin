@@ -1,0 +1,268 @@
+# Installation Guide: Nginx + SOGo Webmail + MySQL (Ubuntu) for ISPConfig
+
+This document describes the installation and configuration process for the SOGo webmail using Nginx as a reverse proxy and MySQL (MariaDB) as the database, integrated with an **ISPConfig** environment.
+
+---
+
+## 1. Prerequisites
+
+* Ubuntu/Debian server with Postfix, Dovecot, and MariaDB (ISPConfig stack) already installed and functional.
+* A configured domain pointing to your server (e.g., `mail.yourdomain.com`).
+* Valid SSL/TLS certificates (e.g., Let's Encript).
+
+---
+
+## 2. MariaDB Configuration for SOGo
+
+SOGo needs its own database to store user preferences, contacts, and calendars. In this setup, we also create a MySQL View to bridge ISPConfig's user table with SOGo's expected format.
+
+Access the MariaDB console:
+```bash
+sudo mariadb
+```
+
+Create the database and user for SOGo. Then, create a View so that SOGo can read the correctly formatted ISPConfig users:
+
+```sql
+-- Cria o banco do SOGo
+CREATE DATABASE sogo CHARSET='utf8mb4';
+
+-- Cria o usuário do banco (Substitua 'SUA_SENHA_AQUI')
+CREATE USER 'sogo'@'localhost' IDENTIFIED BY 'SUA_SENHA_AQUI';
+
+-- Permissões totais na base própria
+GRANT ALL PRIVILEGES ON sogo.* TO 'sogo'@'localhost';
+
+-- Permissão de leitura na tabela de e-mails do ISPConfig
+-- Nota: Ajuste 'dbispconfig' se o nome do seu banco for diferente
+GRANT SELECT ON dbispconfig.mail_user TO 'sogo'@'localhost';
+
+FLUSH PRIVILEGES;
+
+-- 2. Criar a View no SOGO
+USE sogo;
+
+CREATE OR REPLACE VIEW sogo_users_view AS
+SELECT
+    email AS c_uid,             -- Login (ex: user@dominio.com.br)
+    email AS c_name,            -- Nome interno
+    IF(name != '', name, email) AS c_cn, -- Nome de exibição (usa e-mail se nome estiver vazio)
+    password AS c_password,      -- Hash da senha
+    email AS mail                -- Campo de busca
+FROM dbispconfig.mail_user
+WHERE postfix = 'y'              -- Apenas contas ativas
+AND disablesmtp = 'n';           -- Opcional: garante que o usuário não esteja desabilitado para SMTP
+```
+
+---
+
+## 3. SOGo Installation
+
+Add the SOGo key and repository for your Ubuntu/Debian version (make sure to reference the correct repository for your distro, example below is for Ubuntu):
+
+```bash
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key 74FFC6D72B925A01
+sudo add-apt-repository "deb [arch=amd64] https://packages.inverse.ca/SOGo/nightly/5/ubuntu/ $(lsb_release -sc) $(lsb_release -sc)"
+sudo apt update
+```
+
+Install SOGo and memcached (required for sessions):
+```bash
+sudo apt install sogo sogo-activesync memcached -y
+```
+
+---
+
+## 4. SOGo Configuration (`/etc/sogo/sogo.conf`)
+
+Backup the original configuration:
+```bash
+sudo cp /etc/sogo/sogo.conf /etc/sogo/sogo.conf.bkp
+```
+
+Edit the `/etc/sogo/sogo.conf` file. Clear the original file (which comes with many comments) and use this base configuration adapting it to your environment:
+
+```ini
+{
+  /* Database configuration (MySQL SOGo) */
+  SOGoProfileURL = "mysql://sogo:YOUR_SECURE_PASSWORD_HERE@localhost:3306/sogo/sogo_user_profile";
+  OCSFolderInfoURL = "mysql://sogo:YOUR_SECURE_PASSWORD_HERE@localhost:3306/sogo/sogo_folder_info";
+  OCSSessionsFolderURL = "mysql://sogo:YOUR_SECURE_PASSWORD_HERE@localhost:3306/sogo/sogo_sessions_folder";
+  OCSAdminURL = "mysql://sogo:YOUR_SECURE_PASSWORD_HERE@localhost:3306/sogo/sogo_admin";
+
+  /* Mail */
+  SOGoDraftsFolderName = Drafts;
+  SOGoSentFolderName = Sent;
+  SOGoTrashFolderName = Trash;
+  SOGoJunkFolderName = Junk;
+  SOGoIMAPServer = "localhost";
+  SOGoSMTPServer = "smtp://localhost";
+  SOGoMailDomain = yourdomain.com;
+  SOGoMailingMechanism = smtp;
+
+  /* Authentication (using the view created in the SOGo database with the ISPConfig data) */
+  SOGoUserSources = (
+    {
+      type = sql;
+      id = directory;
+      viewURL = "mysql://sogo:YOUR_SECURE_PASSWORD_HERE@localhost:3306/sogo/sogo_users_view";
+      canAuthenticate = YES;
+      isAddressBook = YES;
+      /* ISPConfig standard password algorithms */
+      /* Use 'crypt' or 'md5' as per your ISPConfig password format */
+      userPasswordAlgorithm = crypt; 
+    }
+  );
+
+  /* Web Interface */
+  SOGoPageTitle = "SOGo Webmail";
+  SOGoVacationEnabled = YES;
+  SOGoForwardEnabled = YES;
+  SOGoSieveScriptsEnabled = YES;
+  SOGoMailAuxiliaryUserAccountsEnabled = YES;
+
+  /* General */
+  SOGoLanguage = English;
+  SOGoTimeZone = America/Sao_Paulo;
+  SOGoSuperUsernames = ("admin@yourdomain.com");
+  SOGoMemcachedHost = "127.0.0.1";
+
+  /* Workers */
+  WOWorkersCount = 3;
+}
+```
+
+*Note: Replace `YOUR_SECURE_PASSWORD_HERE` and `yourdomain.com` with the real values from your environment.*
+
+After configuring, restart the services:
+```bash
+sudo systemctl restart memcached sogo
+sudo systemctl enable memcached sogo
+```
+
+---
+
+## 5. Nginx Installation and Configuration
+
+Install Nginx if it's not already installed:
+```bash
+sudo apt install nginx -y
+```
+
+Create the configuration file for SOGo in Nginx:
+```bash
+sudo nano /etc/nginx/sites-available/sogo.conf
+```
+
+Basic Virtual Host (Reverse Proxy) configuration example with SSL:
+
+```nginx
+server {
+    listen 80;
+    server_name mail.yourdomain.com;
+    
+    # Redirect HTTP to HTTPS
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name mail.yourdomain.com;
+
+    # SSL Certificates (Example via Let's Encrypt)
+    ssl_certificate /etc/letsencrypt/live/mail.yourdomain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/mail.yourdomain.com/privkey.pem;
+
+    root /usr/lib/GNUstep/SOGo/WebServerResources/;
+
+    location = / {
+        rewrite ^ https://$server_name/SOGo;
+        allow all;
+    }
+
+    # SOGo Proxy
+    location ^~ /SOGo {
+        proxy_pass http://127.0.0.1:20000;
+        proxy_redirect http://127.0.0.1:20000 default;
+        
+        # Required headers
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $host;
+        proxy_set_header x-webobjects-server-protocol HTTP/1.0;
+        proxy_set_header x-webobjects-remote-host 127.0.0.1;
+        proxy_set_header x-webobjects-server-name $server_name;
+        proxy_set_header x-webobjects-server-url https://$server_name;
+        proxy_set_header x-webobjects-server-port 443;
+        
+        # Upload limits adjustments
+        client_max_body_size 50M;
+        client_body_buffer_size 128k;
+        break;
+    }
+
+    # SOGo Static files
+    location /SOGo.woa/WebServerResources/ {
+        alias /usr/lib/GNUstep/SOGo/WebServerResources/;
+        allow all;
+        expires max;
+    }
+
+    location /SOGo/WebServerResources/ {
+        alias /usr/lib/GNUstep/SOGo/WebServerResources/;
+        allow all;
+        expires max;
+    }
+
+    # ActiveSync (optional, for mobile/Outlook clients)
+    location ^~ /Microsoft-Server-ActiveSync {
+        proxy_pass http://127.0.0.1:20000/SOGo/Microsoft-Server-ActiveSync;
+        proxy_redirect http://127.0.0.1:20000/Microsoft-Server-ActiveSync /;
+        
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $server_name;
+        proxy_set_header x-webobjects-server-protocol HTTP/1.0;
+        proxy_set_header x-webobjects-remote-host 127.0.0.1;
+        proxy_set_header x-webobjects-server-name $server_name;
+        proxy_set_header x-webobjects-server-url https://$server_name;
+        proxy_set_header x-webobjects-server-port 443;
+        
+        proxy_connect_timeout 75;
+        proxy_send_timeout 3600;
+        proxy_read_timeout 3600;
+        proxy_buffer_size 128k;
+        proxy_buffers 64 256k;
+        proxy_busy_buffers_size 256k;
+        proxy_temp_file_write_size 256k;
+        client_max_body_size 0;
+        client_body_buffer_size 128k;
+    }
+}
+```
+
+Enable the site in Nginx by setting up the symbolic link and reloading the service:
+```bash
+sudo ln -s /etc/nginx/sites-available/sogo.conf /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl restart nginx
+```
+
+---
+
+## 6. Customizing the SOGo Theme
+
+Refer to the original `nginx-sogo-mysql.md` for detailed instructions on theme customization if needed.
+
+---
+
+## 7. Testing Access
+
+1. In your browser, go to `https://mail.yourdomain.com`.
+2. The SOGo login screen should appear.
+3. Enter with a complete email address created in **ISPConfig** (e.g., `user@yourdomain.com`) and its respective password.
+
+### Additional Tips
+
+- **SOGo Logs**: Check `/var/log/sogo/sogo.log` in case of 502 errors or mysterious login failures.
+- **ISPConfig Integration**: Any password change, new mailbox creation, or suspension done through *ISPConfig* will automatically impact access to SOGo, since we use the MySQL View connected to the `dbispconfig` database.
