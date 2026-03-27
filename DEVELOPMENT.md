@@ -188,6 +188,8 @@ The `mailbox` subcommand manages mailbox users:
 ./postfixadmin mailbox --import-csv users.csv
 # Import with a custom quota
 ./postfixadmin mailbox --import-csv users.csv -q 250
+# Import with pre-hashed passwords (skip hashing)
+./postfixadmin mailbox --import-csv users.csv --password-crypt
 ```
 
 CSV format (`user,password,domain,name`):
@@ -206,6 +208,7 @@ Available flags for `mailbox`:
 - `--add` / `-a`: Create a new mailbox user (format: `email:password`)
 - `--quota` / `-q`: Mailbox quota in MB (default: `100`). Applies to `--add` and `--import-csv`. The final stored value is multiplied by `quota.multiplier` in `config.toml`
 - `--import-csv`: Import mailbox users from a CSV file. Existing mailboxes and rows with passwords shorter than 8 characters are skipped
+- `--password-crypt`: Use with `--import-csv`. Treats the `password` column as an already-hashed value and stores it directly, skipping hashing and length validation. Useful when migrating from another system that exports bcrypt hashes
 
 ### `readlog` Command
 

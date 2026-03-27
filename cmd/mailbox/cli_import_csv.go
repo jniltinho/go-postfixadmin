@@ -19,7 +19,9 @@ import (
 
 // ImportCSV imports mailbox users from a CSV file.
 // Expected columns: user,password,domain,name
-func ImportCSV(db *gorm.DB, path string, quotaMB int64) {
+// When passwordCrypt is true, the password column is treated as an already-hashed value
+// and is stored directly without further hashing or length validation.
+func ImportCSV(db *gorm.DB, path string, quotaMB int64, passwordCrypt bool) {
 	db = db.Session(&gorm.Session{Logger: logger.Default.LogMode(logger.Silent)})
 
 	f, err := os.Open(path)
@@ -71,17 +73,22 @@ func ImportCSV(db *gorm.DB, path string, quotaMB int64) {
 			continue
 		}
 
-		if len(password) < 8 {
-			slog.Warn("Password too short, skipping", "username", username)
-			skipped++
-			continue
-		}
-
-		crypted, err := utils.HashPassword(password)
-		if err != nil {
-			slog.Warn("Failed to hash password, skipping", "username", username, "error", err)
-			skipped++
-			continue
+		var crypted string
+		if passwordCrypt {
+			crypted = password
+		} else {
+			if len(password) < 8 {
+				slog.Warn("Password too short, skipping", "username", username)
+				skipped++
+				continue
+			}
+			var err error
+			crypted, err = utils.HashPassword(password)
+			if err != nil {
+				slog.Warn("Failed to hash password, skipping", "username", username, "error", err)
+				skipped++
+				continue
+			}
 		}
 
 		now := time.Now()

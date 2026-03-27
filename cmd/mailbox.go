@@ -11,10 +11,11 @@ import (
 )
 
 var (
-	addMailboxUser    string
-	listMailboxesFlag bool
-	importCSVFile     string
-	mailboxQuotaMB    int64
+	addMailboxUser      string
+	listMailboxesFlag   bool
+	importCSVFile       string
+	mailboxQuotaMB      int64
+	importPasswordCrypt bool
 )
 
 var mailboxCmd = &cobra.Command{
@@ -32,7 +33,7 @@ var mailboxCmd = &cobra.Command{
 		} else if listMailboxesFlag {
 			mailbox.ListAllMailboxes(db)
 		} else if importCSVFile != "" {
-			mailbox.ImportCSV(db, importCSVFile, mailboxQuotaMB)
+			mailbox.ImportCSV(db, importCSVFile, mailboxQuotaMB, importPasswordCrypt)
 		} else {
 			cmd.Help()
 		}
@@ -45,4 +46,5 @@ func init() {
 	mailboxCmd.Flags().BoolVarP(&listMailboxesFlag, "list", "l", false, "List all mailboxes")
 	mailboxCmd.Flags().StringVar(&importCSVFile, "import-csv", "", "Import mailbox users from a CSV file (columns: user,password,domain,name)")
 	mailboxCmd.Flags().Int64VarP(&mailboxQuotaMB, "quota", "q", 100, "Mailbox quota in MB")
+	mailboxCmd.Flags().BoolVar(&importPasswordCrypt, "password-crypt", false, "Treat the password column in the CSV as an already-hashed value (skip hashing and length validation)")
 }
