@@ -200,6 +200,14 @@ john,Password&123,example.com,John Doe
 jane,Password&123,example.com,Jane Doe
 ```
 
+When using `--password-crypt`, the `password` column must contain a valid bcrypt hash:
+
+```csv
+user,password,domain,name
+john,$2y$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ012345,example.com,John Doe
+jane,$2y$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ678901,example.com,Jane Doe
+```
+
 The `name` column is optional — if empty, the local part is used with an uppercase first letter.
 
 Available flags for `mailbox`:
