@@ -47,6 +47,7 @@ This file lists product capabilities by area. For installation and deployment de
 - Mail log viewer with filtering and pagination
 - `readlog` daemon to ingest `FILTER:` entries from `/var/log/mail.log`
 - CLI utilities for migration, SQL import, admin recovery, and maintenance tasks
+- CLI `mailbox` subcommand: list, create, and bulk-import mailbox users from CSV
 
 ## Internationalization
 

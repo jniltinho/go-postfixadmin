@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"os"
 
-	"go-postfixadmin/admin"
+	"go-postfixadmin/cmd/admin"
 	"go-postfixadmin/internal/utils"
 
 	"github.com/spf13/cobra"
@@ -12,7 +12,6 @@ import (
 
 var (
 	listDomains      bool
-	listMailboxes    bool
 	listAdmins       bool
 	listAliases      bool
 	listAliasDomains bool
@@ -22,7 +21,6 @@ var (
 	maillogDomain    string
 	maillogLimit     int
 	addSuperAdmin    string
-	addUser          string
 	cleanupMaildirs  bool
 	quotaReport      bool
 	reportEmail      string
@@ -42,8 +40,6 @@ var adminCmd = &cobra.Command{
 
 		if listDomains {
 			admin.ListAllDomains(db)
-		} else if listMailboxes {
-			admin.ListAllMailboxes(db)
 		} else if listAdmins {
 			admin.ListAllAdmins(db)
 		} else if listAliases {
@@ -62,8 +58,6 @@ var adminCmd = &cobra.Command{
 			admin.ShowQuotaReport(reportEmail)
 		} else if addSuperAdmin != "" {
 			admin.AddSuperAdmin(db, addSuperAdmin)
-		} else if addUser != "" {
-			admin.AddUser(db, addUser)
 		} else {
 			cmd.Help()
 		}
@@ -73,7 +67,6 @@ var adminCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(adminCmd)
 	adminCmd.Flags().BoolVarP(&listDomains, "list-domains", "d", false, "List all domains")
-	adminCmd.Flags().BoolVarP(&listMailboxes, "list-mailboxes", "m", false, "List all mailboxes")
 	adminCmd.Flags().BoolVarP(&listAdmins, "list-admins", "a", false, "List all admins")
 	adminCmd.Flags().BoolVarP(&listAliases, "list-aliases", "s", false, "List all aliases")
 	adminCmd.Flags().BoolVarP(&listAliasDomains, "list-alias-domains", "S", false, "List all alias domains")
@@ -86,6 +79,5 @@ func init() {
 	adminCmd.Flags().BoolVarP(&quotaReport, "quota-report", "q", false, "Show Dovecot quota report")
 	adminCmd.Flags().StringVarP(&reportEmail, "email", "e", "", "Send quota report via sendmail to this address")
 	adminCmd.Flags().StringVar(&addSuperAdmin, "add-superadmin", "", "Add a new superadmin (format: email:password)")
-	adminCmd.Flags().StringVar(&addUser, "add-user", "", "Add a new mailbox user (format: email:password)")
 	adminCmd.Flags().StringVar(&baseDir, "base-dir", "/var/vmail", "Base directory for maildirs")
 }

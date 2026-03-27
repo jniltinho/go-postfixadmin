@@ -153,16 +153,10 @@ The binary also supports direct administrative commands via the `admin` subcomma
 # Or leave the password blank to generate a random one
 ./postfixadmin admin --add-superadmin "admin@example.com"
 
-# Create a new mailbox user (quota defined by quota.multiplier in config.toml, default 100 MB)
-./postfixadmin admin --add-user "user@example.com:password123"
-# Or leave the password blank to generate a random one
-./postfixadmin admin --add-user "user@example.com"
 ```
 
 Other available flags for `admin`:
 
-- `--add-user`: Create a new mailbox user (format: `email:password`)
-- `--list-mailboxes` (`-m`): List all mailboxes
 - `--list-aliases` (`-s`): List all aliases
 - `--list-alias-domains` (`-S`): List all alias domains
 - `--domain-admins` (`-A`): List all domain admins
@@ -174,6 +168,40 @@ Other available flags for `admin`:
 - `--quota-report` (`-q`): Fetch and display the Dovecot quota report
 - `--email` (`-e`): Optionally send the quota report via sendmail to this address (when combined with `-q`)
 - `--base-dir`: Base directory for maildirs (default `/var/vmail`)
+
+## Mailbox Commands (CLI)
+
+The `mailbox` subcommand manages mailbox users:
+
+```bash
+# List all mailboxes
+./postfixadmin mailbox --list
+./postfixadmin mailbox -l
+
+# Create a new mailbox user
+./postfixadmin mailbox --add "user@example.com:password123"
+# Or use the short flag, leaving the password blank to generate a random one
+./postfixadmin mailbox -a "user@example.com"
+
+# Import users from a CSV file
+./postfixadmin mailbox --import-csv users.csv
+```
+
+CSV format (`user,password,domain,name`):
+
+```csv
+user,password,domain,name
+john,Password&123,example.com,John Doe
+jane,Password&123,example.com,Jane Doe
+```
+
+The `name` column is optional — if empty, the local part is used with an uppercase first letter.
+
+Available flags for `mailbox`:
+
+- `--list` / `-l`: List all mailboxes
+- `--add` / `-a`: Create a new mailbox user (format: `email:password`). Quota defaults to 100 MB (controlled by `quota.multiplier` in `config.toml`)
+- `--import-csv`: Import mailbox users from a CSV file. Existing mailboxes and rows with passwords shorter than 8 characters are skipped
 
 ### `readlog` Command
 

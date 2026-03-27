@@ -1,4 +1,4 @@
-package admin
+package mailbox
 
 import (
 	"fmt"
@@ -69,7 +69,7 @@ func AddUser(db *gorm.DB, input string) {
 	}
 
 	now := time.Now()
-	mailbox := models.Mailbox{
+	mb := models.Mailbox{
 		Username:      username,
 		Password:      crypted,
 		Name:          cases.Title(language.English).String(localPart),
@@ -84,7 +84,7 @@ func AddUser(db *gorm.DB, input string) {
 		TokenValidity: now.Add(3 * time.Hour),
 	}
 
-	if err := repositories.CreateMailbox(db, mailbox, "CLI", "127.0.0.1"); err != nil {
+	if err := repositories.CreateMailbox(db, mb, "CLI", "127.0.0.1"); err != nil {
 		slog.Error("Failed to create mailbox", "error", err)
 		os.Exit(1)
 	}
