@@ -18,7 +18,7 @@ import (
 )
 
 // AddUser adds a new mailbox user to the database
-func AddUser(db *gorm.DB, input string) {
+func AddUser(db *gorm.DB, input string, quotaMB int64) {
 	db = db.Session(&gorm.Session{Logger: logger.Default.LogMode(logger.Silent)})
 
 	var username, password string
@@ -78,7 +78,7 @@ func AddUser(db *gorm.DB, input string) {
 		Domain:        domain,
 		Created:       now,
 		Modified:      now,
-		Quota:         100 * utils.GetQuotaMultiplier(),
+		Quota:         quotaMB * utils.GetQuotaMultiplier(),
 		Active:        true,
 		SMTPActive:    true,
 		TokenValidity: now.Add(3 * time.Hour),

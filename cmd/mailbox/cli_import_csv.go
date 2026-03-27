@@ -19,7 +19,7 @@ import (
 
 // ImportCSV imports mailbox users from a CSV file.
 // Expected columns: user,password,domain,name
-func ImportCSV(db *gorm.DB, path string) {
+func ImportCSV(db *gorm.DB, path string, quotaMB int64) {
 	db = db.Session(&gorm.Session{Logger: logger.Default.LogMode(logger.Silent)})
 
 	f, err := os.Open(path)
@@ -94,7 +94,7 @@ func ImportCSV(db *gorm.DB, path string) {
 			Domain:        domain,
 			Created:       now,
 			Modified:      now,
-			Quota:         100 * utils.GetQuotaMultiplier(),
+			Quota:         quotaMB * utils.GetQuotaMultiplier(),
 			Active:        true,
 			SMTPActive:    true,
 			TokenValidity: now.Add(3 * time.Hour),

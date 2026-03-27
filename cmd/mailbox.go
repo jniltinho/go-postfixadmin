@@ -14,6 +14,7 @@ var (
 	addMailboxUser    string
 	listMailboxesFlag bool
 	importCSVFile     string
+	mailboxQuotaMB    int64
 )
 
 var mailboxCmd = &cobra.Command{
@@ -27,11 +28,11 @@ var mailboxCmd = &cobra.Command{
 		}
 
 		if addMailboxUser != "" {
-			mailbox.AddUser(db, addMailboxUser)
+			mailbox.AddUser(db, addMailboxUser, mailboxQuotaMB)
 		} else if listMailboxesFlag {
 			mailbox.ListAllMailboxes(db)
 		} else if importCSVFile != "" {
-			mailbox.ImportCSV(db, importCSVFile)
+			mailbox.ImportCSV(db, importCSVFile, mailboxQuotaMB)
 		} else {
 			cmd.Help()
 		}
@@ -43,4 +44,5 @@ func init() {
 	mailboxCmd.Flags().StringVarP(&addMailboxUser, "add", "a", "", "Add a new mailbox user (format: email:password)")
 	mailboxCmd.Flags().BoolVarP(&listMailboxesFlag, "list", "l", false, "List all mailboxes")
 	mailboxCmd.Flags().StringVar(&importCSVFile, "import-csv", "", "Import mailbox users from a CSV file (columns: user,password,domain,name)")
+	mailboxCmd.Flags().Int64VarP(&mailboxQuotaMB, "quota", "q", 100, "Mailbox quota in MB")
 }

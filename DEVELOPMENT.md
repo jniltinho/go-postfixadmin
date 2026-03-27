@@ -182,9 +182,13 @@ The `mailbox` subcommand manages mailbox users:
 ./postfixadmin mailbox --add "user@example.com:password123"
 # Or use the short flag, leaving the password blank to generate a random one
 ./postfixadmin mailbox -a "user@example.com"
+# Set a custom quota (in MB)
+./postfixadmin mailbox -a "user@example.com" --quota 500
 
 # Import users from a CSV file
 ./postfixadmin mailbox --import-csv users.csv
+# Import with a custom quota
+./postfixadmin mailbox --import-csv users.csv -q 250
 ```
 
 CSV format (`user,password,domain,name`):
@@ -200,7 +204,8 @@ The `name` column is optional — if empty, the local part is used with an upper
 Available flags for `mailbox`:
 
 - `--list` / `-l`: List all mailboxes
-- `--add` / `-a`: Create a new mailbox user (format: `email:password`). Quota defaults to 100 MB (controlled by `quota.multiplier` in `config.toml`)
+- `--add` / `-a`: Create a new mailbox user (format: `email:password`)
+- `--quota` / `-q`: Mailbox quota in MB (default: `100`). Applies to `--add` and `--import-csv`. The final stored value is multiplied by `quota.multiplier` in `config.toml`
 - `--import-csv`: Import mailbox users from a CSV file. Existing mailboxes and rows with passwords shorter than 8 characters are skipped
 
 ### `readlog` Command
