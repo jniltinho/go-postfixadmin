@@ -47,7 +47,11 @@ This file lists product capabilities by area. For installation and deployment de
 - Mail log viewer with filtering and pagination
 - `readlog` daemon to ingest `FILTER:` entries from `/var/log/mail.log`
 - CLI utilities for migration, SQL import, admin recovery, and maintenance tasks
-- CLI `mailbox` subcommand: list, create (with configurable quota), bulk-import from CSV, and export to CSV for backup and migration
+- CLI `mailbox` subcommand:
+  - List all mailboxes
+  - Create individual mailbox with configurable quota (`--quota`)
+  - Bulk-import from CSV (`--import-csv`), with support for pre-hashed passwords (`--password-crypt`)
+  - Export all mailboxes to CSV (`--export`), compatible with re-import for backup and migration workflows
 
 ## Internationalization
 
