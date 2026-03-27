@@ -22,6 +22,7 @@ var (
 	maillogDomain    string
 	maillogLimit     int
 	addSuperAdmin    string
+	addUser          string
 	cleanupMaildirs  bool
 	quotaReport      bool
 	reportEmail      string
@@ -61,6 +62,8 @@ var adminCmd = &cobra.Command{
 			admin.ShowQuotaReport(reportEmail)
 		} else if addSuperAdmin != "" {
 			admin.AddSuperAdmin(db, addSuperAdmin)
+		} else if addUser != "" {
+			admin.AddUser(db, addUser)
 		} else {
 			cmd.Help()
 		}
@@ -83,5 +86,6 @@ func init() {
 	adminCmd.Flags().BoolVarP(&quotaReport, "quota-report", "q", false, "Show Dovecot quota report")
 	adminCmd.Flags().StringVarP(&reportEmail, "email", "e", "", "Send quota report via sendmail to this address")
 	adminCmd.Flags().StringVar(&addSuperAdmin, "add-superadmin", "", "Add a new superadmin (format: email:password)")
+	adminCmd.Flags().StringVar(&addUser, "add-user", "", "Add a new mailbox user (format: email:password)")
 	adminCmd.Flags().StringVar(&baseDir, "base-dir", "/var/vmail", "Base directory for maildirs")
 }
