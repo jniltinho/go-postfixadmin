@@ -152,10 +152,16 @@ The binary also supports direct administrative commands via the `admin` subcomma
 ./postfixadmin admin --add-superadmin "admin@example.com:password123"
 # Or leave the password blank to generate a random one
 ./postfixadmin admin --add-superadmin "admin@example.com"
+
+# Create a new mailbox user (quota defined by quota.multiplier in config.toml, default 100 MB)
+./postfixadmin admin --add-user "user@example.com:password123"
+# Or leave the password blank to generate a random one
+./postfixadmin admin --add-user "user@example.com"
 ```
 
 Other available flags for `admin`:
 
+- `--add-user`: Create a new mailbox user (format: `email:password`)
 - `--list-mailboxes` (`-m`): List all mailboxes
 - `--list-aliases` (`-s`): List all aliases
 - `--list-alias-domains` (`-S`): List all alias domains
