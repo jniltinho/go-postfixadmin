@@ -69,8 +69,9 @@ Typical locations:
 
 ```
 .
-├── cmd/                  # Cobra CLI commands (root, server, admin, version, migrate, importsql, config-generator)
-├── admin/                # Admin CLI logic: listing, cleanup, quota report
+├── cmd/                  # Cobra CLI entry points (root, server, version, migrate, importsql, config-generator)
+│   ├── admin/            # Admin CLI logic: listing admins/domains/aliases, cleanup, quota report
+│   └── mailbox/          # Mailbox CLI logic: list, add, import CSV
 ├── internal/
 │   ├── handlers/         # HTTP route handlers
 │   ├── i18n/             # Internationalization (gotext wrapper)
