@@ -29,8 +29,8 @@ Have an idea to make Go-PostfixAdmin better?
 ### Pull Requests
 1. **Fork the repository** and create your branch from `main`.
 2. **Setup your environment**:
-   - Install Go (v1.22+) and Node.js (v20+).
-   - Run `make deps` to install all Go and NPM dependencies.
+   - Install Go (v1.26+). Run `make install-tailwind` to install the Tailwind CSS standalone binary.
+   - Run `make deps` to install Go dependencies.
 3. **Make your changes**:
    - Follow clean code principles: concise, self-documenting, no over-engineering.
    - If adding a new feature, ensure it is documented in the appropriate file.

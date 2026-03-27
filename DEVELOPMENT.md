@@ -15,10 +15,9 @@ Related documents:
 
 To compile the project locally without Docker, install the following tools:
 
-1. **Go (v1.21 or higher)**: Main language of the project.
+1. **Go (v1.26 or higher)**: Main language of the project.
    [Download Go](https://go.dev/dl/)
-2. **Node.js (v20 or higher)**: Required for CSS processing with Tailwind.
-   [Download Node.js](https://nodejs.org/)
+2. **Tailwind CSS standalone binary**: Required for CSS processing. Install via `make install-tailwind` (no Node.js required).
 3. **Make**: Utility for command automation (native on Linux/macOS).
 4. **UPX (Optional)**: Used by the Makefile to compress the final binary.
    Debian/Ubuntu: `sudo apt install upx-ucl`
@@ -43,7 +42,7 @@ Manual installation:
 
 ```bash
 go mod download
-npm install
+make install-tailwind
 ```
 
 #### Compilation
