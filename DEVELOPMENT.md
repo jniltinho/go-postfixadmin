@@ -190,6 +190,10 @@ The `mailbox` subcommand manages mailbox users:
 ./postfixadmin mailbox --import-csv users.csv -q 250
 # Import with pre-hashed passwords (skip hashing)
 ./postfixadmin mailbox --import-csv users.csv --password-crypt
+
+# Export all mailboxes to a CSV file
+./postfixadmin mailbox --export backup.csv
+./postfixadmin mailbox -e backup.csv
 ```
 
 CSV format (`user,password,domain,name`):
@@ -210,6 +214,16 @@ jane,$2y$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ678901,example.com,J
 
 The `name` column is optional — if empty, the local part is used with an uppercase first letter.
 
+The export format (`--export`) includes two additional columns:
+
+```csv
+user,password,domain,name,quota_mb,active
+john,$2y$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ012345,example.com,John Doe,100,1
+jane,$2y$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ678901,example.com,Jane Doe,500,1
+```
+
+- `quota_mb`: quota in MB (the `quota_mb` and `active` columns are ignored by `--import-csv`, which uses `--quota` instead)
+
 Available flags for `mailbox`:
 
 - `--list` / `-l`: List all mailboxes
@@ -217,6 +231,7 @@ Available flags for `mailbox`:
 - `--quota` / `-q`: Mailbox quota in MB (default: `100`). Applies to `--add` and `--import-csv`. The final stored value is multiplied by `quota.multiplier` in `config.toml`
 - `--import-csv`: Import mailbox users from a CSV file. Existing mailboxes and rows with passwords shorter than 8 characters are skipped
 - `--password-crypt`: Use with `--import-csv`. Treats the `password` column as an already-hashed value and stores it directly, skipping hashing and length validation. Useful when migrating from another system that exports bcrypt hashes
+- `--export` / `-e`: Export all mailboxes to a CSV file (columns: `user,password,domain,name,quota_mb,active`). The `password` column contains the stored bcrypt hash, making the output directly compatible with `--import-csv --password-crypt` for backup and migration workflows
 
 ### `readlog` Command
 
