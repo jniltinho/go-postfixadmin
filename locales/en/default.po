@@ -589,6 +589,9 @@ msgstr "Manage your email accounts"
 msgid "Mailboxes_AddMailboxBtn"
 msgstr "Add Email Account"
 
+msgid "Mailboxes_DomainLimitReached"
+msgstr "This domain has reached its mailbox limit"
+
 msgid "Mailboxes_FilterDomain"
 msgstr "Filter by Domain:"
 
@@ -780,6 +783,9 @@ msgstr "Manage email forwarders and aliases."
 
 msgid "Aliases_AddAliasBtn"
 msgstr "Add Alias"
+
+msgid "Aliases_DomainLimitReached"
+msgstr "This domain has reached its alias limit"
 
 msgid "Aliases_FilterDomain"
 msgstr "Filter by Domain:"

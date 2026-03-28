@@ -46,15 +46,27 @@ func (h *Handler) ListMailboxes(c *echo.Context) error {
 		domains, _, _ = repositories.GetActiveDomains(h.DB, SessionUser, isSuperAdmin)
 	}
 
+	domainLimitReached := false
+	if h.DB != nil && domainFilter != "" {
+		if domainRecord, err := repositories.GetDomainByName(h.DB, domainFilter); err == nil {
+			if domainRecord.Mailboxes > 0 {
+				if count, err := repositories.CountDomainMailboxes(h.DB, domainFilter); err == nil {
+					domainLimitReached = count >= int64(domainRecord.Mailboxes)
+				}
+			}
+		}
+	}
+
 	return c.Render(http.StatusOK, "mailboxes/mailboxes.html", map[string]interface{}{
-		"Mailboxes":       mailboxes,
-		"Domains":         domains,
-		"DomainFilter":    domainFilter,
-		"IsSuperAdmin":    isSuperAdmin,
-		"SessionUser":     SessionUser,
-		"QuotaMultiplier": float64(utils.GetQuotaMultiplier()),
-		"Message":         GetFlash(c, "message"),
-		"Error":           GetFlash(c, "error"),
+		"Mailboxes":          mailboxes,
+		"Domains":            domains,
+		"DomainFilter":       domainFilter,
+		"IsSuperAdmin":       isSuperAdmin,
+		"SessionUser":        SessionUser,
+		"QuotaMultiplier":    float64(utils.GetQuotaMultiplier()),
+		"DomainLimitReached": domainLimitReached,
+		"Message":            GetFlash(c, "message"),
+		"Error":              GetFlash(c, "error"),
 	})
 }
 

@@ -598,6 +598,9 @@ msgstr "Gestione sus cuentas de correo"
 msgid "Mailboxes_AddMailboxBtn"
 msgstr "Agregar Cuenta de Correo"
 
+msgid "Mailboxes_DomainLimitReached"
+msgstr "Este dominio ha alcanzado su límite de buzones"
+
 msgid "Mailboxes_FilterDomain"
 msgstr "Filtrar por Dominio:"
 
@@ -789,6 +792,9 @@ msgstr "Gestione los reenvíos de correo y alias."
 
 msgid "Aliases_AddAliasBtn"
 msgstr "Agregar Alias"
+
+msgid "Aliases_DomainLimitReached"
+msgstr "Este dominio ha alcanzado su límite de alias"
 
 msgid "Aliases_FilterDomain"
 msgstr "Filtrar por Dominio:"

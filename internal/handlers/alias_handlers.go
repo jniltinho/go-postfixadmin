@@ -33,14 +33,26 @@ func (h *Handler) ListAliases(c *echo.Context) error {
 
 	domains, _, _ := repositories.GetActiveDomains(h.DB, username, isSuper)
 
+	domainLimitReached := false
+	if h.DB != nil && domainFilter != "" {
+		if domainRecord, err := repositories.GetDomainByName(h.DB, domainFilter); err == nil {
+			if domainRecord.Aliases > 0 {
+				if count, err := repositories.CountDomainAliases(h.DB, domainFilter); err == nil {
+					domainLimitReached = count >= int64(domainRecord.Aliases)
+				}
+			}
+		}
+	}
+
 	return c.Render(http.StatusOK, "aliases/aliases.html", map[string]interface{}{
-		"Aliases":      aliases,
-		"Domains":      domains,
-		"DomainFilter": domainFilter,
-		"IsSuperAdmin": isSuper,
-		"SessionUser":  username,
-		"Message":      GetFlash(c, "message"),
-		"Error":        GetFlash(c, "error"),
+		"Aliases":            aliases,
+		"Domains":            domains,
+		"DomainFilter":       domainFilter,
+		"IsSuperAdmin":       isSuper,
+		"SessionUser":        username,
+		"DomainLimitReached": domainLimitReached,
+		"Message":            GetFlash(c, "message"),
+		"Error":              GetFlash(c, "error"),
 	})
 }
 
