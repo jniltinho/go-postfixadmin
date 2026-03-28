@@ -1328,3 +1328,18 @@ msgstr "A senha deve ter pelo menos 8 caracteres"
 
 msgid "Password_JsNoMatch"
 msgstr "As senhas não coincidem"
+
+msgid "Domain not found"
+msgstr "Domínio não encontrado"
+
+msgid "Failed to check mailbox limit"
+msgstr "Falha ao verificar o limite de caixas de entrada"
+
+msgid "Mailbox_LimitReached"
+msgstr "Limite de caixas de entrada atingido para este domínio ({{.Count}}/{{.Limit}})"
+
+msgid "Failed to check alias limit"
+msgstr "Falha ao verificar o limite de aliases"
+
+msgid "Alias_LimitReached"
+msgstr "Limite de aliases atingido para este domínio ({{.Count}}/{{.Limit}})"

@@ -100,6 +100,23 @@ func (h *Handler) AddAliasAPI(c *echo.Context) error {
 		return c.JSON(http.StatusConflict, map[string]interface{}{"success": false, "error": "A mailbox already exists with this address"})
 	}
 
+	domainRecord, err := repositories.GetDomainByName(h.DB, domain)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "error": T(c, "Domain not found")})
+	}
+	if domainRecord.Aliases > 0 {
+		count, err := repositories.CountDomainAliases(h.DB, domain)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": T(c, "Failed to check alias limit")})
+		}
+		if count >= int64(domainRecord.Aliases) {
+			return c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "error": TData(c, "Alias_LimitReached", map[string]any{
+				"Count": fmt.Sprintf("%d", count),
+				"Limit": fmt.Sprintf("%d", domainRecord.Aliases),
+			})})
+		}
+	}
+
 	now := time.Now()
 	newAlias := models.Alias{
 		Address:  address,

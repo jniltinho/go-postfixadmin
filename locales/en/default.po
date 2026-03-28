@@ -1319,3 +1319,18 @@ msgstr "The password must be at least 8 characters long"
 
 msgid "Password_JsNoMatch"
 msgstr "Passwords do not match"
+
+msgid "Domain not found"
+msgstr "Domain not found"
+
+msgid "Failed to check mailbox limit"
+msgstr "Failed to check mailbox limit"
+
+msgid "Mailbox_LimitReached"
+msgstr "Mailbox limit reached for this domain ({{.Count}}/{{.Limit}})"
+
+msgid "Failed to check alias limit"
+msgstr "Failed to check alias limit"
+
+msgid "Alias_LimitReached"
+msgstr "Alias limit reached for this domain ({{.Count}}/{{.Limit}})"

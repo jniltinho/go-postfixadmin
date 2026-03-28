@@ -121,6 +121,23 @@ func (h *Handler) AddMailboxAPI(c *echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "Mailbox already exists"})
 	}
 
+	domainRecord, err := repositories.GetDomainByName(h.DB, domain)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": T(c, "Domain not found")})
+	}
+	if domainRecord.Mailboxes > 0 {
+		count, err := repositories.CountDomainMailboxes(h.DB, domain)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": T(c, "Failed to check mailbox limit")})
+		}
+		if count >= int64(domainRecord.Mailboxes) {
+			return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": TData(c, "Mailbox_LimitReached", map[string]any{
+				"Count": fmt.Sprintf("%d", count),
+				"Limit": fmt.Sprintf("%d", domainRecord.Mailboxes),
+			})})
+		}
+	}
+
 	hashedPassword, err := utils.HashPassword(password)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "Failed to hash password: " + err.Error()})

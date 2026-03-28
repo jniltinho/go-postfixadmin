@@ -37,6 +37,11 @@ func T(c *echo.Context, msgID string) string {
 	return i18n.Translate(getLang(c), msgID, nil)
 }
 
+// TData translates a message ID with template data using the request's language.
+func TData(c *echo.Context, msgID string, data map[string]any) string {
+	return i18n.Translate(getLang(c), msgID, data)
+}
+
 // Login processa autenticação de administradores
 func (h *Handler) Login(c *echo.Context) error {
 	if c.Request().Method == http.MethodPost {
