@@ -8,7 +8,6 @@
 *.dll
 *.so
 *.dylib
-postfixadmin
 go-postfixadmin
 node_modules
 package-lock.json
@@ -38,8 +37,10 @@ web/static/css/style.css
 .vscode/
 
 # Docker data
-DOCUMENTS/docker/_dbdata/
-DOCUMENTS/docker/_dbdata/*
+DOCUMENTS/docker/mariadb/_dbdata/
+DOCUMENTS/docker/mariadb/_dbdata/*
+DOCUMENTS/docker/postfixadmin/_dbdata/
+DOCUMENTS/docker/postfixadmin/_dbdata/*
 DOCUMENTS/setup/quota-warning/quota-warning
 DOCUMENTS/setup/quota-report/quota-report
 DOCUMENTS/DOVECOT_VACATION/vacation/dovecot-vacation
