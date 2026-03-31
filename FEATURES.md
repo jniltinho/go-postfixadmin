@@ -47,6 +47,13 @@ This file lists product capabilities by area. For installation and deployment de
 - Mail log viewer with filtering and pagination
 - `readlog` daemon to ingest `FILTER:` entries from `/var/log/mail.log`
 - CLI utilities for migration, SQL import, admin recovery, and maintenance tasks
+- CLI `backup-mysql` subcommand:
+  - List all MySQL/MariaDB databases with sizes (`backup-mysql list`)
+  - Backup all non-system databases as compressed `.sql.gz` files (`backup-mysql backup`)
+  - Automatic cleanup of backup files older than N days (`--clean N`)
+  - Optional log delivery by e-mail via SMTP (`--sendmail`)
+  - Verbose mode that prints log output to stdout (`--verbose`)
+  - Config via `config.toml [backup]` section, environment variables, or CLI flags (`--host`, `--user`, `--passwd`)
 - CLI `mailbox` subcommand:
   - List all mailboxes
   - Create individual mailbox with configurable quota (`--quota`)

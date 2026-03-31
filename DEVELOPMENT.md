@@ -116,14 +116,16 @@ Usage:
   postfixadmin [command]
 
 Available Commands:
-  admin       Admin management utilities
-  completion  Generate the autocompletion script for the specified shell
-  help        Help about any command
-  importsql   Import SQL file to database
-  migrate     Run database migration
-  readlog     Parse mail.log and store FILTER entries in the maillog table
-  server      Start the administration server
-  version     Display version information
+  admin        Admin management utilities
+  backup-mysql MySQL backup utilities
+  completion   Generate the autocompletion script for the specified shell
+  help         Help about any command
+  importsql    Import SQL file to database
+  mailbox      Mailbox management utilities
+  migrate      Run database migration
+  readlog      Parse mail.log and store FILTER entries in the maillog table
+  server       Start the administration server
+  version      Display version information
 
 Flags:
       --config string      config file (default is ./config.toml)
@@ -232,6 +234,63 @@ Available flags for `mailbox`:
 - `--import-csv`: Import mailbox users from a CSV file. Existing mailboxes and rows with passwords shorter than 8 characters are skipped
 - `--password-crypt`: Use with `--import-csv`. Treats the `password` column as an already-hashed value and stores it directly, skipping hashing and length validation. Useful when migrating from another system that exports bcrypt hashes
 - `--export` / `-e`: Export all mailboxes to a CSV file (columns: `user,password,domain,name,quota_mb,active`). The `password` column contains the stored bcrypt hash, making the output directly compatible with `--import-csv --password-crypt` for backup and migration workflows
+
+## Backup MySQL Commands (CLI)
+
+The `backup-mysql` subcommand backs up and inspects MySQL/MariaDB databases without requiring a database URL — it calls `mysql` and `mysqldump` directly.
+
+Configuration is read in priority order: `config.toml [backup]` section → environment variables → built-in defaults. CLI flags always override.
+
+```bash
+# List all databases and their sizes
+./postfixadmin backup-mysql list
+
+# Backup all databases (creates .sql.gz files in backup_dir)
+./postfixadmin backup-mysql backup
+
+# Backup with cleanup of files older than 7 days and verbose output
+./postfixadmin backup-mysql backup --clean 7 --verbose
+
+# Backup and send the log by e-mail
+./postfixadmin backup-mysql backup --sendmail
+
+# Override connection details at runtime
+./postfixadmin backup-mysql --host db.example.com --user root --passwd secret backup --clean 30
+```
+
+Persistent flags (available to all `backup-mysql` subcommands):
+
+- `--host`: MySQL host address (overrides `backup.mysql_host` in config)
+- `--port`: MySQL port (overrides `backup.mysql_port` in config, default `3306`)
+- `--user`: MySQL username (overrides `backup.mysql_user` in config)
+- `--passwd`: MySQL password (overrides `backup.mysql_pass` in config)
+
+Flags for `backup-mysql backup`:
+
+- `--clean N`: Remove `.sql.gz` backup files older than N days (0 = disabled)
+- `--verbose`: Print log output to stdout in addition to the log file
+- `--sendmail`: Send the backup log by e-mail after completion
+
+Environment variables (fallback when config key is absent):
+
+| Variable | Description |
+| :--- | :--- |
+| `MYSQL_HOST` | MySQL host |
+| `MYSQL_USER` | MySQL username |
+| `MYSQL_PASS` | MySQL password |
+| `BACKUP_DIR` | Directory for `.sql.gz` files (default `/usr/local/backup/mysql`) |
+| `LOG_FILE` | Path to the log file (default `/var/log/backup_mysql.log`) |
+| `SMTP_SERVER` | SMTP host for `--sendmail` |
+| `SMTP_PORT` | SMTP port (default `587`) |
+| `EMAIL_FROM` | Sender address |
+| `EMAIL_TO` | Comma-separated recipient list |
+| `EMAIL_CC` | Comma-separated CC list |
+
+Crontab example (daily backup at 02:00, keep 14 days):
+
+```cron
+0 2 * * * /usr/local/bin/postfixadmin backup-mysql backup --clean 14 --sendmail
+```
 
 ### `readlog` Command
 

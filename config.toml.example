@@ -40,3 +40,27 @@ fetchmail = false
 server  = "localhost"
 port    = 25
 type    = "plain" # type: plain | tls | starttls
+
+[backup]
+# MySQL connection (defaults to database.url values if not set here)
+mysql_host = "localhost"
+mysql_port = "3306"
+mysql_user = "root"
+mysql_pass = ""
+
+# Directory where .sql.gz backup files are stored
+backup_dir = "/usr/local/backup/mysql"
+
+# Log file written after each backup run
+log_file = "/var/log/backup_mysql.log"
+
+# SMTP settings for --sendmail (uses [smtp] section values as fallback)
+smtp_server = "smtp.example.com"
+smtp_port   = "587"
+smtp_user   = "backup@example.com"
+smtp_pass   = ""
+
+# Email recipients
+email_from = "backup@example.com"
+email_to   = ["admin@example.com"]
+email_cc   = []
