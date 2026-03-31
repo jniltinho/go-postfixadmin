@@ -10,9 +10,13 @@ func generateConfig() {
 	configContent := `# Go-Postfixadmin Configuration File
 
 [database]
-# Format: user:password@tcp(host:port)/dbname?args | driver = "mysql" # mysql or postgres (default: mysql)
-url = "postfix:postfixPassword@tcp(localhost:3306)/postfix?charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=True&loc=Local"
-debug = false # Enable full GORM SQL debug logging
+host   = "localhost"
+port   = "3306"
+user   = "postfix"
+pass   = "postfixPassword"
+name   = "postfix"
+driver = "mysql"  # mysql or postgres
+debug  = false    # Enable full GORM SQL debug logging
 
 [server]
 # Server Port (default 8080)
@@ -52,6 +56,30 @@ fetchmail = false
 server  = "localhost"
 port    = 25
 type    = "plain" # type: plain | tls | starttls
+
+[backup]
+# MySQL connection (defaults to localhost:3306 if not set)
+mysql_host = "localhost"
+mysql_port = "3306"
+mysql_user = "root"
+mysql_pass = ""
+
+# Directory where .sql.gz backup files are stored
+backup_dir = "/usr/local/backup/mysql"
+
+# Log file written after each backup run
+log_file = "/var/log/backup_mysql.log"
+
+# SMTP settings for --sendmail
+smtp_server = "smtp.example.com"
+smtp_port   = "587"
+smtp_user   = "backup@example.com"
+smtp_pass   = ""
+
+# Email recipients
+email_from = "backup@example.com"
+email_to   = ["admin@example.com"]
+email_cc   = []
 `
 
 	fileName := fmt.Sprintf("config_%s.toml", time.Now().Format("2006-01-02_150405"))

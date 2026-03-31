@@ -53,8 +53,13 @@ Example `config.toml` database section:
 
 ```toml
 [database]
-url = "postfix:your_password@tcp(localhost:3306)/postfix?charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=True&loc=Local"
-debug = false
+host   = "localhost"
+port   = "3306"
+user   = "postfix"
+pass   = "your_password"
+name   = "postfix"
+driver = "mysql"
+debug  = false
 ```
 
 Password policy enforced by the backend:

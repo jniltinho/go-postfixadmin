@@ -105,9 +105,13 @@ Go-PostfixAdmin will manage the database structure (tables, domains, accounts, a
    
    ```toml
    [database]
-   # Format: user:password@tcp(host:port)/dbname?args | driver = "mysql"
-   url = "postfix:your_secure_password@tcp(localhost:3306)/postfix?charset=utf8mb4&parseTime=True&loc=Local"
-   debug = false # Set to true to enable verbose GORM SQL logs during troubleshooting
+   host   = "localhost"
+   port   = "3306"
+   user   = "postfix"
+   pass   = "your_secure_password"
+   name   = "postfix"
+   driver = "mysql"  # mysql or postgres
+   debug  = false    # Set to true to enable verbose GORM SQL logs during troubleshooting
    
    [server]
    # Web Server Configuration. For SSL use port 443
@@ -627,9 +631,13 @@ The binary shares the same `config.toml` as Go-PostfixAdmin. Make sure the follo
 
 ```toml
 [database]
-# Must use parseTime=True so vacation date columns are parsed correctly
-url = "postfix:your_secure_password@tcp(localhost:3306)/postfix?charset=utf8mb4&parseTime=True&loc=Local"
-debug = false
+host   = "localhost"
+port   = "3306"
+user   = "postfix"
+pass   = "your_secure_password"
+name   = "postfix"
+driver = "mysql"
+debug  = false
 
 [server]
 mail_base = "/var/vmail"  # Maildir base path (default: /var/vmail)
