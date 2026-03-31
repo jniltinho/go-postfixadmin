@@ -9,6 +9,8 @@ import (
 	"strings"
 
 	"github.com/jedib0t/go-pretty/v6/table"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 var skipDatabases = map[string]bool{
@@ -33,22 +35,26 @@ func mysqlEnv(pass string) []string {
 }
 
 func mysqlDatabases(cfg Config) ([]string, error) {
-	cmd := exec.Command("mysql",
-		"-u", cfg.MySQLUser,
-		"-h", cfg.MySQLHost, "-P", cfg.MySQLPort, "--silent", "-N",
-		"-e", "show databases",
-	)
-	cmd.Env = mysqlEnv(cfg.MySQLPass)
-	out, err := cmd.Output()
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/", cfg.MySQLUser, cfg.MySQLPass, cfg.MySQLHost, cfg.MySQLPort)
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
-		return nil, mysqlCmdError(err)
+		return nil, err
+	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		return nil, err
+	}
+	defer sqlDB.Close()
+
+	var all []string
+	if err := db.Raw("SHOW DATABASES").Scan(&all).Error; err != nil {
+		return nil, err
 	}
 
 	var dbs []string
-	for _, db := range strings.Split(strings.TrimSpace(string(out)), "\n") {
-		db = strings.TrimSpace(db)
-		if db != "" && !skipDatabases[db] {
-			dbs = append(dbs, db)
+	for _, name := range all {
+		if !skipDatabases[name] {
+			dbs = append(dbs, name)
 		}
 	}
 	return dbs, nil
@@ -85,25 +91,32 @@ func ExecBackup(cfg Config) {
 }
 
 func mysqlDatabaseSizes(cfg Config) (map[string]string, error) {
-	query := "SELECT table_schema, ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) " +
-		"FROM information_schema.TABLES GROUP BY table_schema;"
-	cmd := exec.Command("mysql",
-		"-u", cfg.MySQLUser,
-		"-h", cfg.MySQLHost, "-P", cfg.MySQLPort, "--silent", "-N",
-		"-e", query,
-	)
-	cmd.Env = mysqlEnv(cfg.MySQLPass)
-	out, err := cmd.Output()
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/information_schema", cfg.MySQLUser, cfg.MySQLPass, cfg.MySQLHost, cfg.MySQLPort)
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
-		return nil, mysqlCmdError(err)
+		return nil, err
+	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		return nil, err
+	}
+	defer sqlDB.Close()
+
+	type row struct {
+		Schema string
+		SizeMB float64
+	}
+	var rows []row
+	if err := db.Raw(
+		"SELECT table_schema AS `schema`, ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) AS size_mb "+
+			"FROM TABLES GROUP BY table_schema",
+	).Scan(&rows).Error; err != nil {
+		return nil, err
 	}
 
-	sizes := make(map[string]string)
-	for _, line := range strings.Split(strings.TrimSpace(string(out)), "\n") {
-		parts := strings.Split(strings.TrimSpace(line), "\t")
-		if len(parts) == 2 {
-			sizes[parts[0]] = parts[1] + " MB"
-		}
+	sizes := make(map[string]string, len(rows))
+	for _, r := range rows {
+		sizes[r.Schema] = fmt.Sprintf("%.2f MB", r.SizeMB)
 	}
 	return sizes, nil
 }
