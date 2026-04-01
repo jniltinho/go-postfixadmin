@@ -39,6 +39,8 @@ web/static/css/style.css
 # Docker data
 DOCUMENTS/docker/mariadb/_dbdata/
 DOCUMENTS/docker/mariadb/_dbdata/*
+DOCUMENTS/docker/postgresql/_dbdata/
+DOCUMENTS/docker/postgresql/_dbdata/*
 DOCUMENTS/docker/postfixadmin/_dbdata/
 DOCUMENTS/docker/postfixadmin/_dbdata/*
 DOCUMENTS/setup/quota-warning/quota-warning

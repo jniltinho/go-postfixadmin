@@ -1,0 +1,25 @@
+services:
+  postgres:
+    image: postgres:15
+    ports:
+      - 5432:5432
+    volumes:
+      - ./_dbdata:/var/lib/postgresql/data
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=postfixadmin
+      - POSTGRES_PASSWORD=postfixadminPassword
+      - POSTGRES_DB=postfixadmin
+      - TZ=America/Sao_Paulo
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    ports:
+      - "8003:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=root
+      - TZ=America/Sao_Paulo
