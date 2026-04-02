@@ -127,7 +127,7 @@ type Fetchmail struct {
 	ID             uint      `gorm:"primaryKey;column:id;autoIncrement;not null;type:int(11) unsigned"`
 	Mailbox        string    `gorm:"column:mailbox;type:varchar(255);not null"`
 	SrcServer      string    `gorm:"column:src_server;type:varchar(255);not null"`
-	SrcAuth        *string   `gorm:"column:src_auth;type:varchar(255)"`
+	SrcAuth        *string   `gorm:"column:src_auth;type:varchar(255);check:src_auth IN ('password','kerberos_v5','kerberos','kerberos_v4','gssapi','cram-md5','otp','ntlm','msn','ssh','any')"`
 	SrcUser        string    `gorm:"column:src_user;type:varchar(255);not null"`
 	SrcPassword    string    `gorm:"column:src_password;type:varchar(255);not null"`
 	SrcFolder      string    `gorm:"column:src_folder;type:varchar(255);not null"`
