@@ -3,8 +3,8 @@ package cmd
 import (
 	"log/slog"
 
+	"go-postfixadmin/internal/database"
 	"go-postfixadmin/internal/server"
-	"go-postfixadmin/internal/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -47,7 +47,7 @@ var serverCmd = &cobra.Command{
 		}
 
 		// Connect to Database
-		db, err := utils.ConnectDB(dbUrl, dbDriver)
+		db, err := database.ConnectDB(dbUrl, dbDriver)
 		if err != nil {
 			slog.Warn("Warning: Database connection failed.", "error", err)
 			db = nil

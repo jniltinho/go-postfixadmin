@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"go-postfixadmin/cmd/mailbox"
-	"go-postfixadmin/internal/utils"
+	"go-postfixadmin/internal/database"
 
 	"github.com/spf13/cobra"
 )
@@ -23,7 +23,7 @@ var mailboxCmd = &cobra.Command{
 	Use:   "mailbox",
 	Short: "Mailbox management utilities",
 	Run: func(cmd *cobra.Command, args []string) {
-		db, err := utils.ConnectDB(dbUrl, dbDriver)
+		db, err := database.ConnectDB(dbUrl, dbDriver)
 		if err != nil {
 			slog.Error("Database connection failed", "error", err)
 			os.Exit(1)

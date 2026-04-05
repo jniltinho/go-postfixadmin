@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"go-postfixadmin/cmd/admin"
-	"go-postfixadmin/internal/utils"
+	"go-postfixadmin/internal/database"
 
 	"github.com/spf13/cobra"
 )
@@ -32,7 +32,7 @@ var adminCmd = &cobra.Command{
 	Short: "Admin management utilities",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Connect to Database
-		db, err := utils.ConnectDB(dbUrl, dbDriver)
+		db, err := database.ConnectDB(dbUrl, dbDriver)
 		if err != nil {
 			slog.Error("Database connection failed", "error", err)
 			os.Exit(1)

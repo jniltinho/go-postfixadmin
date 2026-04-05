@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"go-postfixadmin/internal/database"
 	"go-postfixadmin/internal/utils"
 
 	"github.com/spf13/cobra"
@@ -47,7 +48,7 @@ Examples:
 		once, _ := cmd.Flags().GetBool("once")
 		retentionDays, _ := cmd.Flags().GetInt("retention-days")
 
-		db, err := utils.ConnectDB(dbUrl, dbDriver)
+		db, err := database.ConnectDB(dbUrl, dbDriver)
 		if err != nil {
 			slog.Error("readlog: database connection failed", "error", err)
 			os.Exit(1)

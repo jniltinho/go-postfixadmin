@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"os"
 
+	"go-postfixadmin/internal/database"
 	"go-postfixadmin/internal/utils"
 
 	"github.com/spf13/cobra"
@@ -21,7 +22,7 @@ var (
 			if generateConfigFlag {
 				generateConfig()
 			} else if vacationSync {
-				db, err := utils.ConnectDB(dbUrl, dbDriver)
+				db, err := database.ConnectDB(dbUrl, dbDriver)
 				if err != nil {
 					slog.Error("database connection failed", "error", err)
 					os.Exit(1)
