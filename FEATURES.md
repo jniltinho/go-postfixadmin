@@ -72,6 +72,8 @@ This file lists product capabilities by area. For installation and deployment de
 - Modal-based admin workflows
 - AJAX-based user password and forwarding updates
 - Docker, Docker Compose, Makefile, and native build support
+- Debian (`.deb`) package build target with automatic configuration embedding (`make deb`)
+- Fully automated CI/CD pipeline to generate `.tar.gz` and `.deb` packages via GitHub Actions Releases
 
 ## Configuration Highlights
 
