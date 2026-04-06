@@ -34,7 +34,7 @@ jobs:
       - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y upx
+          sudo apt-get install -y upx rpm
 
       - name: Install Project Dependencies
         run: make install-tailwind && make deps
@@ -52,11 +52,15 @@ jobs:
       - name: Build Deb Package
         run: make deb
 
+      - name: Build RPM Package
+        run: make rpm
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
             ${{ env.ARCHIVE_NAME }}
             go-postfixadmin_*.deb
+            *.rpm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

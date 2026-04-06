@@ -19,8 +19,9 @@ GIT_COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 
 LDFLAGS    := -ldflags "-s -w -X $(PREFIX).Version=$(VERSION) -X $(PREFIX).BuildDate=$(BUILD_TIME) -X $(PREFIX).GitCommit=$(GIT_COMMIT)"
 DEB_VERSION := $(shell echo $(VERSION) | sed 's/^v//')
+RPM_VERSION := $(shell echo $(DEB_VERSION) | tr '-' '_')
 
-.PHONY: all build build-prod run clean css help install-tailwind install-upx deb
+.PHONY: all build build-prod run clean css help install-tailwind install-upx deb rpm
 
 all: clean css build-prod
 
@@ -103,6 +104,37 @@ deb: build-prod
 	rm -rf build/deb
 	@echo "Debian package created: go-postfixadmin_$(DEB_VERSION)_amd64.deb"
 
+rpm: build-prod
+	@echo "Building RPM package..."
+	rm -rf build/rpm
+	mkdir -p build/rpm/BUILD build/rpm/RPMS build/rpm/SOURCES build/rpm/SPECS build/rpm/SRPMS
+	@echo "Name: go-postfixadmin" > build/rpm/SPECS/go-postfixadmin.spec
+	@echo "Version: $(RPM_VERSION)" >> build/rpm/SPECS/go-postfixadmin.spec
+	@echo "Release: 1" >> build/rpm/SPECS/go-postfixadmin.spec
+	@echo "Summary: Go PostfixAdmin Web Interface" >> build/rpm/SPECS/go-postfixadmin.spec
+	@echo "License: MIT" >> build/rpm/SPECS/go-postfixadmin.spec
+	@echo "URL: https://github.com/jniltinho/go-postfixadmin" >> build/rpm/SPECS/go-postfixadmin.spec
+	@echo "%description" >> build/rpm/SPECS/go-postfixadmin.spec
+	@echo "A fully featured web interface for configuring Postfix and Dovecot." >> build/rpm/SPECS/go-postfixadmin.spec
+	@echo "%install" >> build/rpm/SPECS/go-postfixadmin.spec
+	@echo "mkdir -p %{buildroot}/opt/go-postfixadmin" >> build/rpm/SPECS/go-postfixadmin.spec
+	@echo "mkdir -p %{buildroot}/etc/systemd/system" >> build/rpm/SPECS/go-postfixadmin.spec
+	@echo "mkdir -p %{buildroot}/usr/share/doc/go-postfixadmin" >> build/rpm/SPECS/go-postfixadmin.spec
+	@echo "cp $(CURDIR)/$(BIN) %{buildroot}/opt/go-postfixadmin/postfixadmin" >> build/rpm/SPECS/go-postfixadmin.spec
+	@echo "cp $(CURDIR)/config.toml.example %{buildroot}/opt/go-postfixadmin/config.toml" >> build/rpm/SPECS/go-postfixadmin.spec
+	@echo "cp $(CURDIR)/DOCUMENTS/setup/postfixadmin.service %{buildroot}/etc/systemd/system/" >> build/rpm/SPECS/go-postfixadmin.spec
+	@echo "cp $(CURDIR)/DOCUMENTS/setup/README.md %{buildroot}/usr/share/doc/go-postfixadmin/" >> build/rpm/SPECS/go-postfixadmin.spec
+	@echo "%files" >> build/rpm/SPECS/go-postfixadmin.spec
+	@echo "%defattr(-,root,root,-)" >> build/rpm/SPECS/go-postfixadmin.spec
+	@echo "/opt/go-postfixadmin/postfixadmin" >> build/rpm/SPECS/go-postfixadmin.spec
+	@echo "%config(noreplace) /opt/go-postfixadmin/config.toml" >> build/rpm/SPECS/go-postfixadmin.spec
+	@echo "/etc/systemd/system/postfixadmin.service" >> build/rpm/SPECS/go-postfixadmin.spec
+	@echo "%doc /usr/share/doc/go-postfixadmin/README.md" >> build/rpm/SPECS/go-postfixadmin.spec
+	rpmbuild -bb --define "_topdir $(CURDIR)/build/rpm" build/rpm/SPECS/go-postfixadmin.spec
+	find build/rpm/RPMS -name "*.rpm" -exec mv {} . \;
+	rm -rf build/rpm
+	@echo "RPM package created"
+
 ## For Development and Build/Production
 install-tailwind:
 	@echo "Installing Tailwind CSS binary..."
@@ -134,3 +166,4 @@ help:
 	@echo "  certs            - Generate self-signed SSL certificates"
 	@echo "  build-docker     - Build the Docker image"
 	@echo "  deb              - Build the Debian (.deb) package"
+	@echo "  rpm              - Build the RPM (.rpm) package"
