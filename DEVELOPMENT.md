@@ -8,7 +8,8 @@ Related documents:
 
 - [Project README](README.md)
 - [Features](FEATURES.md)
-- [Quick mail server setup](DOCUMENTS/setup/SETUP_MAILSERVER.md)
+- [Quick setup summary (MariaDB/MySQL)](DOCUMENTS/setup/SETUP_MAILSERVER_MARIADB.md)
+- [Quick setup summary (PostgreSQL)](DOCUMENTS/setup/SETUP_MAILSERVER_POSTGRESQL.md)
 - [Complete setup guide](DOCUMENTS/setup/README.md)
 
 ## Development Tools
@@ -20,7 +21,7 @@ To compile the project locally without Docker, install the following tools:
 2. **Tailwind CSS standalone binary**: Required for CSS processing. Install via `make install-tailwind` (no Node.js required).
 3. **Make**: Utility for command automation (native on Linux/macOS).
 4. **UPX (Optional)**: Used by the Makefile to compress the final binary.
-   Debian/Ubuntu: `sudo apt install upx-ucl`
+   Debian/Ubuntu: `sudo apt install upx-ucl rpm`
 
 ## How to Build
 
@@ -104,6 +105,8 @@ You can customize ports and environment variables in `docker-compose.yml`.
 | `make clean` | Remove generated binary and CSS files |
 | `make tidy` | Clean and organize Go dependencies |
 | `make deps` | Install required dependencies |
+| `make deb` | Build the Debian (.deb) package |
+| `make rpm` | Build the RPM (.rpm) package |
 
 ## 💻 CLI Flags
 
@@ -289,15 +292,18 @@ Environment variables (fallback when config key is absent):
 Crontab example (daily backup at 02:00, keep 14 days):
 
 ```cron
-0 2 * * * /usr/local/bin/postfixadmin backup-mysql backup --clean 14 --sendmail
+0 2 * * * /opt/go-postfixadmin/postfixadmin --config /opt/go-postfixadmin/config.toml backup-mysql backup --clean 14 --sendmail
 ```
 
 ### `readlog` Command
 
-Parses `FILTER:` entries from `/var/log/mail.log` and stores them in the `maillog` database table. Runs continuously, polling every 5 minutes:
+Parses `FILTER:` entries from `/var/log/mail.log` and stores them in the `maillog` database table. It is recommended to schedule it via cron.
 
-```bash
-./postfixadmin readlog
+Crontab example (poll every 5 minutes):
+
+```cron
+## Readlog Postfixadmin
+*/5 * * * * /opt/go-postfixadmin/postfixadmin readlog --once --config /opt/go-postfixadmin/config.toml >/tmp/readlog.log 2>&1
 ```
 
 The `maillog` table stores timestamp, sender, recipient, sender domain, recipient domain, host IP, hostname, HELO string, and message size.

@@ -9,7 +9,8 @@ Related documents:
 - [Project README](README.md)
 - [Development guide](DEVELOPMENT.md)
 - [Features](FEATURES.md)
-- [Quick mail server setup](DOCUMENTS/setup/SETUP_MAILSERVER.md)
+- [Quick setup summary (MariaDB/MySQL)](DOCUMENTS/setup/SETUP_MAILSERVER_MARIADB.md)
+- [Quick setup summary (PostgreSQL)](DOCUMENTS/setup/SETUP_MAILSERVER_POSTGRESQL.md)
 - [Complete setup guide](DOCUMENTS/setup/README.md)
 
 ## 🚀 How Can I Contribute?
@@ -60,7 +61,8 @@ Typical locations:
 - `README.md`: project overview and navigation
 - `DEVELOPMENT.md`: local build, CLI, and development workflow
 - `FEATURES.md`: capability overview
-- `DOCUMENTS/setup/SETUP_MAILSERVER.md`: quick setup summary
+- `DOCUMENTS/setup/SETUP_MAILSERVER_MARIADB.md`: quick setup summary (MariaDB/MySQL)
+- `DOCUMENTS/setup/SETUP_MAILSERVER_POSTGRESQL.md`: quick setup summary (PostgreSQL)
 - `DOCUMENTS/setup/README.md`: full setup and deployment guide
 
 ---
@@ -73,6 +75,7 @@ Typical locations:
 │   ├── admin/            # Admin CLI logic: listing admins/domains/aliases, cleanup, quota report
 │   └── mailbox/          # Mailbox CLI logic: list, add, import CSV
 ├── internal/
+│   ├── database/         # Database connection logic and GORM instance management
 │   ├── handlers/         # HTTP route handlers
 │   ├── i18n/             # Internationalization (gotext wrapper)
 │   ├── middleware/       # HTTP middleware (auth, logging, etc.)
@@ -80,7 +83,7 @@ Typical locations:
 │   ├── repositories/     # Database access helpers and query-oriented data operations
 │   ├── routes/           # Route definitions
 │   ├── server/           # HTTP server setup and render helpers
-│   └── utils/            # Shared utilities (mailer, DB connection, quota, vacation helpers)
+│   └── utils/            # Shared utilities (mailer, quota, vacation helpers)
 ├── locales/              # GNU Gettext .po translation files
 ├── web/
 │   ├── static/           # Static assets (CSS, JS, images)
@@ -97,8 +100,12 @@ Copy `config.toml.example` to `config.toml` and adjust as needed. Key sections:
 
 ```toml
 [database]
-url    = "user:password@tcp(host:3306)/dbname?parseTime=True"
-# driver defaults to "mysql"; use "postgres" for PostgreSQL
+host   = "localhost"
+port   = "3306"
+user   = "postfix"
+pass   = "your_password"
+name   = "postfix"
+driver = "mysql"
 debug  = false
 
 [server]
