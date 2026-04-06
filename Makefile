@@ -18,8 +18,9 @@ GIT_COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 
 
 LDFLAGS    := -ldflags "-s -w -X $(PREFIX).Version=$(VERSION) -X $(PREFIX).BuildDate=$(BUILD_TIME) -X $(PREFIX).GitCommit=$(GIT_COMMIT)"
+DEB_VERSION := $(shell echo $(VERSION) | sed 's/^v//')
 
-.PHONY: all build run clean css help install-tailwind install-upx
+.PHONY: all build build-prod run clean css help install-tailwind install-upx deb
 
 all: clean css build-prod
 
@@ -75,6 +76,33 @@ build-docker-prod:
 	CGO_ENABLED=0 go build -o $(BIN) $(LDFLAGS)
 	upx --best --lzma $(BIN)
 
+deb: build-prod
+	@echo "Building Debian package..."
+	rm -rf build/deb
+	mkdir -p build/deb/opt/go-postfixadmin
+	mkdir -p build/deb/etc/systemd/system
+	mkdir -p build/deb/usr/share/doc/go-postfixadmin
+	mkdir -p build/deb/DEBIAN
+	cp $(BIN) build/deb/opt/go-postfixadmin/postfixadmin
+	chmod 755 build/deb/opt/go-postfixadmin/postfixadmin
+	cp config.toml.example build/deb/opt/go-postfixadmin/config.toml
+	chmod 644 build/deb/opt/go-postfixadmin/config.toml
+	cp DOCUMENTS/setup/postfixadmin.service build/deb/etc/systemd/system/
+	chmod 644 build/deb/etc/systemd/system/postfixadmin.service
+	cp DOCUMENTS/setup/README.md build/deb/usr/share/doc/go-postfixadmin/
+	chmod 644 build/deb/usr/share/doc/go-postfixadmin/README.md
+	@echo "Package: go-postfixadmin" > build/deb/DEBIAN/control
+	@echo "Version: $(DEB_VERSION)" >> build/deb/DEBIAN/control
+	@echo "Section: mail" >> build/deb/DEBIAN/control
+	@echo "Priority: optional" >> build/deb/DEBIAN/control
+	@echo "Architecture: amd64" >> build/deb/DEBIAN/control
+	@echo "Maintainer: jniltinho <jniltinho@gmail.com>" >> build/deb/DEBIAN/control
+	@echo "Description: Go PostfixAdmin Web Interface" >> build/deb/DEBIAN/control
+	@echo " A fully featured web interface for configuring Postfix and Dovecot." >> build/deb/DEBIAN/control
+	dpkg-deb --build build/deb go-postfixadmin_$(DEB_VERSION)_amd64.deb
+	rm -rf build/deb
+	@echo "Debian package created: go-postfixadmin_$(DEB_VERSION)_amd64.deb"
+
 ## For Development and Build/Production
 install-tailwind:
 	@echo "Installing Tailwind CSS binary..."
@@ -105,3 +133,4 @@ help:
 	@echo "  install-upx      - Install the UPX binary"
 	@echo "  certs            - Generate self-signed SSL certificates"
 	@echo "  build-docker     - Build the Docker image"
+	@echo "  deb              - Build the Debian (.deb) package"

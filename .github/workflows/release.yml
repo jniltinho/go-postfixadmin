@@ -49,9 +49,14 @@ jobs:
           cd bin && tar -czvf "../$ARCHIVE_NAME" postfixadmin && cd ..
           echo "ARCHIVE_NAME=$ARCHIVE_NAME" >> $GITHUB_ENV
 
+      - name: Build Deb Package
+        run: make deb
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: ${{ env.ARCHIVE_NAME }}
+          files: |
+            ${{ env.ARCHIVE_NAME }}
+            go-postfixadmin_*.deb
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
