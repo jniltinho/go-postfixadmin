@@ -75,7 +75,8 @@ FLUSH PRIVILEGES;
 
 ```bash
 ## After creating the database do:
-/opt/go-postfixadmin/postfixadmin --generate-config
+cd /opt/go-postfixadmin
+./postfixadmin --generate-config
 
 ## Adjust the configuration in /opt/go-postfixadmin/config.toml with the saved database password ("your_password")
 ## You can also enable verbose SQL logging during setup/troubleshooting:
@@ -83,7 +84,7 @@ FLUSH PRIVILEGES;
 ## debug = true
 ##
 ## And then run the migration:
-/opt/go-postfixadmin/postfixadmin migrate
+./postfixadmin migrate
 ## The Go-PostfixAdmin binary creates tables automatically based on config.toml
 ```
 
