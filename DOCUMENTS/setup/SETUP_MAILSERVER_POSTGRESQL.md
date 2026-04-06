@@ -57,17 +57,23 @@ Go-PostfixAdmin will manage the database structure (tables, domains, accounts, a
 
 1. **Get the Application:**
 
-   You can clone the original repository or directly download the latest compiled executable from the Releases page.
-   
-   *Download binary and Repository:*
+   Instead of building from source or using the `.tar.gz`, you can download and install the pre-compiled `.deb` or `.rpm` packages from the GitHub Releases page automatically:
+
+   **Ubuntu / Debian (.deb):**
    ```bash
-   sudo mkdir -p /opt/go-postfixadmin
-   cd /opt/go-postfixadmin
-   # Download the latest release:
    TAG=$(curl -s https://api.github.com/repos/jniltinho/go-postfixadmin/releases/latest|grep tag_name|cut -d '"' -f4|tr -d v)
-   sudo curl -L -o postfixadmin_${TAG}_linux_amd64.tar.gz "https://github.com/jniltinho/go-postfixadmin/releases/download/v${TAG}/postfixadmin_${TAG}_linux_amd64.tar.gz"
-   sudo tar -xzvf postfixadmin_*.tar.gz
+   wget https://github.com/jniltinho/go-postfixadmin/releases/latest/download/go-postfixadmin_${TAG}_amd64.deb
+   sudo dpkg -i go-postfixadmin_${TAG}_amd64.deb
    ```
+
+   **RHEL / CentOS / RockyLinux (.rpm):**
+   ```bash
+   TAG=$(curl -s https://api.github.com/repos/jniltinho/go-postfixadmin/releases/latest|grep tag_name|cut -d '"' -f4|tr -d v)
+   wget https://github.com/jniltinho/go-postfixadmin/releases/latest/download/go-postfixadmin-${TAG}-1.x86_64.rpm
+   sudo rpm -i go-postfixadmin-${TAG}-1.x86_64.rpm
+   ```
+   
+   The package automatically creates the folder structure in `/opt/go-postfixadmin`, copies the default `config.toml`, and installs the systemd service in `/etc/systemd/system/postfixadmin.service`.
    
 2. **Generate Initial SSL Certificates (Certbot):**
    
@@ -77,20 +83,13 @@ Go-PostfixAdmin will manage the database structure (tables, domains, accounts, a
    ```
 
 3. **Configure the Environment (`config.toml`):**
-   You can generate a default config file using the native CLI command or copy the example file.
+   Edit the default configuration file automatically provided by the package to add the database and session settings:
    
-   *Generating via CLI:*
    ```bash
-   cd /opt/go-postfixadmin
-   ./postfixadmin --generate-config
+   sudo nano /opt/go-postfixadmin/config.toml
    ```
 
-   *Or copying the example:*
-   ```bash
-   cp download/config.toml.example /opt/go-postfixadmin/config.toml
-   ```
-
-   Then edit the generated (`config*.toml`) or copied file and add the database and session settings required for your environment:
+   Ensure your settings match your environment:
    
    ```toml
    [database]
@@ -149,18 +148,15 @@ Go-PostfixAdmin will manage the database structure (tables, domains, accounts, a
 
    The web interface password generator already follows the same rules.
 
-3. **Run Migrations:**
+4. **Run Migrations:**
    Before starting the service, create the necessary tables by running migrations:
    ```bash
-   cd /opt/go-postfixadmin
-   ./postfixadmin migrate
+   /opt/go-postfixadmin/postfixadmin migrate
    ```
 
-4. **Configure the systemd Service:**
-   Copy the service file (provided in `DOCUMENTS/setup/postfixadmin.service`) to systemd:
+5. **Start the systemd Service:**
+   Since the package already provided the systemd service file, you just need to enable and start it:
    ```bash
-   wget https://raw.githubusercontent.com/jniltinho/go-postfixadmin/refs/heads/main/DOCUMENTS/setup/postfixadmin.service
-   sudo cp postfixadmin.service /etc/systemd/system/
    sudo systemctl daemon-reload
    sudo systemctl enable --now postfixadmin.service
    ```
