@@ -16,7 +16,7 @@ For the full feature list and capability breakdown, see [FEATURES.md](FEATURES.m
 
 - [Features](FEATURES.md)
 - [Development guide](DEVELOPMENT.md)
-- [Quick mail server setup](DOCUMENTS/setup/SETUP_MAILSERVER.md)
+- [Quick mail server setup](DOCUMENTS/setup/SETUP_MAILSERVER_MARIADB.md)
 - [Complete setup guide](DOCUMENTS/setup/README.md)
 - [Contributing](CONTRIBUTING.md)
 

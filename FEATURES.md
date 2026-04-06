@@ -5,7 +5,7 @@
 This file lists product capabilities by area. For installation and deployment details, use the setup guides:
 
 - [Project README](README.md)
-- [Quick mail server setup](DOCUMENTS/setup/SETUP_MAILSERVER.md)
+- [Quick mail server setup](DOCUMENTS/setup/SETUP_MAILSERVER_MARIADB.md)
 - [Complete setup guide](DOCUMENTS/setup/README.md)
 
 ## Core
