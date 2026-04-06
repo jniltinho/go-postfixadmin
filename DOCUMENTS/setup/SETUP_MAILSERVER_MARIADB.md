@@ -16,17 +16,55 @@ Related documents:
 
 ## Summary
 
-1. [MySQL Database](#1-mysql-database)
-2. [Postfix — main.cf](#2-postfix--maincf)
-3. [Postfix SQL Files](#3-postfix-sql-files)
-4. [Dovecot](#4-dovecot)
-5. [User and Emails Directory](#5-create-user-and-emails-directory)
-6. [Restart Services](#6-restart-everything)
-7. [Points of Attention](#points-of-attention)
+1. [Installation](#1-installation)
+2. [MySQL Database](#2-mysql-database)
+3. [Postfix — main.cf](#3-postfix--maincf)
+4. [Postfix SQL Files](#4-postfix-sql-files)
+5. [Dovecot](#5-dovecot)
+6. [User and Emails Directory](#6-create-user-and-emails-directory)
+7. [Restart Services](#7-restart-everything)
+8. [Points of Attention](#points-of-attention)
 
 ---
 
-## 1. MySQL Database
+## 1. Installation
+
+You can download and install the pre-compiled `.deb` or `.rpm` packages from the GitHub Releases page automatically:
+
+**Ubuntu / Debian (.deb):**
+```bash
+TAG=$(curl -s https://api.github.com/repos/jniltinho/go-postfixadmin/releases/latest|grep tag_name|cut -d '"' -f4|tr -d v)
+wget https://github.com/jniltinho/go-postfixadmin/releases/latest/download/go-postfixadmin_${TAG}_amd64.deb
+sudo dpkg -i go-postfixadmin_${TAG}_amd64.deb
+```
+
+**RHEL / CentOS / RockyLinux (.rpm):**
+```bash
+TAG=$(curl -s https://api.github.com/repos/jniltinho/go-postfixadmin/releases/latest|grep tag_name|cut -d '"' -f4|tr -d v)
+wget https://github.com/jniltinho/go-postfixadmin/releases/latest/download/go-postfixadmin-${TAG}-1.x86_64.rpm
+sudo rpm -i go-postfixadmin-${TAG}-1.x86_64.rpm
+```
+
+### Automatic Folder and File Structure
+The package will place internal files into their standard directories globally:
+- `/opt/go-postfixadmin/postfixadmin`: The main executive built binary.
+- `/opt/go-postfixadmin/config.toml`: The default system configuration file.
+- `/etc/systemd/system/postfixadmin.service`: The systemd service to control the web background process.
+- `/usr/share/doc/go-postfixadmin/README.md`: Basic setup documentation.
+
+### Starting on system boot
+To ensure Go-PostfixAdmin automatically starts whenever your server reboots, execute:
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable postfixadmin
+sudo systemctl start postfixadmin
+sudo systemctl status postfixadmin
+```
+*(Remember to follow the SQL Database step below and update your `/opt/go-postfixadmin/config.toml` file correctly before actually starting the service)*
+
+---
+
+## 2. MySQL Database
 
 ```sql
 CREATE DATABASE postfix;
@@ -37,15 +75,15 @@ FLUSH PRIVILEGES;
 
 ```bash
 ## After creating the database do:
-./postfixadmin --generate-config
+/opt/go-postfixadmin/postfixadmin --generate-config
 
-## Adjust the generated config.toml file with the saved database password ("your_password")
+## Adjust the configuration in /opt/go-postfixadmin/config.toml with the saved database password ("your_password")
 ## You can also enable verbose SQL logging during setup/troubleshooting:
 ## [database]
 ## debug = true
 ##
 ## And then run the migration:
-./postfixadmin migrate
+/opt/go-postfixadmin/postfixadmin migrate
 ## The Go-PostfixAdmin binary creates tables automatically based on config.toml
 ```
 
@@ -74,7 +112,7 @@ The web interface password generator already follows the same rules, so generate
 
 ---
 
-## 2. Postfix — `/etc/postfix/main.cf`
+## 3. Postfix — `/etc/postfix/main.cf`
 
 ```ini
 # Domain and hostname
@@ -113,7 +151,7 @@ smtpd_tls_auth_only = yes
 
 ---
 
-## 3. Postfix SQL Files
+## 4. Postfix SQL Files
 
 Create the files below in `/etc/postfix/sql/` and then protect them:
 
@@ -193,7 +231,7 @@ query    = SELECT maildir FROM mailbox,alias_domain
 
 ---
 
-## 4. Dovecot
+## 5. Dovecot
 
 Instead of making changes across multiple fragmented files, you can configure everything mainly using two files.
 
@@ -318,7 +356,7 @@ sudo chown root:dovecot /etc/dovecot/dovecot-sql.conf
 
 ---
 
-## 5. Create user and emails directory
+## 6. Create user and emails directory
 
 ```bash
 groupadd -g 1001 vmail
@@ -328,7 +366,7 @@ chown -R vmail:vmail /var/vmail
 
 ---
 
-## 6. Restart everything
+## 7. Restart everything
 
 ```bash
 systemctl restart postfix dovecot rsyslog
