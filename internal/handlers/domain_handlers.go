@@ -44,8 +44,11 @@ func (h *Handler) ListDomains(c *echo.Context) error {
 		})
 	}
 
+	transports, _ := repositories.GetAllTransports(h.DB)
+
 	return c.Render(http.StatusOK, "domains/domains.html", map[string]interface{}{
 		"Domains":      displayDomains,
+		"Transports":   transports,
 		"IsSuperAdmin": isSuperAdmin,
 		"SessionUser":  username,
 		"Message":      GetFlash(c, "message"),
@@ -91,6 +94,13 @@ func (h *Handler) AddDomainAPI(c *echo.Context) error {
 		}
 	}
 
+	transport := "virtual"
+	if middleware.GetIsSuperAdmin(c) {
+		if val := c.FormValue("transport"); val != "" {
+			transport = val
+		}
+	}
+
 	if domainName == "" {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "Domain name is required"})
 	}
@@ -111,6 +121,7 @@ func (h *Handler) AddDomainAPI(c *echo.Context) error {
 		Mailboxes:      mailboxes,
 		Quota:          quota,
 		BackupMX:       backupMX,
+		Transport:      transport,
 		Created:        now,
 		Modified:       now,
 		Active:         active,
@@ -179,12 +190,20 @@ func (h *Handler) EditDomainAPI(c *echo.Context) error {
 		}
 	}
 
+	transport := domain.Transport // preserve existing transport
+	if middleware.GetIsSuperAdmin(c) {
+		if val := c.FormValue("transport"); val != "" {
+			transport = val
+		}
+	}
+
 	activeChanged := domain.Active != active
 	domain.Description = description
 	domain.Aliases = aliases
 	domain.Mailboxes = mailboxes
 	domain.Quota = quota
 	domain.BackupMX = backupMX
+	domain.Transport = transport
 	domain.Active = active
 	domain.PasswordExpiry = passwordExpiry
 

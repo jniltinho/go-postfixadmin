@@ -61,7 +61,7 @@ $(document).ready(function () {
         });
     }
 
-    var standardTables = ['#mailboxesTable', '#domainsTable', '#adminsTable', '#aliasesTable', '#aliasDomainsTable'];
+    var standardTables = ['#mailboxesTable', '#domainsTable', '#adminsTable', '#aliasesTable', '#aliasDomainsTable', '#transportsTable'];
     standardTables.forEach(function (selector) {
         if ($(selector).length) {
             $(selector).DataTable({

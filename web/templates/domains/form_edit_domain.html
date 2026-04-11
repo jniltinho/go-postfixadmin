@@ -128,9 +128,30 @@
                                     </label>
                                     <input type="number" id="modal-edit-password-expiry" name="password_expiry" min="0"
                                         class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm">
-                                    <p class="text-[10px] text-gray-500 mt-1">{{ T $.Lang `Domains_HelpPasswordExpiry`
-                                        }}</p>
+                                    <p class="text-[10px] text-gray-500 mt-1">{{ T $.Lang `Domains_HelpPasswordExpiry` }}</p>
                                 </div>
+
+                                {{if $.IsSuperAdmin}}
+                                <!-- Transport -->
+                                <div class="col-span-2">
+                                    <label for="modal-edit-transport"
+                                        class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                                        Transport
+                                    </label>
+                                    <div class="relative">
+                                        <select id="modal-edit-transport" name="transport"
+                                            class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm appearance-none bg-white cursor-pointer select-styled">
+                                            {{range $.Transports}}
+                                                <option value="{{.Transport}}">{{.Domain}} -> {{.Transport}}</option>
+                                            {{end}}
+                                        </select>
+                                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-brand-text border-l-2 border-brand-text">
+                                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                        </div>
+                                    </div>
+                                    <p class="text-[10px] text-gray-500 mt-1">Select the mail transport for this domain</p>
+                                </div>
+                                {{end}}
                             </div>
 
                             <!-- Backup MX -->
@@ -187,16 +208,36 @@
                 if (data.error) throw new Error(data.error);
 
                 // Populate forms
-                document.getElementById('modal-edit-domain-id').value = data.domain.Domain;
-                document.getElementById('modal-edit-domain').value = data.domain.Domain;
-                document.getElementById('modal-edit-description').value = data.domain.Description || '';
-                document.getElementById('modal-edit-active').checked = data.domain.Active;
+                document.getElementById('modal-edit-domain-id').value = data.domain.domain;
+                document.getElementById('modal-edit-domain').value = data.domain.domain;
+                document.getElementById('modal-edit-description').value = data.domain.description || '';
+                document.getElementById('modal-edit-active').checked = data.domain.active;
 
-                document.getElementById('modal-edit-aliases').value = data.domain.Aliases;
-                document.getElementById('modal-edit-mailboxes').value = data.domain.Mailboxes;
-                document.getElementById('modal-edit-quota').value = data.domain.Quota;
-                document.getElementById('modal-edit-password-expiry').value = data.domain.PasswordExpiry || 0;
-                document.getElementById('modal-edit-backupmx').checked = data.domain.BackupMX;
+                document.getElementById('modal-edit-aliases').value = data.domain.aliases;
+                document.getElementById('modal-edit-mailboxes').value = data.domain.mailboxes;
+                document.getElementById('modal-edit-quota').value = data.domain.quota;
+                document.getElementById('modal-edit-password-expiry').value = data.domain.password_expiry || 0;
+                document.getElementById('modal-edit-backupmx').checked = data.domain.backupmx;
+                
+                var transportSel = document.getElementById('modal-edit-transport');
+                if(data.domain.transport) {
+                    var exists = false;
+                    for (var i = 0; i < transportSel.options.length; i++) {
+                        if (transportSel.options[i].value === data.domain.transport) {
+                            exists = true;
+                            break;
+                        }
+                    }
+                    if (!exists) {
+                        var opt = document.createElement('option');
+                        opt.value = data.domain.transport;
+                        opt.text = data.domain.transport;
+                        transportSel.add(opt);
+                    }
+                    transportSel.value = data.domain.transport;
+                } else {
+                    transportSel.value = 'virtual';
+                }
 
                 // Show form, hide loading, enable button
                 document.getElementById('modal-edit-domain-loading').classList.add('hidden');

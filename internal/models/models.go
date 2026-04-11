@@ -345,3 +345,20 @@ type Maillog struct {
 }
 
 func (Maillog) TableName() string { return TableNameMaillog }
+
+const TableNameTransportList = "transport_list"
+
+// TransportList mapped from table <transport_list>
+type TransportList struct {
+	ID        int       `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
+	Domain    string    `gorm:"column:domain;type:varchar(255);not null;uniqueIndex" json:"domain"`
+	Transport string    `gorm:"column:transport;type:varchar(255);not null" json:"transport"`
+	Created   time.Time `gorm:"column:created;not null;default:'2000-01-01 00:00:00'" json:"created"`
+	Modified  time.Time `gorm:"column:modified;not null;default:CURRENT_TIMESTAMP" json:"modified"`
+	Active    bool      `gorm:"column:active;not null;default:true" json:"active"`
+}
+
+// TableName TransportList's table name
+func (TransportList) TableName() string {
+	return TableNameTransportList
+}

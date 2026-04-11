@@ -15,4 +15,6 @@
 		$CONF['vacation'] = 'YES';
 		$CONF['vacation_domain'] = 'autoreply.linuxpro.com.br'; // O mesmo do passo anterior
 		$CONF['vacation_control'] = 'YES';
+		$CONF['transport'] = 'YES';
+		$CONF['transport_options'] = array ('virtual','local','relay');
 		?>

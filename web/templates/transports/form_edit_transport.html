@@ -1,0 +1,165 @@
+{{define "form_edit_transport"}}
+<!-- Edit Transport Modal -->
+<div id="editTransportModal" class="fixed inset-0 z-50 hidden">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/50" onclick="closeEditTransportModal()"></div>
+    <!-- Modal Box -->
+    <div class="relative z-10 flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white border-4 border-brand-text w-full max-w-lg max-h-[90vh] flex flex-col">
+            <!-- Header -->
+            <div class="bg-brand-primary px-6 py-4 flex items-center justify-between flex-shrink-0">
+                <h3 class="text-lg font-mono font-black uppercase tracking-tight text-white flex items-center">
+                    <i data-lucide="edit" class="w-5 h-5 mr-2"></i>
+                    Edit Transport
+                </h3>
+                <button onclick="closeEditTransportModal()" class="text-white hover:text-gray-200 transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Scrollable Body -->
+            <div class="overflow-y-auto flex-1">
+                <!-- Error Area -->
+                <div id="modal-edit-transport-error"
+                    class="hidden mx-6 mt-4 bg-red-50 border-2 border-red-600 p-3 flex items-start">
+                    <i data-lucide="alert-circle" class="w-4 h-4 text-red-600 mr-2 mt-0.5 flex-shrink-0"></i>
+                    <p id="modal-edit-transport-error-text" class="text-sm text-red-700 font-medium"></p>
+                </div>
+
+                <form id="modalEditTransportForm" class="p-6 space-y-5">
+                    <input type="hidden" id="modal-edit-transport-id" name="id">
+                    
+                    <div class="border-2 border-brand-text p-4 space-y-4">
+                        <!-- Domain Name -->
+                        <div>
+                            <label for="modal-edit-domain"
+                                class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                                Domain <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="modal-edit-domain" name="domain" required
+                                class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm">
+                        </div>
+
+                        <!-- Transport Name -->
+                        <div>
+                            <label for="modal-edit-transport"
+                                class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                                Transport <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="modal-edit-transport" name="transport" required
+                                class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm">
+                        </div>
+
+                        <!-- Active -->
+                        <div class="flex items-center pt-2">
+                            <input type="checkbox" id="modal-edit-transport-active" name="active" value="true"
+                                class="w-5 h-5 border-2 border-brand-text cursor-pointer">
+                            <label for="modal-edit-transport-active" class="ml-2 text-sm font-bold cursor-pointer">
+                                Active
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Footer / Actions -->
+            <div
+                class="bg-gray-50 px-6 py-4 flex items-center justify-end space-x-3 border-t-2 border-brand-text flex-shrink-0">
+                <button type="button" onclick="closeEditTransportModal()"
+                    class="bg-white hover:bg-gray-100 text-brand-text border-2 border-brand-text font-black px-6 py-2.5 shadow-[2px_2px_0px_#1E293B] hover:translate-y-px hover:shadow-[1px_1px_0px_#1E293B] active:translate-y-0.5 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center">
+                    <i data-lucide="x" class="w-4 h-4 mr-2"></i>
+                    Cancel
+                </button>
+                <button type="submit" form="modalEditTransportForm" id="btn-save-edit-transport"
+                    class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-6 py-2.5 shadow-[2px_2px_0px_#1E293B] hover:translate-y-px hover:shadow-[1px_1px_0px_#1E293B] active:translate-y-0.5 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center">
+                    <i data-lucide="save" class="w-4 h-4 mr-2"></i>
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openEditTransportModal(id) {
+        document.getElementById('editTransportModal').classList.remove('hidden');
+        document.getElementById('modal-edit-transport-error').classList.add('hidden');
+        document.getElementById('modalEditTransportForm').reset();
+        document.getElementById('modal-edit-transport-id').value = id;
+        
+        fetch('/api/transports/' + id)
+            .then(res => res.json())
+            .then(data => {
+                if (data.transport) {
+                    document.getElementById('modal-edit-domain').value = data.transport.domain || '';
+                    document.getElementById('modal-edit-transport').value = data.transport.transport || '';
+                    document.getElementById('modal-edit-transport-active').checked = data.transport.active;
+                } else {
+                    document.getElementById('modal-edit-transport-error-text').textContent = 'Could not load transport data.';
+                    document.getElementById('modal-edit-transport-error').classList.remove('hidden');
+                }
+            })
+            .catch(err => {
+                document.getElementById('modal-edit-transport-error-text').textContent = 'Network error fetching data.';
+                document.getElementById('modal-edit-transport-error').classList.remove('hidden');
+            });
+            
+        lucide.createIcons();
+    }
+
+    function closeEditTransportModal() {
+        document.getElementById('editTransportModal').classList.add('hidden');
+    }
+
+    document.getElementById('modalEditTransportForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var form = this;
+        var btn = document.getElementById('btn-save-edit-transport');
+        var errBox = document.getElementById('modal-edit-transport-error');
+        var errText = document.getElementById('modal-edit-transport-error-text');
+        var id = document.getElementById('modal-edit-transport-id').value;
+
+        errBox.classList.add('hidden');
+
+        if (!document.getElementById('modal-edit-domain').value.trim()) {
+            errText.textContent = 'Domain name is required.';
+            errBox.classList.remove('hidden');
+            return;
+        }
+
+        if (!document.getElementById('modal-edit-transport').value.trim()) {
+            errText.textContent = 'Transport name is required.';
+            errBox.classList.remove('hidden');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+        var formData = new FormData(form);
+
+        fetch('/api/transports/' + id, {
+            method: 'POST',
+            body: formData,
+            headers: { 'Accept': 'application/json' }
+        })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    errText.textContent = data.error || 'Failed to update transport';
+                    errBox.classList.remove('hidden');
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            })
+            .catch(function (err) {
+                errText.textContent = 'Network or server error occurred.';
+                errBox.classList.remove('hidden');
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            });
+    });
+</script>
+{{end}}

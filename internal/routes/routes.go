@@ -73,6 +73,14 @@ func RegisterRoutes(e *echo.Echo, h *handlers.Handler) {
 	adminGroup.GET("/fetchmail/add", h.AddFetchmailGET)
 	adminGroup.POST("/fetchmail/add", h.AddFetchmailPOST)
 
+	// Transports
+	adminGroup.GET("/transports", h.ListTransports)
+	adminGroup.POST("/api/transports", h.AddTransportAPI)
+	adminGroup.GET("/api/transports/:id", h.GetTransportAPI)
+	adminGroup.POST("/api/transports/:id", h.EditTransportAPI)
+	adminGroup.DELETE("/transports/delete/:id", h.DeleteTransport)
+
+
 	// User Portal Routes (public)
 	e.GET("/users/login", h.UserLogin)
 	e.POST("/users/login", h.UserLogin)

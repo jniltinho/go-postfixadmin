@@ -1,0 +1,44 @@
+# =============================================================================
+# Transport TCP Server - Configuration Example
+# =============================================================================
+# Copy this file to config.toml and adjust the values for your environment.
+#
+# Usage: ./transport server --config /etc/postfix-transport/config.toml
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Database connection (MariaDB / MySQL)
+# -----------------------------------------------------------------------------
+[database]
+host     = "127.0.0.1"    # DB server address
+port     = "3306"          # DB server port
+user     = "postfixadmin"  # DB username
+password = "secret"        # DB password
+name     = "postfixadmin"  # DB name (same as go-postfixadmin)
+debug    = false           # Set true to log all SQL queries
+
+# -----------------------------------------------------------------------------
+# Transport TCP server settings
+# -----------------------------------------------------------------------------
+[transport]
+# Hostname of this mail server.
+# Used in FormatTransport to detect local delivery and rewrite to LMTP.
+# Example: if domain.transport = "smtp:mail.example.com", it is rewritten to
+# "lmtp:unix:private/dovecot-lmtp" automatically.
+hostname = "mail.example.com"
+
+# Address the TCP server listens on.
+# Postfix connects here via tcp_table (transport_maps).
+# In Postfix main.cf:
+#   transport_maps = tcp:127.0.0.1:12221
+host = "127.0.0.1:12221"
+
+# How long to cache lookup results in memory.
+# Accepts Go duration strings: "5m", "10m", "1h", etc.
+cache = "10m"
+
+# If a domain transport value exactly equals `localdelivery`, it is rewritten
+# to the `delivery` value below. Useful to normalise legacy transport entries.
+# Leave empty to disable this rewrite.
+localdelivery = "smtp:mail.example.com"
+delivery      = "lmtp:unix:private/dovecot-lmtp"

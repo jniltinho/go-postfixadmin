@@ -115,6 +115,12 @@
                     <i data-lucide="users" class="w-5 h-5 mr-3 transition-colors {{ navIconClass .CurrentPath "/admins" }}"></i>
                     {{ T $.Lang `LayoutAdmin_Administrators` }}
                 </a>
+                {{if .IsSuperAdmin}}
+                <a href="/transports" class="flex items-center py-2 px-4 border-2 font-bold transition-all group hover:border-brand-text hover:bg-brand-primary/10 {{ navLinkClass .CurrentPath "/transports" }}">
+                    <i data-lucide="truck" class="w-5 h-5 mr-3 transition-colors {{ navIconClass .CurrentPath "/transports" }}"></i>
+                    Transport List
+                </a>
+                {{end}}
                 {{if .FetchmailEnabled}}
                 <a href="/fetchmail/add" class="flex items-center py-2 px-4 border-2 font-bold transition-all group hover:border-brand-text hover:bg-brand-primary/10 {{ navLinkClass .CurrentPath "/fetchmail/add" }}">
                     <i data-lucide="download-cloud" class="w-5 h-5 mr-3 transition-colors {{ navIconClass .CurrentPath "/fetchmail/add" }}"></i>

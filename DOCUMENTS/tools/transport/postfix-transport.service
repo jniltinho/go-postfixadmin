@@ -1,0 +1,37 @@
+[Unit]
+Description=Postfix Transport TCP Lookup Server
+Documentation=https://github.com/jniltinho/go-postfixadmin
+After=network.target mariadb.service mysql.service
+Wants=mariadb.service
+
+[Service]
+Type=simple
+#User=root
+#Group=root
+
+# Binary and config paths
+WorkingDirectory=/opt/transport
+ExecStart=/opt/transport/transport -d --config /opt/transport/config.toml
+ExecReload=/bin/kill -HUP $MAINPID
+
+# Restart policy
+Restart=on-failure
+RestartSec=5s
+
+# Hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/opt/transport
+
+# Resource limits
+LimitNOFILE=65536
+TimeoutStopSec=10
+
+# Logging
+StandardOutput=append:/opt/transport/transport.log
+StandardError=append:/opt/transport/transport.log
+
+[Install]
+WantedBy=multi-user.target

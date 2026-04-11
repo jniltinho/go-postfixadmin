@@ -121,9 +121,30 @@
                                     <input type="number" id="modal-add-password-expiry" name="password_expiry" min="0"
                                         value="365"
                                         class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm">
-                                    <p class="text-[10px] text-gray-500 mt-1">{{ T $.Lang `Domains_HelpPasswordExpiry`
-                                        }}</p>
+                                    <p class="text-[10px] text-gray-500 mt-1">{{ T $.Lang `Domains_HelpPasswordExpiry` }}</p>
                                 </div>
+
+                                {{if $.IsSuperAdmin}}
+                                <!-- Transport -->
+                                <div class="col-span-2">
+                                    <label for="modal-add-transport"
+                                        class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                                        Transport
+                                    </label>
+                                    <div class="relative">
+                                        <select id="modal-add-transport" name="transport"
+                                            class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm appearance-none bg-white cursor-pointer select-styled">
+                                            {{range $.Transports}}
+                                                <option value="{{.Transport}}">{{.Domain}} -> {{.Transport}}</option>
+                                            {{end}}
+                                        </select>
+                                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-brand-text border-l-2 border-brand-text">
+                                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                        </div>
+                                    </div>
+                                    <p class="text-[10px] text-gray-500 mt-1">Select the mail transport for this domain</p>
+                                </div>
+                                {{end}}
                             </div>
 
                             <!-- Backup MX -->
