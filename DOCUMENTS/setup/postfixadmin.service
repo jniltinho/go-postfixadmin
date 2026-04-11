@@ -22,8 +22,8 @@ RestartSec=5s
 # Devido a integração com o Viper (Go)
 
 # Configurar saída de logs diretamente para um arquivo
-StandardOutput=append:/opt/go-postfixadmin/postfixadmin.log
-StandardError=append:/opt/go-postfixadmin/postfixadmin.log
+StandardOutput=append:/opt/go-postfixadmin/logs/postfixadmin.log
+StandardError=append:/opt/go-postfixadmin/logs/postfixadmin.log
 
 # Práticas recomendadas de segurança (descomentar se necessário)
 # NoNewPrivileges=yes

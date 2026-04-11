@@ -80,7 +80,7 @@ build-docker-prod:
 deb: build-prod
 	@echo "Building Debian package..."
 	rm -rf build/deb
-	mkdir -p build/deb/opt/go-postfixadmin
+	mkdir -p build/deb/opt/go-postfixadmin/logs
 	mkdir -p build/deb/etc/systemd/system
 	mkdir -p build/deb/usr/share/doc/go-postfixadmin
 	mkdir -p build/deb/DEBIAN
@@ -90,6 +90,8 @@ deb: build-prod
 	chmod 644 build/deb/opt/go-postfixadmin/config.toml
 	cp DOCUMENTS/setup/postfixadmin.service build/deb/etc/systemd/system/
 	chmod 644 build/deb/etc/systemd/system/postfixadmin.service
+	cp DOCUMENTS/setup/postfixadmin-transport.service build/deb/etc/systemd/system/
+	chmod 644 build/deb/etc/systemd/system/postfixadmin-transport.service
 	cp DOCUMENTS/setup/README.md build/deb/usr/share/doc/go-postfixadmin/
 	chmod 644 build/deb/usr/share/doc/go-postfixadmin/README.md
 	@echo "Package: go-postfixadmin" > build/deb/DEBIAN/control
@@ -117,18 +119,21 @@ rpm: build-prod
 	@echo "%description" >> build/rpm/SPECS/go-postfixadmin.spec
 	@echo "A fully featured web interface for configuring Postfix and Dovecot." >> build/rpm/SPECS/go-postfixadmin.spec
 	@echo "%install" >> build/rpm/SPECS/go-postfixadmin.spec
-	@echo "mkdir -p %{buildroot}/opt/go-postfixadmin" >> build/rpm/SPECS/go-postfixadmin.spec
+	@echo "mkdir -p %{buildroot}/opt/go-postfixadmin/logs" >> build/rpm/SPECS/go-postfixadmin.spec
 	@echo "mkdir -p %{buildroot}/etc/systemd/system" >> build/rpm/SPECS/go-postfixadmin.spec
 	@echo "mkdir -p %{buildroot}/usr/share/doc/go-postfixadmin" >> build/rpm/SPECS/go-postfixadmin.spec
 	@echo "cp $(CURDIR)/$(BIN) %{buildroot}/opt/go-postfixadmin/postfixadmin" >> build/rpm/SPECS/go-postfixadmin.spec
 	@echo "cp $(CURDIR)/config.toml.example %{buildroot}/opt/go-postfixadmin/config.toml" >> build/rpm/SPECS/go-postfixadmin.spec
 	@echo "cp $(CURDIR)/DOCUMENTS/setup/postfixadmin.service %{buildroot}/etc/systemd/system/" >> build/rpm/SPECS/go-postfixadmin.spec
+	@echo "cp $(CURDIR)/DOCUMENTS/setup/postfixadmin-transport.service %{buildroot}/etc/systemd/system/" >> build/rpm/SPECS/go-postfixadmin.spec
 	@echo "cp $(CURDIR)/DOCUMENTS/setup/README.md %{buildroot}/usr/share/doc/go-postfixadmin/" >> build/rpm/SPECS/go-postfixadmin.spec
 	@echo "%files" >> build/rpm/SPECS/go-postfixadmin.spec
 	@echo "%defattr(-,root,root,-)" >> build/rpm/SPECS/go-postfixadmin.spec
 	@echo "/opt/go-postfixadmin/postfixadmin" >> build/rpm/SPECS/go-postfixadmin.spec
 	@echo "%config(noreplace) /opt/go-postfixadmin/config.toml" >> build/rpm/SPECS/go-postfixadmin.spec
+	@echo "%dir /opt/go-postfixadmin/logs" >> build/rpm/SPECS/go-postfixadmin.spec
 	@echo "/etc/systemd/system/postfixadmin.service" >> build/rpm/SPECS/go-postfixadmin.spec
+	@echo "/etc/systemd/system/postfixadmin-transport.service" >> build/rpm/SPECS/go-postfixadmin.spec
 	@echo "%doc /usr/share/doc/go-postfixadmin/README.md" >> build/rpm/SPECS/go-postfixadmin.spec
 	rpmbuild -bb --define "_topdir $(CURDIR)/build/rpm" build/rpm/SPECS/go-postfixadmin.spec
 	find build/rpm/RPMS -name "*.rpm" -exec mv {} . \;

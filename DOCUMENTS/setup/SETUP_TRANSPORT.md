@@ -74,7 +74,7 @@ systemctl status postfixadmin-transport
 View logs:
 
 ```bash
-tail -f /opt/go-postfixadmin/transport.log
+tail -f /opt/go-postfixadmin/logs/transport.log
 # or via journald
 journalctl -u postfixadmin-transport -f
 ```

@@ -19,8 +19,8 @@ RestartSec=5s
 # Configurações lidas de /opt/go-postfixadmin/config.toml via Viper
 # Campos relevantes: [transport] host, cache, hostname, localdelivery, delivery
 
-StandardOutput=append:/opt/go-postfixadmin/transport.log
-StandardError=append:/opt/go-postfixadmin/transport.log
+StandardOutput=append:/opt/go-postfixadmin/logs/transport.log
+StandardError=append:/opt/go-postfixadmin/logs/transport.log
 
 [Install]
 WantedBy=multi-user.target
