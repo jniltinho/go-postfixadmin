@@ -11,6 +11,7 @@ Related documents:
 - [Quick setup summary (MariaDB/MySQL)](DOCUMENTS/setup/SETUP_MAILSERVER_MARIADB.md)
 - [Quick setup summary (PostgreSQL)](DOCUMENTS/setup/SETUP_MAILSERVER_POSTGRESQL.md)
 - [Complete setup guide](DOCUMENTS/setup/README.md)
+- [Transport TCP server setup](DOCUMENTS/setup/SETUP_TRANSPORT.md)
 
 ## Development Tools
 
@@ -122,12 +123,14 @@ Available Commands:
   admin        Admin management utilities
   backup-mysql MySQL backup utilities
   completion   Generate the autocompletion script for the specified shell
+  domain       Domain management utilities
   help         Help about any command
   importsql    Import SQL file to database
   mailbox      Mailbox management utilities
   migrate      Run database migration
   readlog      Parse mail.log and store FILTER entries in the maillog table
   server       Start the administration server
+  transport    Transport management utilities
   version      Display version information
 
 Flags:
@@ -294,6 +297,34 @@ Crontab example (daily backup at 02:00, keep 14 days):
 ```cron
 0 2 * * * /opt/go-postfixadmin/postfixadmin --config /opt/go-postfixadmin/config.toml backup-mysql backup --clean 14 --sendmail
 ```
+
+## Transport Commands (CLI)
+
+The `transport` subcommand manages transport routing entries and runs the Postfix transport map TCP server.
+
+```bash
+# List all transport entries
+./postfixadmin transport --list
+./postfixadmin transport -l
+
+# Add a transport entry (format: domain:transport)
+./postfixadmin transport --add "example.com:smtp:[relay.example.com]:25"
+./postfixadmin transport -a "example.com:relay:[mx.provider.com]"
+
+# Delete a transport entry by domain
+./postfixadmin transport --delete "example.com"
+./postfixadmin transport -d "example.com"
+
+# Start the Postfix transport map TCP server
+./postfixadmin transport server
+./postfixadmin transport server --debug
+```
+
+The `transport server` subcommand starts a TCP server that answers Postfix `transport_maps` lookups. Configure in `config.toml` under `[transport]` — see [SETUP_TRANSPORT.md](DOCUMENTS/setup/SETUP_TRANSPORT.md) for full setup instructions.
+
+Available flags for `transport server`:
+
+- `--debug`: Enable per-request tracing with colored zerolog output (source, subject, resolved transport)
 
 ### `readlog` Command
 
