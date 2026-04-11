@@ -298,6 +298,33 @@ Crontab example (daily backup at 02:00, keep 14 days):
 0 2 * * * /opt/go-postfixadmin/postfixadmin --config /opt/go-postfixadmin/config.toml backup-mysql backup --clean 14 --sendmail
 ```
 
+## Domain Commands (CLI)
+
+The `domain` subcommand manages mail domains.
+
+```bash
+# List all domains
+./postfixadmin domain --list
+./postfixadmin domain -l
+
+# Add a new domain
+./postfixadmin domain --add "example.com"
+./postfixadmin domain -a "example.com" --description "My domain" --max-aliases 50 --max-mailboxes 100
+
+# Delete a domain and all its associated data (mailboxes, aliases, alias domains, fetchmail, vacation)
+./postfixadmin domain --delete "example.com"
+./postfixadmin domain -d "example.com"
+```
+
+Available flags for `domain`:
+
+- `--list` / `-l`: List all domains
+- `--add` / `-a`: Create a new domain
+- `--delete` / `-d`: Delete a domain and all its associated data
+- `--description`: Domain description (applies to `--add`)
+- `--max-aliases`: Maximum number of aliases (default: `10`, `0` = unlimited)
+- `--max-mailboxes`: Maximum number of mailboxes (default: `10`, `0` = unlimited)
+
 ## Transport Commands (CLI)
 
 The `transport` subcommand manages transport routing entries and runs the Postfix transport map TCP server.
