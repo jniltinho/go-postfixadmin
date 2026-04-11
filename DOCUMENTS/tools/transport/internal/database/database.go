@@ -35,58 +35,47 @@ func Connect(cfg config.Config) (*Database, error) {
 	return &Database{DB: db, Cfg: cfg}, nil
 }
 
-// GetEmailTransport queries the mailbox table for a per-user transport override,
-// then falls back to the domain-level routing via GetDomainTransport.
+// GetTransport resolves the transport for an email address or domain in a
+// single query. When email is empty, only domain-level rules apply.
 //
 // Priority:
-//  1. mailbox WHERE username = email AND active = true (per-user transport override)
-//  2. GetDomainTransport(domain) (domain-level routing)
-func (d *Database) GetEmailTransport(email string, domain string) (string, error) {
-	// 1. Per-user transport override in mailbox table
-	var mb Mailbox
-	err := d.DB.Select("transport").Where("username = ? AND active = true", email).First(&mb).Error
-	if err == nil && mb.Transport != "" && mb.Transport != "virtual" {
-		return d.FormatTransport(mb.Transport), nil
-	}
-	if err != nil && err != gorm.ErrRecordNotFound {
-		log.Printf("DB error GetEmailTransport(%s): %v", email, err)
-		return "", err
+//  1. mailbox.transport       WHERE username = email  (per-user override)
+//  2. transport_list.transport WHERE domain  = domain (explicit domain rule)
+//  3. domain.transport         WHERE domain  = domain (default domain transport)
+func (d *Database) GetTransport(email, domain string) (string, error) {
+	var result struct {
+		MailboxTransport       string `gorm:"column:mailbox_transport"`
+		TransportListTransport string `gorm:"column:transport_list_transport"`
+		DomainTransport        string `gorm:"column:domain_transport"`
 	}
 
-	// 2. Fallback to domain-level routing
-	return d.GetDomainTransport(domain)
-}
-
-// GetDomainTransport queries transport_list first (specific routing rules),
-// then falls back to the domain table transport field.
-//
-// Priority:
-//  1. transport_list WHERE domain = ? (explicit per-domain routing rule)
-//  2. domain WHERE domain = ? (default transport stored on the domain record)
-func (d *Database) GetDomainTransport(domain string) (string, error) {
-	// 1. Exact match in transport_list
-	var tl TransportList
-	if err := d.DB.Select("transport").Where("domain = ? AND active = true", domain).First(&tl).Error; err == nil && tl.Transport != "" {
-		return d.FormatTransport(tl.Transport), nil
-	}
-
-	// 2. Fallback to domain.transport
-	var dmn Domain
-	err := d.DB.Select("transport").Where("domain = ? AND active = true", domain).First(&dmn).Error
+	err := d.DB.Raw(`
+		SELECT
+			d.transport  AS domain_transport,
+			tl.transport AS transport_list_transport,
+			m.transport  AS mailbox_transport
+		FROM domain d
+		LEFT JOIN transport_list tl ON tl.domain   = d.domain   AND tl.active = true
+		LEFT JOIN mailbox        m  ON m.username  = ?          AND m.active  = true
+		WHERE d.domain = ? AND d.active = true
+		LIMIT 1
+	`, email, domain).Scan(&result).Error
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return "", nil
-		}
-		log.Printf("DB error GetDomainTransport(%s): %v", domain, err)
+		log.Printf("DB error GetTransport(%s, %s): %v", email, domain, err)
 		return "", err
 	}
 
-	// empty or generic "virtual" means no specific routing
-	if dmn.Transport == "" || dmn.Transport == "virtual" {
-		return "", nil
+	if result.MailboxTransport != "" && result.MailboxTransport != "virtual" {
+		return d.FormatTransport(result.MailboxTransport), nil
+	}
+	if result.TransportListTransport != "" {
+		return d.FormatTransport(result.TransportListTransport), nil
+	}
+	if result.DomainTransport != "" && result.DomainTransport != "virtual" {
+		return d.FormatTransport(result.DomainTransport), nil
 	}
 
-	return d.FormatTransport(dmn.Transport), nil
+	return "", nil
 }
 
 // FormatTransport aplica a lógica de reescrita local presente no Perl original.

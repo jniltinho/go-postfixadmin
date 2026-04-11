@@ -33,9 +33,13 @@ edit_alias   = true
 alias_domain = true
 
 [transport]
-enabled  = true
-options  = ["virtual", "local", "relay"]
-default  = "virtual"
+# Transport TCP server (postfixadmin transport server)
+# Postfix main.cf: transport_maps = tcp:127.0.0.1:12221
+host          = "127.0.0.1:12221"
+cache         = "10m"
+hostname      = "mail.example.com"       # FQDN of this mail server
+localdelivery = "smtp:mail.example.com"  # Legacy transport value to rewrite
+delivery      = "lmtp:unix:private/dovecot-lmtp" # Rewrite target for local delivery
 
 [features]
 fetchmail = false

@@ -1,0 +1,26 @@
+[Unit]
+Description=Go Postfixadmin Transport TCP Server
+After=network-online.target mariadb.service mysql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+
+WorkingDirectory=/opt/go-postfixadmin
+
+# Postfix main.cf: transport_maps = tcp:127.0.0.1:12221
+ExecStart=/opt/go-postfixadmin/postfixadmin transport server --debug
+
+Restart=always
+RestartSec=5s
+
+# Configurações lidas de /opt/go-postfixadmin/config.toml via Viper
+# Campos relevantes: [transport] host, cache, hostname, localdelivery, delivery
+
+StandardOutput=append:/opt/go-postfixadmin/transport.log
+StandardError=append:/opt/go-postfixadmin/transport.log
+
+[Install]
+WantedBy=multi-user.target

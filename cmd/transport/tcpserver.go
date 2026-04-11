@@ -1,4 +1,4 @@
-package server
+package transport
 
 import (
 	"bufio"
@@ -8,40 +8,48 @@ import (
 	"strings"
 	"time"
 
-	"transport/internal/database"
-
-	"github.com/patrickmn/go-cache"
+	cache "github.com/patrickmn/go-cache"
 	zlog "github.com/rs/zerolog/log"
+	"gorm.io/gorm"
 )
 
+// TCPServer serves Postfix transport map queries over TCP.
+// Postfix main.cf: transport_maps = tcp:127.0.0.1:12221
 type TCPServer struct {
-	Address string
-	DB      *database.Database
-	Cache   *cache.Cache
-	Debug   bool
+	address       string
+	db            *gorm.DB
+	cache         *cache.Cache
+	hostname      string
+	localDelivery string
+	delivery      string
+	debug         bool
 }
 
-func New(address string, db *database.Database, cacheDur time.Duration, debug bool) *TCPServer {
-	c := cache.New(cacheDur, 5*time.Minute)
+// NewTCPServer creates and returns a new TCPServer.
+func NewTCPServer(address string, db *gorm.DB, cacheDur time.Duration, hostname, localDelivery, delivery string, debug bool) *TCPServer {
 	return &TCPServer{
-		Address: address,
-		DB:      db,
-		Cache:   c,
-		Debug:   debug,
+		address:       address,
+		db:            db,
+		cache:         cache.New(cacheDur, 5*time.Minute),
+		hostname:      hostname,
+		localDelivery: localDelivery,
+		delivery:      delivery,
+		debug:         debug,
 	}
 }
 
+// Start begins accepting connections. Blocks until a fatal error occurs.
 func (s *TCPServer) Start() error {
-	listener, err := net.Listen("tcp", s.Address)
+	listener, err := net.Listen("tcp", s.address)
 	if err != nil {
 		return err
 	}
 	defer listener.Close()
 
-	if s.Debug {
-		zlog.Info().Msg("Debug Line activated")
+	if s.debug {
+		zlog.Info().Msg("Debug mode activated")
 	}
-	zlog.Info().Msgf("Starting TCP server on %s...", s.Address)
+	zlog.Info().Msgf("Starting TCP server on %s...", s.address)
 
 	for {
 		conn, err := listener.Accept()
@@ -53,8 +61,8 @@ func (s *TCPServer) Start() error {
 	}
 }
 
-func (s *TCPServer) logEvent(source string, subject string, domain string, isEmail bool, ret string) {
-	if !s.Debug {
+func (s *TCPServer) logEvent(source, subject, domain string, isEmail bool, ret string) {
+	if !s.debug {
 		return
 	}
 	ev := zlog.Info().Str("cmd", "get "+subject)
@@ -86,8 +94,7 @@ func (s *TCPServer) handleConnection(conn net.Conn) {
 		}
 
 		parts := strings.SplitN(line, " ", 2)
-		cmd := strings.ToLower(parts[0])
-		if cmd != "get" || len(parts) < 2 {
+		if strings.ToLower(parts[0]) != "get" || len(parts) < 2 {
 			continue
 		}
 
@@ -118,30 +125,24 @@ func (s *TCPServer) handleConnection(conn net.Conn) {
 			isEmail = true
 		}
 
-		// Cache hit
-		if cached, found := s.Cache.Get(subject); found {
+		if cached, found := s.cache.Get(subject); found {
 			dest := cached.(string)
 			if dest == "" {
 				s.logEvent("CACHE", subject, domain, isEmail, "500 not found")
 				s.reply(conn, "500 not found")
 			} else {
-				// Use non-encoded dest for logging to match criare-antispam/transport
 				s.logEvent("CACHE", subject, domain, isEmail, "200 "+dest)
 				s.reply(conn, "200 "+url.PathEscape(dest))
 			}
 			continue
 		}
 
-		var dest string
-		var dbErr error
-
-		// Fallback to manual perl logic or normal query
+		email := ""
 		if isEmail {
-			dest, dbErr = s.DB.GetTransport(subject, domain)
-		} else {
-			dest, dbErr = s.DB.GetTransport("", domain)
+			email = subject
 		}
 
+		dest, dbErr := GetTransport(s.db, email, domain, s.hostname, s.localDelivery, s.delivery)
 		if dbErr != nil {
 			zlog.Error().Msgf("DB Error: %v", dbErr)
 			s.logEvent("DB", subject, domain, isEmail, "400 internal error")
@@ -151,11 +152,11 @@ func (s *TCPServer) handleConnection(conn net.Conn) {
 
 		if dest == "" {
 			s.logEvent("DB", subject, domain, isEmail, "500 not found")
-			s.Cache.SetDefault(subject, "")
+			s.cache.SetDefault(subject, "")
 			s.reply(conn, "500 not found")
 		} else {
 			s.logEvent("DB", subject, domain, isEmail, "200 "+dest)
-			s.Cache.SetDefault(subject, dest)
+			s.cache.SetDefault(subject, dest)
 			s.reply(conn, "200 "+url.PathEscape(dest))
 		}
 	}

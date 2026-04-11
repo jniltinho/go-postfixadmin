@@ -68,6 +68,12 @@ This file lists product capabilities by area. For installation and deployment de
   - List all transport entries
   - Create a transport entry (`--add "domain:transport"`)
   - Delete a transport entry by domain (`--delete`)
+  - `transport server`: TCP server for Postfix `transport_maps` lookups (`transport_maps = tcp:127.0.0.1:12221`)
+    - Single-query JOIN resolves per-user, per-domain, and domain-default transport in priority order
+    - In-memory cache with configurable TTL (`transport.cache`)
+    - Colored zerolog console output with `--debug` flag for per-request tracing (source, subject, result)
+    - Config via `config.toml [transport]` section (`host`, `cache`, `hostname`, `localdelivery`, `delivery`)
+    - systemd service file included (`postfixadmin-transport.service`)
 
 ## Internationalization
 
