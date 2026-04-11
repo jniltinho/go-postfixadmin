@@ -10,7 +10,7 @@
             <div class="bg-brand-primary px-6 py-4 flex items-center justify-between flex-shrink-0">
                 <h3 class="text-lg font-mono font-black uppercase tracking-tight text-white flex items-center">
                     <i data-lucide="edit" class="w-5 h-5 mr-2"></i>
-                    Edit Transport
+                    {{ T $.Lang `Transport_EditTitle` }}
                 </h3>
                 <button onclick="closeEditTransportModal()" class="text-white hover:text-gray-200 transition-colors">
                     <i data-lucide="x" class="w-5 h-5"></i>
@@ -28,13 +28,13 @@
 
                 <form id="modalEditTransportForm" class="p-6 space-y-5">
                     <input type="hidden" id="modal-edit-transport-id" name="id">
-                    
+
                     <div class="border-2 border-brand-text p-4 space-y-4">
                         <!-- Domain Name -->
                         <div>
                             <label for="modal-edit-domain"
                                 class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
-                                Domain <span class="text-red-500">*</span>
+                                {{ T $.Lang `Transport_LblDomain` }} <span class="text-red-500">*</span>
                             </label>
                             <input type="text" id="modal-edit-domain" name="domain" required
                                 class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm">
@@ -44,7 +44,7 @@
                         <div>
                             <label for="modal-edit-transport"
                                 class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
-                                Transport <span class="text-red-500">*</span>
+                                {{ T $.Lang `Transport_LblTransport` }} <span class="text-red-500">*</span>
                             </label>
                             <input type="text" id="modal-edit-transport" name="transport" required
                                 class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm">
@@ -55,7 +55,7 @@
                             <input type="checkbox" id="modal-edit-transport-active" name="active" value="true"
                                 class="w-5 h-5 border-2 border-brand-text cursor-pointer">
                             <label for="modal-edit-transport-active" class="ml-2 text-sm font-bold cursor-pointer">
-                                Active
+                                {{ T $.Lang `Transport_LblActive` }}
                             </label>
                         </div>
                     </div>
@@ -68,12 +68,12 @@
                 <button type="button" onclick="closeEditTransportModal()"
                     class="bg-white hover:bg-gray-100 text-brand-text border-2 border-brand-text font-black px-6 py-2.5 shadow-[2px_2px_0px_#1E293B] hover:translate-y-px hover:shadow-[1px_1px_0px_#1E293B] active:translate-y-0.5 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center">
                     <i data-lucide="x" class="w-4 h-4 mr-2"></i>
-                    Cancel
+                    {{ T $.Lang `Transport_BtnCancel` }}
                 </button>
                 <button type="submit" form="modalEditTransportForm" id="btn-save-edit-transport"
                     class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-6 py-2.5 shadow-[2px_2px_0px_#1E293B] hover:translate-y-px hover:shadow-[1px_1px_0px_#1E293B] active:translate-y-0.5 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center">
                     <i data-lucide="save" class="w-4 h-4 mr-2"></i>
-                    Save Changes
+                    {{ T $.Lang `Transport_BtnSaveChanges` }}
                 </button>
             </div>
         </div>
@@ -86,7 +86,7 @@
         document.getElementById('modal-edit-transport-error').classList.add('hidden');
         document.getElementById('modalEditTransportForm').reset();
         document.getElementById('modal-edit-transport-id').value = id;
-        
+
         fetch('/api/transports/' + id)
             .then(res => res.json())
             .then(data => {
@@ -95,15 +95,15 @@
                     document.getElementById('modal-edit-transport').value = data.transport.transport || '';
                     document.getElementById('modal-edit-transport-active').checked = data.transport.active;
                 } else {
-                    document.getElementById('modal-edit-transport-error-text').textContent = 'Could not load transport data.';
+                    document.getElementById('modal-edit-transport-error-text').textContent = `{{ T $.Lang "Transport_JsLoadError" }}`;
                     document.getElementById('modal-edit-transport-error').classList.remove('hidden');
                 }
             })
             .catch(err => {
-                document.getElementById('modal-edit-transport-error-text').textContent = 'Network error fetching data.';
+                document.getElementById('modal-edit-transport-error-text').textContent = `{{ T $.Lang "Transport_JsFetchError" }}`;
                 document.getElementById('modal-edit-transport-error').classList.remove('hidden');
             });
-            
+
         lucide.createIcons();
     }
 
@@ -122,13 +122,13 @@
         errBox.classList.add('hidden');
 
         if (!document.getElementById('modal-edit-domain').value.trim()) {
-            errText.textContent = 'Domain name is required.';
+            errText.textContent = `{{ T $.Lang "Transport_JsDomainRequired" }}`;
             errBox.classList.remove('hidden');
             return;
         }
 
         if (!document.getElementById('modal-edit-transport').value.trim()) {
-            errText.textContent = 'Transport name is required.';
+            errText.textContent = `{{ T $.Lang "Transport_JsTransportRequired" }}`;
             errBox.classList.remove('hidden');
             return;
         }
@@ -148,14 +148,14 @@
                 if (data.success) {
                     window.location.reload();
                 } else {
-                    errText.textContent = data.error || 'Failed to update transport';
+                    errText.textContent = data.error || `{{ T $.Lang "Transport_JsUpdateFailed" }}`;
                     errBox.classList.remove('hidden');
                     btn.disabled = false;
                     btn.classList.remove('opacity-50', 'cursor-not-allowed');
                 }
             })
             .catch(function (err) {
-                errText.textContent = 'Network or server error occurred.';
+                errText.textContent = `{{ T $.Lang "Transport_JsNetworkError" }}`;
                 errBox.classList.remove('hidden');
                 btn.disabled = false;
                 btn.classList.remove('opacity-50', 'cursor-not-allowed');

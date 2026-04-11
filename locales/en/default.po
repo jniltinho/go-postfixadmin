@@ -1340,3 +1340,102 @@ msgstr "Failed to check alias limit"
 
 msgid "Alias_LimitReached"
 msgstr "Alias limit reached for this domain ({{.Count}}/{{.Limit}})"
+
+msgid "Transport_Title"
+msgstr "Transport List"
+
+msgid "Transport_Subtitle"
+msgstr "Manage Postfix transports"
+
+msgid "Transport_AddBtn"
+msgstr "Add Transport"
+
+msgid "Transport_TblDomain"
+msgstr "Domain"
+
+msgid "Transport_TblTransport"
+msgstr "Transport"
+
+msgid "Transport_TblCreated"
+msgstr "Created"
+
+msgid "Transport_TblModified"
+msgstr "Modified"
+
+msgid "Transport_TblActive"
+msgstr "Active"
+
+msgid "Transport_Yes"
+msgstr "Yes"
+
+msgid "Transport_No"
+msgstr "No"
+
+msgid "Transport_Edit"
+msgstr "Edit"
+
+msgid "Transport_Delete"
+msgstr "Delete"
+
+msgid "Transport_AlertDeleteConfirm"
+msgstr "Are you sure you want to delete this transport?"
+
+msgid "Transport_AlertDeleteSuccess"
+msgstr "Transport deleted successfully"
+
+msgid "Transport_AlertDeleteError"
+msgstr "Failed to delete transport"
+
+msgid "Transport_AlertRequestError"
+msgstr "Network error while deleting"
+
+msgid "Transport_AddTitle"
+msgstr "Add Transport"
+
+msgid "Transport_EditTitle"
+msgstr "Edit Transport"
+
+msgid "Transport_LblDomain"
+msgstr "Domain"
+
+msgid "Transport_PhDomain"
+msgstr "e.g. example.com or *"
+
+msgid "Transport_LblTransport"
+msgstr "Transport"
+
+msgid "Transport_PhTransport"
+msgstr "e.g. smtp, local, virtual"
+
+msgid "Transport_LblActive"
+msgstr "Active"
+
+msgid "Transport_BtnCancel"
+msgstr "Cancel"
+
+msgid "Transport_BtnSave"
+msgstr "Save Transport"
+
+msgid "Transport_BtnSaveChanges"
+msgstr "Save Changes"
+
+msgid "Transport_JsDomainRequired"
+msgstr "Domain name is required."
+
+msgid "Transport_JsTransportRequired"
+msgstr "Transport name is required."
+
+msgid "Transport_JsCreateFailed"
+msgstr "Failed to create transport"
+
+msgid "Transport_JsUpdateFailed"
+msgstr "Failed to update transport"
+
+msgid "Transport_JsNetworkError"
+msgstr "Network or server error occurred."
+
+msgid "Transport_JsLoadError"
+msgstr "Could not load transport data."
+
+msgid "Transport_JsFetchError"
+msgstr "Network error fetching data."

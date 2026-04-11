@@ -15,6 +15,7 @@ This file lists product capabilities by area. For installation and deployment de
 - Alias management
 - Alias domain management
 - Admin management
+- Transport list management (Postfix transport routing per domain)
 - User self-service portal
 
 ## Access Control
@@ -59,12 +60,21 @@ This file lists product capabilities by area. For installation and deployment de
   - Create individual mailbox with configurable quota (`--quota`)
   - Bulk-import from CSV (`--import-csv`), with support for pre-hashed passwords (`--password-crypt`)
   - Export all mailboxes to CSV (`--export`), compatible with re-import for backup and migration workflows
+- CLI `domain` subcommand:
+  - List all domains
+  - Create a domain with optional description, alias and mailbox limits (`--add`, `--description`, `--max-aliases`, `--max-mailboxes`)
+  - Delete a domain and all its associated data (mailboxes, aliases, alias domains, fetchmail, vacation) (`--delete`)
+- CLI `transport` subcommand:
+  - List all transport entries
+  - Create a transport entry (`--add "domain:transport"`)
+  - Delete a transport entry by domain (`--delete`)
 
 ## Internationalization
 
 - GNU Gettext `.po`-based i18n
 - Portuguese (`pt_BR`), English (`en`), and Spanish (`es`)
 - Backend flash messages translated through the same i18n layer
+- All management UIs fully translated, including the transport list CRUD
 
 ## UI / DX
 

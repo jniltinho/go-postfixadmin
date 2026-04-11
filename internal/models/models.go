@@ -214,6 +214,7 @@ type Mailbox struct {
 	Quota          int64     `gorm:"column:quota;not null" json:"quota"`
 	LocalPart      string    `gorm:"column:local_part;type:varchar(255);not null" json:"local_part"`
 	Domain         string    `gorm:"column:domain;type:varchar(255);not null;index:idx_mailbox_domain,priority:1" json:"domain"`
+	Transport      string    `gorm:"column:transport;type:varchar(255);not null;default:''" json:"transport"`
 	Created        time.Time `gorm:"column:created;not null;default:'2000-01-01 00:00:00'" json:"created"`
 	Modified       time.Time `gorm:"column:modified;not null;default:'2000-01-01 00:00:00'" json:"modified"`
 	Active         bool      `gorm:"column:active;not null;default:true" json:"active"`
@@ -224,7 +225,6 @@ type Mailbox struct {
 	PasswordExpiry time.Time `gorm:"column:password_expiry;not null;default:'2000-01-01 00:00:00'" json:"password_expiry"`
 	TOTPSecret     *string   `gorm:"column:totp_secret;type:varchar(255)" json:"totp_secret"`
 	SMTPActive     bool      `gorm:"column:smtp_active;not null;default:true" json:"smtp_active"`
-	Transport      string    `gorm:"column:transport;type:varchar(255);not null;default:''" json:"transport"`
 }
 
 // TableName Mailbox's table name

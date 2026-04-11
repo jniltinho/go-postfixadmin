@@ -1349,3 +1349,102 @@ msgstr "Falha ao verificar o limite de aliases"
 
 msgid "Alias_LimitReached"
 msgstr "Limite de aliases atingido para este domínio ({{.Count}}/{{.Limit}})"
+
+msgid "Transport_Title"
+msgstr "Lista de Transportes"
+
+msgid "Transport_Subtitle"
+msgstr "Gerencie os transportes do Postfix"
+
+msgid "Transport_AddBtn"
+msgstr "Adicionar Transporte"
+
+msgid "Transport_TblDomain"
+msgstr "Domínio"
+
+msgid "Transport_TblTransport"
+msgstr "Transporte"
+
+msgid "Transport_TblCreated"
+msgstr "Criado"
+
+msgid "Transport_TblModified"
+msgstr "Modificado"
+
+msgid "Transport_TblActive"
+msgstr "Ativo"
+
+msgid "Transport_Yes"
+msgstr "Sim"
+
+msgid "Transport_No"
+msgstr "Não"
+
+msgid "Transport_Edit"
+msgstr "Editar"
+
+msgid "Transport_Delete"
+msgstr "Excluir"
+
+msgid "Transport_AlertDeleteConfirm"
+msgstr "Tem certeza que deseja excluir este transporte?"
+
+msgid "Transport_AlertDeleteSuccess"
+msgstr "Transporte excluído com sucesso"
+
+msgid "Transport_AlertDeleteError"
+msgstr "Falha ao excluir transporte"
+
+msgid "Transport_AlertRequestError"
+msgstr "Erro de rede ao excluir"
+
+msgid "Transport_AddTitle"
+msgstr "Adicionar Transporte"
+
+msgid "Transport_EditTitle"
+msgstr "Editar Transporte"
+
+msgid "Transport_LblDomain"
+msgstr "Domínio"
+
+msgid "Transport_PhDomain"
+msgstr "ex: example.com ou *"
+
+msgid "Transport_LblTransport"
+msgstr "Transporte"
+
+msgid "Transport_PhTransport"
+msgstr "ex: smtp, local, virtual"
+
+msgid "Transport_LblActive"
+msgstr "Ativo"
+
+msgid "Transport_BtnCancel"
+msgstr "Cancelar"
+
+msgid "Transport_BtnSave"
+msgstr "Salvar Transporte"
+
+msgid "Transport_BtnSaveChanges"
+msgstr "Salvar Alterações"
+
+msgid "Transport_JsDomainRequired"
+msgstr "O nome do domínio é obrigatório."
+
+msgid "Transport_JsTransportRequired"
+msgstr "O nome do transporte é obrigatório."
+
+msgid "Transport_JsCreateFailed"
+msgstr "Falha ao criar transporte"
+
+msgid "Transport_JsUpdateFailed"
+msgstr "Falha ao atualizar transporte"
+
+msgid "Transport_JsNetworkError"
+msgstr "Ocorreu um erro de rede ou no servidor."
+
+msgid "Transport_JsLoadError"
+msgstr "Não foi possível carregar os dados do transporte."
+
+msgid "Transport_JsFetchError"
+msgstr "Erro de rede ao buscar dados."

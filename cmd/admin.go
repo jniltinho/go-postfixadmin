@@ -11,7 +11,6 @@ import (
 )
 
 var (
-	listDomains      bool
 	listAdmins       bool
 	listAliases      bool
 	listAliasDomains bool
@@ -38,9 +37,7 @@ var adminCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		if listDomains {
-			admin.ListAllDomains(db)
-		} else if listAdmins {
+		if listAdmins {
 			admin.ListAllAdmins(db)
 		} else if listAliases {
 			admin.ListAllAliases(db)
@@ -66,7 +63,6 @@ var adminCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(adminCmd)
-	adminCmd.Flags().BoolVarP(&listDomains, "list-domains", "d", false, "List all domains")
 	adminCmd.Flags().BoolVarP(&listAdmins, "list-admins", "a", false, "List all admins")
 	adminCmd.Flags().BoolVarP(&listAliases, "list-aliases", "s", false, "List all aliases")
 	adminCmd.Flags().BoolVarP(&listAliasDomains, "list-alias-domains", "S", false, "List all alias domains")

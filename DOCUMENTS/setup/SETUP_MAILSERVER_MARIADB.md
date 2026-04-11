@@ -18,12 +18,13 @@ Related documents:
 
 1. [Installation](#1-installation)
 2. [MySQL Database](#2-mysql-database)
-3. [Postfix — main.cf](#3-postfix--maincf)
-4. [Postfix SQL Files](#4-postfix-sql-files)
-5. [Dovecot](#5-dovecot)
-6. [User and Emails Directory](#6-create-user-and-emails-directory)
-7. [Restart Services](#7-restart-everything)
-8. [Points of Attention](#points-of-attention)
+3. [Initial Setup via CLI](#3-initial-setup-via-cli)
+4. [Postfix — main.cf](#4-postfix--maincf)
+5. [Postfix SQL Files](#5-postfix-sql-files)
+6. [Dovecot](#6-dovecot)
+7. [User and Emails Directory](#7-create-user-and-emails-directory)
+8. [Restart Services](#8-restart-everything)
+9. [Points of Attention](#points-of-attention)
 
 ---
 
@@ -113,7 +114,48 @@ The web interface password generator already follows the same rules, so generate
 
 ---
 
-## 3. Postfix — `/etc/postfix/main.cf`
+## 3. Initial Setup via CLI
+
+After the migration, use the CLI to bootstrap the initial data before starting the web service.
+
+```bash
+cd /opt/go-postfixadmin
+```
+
+### Superadmin
+
+```bash
+./postfixadmin admin --add-superadmin "admin@example.com:Password1@"
+```
+
+### First domain
+
+```bash
+./postfixadmin domain --add "example.com" \
+  --description "Main domain" \
+  --max-aliases 100 \
+  --max-mailboxes 50
+```
+
+### First mailbox
+
+```bash
+./postfixadmin mailbox --add "user@example.com:Password1@"
+```
+
+### Dovecot LMTP transport
+
+Required for local mail delivery. Register the `local` domain pointing to Dovecot's LMTP socket:
+
+```bash
+./postfixadmin transport --add "local:lmtp:unix:private/dovecot-lmtp"
+```
+
+> After this step you can start the web service and log in with the superadmin credentials created above.
+
+---
+
+## 4. Postfix — `/etc/postfix/main.cf`
 
 ```ini
 # Domain and hostname
@@ -152,7 +194,7 @@ smtpd_tls_auth_only = yes
 
 ---
 
-## 4. Postfix SQL Files
+## 5. Postfix SQL Files
 
 Create the files below in `/etc/postfix/sql/` and then protect them:
 
@@ -232,7 +274,7 @@ query    = SELECT maildir FROM mailbox,alias_domain
 
 ---
 
-## 5. Dovecot
+## 6. Dovecot
 
 Instead of making changes across multiple fragmented files, you can configure everything mainly using two files.
 
@@ -357,7 +399,7 @@ sudo chown root:dovecot /etc/dovecot/dovecot-sql.conf
 
 ---
 
-## 6. Create user and emails directory
+## 7. Create user and emails directory
 
 ```bash
 groupadd -g 1001 vmail
@@ -367,7 +409,7 @@ chown -R vmail:vmail /var/vmail
 
 ---
 
-## 7. Restart everything
+## 8. Restart everything
 
 ```bash
 systemctl restart postfix dovecot rsyslog

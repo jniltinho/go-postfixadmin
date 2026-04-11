@@ -10,7 +10,7 @@
             <div class="bg-brand-primary px-6 py-4 flex items-center justify-between flex-shrink-0">
                 <h3 class="text-lg font-mono font-black uppercase tracking-tight text-white flex items-center">
                     <i data-lucide="plus-circle" class="w-5 h-5 mr-2"></i>
-                    Add Transport
+                    {{ T $.Lang `Transport_AddTitle` }}
                 </h3>
                 <button onclick="closeAddTransportModal()" class="text-white hover:text-gray-200 transition-colors">
                     <i data-lucide="x" class="w-5 h-5"></i>
@@ -32,10 +32,10 @@
                         <div>
                             <label for="modal-add-domain"
                                 class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
-                                Domain <span class="text-red-500">*</span>
+                                {{ T $.Lang `Transport_LblDomain` }} <span class="text-red-500">*</span>
                             </label>
                             <input type="text" id="modal-add-domain" name="domain" required
-                                placeholder="e.g. example.com or *"
+                                placeholder="{{ T $.Lang `Transport_PhDomain` }}"
                                 class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm">
                         </div>
 
@@ -43,10 +43,10 @@
                         <div>
                             <label for="modal-add-transport"
                                 class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
-                                Transport <span class="text-red-500">*</span>
+                                {{ T $.Lang `Transport_LblTransport` }} <span class="text-red-500">*</span>
                             </label>
                             <input type="text" id="modal-add-transport" name="transport" required
-                                placeholder="e.g. smtp, local, virtual"
+                                placeholder="{{ T $.Lang `Transport_PhTransport` }}"
                                 class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm">
                         </div>
 
@@ -55,7 +55,7 @@
                             <input type="checkbox" id="modal-add-transport-active" name="active" value="true" checked
                                 class="w-5 h-5 border-2 border-brand-text cursor-pointer">
                             <label for="modal-add-transport-active" class="ml-2 text-sm font-bold cursor-pointer">
-                                Active
+                                {{ T $.Lang `Transport_LblActive` }}
                             </label>
                         </div>
                     </div>
@@ -68,12 +68,12 @@
                 <button type="button" onclick="closeAddTransportModal()"
                     class="bg-white hover:bg-gray-100 text-brand-text border-2 border-brand-text font-black px-6 py-2.5 shadow-[2px_2px_0px_#1E293B] hover:translate-y-px hover:shadow-[1px_1px_0px_#1E293B] active:translate-y-0.5 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center">
                     <i data-lucide="x" class="w-4 h-4 mr-2"></i>
-                    Cancel
+                    {{ T $.Lang `Transport_BtnCancel` }}
                 </button>
                 <button type="submit" form="modalAddTransportForm" id="btn-save-transport"
                     class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-6 py-2.5 shadow-[2px_2px_0px_#1E293B] hover:translate-y-px hover:shadow-[1px_1px_0px_#1E293B] active:translate-y-0.5 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center">
                     <i data-lucide="save" class="w-4 h-4 mr-2"></i>
-                    Save Transport
+                    {{ T $.Lang `Transport_BtnSave` }}
                 </button>
             </div>
         </div>
@@ -102,13 +102,13 @@
         errBox.classList.add('hidden');
 
         if (!document.getElementById('modal-add-domain').value.trim()) {
-            errText.textContent = 'Domain name is required.';
+            errText.textContent = `{{ T $.Lang "Transport_JsDomainRequired" }}`;
             errBox.classList.remove('hidden');
             return;
         }
 
         if (!document.getElementById('modal-add-transport').value.trim()) {
-            errText.textContent = 'Transport name is required.';
+            errText.textContent = `{{ T $.Lang "Transport_JsTransportRequired" }}`;
             errBox.classList.remove('hidden');
             return;
         }
@@ -128,14 +128,14 @@
                 if (data.success) {
                     window.location.reload();
                 } else {
-                    errText.textContent = data.error || 'Failed to create transport';
+                    errText.textContent = data.error || `{{ T $.Lang "Transport_JsCreateFailed" }}`;
                     errBox.classList.remove('hidden');
                     btn.disabled = false;
                     btn.classList.remove('opacity-50', 'cursor-not-allowed');
                 }
             })
             .catch(function (err) {
-                errText.textContent = 'Network or server error occurred.';
+                errText.textContent = `{{ T $.Lang "Transport_JsNetworkError" }}`;
                 errBox.classList.remove('hidden');
                 btn.disabled = false;
                 btn.classList.remove('opacity-50', 'cursor-not-allowed');

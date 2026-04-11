@@ -40,6 +40,7 @@ func (h *Handler) ListTransports(c *echo.Context) error {
 
 // AddTransportAPI processes the creation of a new transport via JSON API
 func (h *Handler) AddTransportAPI(c *echo.Context) error {
+	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
 	if !middleware.GetIsSuperAdmin(c) {
 		return c.JSON(http.StatusForbidden, map[string]interface{}{"success": false, "error": "Access denied"})
 	}
@@ -59,7 +60,7 @@ func (h *Handler) AddTransportAPI(c *echo.Context) error {
 		Active:    active,
 	}
 
-	if err := repositories.CreateTransport(h.DB, newTransport); err != nil {
+	if err := repositories.CreateTransport(h.DB, newTransport, loggedInUser, c.RealIP()); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to create transport"})
 	}
 
@@ -90,6 +91,7 @@ func (h *Handler) GetTransportAPI(c *echo.Context) error {
 
 // EditTransportAPI update an existing transport
 func (h *Handler) EditTransportAPI(c *echo.Context) error {
+	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
 	if !middleware.GetIsSuperAdmin(c) {
 		return c.JSON(http.StatusForbidden, map[string]interface{}{"success": false, "error": "Access denied"})
 	}
@@ -114,7 +116,7 @@ func (h *Handler) EditTransportAPI(c *echo.Context) error {
 		"modified":  time.Now(),
 	}
 
-	if err := repositories.UpdateTransport(h.DB, id, updates); err != nil {
+	if err := repositories.UpdateTransport(h.DB, id, updates, loggedInUser, c.RealIP()); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to update transport"})
 	}
 
@@ -124,6 +126,7 @@ func (h *Handler) EditTransportAPI(c *echo.Context) error {
 
 // DeleteTransport handles transport deletion
 func (h *Handler) DeleteTransport(c *echo.Context) error {
+	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
 	if !middleware.GetIsSuperAdmin(c) {
 		return c.JSON(http.StatusForbidden, map[string]interface{}{"success": false, "error": "Access denied"})
 	}
@@ -133,7 +136,7 @@ func (h *Handler) DeleteTransport(c *echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "error": "Invalid ID"})
 	}
 
-	if err := repositories.DeleteTransport(h.DB, id); err != nil {
+	if err := repositories.DeleteTransport(h.DB, id, loggedInUser, c.RealIP()); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to delete transport"})
 	}
 

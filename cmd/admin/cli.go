@@ -35,34 +35,6 @@ func FormatQuota(bytes int64) string {
 	return fmt.Sprintf("%s %cB", strings.TrimSuffix(val, ".0"), "KMGTPE"[exp])
 }
 
-// ListAllDomains lists all domains in the database
-func ListAllDomains(db *gorm.DB) {
-	var domains []models.Domain
-	if err := db.Where("domain != ?", "ALL").Order("domain ASC").Find(&domains).Error; err != nil {
-		slog.Error("Failed to fetch domains", "error", err)
-		os.Exit(1)
-	}
-
-	t := table.NewWriter()
-	t.SetOutputMirror(os.Stdout)
-	t.AppendHeader(table.Row{"Domain", "Description", "Aliases", "Mailboxes", "Quota", "Active", "Modified"})
-
-	for _, d := range domains {
-		active := "No"
-		if d.Active {
-			active = "Yes"
-		}
-		// Domain quota stored in MB/units, apply multiplier * multiplier for display?
-		unit := utils.GetQuotaMultiplier()
-		t.AppendRow(table.Row{d.Domain, d.Description, d.Aliases, d.Mailboxes, FormatQuota(d.Quota * unit * unit), active, d.Modified.Format("2006-01-02 15:04:05")})
-	}
-	style := table.StyleDefault
-	style.Format.Footer = text.FormatDefault
-	t.SetStyle(style)
-	t.AppendFooter(table.Row{"List All Domains", strings.Join(os.Args, " ")})
-	t.Render()
-}
-
 // ListAllMailboxes lists all mailboxes in the database
 func ListAllMailboxes(db *gorm.DB) {
 	var mailboxes []models.Mailbox

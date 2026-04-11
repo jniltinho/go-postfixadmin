@@ -151,20 +151,63 @@ Go-PostfixAdmin will manage the database structure (tables, domains, accounts, a
 4. **Run Migrations:**
    Before starting the service, create the necessary tables by running migrations:
    ```bash
-   /opt/go-postfixadmin/postfixadmin migrate
+   cd /opt/go-postfixadmin
+   ./postfixadmin migrate
    ```
-
-5. **Start the systemd Service:**
-   Since the package already provided the systemd service file, you just need to enable and start it:
-   ```bash
-   sudo systemctl daemon-reload
-   sudo systemctl enable --now postfixadmin.service
-   ```
-   *Check logs with: `tail -f /opt/go-postfixadmin/postfixadmin.log`*
 
 ---
 
-## 4. Configure Postfix
+## 4. Initial Setup via CLI
+
+After the migration, use the CLI to bootstrap the initial data **before starting the web service**.
+
+```bash
+cd /opt/go-postfixadmin
+```
+
+### Superadmin
+
+```bash
+./postfixadmin admin --add-superadmin "admin@example.com:Password1@"
+```
+
+### First domain
+
+```bash
+./postfixadmin domain --add "example.com" \
+  --description "Main domain" \
+  --max-aliases 100 \
+  --max-mailboxes 50
+```
+
+### First mailbox
+
+```bash
+./postfixadmin mailbox --add "user@example.com:Password1@"
+```
+
+### Dovecot LMTP transport
+
+Required for local mail delivery. Register the `local` domain pointing to Dovecot's LMTP socket:
+
+```bash
+./postfixadmin transport --add "local:lmtp:unix:private/dovecot-lmtp"
+```
+
+### Start the web service
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now postfixadmin.service
+```
+
+*Check logs with: `tail -f /opt/go-postfixadmin/postfixadmin.log`*
+
+> You can now log in to the web interface with the superadmin credentials created above.
+
+---
+
+## 5. Configure Postfix
 
 ### General Configuration (`/etc/postfix/main.cf`)
 
@@ -231,7 +274,7 @@ submission inet n       -       y       -       -       smtpd
 
 ---
 
-## 5. SQL Maps for Postfix
+## 6. SQL Maps for Postfix
 
 Create the SQL query files in the directory below and ensure proper permissions:
 
@@ -304,7 +347,7 @@ sudo chown root:postfix /etc/postfix/sql/*.cf
 
 ---
 
-## 6. Configure Dovecot
+## 7. Configure Dovecot
 
 Instead of making changes across multiple fragmented files, you can configure everything mainly using two files. 
 
@@ -445,7 +488,7 @@ sudo chown root:dovecot /etc/dovecot/dovecot-sql.conf
 
 ---
 
-## 7. Create the User and Email Directory
+## 8. Create the User and Email Directory
 
 Create the `vmail` (Virtual Mail) system user, which will own all mailbox files:
 
@@ -457,7 +500,7 @@ sudo chown -R vmail:vmail /var/vmail
 
 ---
 
-## 8. Configure System Logging (rsyslog)
+## 9. Configure System Logging (rsyslog)
 
 To properly capture logs from Postfix (especially if running chrooted) and Dovecot, you need to configure `rsyslog`.
 
@@ -504,7 +547,7 @@ sudo systemctl restart rsyslog
 
 ---
 
-## 9. Restart and Validate Services
+## 10. Restart and Validate Services
 
 After making all configurations, restart the services to apply changes:
 
@@ -526,7 +569,7 @@ sudo tail -f /var/log/mail.log
 
 ---
 
-## 10. Vacation / Auto-Reply with Dovecot Sieve
+## 11. Vacation / Auto-Reply with Dovecot Sieve
 
 Go-PostfixAdmin allows users to configure vacation auto-replies through the web UI. The actual delivery of these replies is handled by **Dovecot Sieve** — a mail filtering language built into Dovecot.
 
@@ -543,7 +586,7 @@ Cron (*/10 min)
       inactive or out of range  → remove .dovecot.sieve
 ```
 
-### 10.1 Enable Sieve in Dovecot
+### 11.1 Enable Sieve in Dovecot
 
 Install the Dovecot Sieve plugin:
 
@@ -590,7 +633,7 @@ Restart Dovecot to apply:
 sudo systemctl restart dovecot
 ```
 
-### 10.2 Install the `dovecot-vacation` Binary
+### 11.2 Install the `dovecot-vacation` Binary
 
 The `dovecot-vacation` binary is part of this project. Build and install it:
 
@@ -609,7 +652,7 @@ sudo chown vmail:vmail /opt/go-postfixadmin/dovecot-vacation
 sudo chmod 750 /opt/go-postfixadmin/dovecot-vacation
 ```
 
-### 10.3 Configuration (`config.toml`)
+### 11.3 Configuration (`config.toml`)
 
 The binary shares the same `config.toml` as Go-PostfixAdmin. Make sure the following keys are present:
 
@@ -630,7 +673,7 @@ mail_base = "/var/vmail"  # Maildir base path (default: /var/vmail)
 enabled = true
 ```
 
-### 10.4 Schedule via Cron
+### 11.4 Schedule via Cron
 
 Add the cron entry to run the sync every 10 minutes as the `vmail` user:
 
@@ -646,7 +689,7 @@ Add the line:
 
 > **Note:** The binary must be able to read and write files inside `/var/vmail`. Running it as `vmail` is the safest approach.
 
-### 10.5 Generated Sieve Script
+### 11.5 Generated Sieve Script
 
 For each mailbox with an active vacation, `dovecot-vacation` writes a `.dovecot.sieve` file like this:
 
@@ -664,7 +707,7 @@ Em caso de urgência, por favor contate José Nilton.";
 - If `interval_time` is `0` (reply once), `:days` defaults to `1`
 - The script is automatically compiled with `sievec` after being written
 
-### 10.6 Verify
+### 11.6 Verify
 
 Check if Sieve is active for a specific user:
 
