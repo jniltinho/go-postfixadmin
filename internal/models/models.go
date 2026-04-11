@@ -224,6 +224,7 @@ type Mailbox struct {
 	PasswordExpiry time.Time `gorm:"column:password_expiry;not null;default:'2000-01-01 00:00:00'" json:"password_expiry"`
 	TOTPSecret     *string   `gorm:"column:totp_secret;type:varchar(255)" json:"totp_secret"`
 	SMTPActive     bool      `gorm:"column:smtp_active;not null;default:true" json:"smtp_active"`
+	Transport      string    `gorm:"column:transport;type:varchar(255);not null;default:''" json:"transport"`
 }
 
 // TableName Mailbox's table name

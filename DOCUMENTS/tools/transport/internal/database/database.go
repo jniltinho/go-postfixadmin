@@ -35,6 +35,28 @@ func Connect(cfg config.Config) (*Database, error) {
 	return &Database{DB: db, Cfg: cfg}, nil
 }
 
+// GetEmailTransport queries the mailbox table for a per-user transport override,
+// then falls back to the domain-level routing via GetDomainTransport.
+//
+// Priority:
+//  1. mailbox WHERE username = email AND active = true (per-user transport override)
+//  2. GetDomainTransport(domain) (domain-level routing)
+func (d *Database) GetEmailTransport(email string, domain string) (string, error) {
+	// 1. Per-user transport override in mailbox table
+	var mb Mailbox
+	err := d.DB.Select("transport").Where("username = ? AND active = true", email).First(&mb).Error
+	if err == nil && mb.Transport != "" && mb.Transport != "virtual" {
+		return d.FormatTransport(mb.Transport), nil
+	}
+	if err != nil && err != gorm.ErrRecordNotFound {
+		log.Printf("DB error GetEmailTransport(%s): %v", email, err)
+		return "", err
+	}
+
+	// 2. Fallback to domain-level routing
+	return d.GetDomainTransport(domain)
+}
+
 // GetDomainTransport queries transport_list first (specific routing rules),
 // then falls back to the domain table transport field.
 //
@@ -65,28 +87,6 @@ func (d *Database) GetDomainTransport(domain string) (string, error) {
 	}
 
 	return d.FormatTransport(dmn.Transport), nil
-}
-
-// GetEmailTransport queries the mailbox table for a per-user transport override,
-// then falls back to the domain-level routing via GetDomainTransport.
-//
-// Priority:
-//  1. mailbox WHERE username = email AND active = true (per-user transport override)
-//  2. GetDomainTransport(domain) (domain-level routing)
-func (d *Database) GetEmailTransport(email string, domain string) (string, error) {
-	// 1. Per-user transport override in mailbox table
-	var mb Mailbox
-	err := d.DB.Select("transport").Where("username = ? AND active = true", email).First(&mb).Error
-	if err == nil && mb.Transport != "" && mb.Transport != "virtual" {
-		return d.FormatTransport(mb.Transport), nil
-	}
-	if err != nil && err != gorm.ErrRecordNotFound {
-		log.Printf("DB error GetEmailTransport(%s): %v", email, err)
-		return "", err
-	}
-
-	// 2. Fallback to domain-level routing
-	return d.GetDomainTransport(domain)
 }
 
 // FormatTransport aplica a lógica de reescrita local presente no Perl original.
