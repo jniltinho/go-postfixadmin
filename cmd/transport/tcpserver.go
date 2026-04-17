@@ -105,6 +105,7 @@ func (s *TCPServer) handleConnection(conn net.Conn) {
 			s.reply(conn, "400 INVALID ENCODING")
 			continue
 		}
+		subject = strings.ToLower(subject)
 
 		if subject == "*" {
 			s.logEvent("EXTERNAL", subject, "", false, "500 not found")
