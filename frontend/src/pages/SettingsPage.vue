@@ -30,68 +30,45 @@
       </div>
     </div>
 
-    <!-- ─── Table card ─── -->
-    <div class="table-card">
-      <div class="table-topbar">
-        <div class="controls-left">
-          <span class="ctrl-label-bold">ACTIVE PERSONAL ACCESS TOKENS</span>
-        </div>
-        <div class="controls-right">
-          <button class="btn-refresh" @click="load">
-            <Icon name="refresh-cw" :size="14" /> REFRESH
-          </button>
-        </div>
-      </div>
+    <!-- ─── Table ─── -->
+    <AppTable
+      :rows="keys"
+      :columns="columns"
+      row-key="id"
+      :search-fields="['name', 'preview']"
+      default-sort-key="name"
+      :loading="loading"
+    >
+      <template #topbar-extra>
+        <button class="btn-refresh" @click="load">
+          <Icon name="refresh-cw" :size="14" /> REFRESH
+        </button>
+      </template>
 
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead>
-            <tr class="table-head-row">
-              <th class="table-th">KEY NAME</th>
-              <th class="table-th">TOKEN PREVIEW</th>
-              <th class="table-th">CREATED</th>
-              <th class="table-th">EXPIRES AT</th>
-              <th class="table-th">ACTIVE</th>
-              <th class="table-th text-center">ACTIONS</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="loading">
-              <td colspan="6" class="table-loading">
-                <div class="spinner mx-auto" />
-              </td>
-            </tr>
-            <tr v-else-if="keys.length === 0">
-              <td colspan="6" class="table-empty">No API keys generated yet. Click "Generate API Key" to create one.</td>
-            </tr>
-            <tr v-for="row in keys" :key="row.id" class="table-row">
-              <td class="table-td font-semibold">{{ row.name }}</td>
-              <td class="table-td font-mono text-grey-7">{{ row.preview }}</td>
-              <td class="table-td">{{ formatDate(row.created) }}</td>
-              <td class="table-td font-semibold" :class="{ 'text-red-500': isExpired(row.expires_at) }">
-                {{ row.expires_at ? formatDate(row.expires_at) : 'NEVER' }}
-              </td>
-              <td class="table-td">
-                <button
-                  class="badge-toggle"
-                  :class="row.active ? 'badge-yes' : 'badge-no'"
-                  @click="toggleActive(row)"
-                  :disabled="updatingRowId === row.id"
-                  title="Click to toggle status"
-                >
-                  {{ row.active ? 'YES' : 'NO' }}
-                </button>
-              </td>
-              <td class="table-td actions-td text-center justify-center">
-                <button class="act-btn act-del" @click="confirmDelete(row)">
-                  <Icon name="trash-2" :size="12" style="margin-right:4px;vertical-align:middle" />REVOKE
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+      <template #cell-preview="{ value }">
+        <span class="font-mono text-grey-7">{{ value }}</span>
+      </template>
+      <template #cell-created="{ value }">{{ formatDate(value) }}</template>
+      <template #cell-expires_at="{ value, row }">
+        <span :class="{ 'text-red-500 font-bold': isExpired(row.expires_at) }">
+          {{ value ? formatDate(value) : 'NEVER' }}
+        </span>
+      </template>
+      <template #cell-active="{ row }">
+        <button
+          class="badge-toggle"
+          :class="row.active ? 'badge-yes' : 'badge-no'"
+          :disabled="updatingRowId === row.id"
+          title="Click to toggle status"
+          @click="toggleActive(row)"
+        >{{ row.active ? 'YES' : 'NO' }}</button>
+      </template>
+      <template #actions="{ row }">
+        <button class="act-btn act-del" @click="confirmDelete(row)">
+          <Icon name="trash-2" :size="12" style="margin-right:4px;vertical-align:middle" />REVOKE
+        </button>
+      </template>
+    </AppTable>
 
     <!-- ══════════ GENERATE MODAL ══════════ -->
     <div v-if="showAdd" class="modal-overlay" @click.self="showAdd = false">
@@ -227,44 +204,19 @@
     </div>
 
     <!-- ══════════ REVOKE CONFIRM ══════════ -->
-    <div v-if="showDeleteConfirm" class="modal-overlay" @click.self="showDeleteConfirm = false">
-      <div class="bg-white border-4 border-brand-text w-full max-w-md flex flex-col">
-        <!-- Header -->
-        <div class="bg-red-600 px-6 py-4 flex items-center justify-between flex-shrink-0" style="border-bottom: 2px solid #1e293b;">
-          <h3 class="text-lg font-mono font-black uppercase tracking-tight text-white flex items-center">
-            <Icon name="trash-2" :size="20" class="mr-2" />
-            REVOKE TOKEN
-          </h3>
-          <button @click="showDeleteConfirm = false" class="text-white hover:text-gray-200 transition-colors">
-            <Icon name="x" :size="20" />
-          </button>
-        </div>
-
-        <!-- Body -->
-        <div class="p-6">
-          <p class="text-sm font-bold text-brand-text leading-relaxed">
-            Are you sure you want to revoke API key<br />
-            <strong class="text-red-600">{{ deleteTarget?.name }}</strong>?<br />
-            <span class="block text-xs text-gray-500 font-medium mt-2 leading-normal">
-              Any external client or script using this key will immediately be blocked. This action is permanent.
-            </span>
-          </p>
-        </div>
-
-        <!-- Footer -->
-        <div class="flex items-center justify-end space-x-3 px-6 py-4 border-t-2 border-brand-text bg-white">
-          <button type="button" @click="showDeleteConfirm = false"
-            class="bg-white hover:bg-gray-50 text-brand-text border-2 border-brand-text font-black px-4 py-2 shadow-[2px_2px_0px_#1E293B] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-xs">
-            CANCEL
-          </button>
-          <button type="button" :disabled="deletingRow" @click="submitDelete"
-            class="bg-red-600 hover:bg-white hover:text-red-600 text-white border-2 border-brand-text font-black px-4 py-2 shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-xs">
-            <Icon name="trash-2" :size="14" style="margin-right:4px;vertical-align:middle" />
-            {{ deletingRow ? 'REVOKING...' : 'REVOKE' }}
-          </button>
-        </div>
-      </div>
-    </div>
+    <ConfirmDialog
+      v-model="showDeleteConfirm"
+      title="REVOKE TOKEN"
+      confirm-label="REVOKE"
+      :loading="deletingRow"
+      @confirm="submitDelete"
+    >
+      <p class="text-sm font-medium text-brand-text leading-relaxed">
+        Are you sure you want to revoke API key<br />
+        <strong class="font-mono break-all">{{ deleteTarget?.name }}</strong>?<br />
+        <span class="text-xs text-gray-500 mt-1 block">Any external client or script using this key will immediately be blocked. This action is permanent.</span>
+      </p>
+    </ConfirmDialog>
 
   </div>
 </template>
@@ -284,6 +236,14 @@ interface ApiKey {
   expires_at: string | null
   active: boolean
 }
+
+const columns = [
+  { key: 'name',       label: 'KEY NAME' },
+  { key: 'preview',    label: 'TOKEN PREVIEW' },
+  { key: 'created',    label: 'CREATED' },
+  { key: 'expires_at', label: 'EXPIRES AT' },
+  { key: 'active',     label: 'ACTIVE' },
+]
 
 // ─── State ───
 const keys = ref<ApiKey[]>([])
@@ -436,7 +396,9 @@ function isExpired(ts: string | null): boolean {
 .ctrl-label-bold { font-size: 13px; color: #1e293b; font-weight: 800; letter-spacing: 0.5px; }
 
 .btn-refresh {
-  background: #f8fafc; border: 1px solid #cbd5e1; color: #475569; padding: 5px 12px;
+  display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;
+  background: #f8fafc; border: 2px solid #cbd5e1; color: #475569;
+  padding: 4px 12px; height: 31px; box-sizing: border-box;
   font-size: 10px; font-weight: 800; letter-spacing: 0.4px; cursor: pointer;
   border-radius: 0; transition: all .12s; text-transform: uppercase;
 }

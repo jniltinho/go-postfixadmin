@@ -16,6 +16,7 @@
           </div>
         </div>
         <div class="controls-right">
+          <slot name="topbar-extra" />
           <span class="ctrl-label">Search:</span>
           <input v-model="search" class="search-input" placeholder="Search records..." @input="currentPage = 1" />
         </div>
@@ -32,7 +33,7 @@
                   <span :class="{ 'sort-active': sortKey === col.key && sortDir === 'desc' }">▼</span>
                 </span>
               </th>
-              <th v-if="showActions" class="table-th">ACTIONS</th>
+              <th v-if="showActions" class="table-th" style="text-align:right">ACTIONS</th>
             </tr>
           </thead>
           <tbody>
