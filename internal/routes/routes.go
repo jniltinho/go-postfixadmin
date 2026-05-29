@@ -1,117 +1,116 @@
 package routes
 
 import (
-	"net/http"
+	"io/fs"
+	"log/slog"
+	"mime"
+	"path/filepath"
+	"strings"
 
 	"go-postfixadmin/internal/handlers"
 	"go-postfixadmin/internal/middleware"
 
+	httpSwagger "github.com/swaggo/http-swagger"
 	"github.com/labstack/echo/v5"
 )
 
 // RegisterRoutes registers all the application routes
-func RegisterRoutes(e *echo.Echo, h *handlers.Handler) {
-	// Public Auth Routes (no middleware needed)
-	e.GET("/login", h.Login)
-	e.POST("/login", h.Login)
-	e.GET("/logout", h.Logout)
-
-	// Static files and utils (public)
+func RegisterRoutes(e *echo.Echo, h *handlers.Handler, spaFS fs.FS) {
 	e.GET("/lang/:code", h.SetLanguage)
 
-	// Protected Admin Routes
-	adminGroup := e.Group("")
-	adminGroup.Use(middleware.AuthMiddleware)
+	apiV1 := e.Group("/api/v1")
 
-	// Dashboard
-	adminGroup.GET("/dashboard", h.Dashboard)
+	// Public auth endpoints
+	apiV1.POST("/auth/login", h.AuthLogin)
+	apiV1.POST("/auth/refresh", h.AuthRefresh)
 
-	// Logs
-	adminGroup.GET("/logs", h.Logs)
-	adminGroup.GET("/api/logs", h.LogsData)
+	// All protected endpoints
+	protected := apiV1.Group("", middleware.JWTAuthMiddleware())
 
-	// Maillog
-	adminGroup.GET("/maillog", h.MailLog)
-	adminGroup.GET("/api/maillog", h.MailLogData)
+	protected.POST("/auth/logout", h.AuthLogout)
+	protected.GET("/auth/me", h.AuthMe)
 
-	// Domains
-	adminGroup.GET("/domains", h.ListDomains)
-	adminGroup.POST("/api/domains", h.AddDomainAPI)
-	adminGroup.GET("/api/domains/:domain", h.GetDomainAPI)
-	adminGroup.POST("/api/domains/:domain", h.EditDomainAPI)
-	adminGroup.DELETE("/domains/delete/:domain", h.DeleteDomain)
+	protected.GET("/domains", h.ListDomainsV1)
+	protected.POST("/domains", h.CreateDomainV1)
+	protected.GET("/domains/:domain", h.GetDomainV1)
+	protected.PUT("/domains/:domain", h.UpdateDomainV1)
+	protected.DELETE("/domains/:domain", h.DeleteDomainV1)
 
-	// Mailboxes
-	adminGroup.GET("/mailboxes", h.ListMailboxes)
-	adminGroup.POST("/api/mailboxes", h.AddMailboxAPI)
-	adminGroup.GET("/api/mailboxes/:username", h.GetMailboxAPI)
-	adminGroup.POST("/api/mailboxes/:username", h.EditMailboxAPI)
-	adminGroup.DELETE("/mailboxes/delete/:username", h.DeleteMailbox)
+	protected.GET("/mailboxes", h.ListMailboxesV1)
+	protected.POST("/mailboxes", h.CreateMailboxV1)
+	protected.GET("/mailboxes/:username", h.GetMailboxV1)
+	protected.PUT("/mailboxes/:username", h.UpdateMailboxV1)
+	protected.DELETE("/mailboxes/:username", h.DeleteMailboxV1)
 
-	// Admins
-	adminGroup.GET("/admins", h.ListAdmins)
-	adminGroup.POST("/api/admins", h.AddAdminAPI)
-	adminGroup.GET("/api/admins/:username", h.GetAdminAPI)
-	adminGroup.POST("/api/admins/:username", h.EditAdminAPI)
-	adminGroup.DELETE("/admins/delete/:username", h.DeleteAdmin)
+	protected.GET("/aliases", h.ListAliasesV1)
+	protected.POST("/aliases", h.CreateAliasV1)
+	protected.GET("/aliases/:address", h.GetAliasV1)
+	protected.PUT("/aliases/:address", h.UpdateAliasV1)
+	protected.DELETE("/aliases/:address", h.DeleteAliasV1)
 
-	// Aliases
-	adminGroup.GET("/aliases", h.ListAliases)
-	adminGroup.POST("/api/aliases", h.AddAliasAPI)
-	adminGroup.GET("/api/aliases/:address", h.GetAliasAPI)
-	adminGroup.POST("/api/aliases/:address", h.EditAliasAPI)
-	adminGroup.DELETE("/aliases/delete/:address", h.DeleteAlias)
+	protected.GET("/alias-domains", h.ListAliasDomainsV1)
+	protected.POST("/alias-domains", h.CreateAliasDomainV1)
+	protected.GET("/alias-domains/:alias_domain", h.GetAliasDomainV1)
+	protected.PUT("/alias-domains/:alias_domain", h.UpdateAliasDomainV1)
+	protected.DELETE("/alias-domains/:alias_domain", h.DeleteAliasDomainV1)
 
-	// Alias Domains
-	adminGroup.GET("/alias-domains", h.ListAliasDomains)
-	adminGroup.POST("/api/alias-domains", h.AddAliasDomainAPI)
-	adminGroup.GET("/api/alias-domains/:alias_domain", h.GetAliasDomainAPI)
-	adminGroup.POST("/api/alias-domains/:alias_domain", h.EditAliasDomainAPI)
-	adminGroup.DELETE("/alias-domains/delete/:alias_domain", h.DeleteAliasDomain)
+	protected.GET("/admins", h.ListAdminsV1)
+	protected.POST("/admins", h.CreateAdminV1)
+	protected.GET("/admins/:username", h.GetAdminV1)
+	protected.PUT("/admins/:username", h.UpdateAdminV1)
+	protected.DELETE("/admins/:username", h.DeleteAdminV1)
 
-	// Fetchmail
-	adminGroup.GET("/fetchmail/add", h.AddFetchmailGET)
-	adminGroup.POST("/fetchmail/add", h.AddFetchmailPOST)
+	protected.GET("/transports", h.ListTransportsV1)
+	protected.POST("/transports", h.CreateTransportV1)
+	protected.GET("/transports/:id", h.GetTransportV1)
+	protected.PUT("/transports/:id", h.UpdateTransportV1)
+	protected.DELETE("/transports/:id", h.DeleteTransportV1)
 
-	// Transports
-	adminGroup.GET("/transports", h.ListTransports)
-	adminGroup.POST("/api/transports", h.AddTransportAPI)
-	adminGroup.GET("/api/transports/:id", h.GetTransportAPI)
-	adminGroup.POST("/api/transports/:id", h.EditTransportAPI)
-	adminGroup.DELETE("/transports/delete/:id", h.DeleteTransport)
+	protected.GET("/dashboard", h.DashboardStatsV1)
+	protected.GET("/logs", h.LogsV1)
+	protected.GET("/maillog", h.MailLogV1)
 
+	e.GET("/swagger/*", echo.WrapHandler(httpSwagger.WrapHandler))
 
-	// User Portal Routes (public)
-	e.GET("/users/login", h.UserLogin)
-	e.POST("/users/login", h.UserLogin)
-	e.GET("/users/logout", h.UserLogout)
+	if spaFS != nil {
+		e.GET("/*", spaHandler(spaFS))
+		slog.Info("Quasar SPA frontend active at /")
+	}
+}
 
-	// Protected User Portal Routes
-	userGroup := e.Group("/users")
-	userGroup.Use(middleware.UserAuthMiddleware)
-	userGroup.GET("/dashboard", h.UserDashboard)
-	userGroup.POST("/password", h.UpdateUserPassword)
-	userGroup.POST("/forwarding", h.UpdateUserForwarding)
-	userGroup.GET("/vacation", h.UserVacation)
-	userGroup.POST("/vacation", h.UpdateUserVacation)
-	userGroup.POST("/vacation/delete", h.DeleteUserVacation)
-
-	// Root Redirect
-	e.GET("/", func(c *echo.Context) error {
-		return c.Redirect(http.StatusMovedPermanently, "/dashboard")
-	})
-
-	// Catch-all route for unknown pages (404)
-	e.Any("/*", func(c *echo.Context) error {
-		// If User is logged in
-		if middleware.GetUsername(c, middleware.UserSessionName) != "" {
-			return c.Redirect(http.StatusFound, "/users/dashboard")
+func spaHandler(spaFS fs.FS) echo.HandlerFunc {
+	return func(c *echo.Context) error {
+		urlPath := c.Request().URL.Path
+		ext := strings.ToLower(filepath.Ext(urlPath))
+		if ext != "" {
+			fsPath := strings.TrimPrefix(urlPath, "/")
+			data, err := fs.ReadFile(spaFS, fsPath)
+			if err != nil {
+				return echo.ErrNotFound
+			}
+			ct := mime.TypeByExtension(ext)
+			if ct == "" {
+				ct = "application/octet-stream"
+			}
+			if ext == ".js" || ext == ".mjs" {
+				ct = "application/javascript; charset=utf-8"
+			}
+			if strings.HasPrefix(urlPath, "/assets/") {
+				c.Response().Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+			} else {
+				c.Response().Header().Set("Cache-Control", "public, max-age=3600")
+			}
+			c.Response().Header().Set("Content-Type", ct)
+			_, _ = c.Response().Write(data)
+			return nil
 		}
-		// If Admin is logged in
-		if middleware.GetUsername(c, middleware.SessionName) != "" {
-			return c.Redirect(http.StatusFound, "/dashboard")
+		indexHTML, err := fs.ReadFile(spaFS, "index.html")
+		if err != nil {
+			return echo.ErrNotFound
 		}
-		// Otherwise standard 404
-		return echo.ErrNotFound
-	})
+		c.Response().Header().Set("Content-Type", "text/html; charset=utf-8")
+		c.Response().Header().Set("Cache-Control", "no-cache")
+		_, _ = c.Response().Write(indexHTML)
+		return nil
+	}
 }

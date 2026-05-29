@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"time"
 
+	"go-postfixadmin/internal/api/dto"
 	"go-postfixadmin/internal/middleware"
 	"go-postfixadmin/internal/models"
 	"go-postfixadmin/internal/repositories"
@@ -230,4 +231,220 @@ func (h *Handler) EditAdminAPI(c *echo.Context) error {
 
 	SetFlash(c, "message", "Admin updated successfully")
 	return c.JSON(http.StatusOK, map[string]interface{}{"success": true})
+}
+
+// =====================================================
+// API v1 Admin Handlers (PR 09+)
+// =====================================================
+
+// ListAdminsV1 returns admins visible to the authenticated user
+func (h *Handler) ListAdminsV1(c *echo.Context) error {
+	claims := middleware.GetJWTClaims(c)
+	if claims == nil {
+		return dto.Unauthorized(c, "not authenticated")
+	}
+
+	admins, err := repositories.GetAllAdmins(h.DB, claims.Username, claims.Superadmin)
+	if err != nil {
+		return dto.InternalError(c, "failed to fetch administrators")
+	}
+
+	var response []dto.AdminResponse
+	for _, admin := range admins {
+		var domainCountStr string
+		if admin.Superadmin {
+			domainCountStr = "ALL"
+		} else {
+			count, _ := repositories.CountAdminDomains(h.DB, admin.Username)
+			domainCountStr = fmt.Sprintf("%d", count)
+		}
+		response = append(response, dto.AdminResponse{
+			Username:   admin.Username,
+			Active:     admin.Active,
+			Superadmin: admin.Superadmin,
+			Created:    admin.Created,
+			Modified:   admin.Modified,
+			DomainCount: domainCountStr,
+		})
+	}
+
+	return dto.WriteSuccess(c, response)
+}
+
+// CreateAdminV1 handles POST /api/v1/admins
+func (h *Handler) CreateAdminV1(c *echo.Context) error {
+	claims := middleware.GetJWTClaims(c)
+	if claims == nil {
+		return dto.Unauthorized(c, "not authenticated")
+	}
+
+	// Only superadmins can create other admins
+	if !claims.Superadmin {
+		return dto.Forbidden(c, "only superadmins can create administrators")
+	}
+
+	var req dto.CreateAdminRequest
+	if err := c.Bind(&req); err != nil {
+		return dto.BadRequest(c, "invalid request body")
+	}
+
+	if req.Username == "" || req.Password == "" {
+		return dto.ValidationError(c, "username and password are required")
+	}
+
+	if validationErr := ValidatePassword(req.Password); validationErr != "" {
+		return dto.ValidationError(c, validationErr)
+	}
+
+	if _, err := repositories.GetAdminByUsername(h.DB, req.Username); err == nil {
+		return dto.WriteError(c, dto.ErrCodeConflict, "admin already exists")
+	}
+
+	crypted, err := utils.HashPassword(req.Password)
+	if err != nil {
+		return dto.InternalError(c, "failed to hash password")
+	}
+
+	newAdmin := models.Admin{
+		Username:      req.Username,
+		Password:      crypted,
+		Created:       time.Now(),
+		Modified:      time.Now(),
+		Active:        req.Active,
+		Superadmin:    req.Superadmin,
+		TokenValidity: time.Now().Add(3 * time.Hour),
+	}
+
+	if err := repositories.CreateAdmin(h.DB, newAdmin, req.Domains, claims.Username, c.RealIP()); err != nil {
+		return dto.InternalError(c, "failed to create administrator")
+	}
+
+	return dto.WriteSuccessWithStatus(c, http.StatusCreated, map[string]string{"username": req.Username})
+}
+
+// GetAdminV1 handles GET /api/v1/admins/:username
+func (h *Handler) GetAdminV1(c *echo.Context) error {
+	claims := middleware.GetJWTClaims(c)
+	if claims == nil {
+		return dto.Unauthorized(c, "not authenticated")
+	}
+
+	targetUsername, _ := url.PathUnescape(c.Param("username"))
+	if targetUsername == "" {
+		return dto.ValidationError(c, "username required")
+	}
+
+	// Non-superadmins can only view themselves
+	if !claims.Superadmin && claims.Username != targetUsername {
+		return dto.Forbidden(c, "access denied")
+	}
+
+	admin, err := repositories.GetAdminByUsername(h.DB, targetUsername)
+	if err != nil {
+		return dto.NotFound(c, "admin not found")
+	}
+
+	allDomains, _, _ := repositories.GetActiveDomains(h.DB, claims.Username, true)
+	domainAdmins, _ := repositories.GetAdminAssignedDomains(h.DB, targetUsername)
+
+	assignedMap := make(map[string]bool)
+	for _, da := range domainAdmins {
+		assignedMap[da.Domain] = true
+	}
+
+	type DomainOption struct {
+		Domain   string `json:"domain"`
+		Assigned bool   `json:"assigned"`
+	}
+	var domainOptions []DomainOption
+	for _, d := range allDomains {
+		domainOptions = append(domainOptions, DomainOption{Domain: d.Domain, Assigned: assignedMap[d.Domain]})
+	}
+
+	return dto.WriteSuccess(c, map[string]interface{}{
+		"admin":   admin,
+		"domains": domainOptions,
+	})
+}
+
+// UpdateAdminV1 handles PUT /api/v1/admins/:username
+func (h *Handler) UpdateAdminV1(c *echo.Context) error {
+	claims := middleware.GetJWTClaims(c)
+	if claims == nil {
+		return dto.Unauthorized(c, "not authenticated")
+	}
+
+	targetUsername, _ := url.PathUnescape(c.Param("username"))
+	if targetUsername == "" {
+		return dto.ValidationError(c, "username required")
+	}
+
+	// Non-superadmins can only update themselves (limited fields)
+	isSuper := claims.Superadmin
+	if !isSuper && claims.Username != targetUsername {
+		return dto.Forbidden(c, "access denied")
+	}
+
+	var req dto.UpdateAdminRequest
+	if err := c.Bind(&req); err != nil {
+		return dto.BadRequest(c, "invalid request body")
+	}
+
+	updates := map[string]interface{}{
+		"modified":       time.Now(),
+		"token_validity": time.Now().Add(3 * time.Hour),
+	}
+
+	if isSuper {
+		if req.Active != nil {
+			updates["active"] = *req.Active
+		}
+		if req.Superadmin != nil {
+			updates["superadmin"] = *req.Superadmin
+		}
+	}
+
+	if req.ChangePassword != nil && *req.ChangePassword {
+		if req.Password == nil || req.PasswordConfirm == nil || *req.Password != *req.PasswordConfirm {
+			return dto.ValidationError(c, "passwords do not match")
+		}
+		if validationErr := ValidatePassword(*req.Password); validationErr != "" {
+			return dto.ValidationError(c, validationErr)
+		}
+		crypted, err := utils.HashPassword(*req.Password)
+		if err != nil {
+			return dto.InternalError(c, "failed to hash password")
+		}
+		updates["password"] = crypted
+	}
+
+	domains := req.Domains
+	if err := repositories.UpdateAdmin(h.DB, targetUsername, updates, domains, isSuper, claims.Username, c.RealIP()); err != nil {
+		return dto.InternalError(c, "failed to update admin")
+	}
+
+	return dto.WriteSuccess(c, map[string]bool{"updated": true})
+}
+
+// DeleteAdminV1 handles DELETE /api/v1/admins/:username
+func (h *Handler) DeleteAdminV1(c *echo.Context) error {
+	claims := middleware.GetJWTClaims(c)
+	if claims == nil {
+		return dto.Unauthorized(c, "not authenticated")
+	}
+
+	if !claims.Superadmin {
+		return dto.Forbidden(c, "only superadmins can delete administrators")
+	}
+
+	targetUsername, _ := url.PathUnescape(c.Param("username"))
+	if targetUsername == "" {
+		return dto.ValidationError(c, "username required")
+	}
+
+	if err := repositories.DeleteAdmin(h.DB, targetUsername, claims.Username, c.RealIP()); err != nil {
+		return dto.InternalError(c, "failed to delete administrator")
+	}
+
+	return dto.WriteSuccess(c, map[string]bool{"deleted": true})
 }

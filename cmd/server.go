@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"log/slog"
+	"os"
 
 	"go-postfixadmin/internal/database"
 	"go-postfixadmin/internal/server"
@@ -55,7 +56,15 @@ var serverCmd = &cobra.Command{
 
 		slog.Info("Starting Go-Postfixadmin...")
 		server.AppVersion = Version
-		server.StartServer(EmbeddedFiles, port, db, ssl, certFile, keyFile)
+
+		// JWT foundations (PR 01 of the Vue/Quasar + JWT migration plan) are loaded
+		// automatically via viper from [server] jwt_* keys. Full middleware + auth
+		// endpoints come in subsequent PRs. See internal/auth/jwt.go and
+		// DOCUMENTS/MIGRATION_PLAN_VUE3_QUASAR_JWT.md.
+		if err := server.StartServer(EmbeddedFiles, port, db, ssl, certFile, keyFile); err != nil {
+				slog.Error("server exited with error", "error", err)
+				os.Exit(1)
+			}
 	},
 }
 

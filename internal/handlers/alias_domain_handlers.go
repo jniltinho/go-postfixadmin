@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"time"
 
+	"go-postfixadmin/internal/api/dto"
 	"go-postfixadmin/internal/middleware"
 	"go-postfixadmin/internal/models"
 	"go-postfixadmin/internal/repositories"
@@ -247,4 +248,238 @@ func (h *Handler) EditAliasDomainAPI(c *echo.Context) error {
 
 	SetFlash(c, "message", "Alias Domain updated successfully")
 	return c.JSON(http.StatusOK, map[string]interface{}{"success": true})
+}
+
+// =====================================================
+// API v1 Alias Domain Handlers (PR 08+)
+// =====================================================
+
+// ListAliasDomainsV1 returns alias domains visible to the authenticated user
+func (h *Handler) ListAliasDomainsV1(c *echo.Context) error {
+	claims := middleware.GetJWTClaims(c)
+	if claims == nil {
+		return dto.Unauthorized(c, "not authenticated")
+	}
+
+	aliasDomains, _, err := repositories.GetAliasDomains(h.DB, claims.Username, claims.Superadmin)
+	if err != nil {
+		return dto.InternalError(c, "failed to fetch alias domains")
+	}
+
+	var response []dto.AliasDomainResponse
+	for _, ad := range aliasDomains {
+		response = append(response, dto.AliasDomainResponse{
+			AliasDomain:  ad.AliasDomain,
+			TargetDomain: ad.TargetDomain,
+			Active:       ad.Active,
+			Created:      ad.Created,
+			Modified:     ad.Modified,
+		})
+	}
+
+	return dto.WriteSuccess(c, response)
+}
+
+// CreateAliasDomainV1 handles POST /api/v1/alias-domains
+func (h *Handler) CreateAliasDomainV1(c *echo.Context) error {
+	claims := middleware.GetJWTClaims(c)
+	if claims == nil {
+		return dto.Unauthorized(c, "not authenticated")
+	}
+
+	var req dto.CreateAliasDomainRequest
+	if err := c.Bind(&req); err != nil {
+		return dto.BadRequest(c, "invalid request body")
+	}
+
+	if req.AliasDomain == "" || req.TargetDomain == "" {
+		return dto.ValidationError(c, "alias_domain and target_domain are required")
+	}
+	if req.AliasDomain == req.TargetDomain {
+		return dto.ValidationError(c, "source and target domains cannot be the same")
+	}
+
+	// Permission check
+	allowedDomains, _, err := repositories.GetAllowedDomains(h.DB, claims.Username, claims.Superadmin)
+	if err != nil {
+		return dto.InternalError(c, "permission check failed")
+	}
+	if !claims.Superadmin {
+		allowed := false
+		for _, d := range allowedDomains {
+			if d == req.TargetDomain || d == req.AliasDomain {
+				allowed = true
+				break
+			}
+		}
+		if !allowed {
+			return dto.Forbidden(c, "access denied to these domains")
+		}
+	}
+
+	if _, err := repositories.GetAliasDomainByName(h.DB, req.AliasDomain); err == nil {
+		return dto.WriteError(c, dto.ErrCodeConflict, "alias domain already exists")
+	}
+	if _, err := repositories.GetDomainByName(h.DB, req.TargetDomain); err != nil {
+		return dto.ValidationError(c, "target domain does not exist")
+	}
+
+	now := time.Now()
+	newAD := models.AliasDomain{
+		AliasDomain:  req.AliasDomain,
+		TargetDomain: req.TargetDomain,
+		Created:      now,
+		Modified:     now,
+		Active:       req.Active,
+	}
+
+	if err := repositories.CreateAliasDomain(h.DB, newAD, claims.Username, c.RealIP()); err != nil {
+		return dto.InternalError(c, "failed to create alias domain")
+	}
+
+	return dto.WriteSuccessWithStatus(c, http.StatusCreated, map[string]string{"alias_domain": req.AliasDomain})
+}
+
+// GetAliasDomainV1 handles GET /api/v1/alias-domains/:alias_domain
+func (h *Handler) GetAliasDomainV1(c *echo.Context) error {
+	claims := middleware.GetJWTClaims(c)
+	if claims == nil {
+		return dto.Unauthorized(c, "not authenticated")
+	}
+
+	name, _ := url.PathUnescape(c.Param("alias_domain"))
+
+	aliasDomain, err := repositories.GetAliasDomainByName(h.DB, name)
+	if err != nil {
+		return dto.NotFound(c, "alias domain not found")
+	}
+
+	// Scoping
+	allowedDomains, _, err := repositories.GetAllowedDomains(h.DB, claims.Username, claims.Superadmin)
+	if err != nil {
+		return dto.InternalError(c, "permission check failed")
+	}
+	if !claims.Superadmin {
+		allowed := false
+		for _, d := range allowedDomains {
+			if d == aliasDomain.TargetDomain {
+				allowed = true
+				break
+			}
+		}
+		if !allowed {
+			return dto.Forbidden(c, "access denied")
+		}
+	}
+
+	return dto.WriteSuccess(c, aliasDomain)
+}
+
+// UpdateAliasDomainV1 handles PUT /api/v1/alias-domains/:alias_domain
+func (h *Handler) UpdateAliasDomainV1(c *echo.Context) error {
+	claims := middleware.GetJWTClaims(c)
+	if claims == nil {
+		return dto.Unauthorized(c, "not authenticated")
+	}
+
+	name, _ := url.PathUnescape(c.Param("alias_domain"))
+
+	aliasDomain, err := repositories.GetAliasDomainByName(h.DB, name)
+	if err != nil {
+		return dto.NotFound(c, "alias domain not found")
+	}
+
+	// Scoping
+	allowedDomains, _, err := repositories.GetAllowedDomains(h.DB, claims.Username, claims.Superadmin)
+	if err != nil {
+		return dto.InternalError(c, "permission check failed")
+	}
+	if !claims.Superadmin {
+		allowed := false
+		for _, d := range allowedDomains {
+			if d == aliasDomain.TargetDomain {
+				allowed = true
+				break
+			}
+		}
+		if !allowed {
+			return dto.Forbidden(c, "access denied")
+		}
+	}
+
+	var req dto.UpdateAliasDomainRequest
+	if err := c.Bind(&req); err != nil {
+		return dto.BadRequest(c, "invalid request body")
+	}
+
+	if req.TargetDomain != nil {
+		if *req.TargetDomain == aliasDomain.AliasDomain {
+			return dto.ValidationError(c, "source and target domains cannot be the same")
+		}
+		if !claims.Superadmin {
+			allowed := false
+			for _, d := range allowedDomains {
+				if d == *req.TargetDomain {
+					allowed = true
+					break
+				}
+			}
+			if !allowed {
+				return dto.Forbidden(c, "access denied to new target domain")
+			}
+		}
+		if _, err := repositories.GetDomainByName(h.DB, *req.TargetDomain); err != nil {
+			return dto.ValidationError(c, "target domain does not exist")
+		}
+		aliasDomain.TargetDomain = *req.TargetDomain
+	}
+
+	if req.Active != nil {
+		aliasDomain.Active = *req.Active
+	}
+
+	if err := repositories.SaveAliasDomain(h.DB, aliasDomain, claims.Username, c.RealIP()); err != nil {
+		return dto.InternalError(c, "failed to update alias domain")
+	}
+
+	return dto.WriteSuccess(c, map[string]bool{"updated": true})
+}
+
+// DeleteAliasDomainV1 handles DELETE /api/v1/alias-domains/:alias_domain
+func (h *Handler) DeleteAliasDomainV1(c *echo.Context) error {
+	claims := middleware.GetJWTClaims(c)
+	if claims == nil {
+		return dto.Unauthorized(c, "not authenticated")
+	}
+
+	name, _ := url.PathUnescape(c.Param("alias_domain"))
+
+	aliasDomain, err := repositories.GetAliasDomainByName(h.DB, name)
+	if err != nil {
+		return dto.NotFound(c, "alias domain not found")
+	}
+
+	// Scoping
+	allowedDomains, _, err := repositories.GetAllowedDomains(h.DB, claims.Username, claims.Superadmin)
+	if err != nil {
+		return dto.InternalError(c, "permission check failed")
+	}
+	if !claims.Superadmin {
+		allowed := false
+		for _, d := range allowedDomains {
+			if d == aliasDomain.TargetDomain {
+				allowed = true
+				break
+			}
+		}
+		if !allowed {
+			return dto.Forbidden(c, "access denied")
+		}
+	}
+
+	if err := repositories.DeleteAliasDomain(h.DB, name, claims.Username, c.RealIP()); err != nil {
+		return dto.InternalError(c, "failed to delete alias domain")
+	}
+
+	return dto.WriteSuccess(c, map[string]string{"deleted": name})
 }

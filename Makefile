@@ -1,12 +1,9 @@
-## Variables for Tailwind CSS and UPX
-TAILWIND_VERSION := v4.2.0
-TAILWIND_BIN     := /usr/local/bin/tailwindcss
-TAILWIND_URL     := https://github.com/tailwindlabs/tailwindcss/releases/download/$(TAILWIND_VERSION)/tailwindcss-linux-x64
-UPX_VERSION      := 5.1.1
-UPX_ARCHIVE      := upx-$(UPX_VERSION)-amd64_linux.tar.xz
-UPX_DIR          := upx-$(UPX_VERSION)-amd64_linux
-UPX_BIN          := /usr/local/bin/upx
-UPX_URL          := https://github.com/upx/upx/releases/download/v$(UPX_VERSION)/$(UPX_ARCHIVE)
+## Variables for UPX
+UPX_VERSION := 5.1.1
+UPX_ARCHIVE  := upx-$(UPX_VERSION)-amd64_linux.tar.xz
+UPX_DIR      := upx-$(UPX_VERSION)-amd64_linux
+UPX_BIN      := /usr/local/bin/upx
+UPX_URL      := https://github.com/upx/upx/releases/download/v$(UPX_VERSION)/$(UPX_ARCHIVE)
 
 ## Variables for Go application
 APP        := postfixadmin
@@ -16,22 +13,21 @@ VERSION    := $(shell git describe --tags --abbrev=0 2>/dev/null || echo "dev")
 BUILD_TIME := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 GIT_COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 
-
 LDFLAGS    := -ldflags "-s -w -X $(PREFIX).Version=$(VERSION) -X $(PREFIX).BuildDate=$(BUILD_TIME) -X $(PREFIX).GitCommit=$(GIT_COMMIT)"
 DEB_VERSION := $(shell echo $(VERSION) | sed 's/^v//')
 RPM_VERSION := $(shell echo $(DEB_VERSION) | tr '-' '_')
 
-.PHONY: all build build-prod run clean css help install-tailwind install-upx deb rpm
+.PHONY: all build build-prod run clean frontend swagger help install-upx deb rpm
 
-all: clean css build-prod
+all: clean frontend build-prod
 
-build: clean css
-	@echo "Building Go application..."
+build: clean frontend
+	@echo "Building Go application (with embedded frontend)..."
 	CGO_ENABLED=0 go build -o $(BIN) $(LDFLAGS)
 
 
-build-prod:
-	@echo "Building Go application..."
+build-prod: frontend
+	@echo "Building Go application (with embedded frontend)..."
 	CGO_ENABLED=0 go build -o $(BIN) $(LDFLAGS)
 	upx --best --lzma $(BIN)
 
@@ -40,18 +36,25 @@ run:
 	@echo "Starting application..."
 	./$(BIN) server
 
-css:
-	@echo "Building CSS with Tailwind..."
-	tailwindcss -i ./web/static/css/input.css -o ./web/static/css/style.css --minify
+frontend:
+	@echo "Building frontend (Vue 3 + Quasar)..."
+	@if [ ! -d "frontend" ]; then \
+		echo "Error: frontend/ directory not found"; \
+		exit 1; \
+	fi
+	cd frontend && npm install && npm run build
+	@echo "Frontend built successfully into web/dist"
 
-watch-css:
-	@echo "Watching CSS changes..."
-	tailwindcss -i ./web/static/css/input.css -o ./web/static/css/style.css --watch
+swagger:
+	@echo "Generating Swagger documentation..."
+	go run github.com/swaggo/swag/cmd/swag@latest init -g main.go --parseDependency --parseInternal
+	@echo "Swagger docs generated in docs/"
+	@echo "Don't forget to run 'make build' afterwards so the docs are embedded."
 
 clean:
 	@echo "Cleaning up..."
 	rm -f $(BIN)
-	rm -f web/static/css/style.css
+	rm -rf web/dist
 
 tidy:
 	@echo "Tidying go modules..."
@@ -72,8 +75,8 @@ build-docker:
 	@echo "Building Docker image..."
 	docker build --no-cache --progress=plain -t jniltinho/go-postfixadmin:latest .
 
-build-docker-prod:
-	@echo "Building Go application..."
+build-docker-prod: frontend
+	@echo "Building Go application (with embedded frontend)..."
 	CGO_ENABLED=0 go build -o $(BIN) $(LDFLAGS)
 	upx --best --lzma $(BIN)
 
@@ -140,13 +143,6 @@ rpm: build-prod
 	rm -rf build/rpm
 	@echo "RPM package created"
 
-## For Development and Build/Production
-install-tailwind:
-	@echo "Installing Tailwind CSS binary..."
-	curl -ksSL "$(TAILWIND_URL)" -o tailwindcss-linux-x64
-	chmod +x tailwindcss-linux-x64
-	mv tailwindcss-linux-x64 "$(TAILWIND_BIN)"
-
 install-upx:
 	@echo "Installing UPX binary..."
 	curl -ksSL "$(UPX_URL)" -o "$(UPX_ARCHIVE)"
@@ -155,20 +151,15 @@ install-upx:
 	mv "$(UPX_DIR)/upx" "$(UPX_BIN)"
 	rm -rf "$(UPX_DIR)" "$(UPX_ARCHIVE)"
 
-
-
 help:
 	@echo "Makefile commands:"
-	@echo "  build            - Build the Go application"
-	@echo "  run              - Build and run the application"
-	@echo "  css              - Build the CSS using Tailwind"
-	@echo "  watch-css        - Watch for CSS changes"
-	@echo "  clean            - Remove binary and generated CSS"
-	@echo "  tidy             - Run go mod tidy"
-	@echo "  deps             - Install Go dependencies, Tailwind CSS, and UPX"
-	@echo "  install-tailwind - Install the Tailwind CSS binary"
-	@echo "  install-upx      - Install the UPX binary"
-	@echo "  certs            - Generate self-signed SSL certificates"
-	@echo "  build-docker     - Build the Docker image"
-	@echo "  deb              - Build the Debian (.deb) package"
-	@echo "  rpm              - Build the RPM (.rpm) package"
+	@echo "  build            - Full build: Frontend + Go binary"
+	@echo "  build-prod       - Frontend + Go binary + UPX compression"
+	@echo "  frontend         - Build only the Vue 3 + Quasar frontend -> web/dist"
+	@echo "  swagger          - Generate Swagger documentation (swag init)"
+	@echo "  clean            - Clean binary and web/dist"
+	@echo "  run              - Run the server binary"
+	@echo "  install-upx      - Install UPX compressor"
+	@echo ""
+	@echo "Swagger UI: http://localhost:8080/swagger/index.html"
+	@echo "Tip: Run 'make swagger' then 'make build' to embed updated docs."

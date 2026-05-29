@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"go-postfixadmin/internal/api/dto"
 	"go-postfixadmin/internal/middleware"
 	"go-postfixadmin/internal/models"
 	"go-postfixadmin/internal/repositories"
@@ -346,4 +347,313 @@ func (h *Handler) DeleteMailbox(c *echo.Context) error {
 
 	SetFlash(c, "message", "Mailbox deleted successfully")
 	return c.JSON(http.StatusOK, map[string]interface{}{"success": true, "message": "Mailbox deleted successfully"})
+}
+
+// =====================================================
+// API v1 Mailbox Handlers (PR 06+)
+// JWT + domain scoping enforced via claims
+// =====================================================
+
+// ListMailboxesV1 returns mailboxes visible to the authenticated user
+func (h *Handler) ListMailboxesV1(c *echo.Context) error {
+	claims := middleware.GetJWTClaims(c)
+	if claims == nil {
+		return dto.Unauthorized(c, "not authenticated")
+	}
+
+	domainFilter := c.QueryParam("domain")
+
+	mailboxes, _, err := repositories.GetAllMailboxes(h.DB, claims.Username, claims.Superadmin, domainFilter)
+	if err != nil {
+		if err.Error() == "access denied to this domain" {
+			return dto.Forbidden(c, "access denied to this domain")
+		}
+		return dto.InternalError(c, "failed to fetch mailboxes")
+	}
+
+	var response []dto.MailboxResponse
+	for _, m := range mailboxes {
+		response = append(response, dto.MailboxResponse{
+			Username:       m.Username,
+			Domain:         m.Domain,
+			Name:           m.Name,
+			Quota:          m.Quota,
+			Active:         m.Active,
+			SMTPActive:     m.SMTPActive,
+			EmailOther:     m.EmailOther,
+			Created:        m.Created,
+			Modified:       m.Modified,
+			PasswordExpiry: m.PasswordExpiry,
+		})
+	}
+
+	return dto.WriteSuccess(c, response)
+}
+
+// CreateMailboxV1 handles POST /api/v1/mailboxes
+func (h *Handler) CreateMailboxV1(c *echo.Context) error {
+	claims := middleware.GetJWTClaims(c)
+	if claims == nil {
+		return dto.Unauthorized(c, "not authenticated")
+	}
+
+	var req dto.CreateMailboxRequest
+	if err := c.Bind(&req); err != nil {
+		return dto.BadRequest(c, "invalid request body")
+	}
+
+	localPart := strings.ToLower(strings.TrimSpace(req.LocalPart))
+	domain := strings.TrimSpace(req.Domain)
+
+	if localPart == "" || domain == "" {
+		return dto.ValidationError(c, "local_part and domain are required")
+	}
+
+	// Permission check using claims
+	allowedDomains, _, err := repositories.GetAllowedDomains(h.DB, claims.Username, claims.Superadmin)
+	if err != nil {
+		return dto.InternalError(c, "permission check failed")
+	}
+	if !claims.Superadmin {
+		allowed := false
+		for _, d := range allowedDomains {
+			if d == domain {
+				allowed = true
+				break
+			}
+		}
+		if !allowed {
+			return dto.Forbidden(c, "access denied to this domain")
+		}
+	}
+
+	username := localPart + "@" + domain
+
+	// Check if already exists
+	if _, err := repositories.GetMailboxByUsername(h.DB, username); err == nil {
+		return dto.WriteError(c, dto.ErrCodeConflict, "mailbox already exists")
+	}
+
+	// Validate password if provided
+	if req.Password != "" {
+		if validationErr := ValidatePassword(req.Password); validationErr != "" {
+			return dto.ValidationError(c, validationErr)
+		}
+	}
+
+	hashedPassword, err := utils.HashPassword(req.Password)
+	if err != nil {
+		return dto.InternalError(c, "failed to hash password")
+	}
+
+	now := time.Now()
+	mailbox := models.Mailbox{
+		Username:       username,
+		Password:       hashedPassword,
+		Name:           req.Name,
+		Maildir:        domain + "/" + localPart + "/",
+		Quota:          req.Quota,
+		LocalPart:      localPart,
+		Domain:         domain,
+		Transport:      "",
+		Created:        now,
+		Modified:       now,
+		Active:         req.Active,
+		EmailOther:     req.EmailOther,
+		SMTPActive:     req.SMTPActive,
+		Token:          "",
+		TokenValidity:  now.Add(3 * time.Hour),
+		PasswordExpiry: now,
+	}
+
+	if err := repositories.CreateMailbox(h.DB, mailbox, claims.Username, c.RealIP()); err != nil {
+		return dto.InternalError(c, "failed to create mailbox")
+	}
+
+	// Optional welcome email
+	if req.SendWelcome {
+		lang := "pt"
+		if cookie, err := c.Cookie("lang"); err == nil {
+			lang = cookie.Value
+		}
+		_ = utils.SendWelcomeEmail(claims.Username, username, lang)
+	}
+
+	return dto.WriteSuccessWithStatus(c, http.StatusCreated, map[string]string{
+		"username": username,
+		"domain":   domain,
+	})
+}
+
+// GetMailboxV1 handles GET /api/v1/mailboxes/:username
+func (h *Handler) GetMailboxV1(c *echo.Context) error {
+	claims := middleware.GetJWTClaims(c)
+	if claims == nil {
+		return dto.Unauthorized(c, "not authenticated")
+	}
+
+	username, _ := url.PathUnescape(c.Param("username"))
+
+	mailbox, err := repositories.GetMailboxByUsername(h.DB, username)
+	if err != nil {
+		return dto.NotFound(c, "mailbox not found")
+	}
+
+	// Scoping check
+	allowedDomains, _, err := repositories.GetAllowedDomains(h.DB, claims.Username, claims.Superadmin)
+	if err != nil {
+		return dto.InternalError(c, "permission check failed")
+	}
+	if !claims.Superadmin {
+		allowed := false
+		for _, d := range allowedDomains {
+			if d == mailbox.Domain {
+				allowed = true
+				break
+			}
+		}
+		if !allowed {
+			return dto.Forbidden(c, "access denied")
+		}
+	}
+
+	quotaMultiplier := utils.GetQuotaMultiplier()
+
+	resp := dto.MailboxResponse{
+		Username:       mailbox.Username,
+		Domain:         mailbox.Domain,
+		Name:           mailbox.Name,
+		Quota:          mailbox.Quota / quotaMultiplier,
+		Active:         mailbox.Active,
+		SMTPActive:     mailbox.SMTPActive,
+		EmailOther:     mailbox.EmailOther,
+		Created:        mailbox.Created,
+		Modified:       mailbox.Modified,
+		PasswordExpiry: mailbox.PasswordExpiry,
+	}
+
+	return dto.WriteSuccess(c, resp)
+}
+
+// UpdateMailboxV1 handles PUT /api/v1/mailboxes/:username
+func (h *Handler) UpdateMailboxV1(c *echo.Context) error {
+	claims := middleware.GetJWTClaims(c)
+	if claims == nil {
+		return dto.Unauthorized(c, "not authenticated")
+	}
+
+	username, _ := url.PathUnescape(c.Param("username"))
+
+	mailbox, err := repositories.GetMailboxByUsername(h.DB, username)
+	if err != nil {
+		return dto.NotFound(c, "mailbox not found")
+	}
+
+	// Scoping
+	allowedDomains, _, err := repositories.GetAllowedDomains(h.DB, claims.Username, claims.Superadmin)
+	if err != nil {
+		return dto.InternalError(c, "permission check failed")
+	}
+	if !claims.Superadmin {
+		allowed := false
+		for _, d := range allowedDomains {
+			if d == mailbox.Domain {
+				allowed = true
+				break
+			}
+		}
+		if !allowed {
+			return dto.Forbidden(c, "access denied")
+		}
+	}
+
+	var req dto.UpdateMailboxRequest
+	if err := c.Bind(&req); err != nil {
+		return dto.BadRequest(c, "invalid request body")
+	}
+
+	quotaMultiplier := utils.GetQuotaMultiplier()
+
+	if req.Name != nil {
+		mailbox.Name = *req.Name
+	}
+	if req.Quota != nil {
+		mailbox.Quota = *req.Quota * quotaMultiplier
+	}
+	if req.Active != nil {
+		mailbox.Active = *req.Active
+	}
+	if req.SMTPActive != nil {
+		mailbox.SMTPActive = *req.SMTPActive
+	}
+	if req.EmailOther != nil {
+		mailbox.EmailOther = *req.EmailOther
+	}
+
+	if req.ChangePassword != nil && *req.ChangePassword {
+		if req.Password == nil || req.PasswordConfirm == nil || *req.Password != *req.PasswordConfirm {
+			return dto.ValidationError(c, "passwords do not match")
+		}
+		if validationErr := ValidatePassword(*req.Password); validationErr != "" {
+			return dto.ValidationError(c, validationErr)
+		}
+		hashed, err := utils.HashPassword(*req.Password)
+		if err != nil {
+			return dto.InternalError(c, "failed to hash password")
+		}
+		mailbox.Password = hashed
+	}
+
+	mailbox.Modified = time.Now()
+	mailbox.TokenValidity = time.Now().Add(3 * time.Hour)
+
+	if err := repositories.SaveMailbox(h.DB, mailbox, "edit_mailbox", claims.Username, c.RealIP()); err != nil {
+		return dto.InternalError(c, "failed to update mailbox")
+	}
+
+	return dto.WriteSuccess(c, map[string]bool{"updated": true})
+}
+
+// DeleteMailboxV1 handles DELETE /api/v1/mailboxes/:username
+func (h *Handler) DeleteMailboxV1(c *echo.Context) error {
+	claims := middleware.GetJWTClaims(c)
+	if claims == nil {
+		return dto.Unauthorized(c, "not authenticated")
+	}
+
+	username, _ := url.PathUnescape(c.Param("username"))
+
+	mailbox, err := repositories.GetMailboxByUsername(h.DB, username)
+	if err != nil {
+		return dto.NotFound(c, "mailbox not found")
+	}
+
+	// Scoping
+	allowedDomains, _, err := repositories.GetAllowedDomains(h.DB, claims.Username, claims.Superadmin)
+	if err != nil {
+		return dto.InternalError(c, "permission check failed")
+	}
+	if !claims.Superadmin {
+		allowed := false
+		for _, d := range allowedDomains {
+			if d == mailbox.Domain {
+				allowed = true
+				break
+			}
+		}
+		if !allowed {
+			return dto.Forbidden(c, "access denied")
+		}
+	}
+
+	if err := repositories.DeleteMailbox(h.DB, mailbox, claims.Username, c.RealIP()); err != nil {
+		return dto.InternalError(c, "failed to delete mailbox")
+	}
+
+	if viper.GetBool("server.cleanup_maildir") {
+		baseDir := "/var/vmail"
+		_ = utils.CleanupOrphanedMaildir(h.DB, baseDir, mailbox.Domain, mailbox.LocalPart)
+	}
+
+	return dto.WriteSuccess(c, map[string]string{"deleted": username})
 }

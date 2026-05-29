@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"crypto/rand"
 	"embed"
 	"encoding/hex"
@@ -9,9 +10,11 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"go-postfixadmin/internal/handlers"
-	"go-postfixadmin/internal/i18n"
 	"go-postfixadmin/internal/routes"
 
 	"github.com/gorilla/sessions"
@@ -24,74 +27,68 @@ import (
 
 var AppVersion string = "1.0.0"
 
-func StartServer(embeddedFiles embed.FS, port int, db *gorm.DB, ssl bool, certFile, keyFile string) {
+func StartServer(embeddedFiles embed.FS, port int, db *gorm.DB, ssl bool, certFile, keyFile string) error {
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer cancel()
+
 	e := echo.New()
-
-	// Middleware
-	e.Use(echoMiddleware.RequestLogger())
 	e.Use(echoMiddleware.Recover())
+	e.Use(echoMiddleware.RequestLogger())
 
-	// Session Middleware
 	secret := viper.GetString("server.session_secret")
 	if secret == "" {
-		secret = os.Getenv("SESSION_SECRET") // fallback
+		secret = os.Getenv("SESSION_SECRET")
 	}
-
 	if secret == "" {
 		slog.Warn("session_secret not configured — sessions will be invalidated on server restart!")
-		bytes := make([]byte, 32)
-		if _, err := rand.Read(bytes); err != nil {
-			secret = "9a048f79e88e35de37dc2c43c1fa002f358f92957a7690e60109cfe8a65178e0"
+		b := make([]byte, 32)
+		if _, err := rand.Read(b); err == nil {
+			secret = hex.EncodeToString(b)
 		} else {
-			secret = hex.EncodeToString(bytes)
+			secret = "9a048f79e88e35de37dc2c43c1fa002f358f92957a7690e60109cfe8a65178e0"
 		}
 	}
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte(secret))))
 
-	// Template Rendering
-	i18n.Init(embeddedFiles)
-	t, err := loadTemplates(embeddedFiles)
+	spaFS, err := fs.Sub(embeddedFiles, "web/dist")
 	if err != nil {
-		slog.Error("Failed to load templates", "error", err)
-		os.Exit(1)
+		slog.Warn("web/dist not found — SPA will not be served. Run 'make build' first.")
+		spaFS = nil
 	}
-	e.Renderer = t
 
-	// Handlers
 	h := &handlers.Handler{DB: db}
-
-	// Static files from embedded FS
-	publicFS, err := fs.Sub(embeddedFiles, "web/static")
-	if err != nil {
-		e.Logger.Error("failed to create sub filesystem", "error", err)
-		os.Exit(1)
-	}
-
-	staticHandler := http.FileServer(http.FS(publicFS))
-	e.GET("/static/*", echo.WrapHandler(http.StripPrefix("/static/", staticHandler)))
-
-	// Register Application Routes
-	routes.RegisterRoutes(e, h)
+	routes.RegisterRoutes(e, h, spaFS)
 
 	addr := fmt.Sprintf(":%d", port)
-	slog.Info("Starting server", "address", addr)
+	srv := &http.Server{
+		Addr:              addr,
+		Handler:           e,
+		ReadTimeout:       30 * time.Second,
+		WriteTimeout:      60 * time.Second,
+		IdleTimeout:       120 * time.Second,
+		ReadHeaderTimeout: 10 * time.Second,
+	}
 
+	go func() {
+		<-ctx.Done()
+		slog.Info("Shutting down server…")
+		shutCtx, shutCancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer shutCancel()
+		_ = srv.Shutdown(shutCtx)
+	}()
+
+	slog.Info("Starting server", "address", addr)
 	if ssl {
 		if certFile == "" || keyFile == "" {
-			slog.Error("SSL enabled but cert or key file not provided")
-			os.Exit(1)
+			return fmt.Errorf("SSL enabled but cert or key file not provided")
 		}
 		slog.Info("SSL enabled", "cert", certFile, "key", keyFile)
-
-		server := &http.Server{Addr: addr, Handler: e}
-		if err := server.ListenAndServeTLS(certFile, keyFile); err != nil && err != http.ErrServerClosed {
-			slog.Error("failed to start server with SSL", "error", err)
-			os.Exit(1)
-		}
+		err = srv.ListenAndServeTLS(certFile, keyFile)
 	} else {
-		if err := e.Start(addr); err != nil {
-			slog.Error("failed to start server", "error", err)
-			os.Exit(1)
-		}
+		err = srv.ListenAndServe()
 	}
+	if err == http.ErrServerClosed {
+		return nil
+	}
+	return err
 }

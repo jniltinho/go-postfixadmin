@@ -1,0 +1,82 @@
+# Go-Postfixadmin Configuration File
+
+[database]
+host   = "localhost"
+port   = "3306"
+user   = "postfix"
+pass   = "postfixPassword"
+name   = "postfix"
+driver = "mysql"  # mysql or postgres
+debug  = false    # Enable full GORM SQL debug logging
+
+[server]
+# Server Port (default 8080)
+port = 8080
+cleanup_maildir = false # Clean up orphaned maildirs when deleting a mailbox
+ssl_enable = false
+# ssl_cert = "ssl/server.crt"
+# ssl_key = "ssl/server.key"
+# If both cert and key are provided, SSL will be enabled automatically
+# Generate a random 64-character hex string for production use, E.g., using "openssl rand -hex 32"
+session_secret = "9a048f79e88e35de37dc2c43c1fc002f358f92957a7690e60109cfe8a65178e0"
+
+# JWT settings (for the new Vue/Quasar SPA frontend)
+# Access tokens should be short-lived. Refresh tokens use httpOnly cookies (7d).
+jwt_access_ttl  = "15m"   # short-lived access token
+jwt_refresh_ttl = "168h"  # 7 days refresh token (httpOnly cookie)
+
+# Optional: dedicated JWT secret. If empty, falls back to session_secret for simplicity during transition.
+# jwt_secret = ""
+
+[quota]
+enabled      = false
+domain_quota = true
+multiplier   = 1048576 # Bytes per MB: 1024000 or 1048576
+
+[vacation]
+enabled = true
+
+[alias]
+edit_alias   = true
+alias_domain = true
+
+[transport]
+# Transport TCP server (postfixadmin transport server)
+# Postfix main.cf: transport_maps = tcp:127.0.0.1:12221
+host          = "127.0.0.1:12221"
+cache         = "10m"
+hostname      = "mail.example.com"       # FQDN of this mail server
+localdelivery = "smtp:mail.example.com"  # Legacy transport value to rewrite
+delivery      = "lmtp:unix:private/dovecot-lmtp" # Rewrite target for local delivery
+
+[features]
+fetchmail = false
+
+[smtp]
+server  = "localhost"
+port    = 25
+type    = "plain" # type: plain | tls | starttls
+
+[backup]
+# MySQL connection (defaults to database.url values if not set here)
+mysql_host = "localhost"
+mysql_port = "3306"
+mysql_user = "root"
+mysql_pass = ""
+
+# Directory where .sql.gz backup files are stored
+backup_dir = "/usr/local/backup/mysql"
+
+# Log file written after each backup run
+log_file = "/var/log/backup_mysql.log"
+
+# SMTP settings for --sendmail (uses [smtp] section values as fallback)
+smtp_server = "smtp.example.com"
+smtp_port   = "587"
+smtp_user   = "backup@example.com"
+smtp_pass   = ""
+
+# Email recipients
+email_from = "backup@example.com"
+email_to   = ["admin@example.com"]
+email_cc   = []

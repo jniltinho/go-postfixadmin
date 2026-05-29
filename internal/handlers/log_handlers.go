@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"go-postfixadmin/internal/api/dto"
 	"go-postfixadmin/internal/middleware"
 	"go-postfixadmin/internal/repositories"
 
@@ -82,3 +83,64 @@ func (h *Handler) LogsData(c *echo.Context) error {
 		"data":            data,
 	})
 }
+
+// LogsV1 provides a clean modern API for admin action logs (for Vue/Quasar SPA)
+func (h *Handler) LogsV1(c *echo.Context) error {
+	claims := middleware.GetJWTClaims(c)
+	if claims == nil {
+		return dto.Unauthorized(c, "not authenticated")
+	}
+
+	page, _ := strconv.Atoi(c.QueryParam("page"))
+	perPage, _ := strconv.Atoi(c.QueryParam("per_page"))
+	if perPage == 0 {
+		perPage = 25
+	}
+	if page < 1 {
+		page = 1
+	}
+	start := (page - 1) * perPage
+
+	search := c.QueryParam("search")
+	filterAdmin := c.QueryParam("admin")
+	filterDomain := c.QueryParam("domain")
+	filterAction := c.QueryParam("action")
+
+	orderField := c.QueryParam("sort")
+	if orderField == "" {
+		orderField = "timestamp"
+	}
+	orderDir := c.QueryParam("order")
+	if orderDir == "" {
+		orderDir = "desc"
+	}
+
+	logs, total, filtered, err := repositories.GetLogs(
+		h.DB, claims.Username, claims.Superadmin,
+		filterAdmin, filterDomain, filterAction,
+		search, orderField, orderDir, start, perPage,
+	)
+	if err != nil {
+		return dto.InternalError(c, "failed to fetch logs")
+	}
+
+	data := make([]dto.LogEntryResponse, 0, len(logs))
+	for _, l := range logs {
+		data = append(data, dto.LogEntryResponse{
+			Timestamp: l.Timestamp,
+			Username:  l.Username,
+			Domain:    l.Domain,
+			Action:    l.Action,
+			Data:      l.Data,
+		})
+	}
+
+	return dto.WriteSuccess(c, dto.PaginatedResponse[dto.LogEntryResponse]{
+		Data:     data,
+		Total:    total,
+		Filtered: filtered,
+		Page:     page,
+		PerPage:  perPage,
+	})
+}
+

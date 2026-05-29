@@ -2,96 +2,45 @@ package cmd
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
 	"time"
 )
 
 func generateConfig() {
-	configContent := `# Go-Postfixadmin Configuration File
+	// Read the default config from the embedded file (single source of truth)
+	configBytes, err := fs.ReadFile(EmbeddedFiles, "web/files/config.default.toml")
+	if err != nil {
+		fmt.Printf("Error reading embedded default config: %v\n", err)
+		fmt.Println("Falling back to minimal config...")
 
+		// Fallback minimal config if embed fails
+		configBytes = []byte(`# Go-Postfixadmin Configuration File (fallback)
 [database]
 host   = "localhost"
 port   = "3306"
 user   = "postfix"
 pass   = "postfixPassword"
 name   = "postfix"
-driver = "mysql"  # mysql or postgres
-debug  = false    # Enable full GORM SQL debug logging
+driver = "mysql"
+debug  = false
 
 [server]
-# Server Port (default 8080)
 port = 8080
-cleanup_maildir = false # Clean up orphaned maildirs when deleting a mailbox
 ssl_enable = false
-# ssl_cert = "ssl/server.crt"
-# ssl_key = "ssl/server.key"
-# If both cert and key are provided, SSL will be enabled automatically
-# Generate a random 64-character hex string for production use, E.g., using "openssl rand -hex 32"
-# session_secret = "9a048f79e88e35de37dc2c43c1fc002f358f92957a7690e60109cfe8a65178e0"
-
-[quota]
-enabled      = false
-domain_quota = true
-multiplier   = 1048576 # Bytes per MB: 1024000 or 1048576
-
-[vacation]
-enabled = true
-
-[alias]
-edit_alias          = true
-alias_control       = true
-alias_control_admin = true
-special_alias_control = false
-alias_domain        = true
-
-[transport]
-# Transport TCP server (postfixadmin transport server)
-# Postfix main.cf: transport_maps = tcp:127.0.0.1:12221
-host          = "127.0.0.1:12221"
-cache         = "10m"
-hostname      = "mail.example.com"       # FQDN of this mail server
-localdelivery = "smtp:mail.example.com"  # Legacy transport value to rewrite
-delivery      = "lmtp:unix:private/dovecot-lmtp" # Rewrite target for local delivery
-
-[features]
-fetchmail = false
-
-[smtp]
-server  = "localhost"
-port    = 25
-type    = "plain" # type: plain | tls | starttls
-
-[backup]
-# MySQL connection (defaults to localhost:3306 if not set)
-mysql_host = "localhost"
-mysql_port = "3306"
-mysql_user = "root"
-mysql_pass = ""
-
-# Directory where .sql.gz backup files are stored
-backup_dir = "/usr/local/backup/mysql"
-
-# Log file written after each backup run
-log_file = "/var/log/backup_mysql.log"
-
-# SMTP settings for --sendmail
-smtp_server = "smtp.example.com"
-smtp_port   = "587"
-smtp_user   = "backup@example.com"
-smtp_pass   = ""
-
-# Email recipients
-email_from = "backup@example.com"
-email_to   = ["admin@example.com"]
-email_cc   = []
-`
+session_secret = "change-me-in-production"
+jwt_access_ttl  = "15m"
+jwt_refresh_ttl = "168h"
+`)
+	}
 
 	fileName := fmt.Sprintf("config_%s.toml", time.Now().Format("2006-01-02_150405"))
-	err := os.WriteFile(fileName, []byte(configContent), 0644)
+	err = os.WriteFile(fileName, configBytes, 0644)
 	if err != nil {
 		fmt.Printf("Error writing %s: %v\n", fileName, err)
 		os.Exit(1)
 	} else {
 		fmt.Printf("Successfully generated %s in the current directory.\n", fileName)
+		fmt.Println("This file was generated from the embedded default config (web/files/config.default.toml).")
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 
+	"go-postfixadmin/internal/api/dto"
 	"go-postfixadmin/internal/middleware"
 	"go-postfixadmin/internal/repositories"
 
@@ -87,3 +88,63 @@ func (h *Handler) MailLogData(c *echo.Context) error {
 		"data":            data,
 	})
 }
+
+// MailLogV1 provides a clean modern API for maillog (for Vue/Quasar SPA)
+func (h *Handler) MailLogV1(c *echo.Context) error {
+	claims := middleware.GetJWTClaims(c)
+	if claims == nil {
+		return dto.Unauthorized(c, "not authenticated")
+	}
+
+	page, _ := strconv.Atoi(c.QueryParam("page"))
+	perPage, _ := strconv.Atoi(c.QueryParam("per_page"))
+	if perPage == 0 {
+		perPage = 25
+	}
+	if page < 1 {
+		page = 1
+	}
+	start := (page - 1) * perPage
+
+	search := c.QueryParam("search")
+	orderField := c.QueryParam("sort")
+	if orderField == "" {
+		orderField = "tstamp"
+	}
+	orderDir := c.QueryParam("order")
+	if orderDir == "" {
+		orderDir = "desc"
+	}
+
+	logs, total, filtered, err := repositories.GetMailLogs(
+		h.DB, claims.Username, claims.Superadmin,
+		search, orderField, orderDir, start, perPage,
+	)
+	if err != nil {
+		return dto.InternalError(c, "failed to fetch maillogs")
+	}
+
+	data := make([]dto.MailLogEntryResponse, 0, len(logs))
+	for _, l := range logs {
+		data = append(data, dto.MailLogEntryResponse{
+			LogDate:    time.Unix(l.Tstamp, 0).Format("2006-01-02 15:04:05"),
+			MFrom:      l.MFrom,
+			MTo:        l.MTo,
+			DomainFrom: l.DomainFrom,
+			DomainTo:   l.DomainTo,
+			HostIP:     l.HostIP,
+			HostName:   l.HostName,
+			Helo:       l.Helo,
+			MsgSize:    l.MsgSize,
+		})
+	}
+
+	return dto.WriteSuccess(c, dto.PaginatedResponse[dto.MailLogEntryResponse]{
+		Data:     data,
+		Total:    total,
+		Filtered: filtered,
+		Page:     page,
+		PerPage:  perPage,
+	})
+}
+

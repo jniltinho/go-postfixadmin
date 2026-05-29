@@ -1,0 +1,348 @@
+basePath: /api/v1
+definitions:
+  dto.APIError:
+    properties:
+      code:
+        type: string
+      message:
+        type: string
+    type: object
+  dto.APIResponse:
+    properties:
+      data: {}
+      error:
+        $ref: '#/definitions/dto.APIError'
+      success:
+        type: boolean
+    type: object
+  dto.CreateDomainRequest:
+    properties:
+      active:
+        type: boolean
+      aliases:
+        type: integer
+      backupmx:
+        type: boolean
+      description:
+        type: string
+      domain:
+        type: string
+      mailboxes:
+        type: integer
+      password_expiry:
+        type: integer
+      quota:
+        type: integer
+      transport:
+        type: string
+    type: object
+  dto.DomainResponse:
+    properties:
+      active:
+        type: boolean
+      alias_count:
+        description: Optional enrichment
+        type: integer
+      aliases:
+        type: integer
+      backupmx:
+        type: boolean
+      created:
+        type: string
+      description:
+        type: string
+      domain:
+        type: string
+      mailbox_count:
+        type: integer
+      mailboxes:
+        type: integer
+      maxquota:
+        type: integer
+      modified:
+        type: string
+      password_expiry:
+        type: integer
+      quota:
+        type: integer
+      transport:
+        type: string
+    type: object
+  dto.LoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  dto.LoginResponse:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        type: integer
+      token_type:
+        type: string
+      user:
+        $ref: '#/definitions/dto.UserInfo'
+    type: object
+  dto.RefreshResponse:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        type: integer
+      token_type:
+        type: string
+    type: object
+  dto.UserInfo:
+    properties:
+      domains:
+        items:
+          type: string
+        type: array
+      superadmin:
+        type: boolean
+      type:
+        description: '"admin" or "mailbox"'
+        type: string
+      username:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: jniltinho@gmail.com
+    name: API Support
+    url: https://github.com/jniltinho/go-postfixadmin
+  description: Modern REST API for Go-PostfixAdmin with JWT authentication.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: Go-PostfixAdmin API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates as Admin or Mailbox user. Returns JWT access token
+        in body and sets httpOnly refresh cookie.
+      parameters:
+      - description: Credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/dto.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "429":
+          description: Too many requests
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      summary: Login
+      tags:
+      - Authentication
+  /auth/logout:
+    post:
+      description: Clears the httpOnly refresh token cookie.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Logout
+      tags:
+      - Authentication
+  /auth/me:
+    get:
+      description: Returns information about the logged-in user extracted from the
+        JWT.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.UserInfo'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Get current user
+      tags:
+      - Authentication
+  /auth/refresh:
+    post:
+      description: Uses the httpOnly refresh cookie to issue a new access token (with
+        rotation).
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.RefreshResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Refresh token
+      tags:
+      - Authentication
+  /domains:
+    get:
+      description: Returns all domains the authenticated user has access to (based
+        on JWT claims).
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.DomainResponse'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: List domains
+      tags:
+      - Domains
+    post:
+      consumes:
+      - application/json
+      description: Creates a new domain (only superadmins can create).
+      parameters:
+      - description: Domain data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateDomainRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Create domain
+      tags:
+      - Domains
+  /domains/{domain}:
+    delete:
+      description: Deletes a domain and all related data (only superadmins).
+      parameters:
+      - description: Domain name
+        in: path
+        name: domain
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete domain
+      tags:
+      - Domains
+    get:
+      description: Returns details of a specific domain (respects user scoping).
+      parameters:
+      - description: Domain name
+        in: path
+        name: domain
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.DomainResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Get domain
+      tags:
+      - Domains
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

@@ -9,6 +9,7 @@
 *.so
 *.dylib
 go-postfixadmin
+frontend/node_modules/
 node_modules
 package-lock.json
 
@@ -32,6 +33,8 @@ config_*.toml
 
 bin/
 web/static/css/style.css
+web/dist
+projeto_base/
 
 ## vs code
 .vscode/

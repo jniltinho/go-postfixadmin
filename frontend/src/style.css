@@ -1,0 +1,223 @@
+@import './fonts.css';
+
+/* ─── Brand tokens ──────────────────────────────────────────────────────────── */
+:root {
+  --color-brand-primary: #3B82F6;
+  --color-brand-secondary: #6366ee;
+  --color-brand-cta: #F97316;
+  --color-brand-background: #F8FAFC;
+  --color-brand-text: #1E293B;
+
+  --font-sans: 'Fira Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Fira Code', ui-monospace, 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
+
+  --toast-success: #22c55e;
+  --toast-error: #ef4444;
+  --toast-warning: var(--color-brand-cta);
+}
+
+/* ─── Global reset ─────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Login page ────────────────────────────────────────────────────────────── */
+.login-page {
+  min-height: 100vh;
+  background-color: var(--color-brand-background);
+  background-image: radial-gradient(circle, #c7d2e0 1.2px, transparent 1.2px);
+  background-size: 22px 22px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 5vh;
+  position: relative;
+}
+
+.lang-bar {
+  position: fixed;
+  top: 14px;
+  right: 18px;
+  display: flex;
+  gap: 2px;
+  z-index: 100;
+}
+
+.lang-btn {
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  border: 1px solid transparent;
+  border-radius: 0;
+  cursor: pointer;
+  color: #64748b;
+  background: transparent;
+  transition: all .15s;
+}
+
+.lang-btn:hover {
+  color: var(--color-brand-primary);
+}
+
+.lang-active {
+  background: var(--color-brand-primary) !important;
+  color: #fff !important;
+  border-color: var(--color-brand-primary) !important;
+}
+
+.login-wrap {
+  width: 100%;
+  max-width: 420px;
+  padding: 0 16px 40px;
+}
+
+.login-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.brand-icon {
+  width: 56px;
+  height: 56px;
+  background: var(--color-brand-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+  border-radius: 0;
+  box-shadow: 0 2px 6px rgba(59, 130, 246, .35);
+}
+
+.brand-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--color-brand-text);
+  letter-spacing: -0.5px;
+  margin: 0 0 4px;
+  line-height: 1;
+}
+
+.brand-sub {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+  font-weight: 400;
+}
+
+.login-card {
+  background: #ffffff;
+  border: 3px solid var(--color-brand-text);
+  padding: 32px 28px 28px;
+  box-shadow: 4px 4px 0 var(--color-brand-text);
+}
+
+.card-heading {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-brand-text);
+  letter-spacing: 0.5px;
+  margin: 0 0 22px;
+}
+
+.field-wrap {
+  margin-bottom: 16px;
+}
+
+.field-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-brand-text);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.field-input {
+  border-radius: 0 !important;
+}
+
+/* Remove Quasar's default border-radius on outlined inputs (global CSS — :deep() only works in scoped) */
+.login-card .q-field--outlined .q-field__control,
+.login-card .q-field--outlined .q-field__control::before,
+.login-card .q-field--outlined .q-field__control::after {
+  border-radius: 0 !important;
+}
+
+.auth-btn {
+  background: var(--color-brand-primary) !important;
+  color: #fff !important;
+  height: 44px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  border-radius: 0 !important;
+  margin-top: 6px;
+}
+
+.auth-btn:hover {
+  background: #2563eb !important;
+}
+
+.card-divider {
+  height: 1px;
+  background: #e2e8f0;
+  margin: 18px 0 14px;
+}
+
+.card-footer-text {
+  font-size: 12px;
+  color: #64748b;
+  text-align: center;
+  margin: 0 0 4px;
+}
+
+.card-link {
+  color: var(--color-brand-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.card-link:hover {
+  text-decoration: underline;
+}
+
+.card-secure-text {
+  font-size: 10px;
+  color: #94a3b8;
+  letter-spacing: 0.8px;
+  text-align: center;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.error-msg {
+  margin-top: 14px;
+  background: #fef2f2;
+  border: 1.5px solid #fca5a5;
+  color: #dc2626;
+  padding: 8px 12px;
+  font-size: 13px;
+  text-align: center;
+}
+
+.page-footer {
+  text-align: center;
+  margin-top: 22px;
+  font-size: 11px;
+  color: #94a3b8;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
