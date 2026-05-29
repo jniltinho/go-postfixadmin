@@ -108,7 +108,7 @@
 
       <!-- Footer Info -->
       <p class="copyright-footer">
-        &copy; {{ currentYear }} GO-POSTFIXADMIN. V{{ appVersion }}
+        &copy; {{ currentYear }} GO-POSTFIXADMIN. {{ appVersion }}
       </p>
     </div>
   </div>
