@@ -17,12 +17,13 @@ Related documents:
 
 To compile the project locally without Docker, install the following tools:
 
-1. **Go (v1.26 or higher)**: Main language of the project.
+1. **Go 1.26 or higher**: Main language of the project.
    [Download Go](https://go.dev/dl/)
-2. **Tailwind CSS standalone binary**: Required for CSS processing. Install via `make install-tailwind` (no Node.js required).
+2. **Node.js 18 or higher**: Required to build the Vue 3 frontend.
+   [Download Node.js](https://nodejs.org/)
 3. **Make**: Utility for command automation (native on Linux/macOS).
-4. **UPX (Optional)**: Used by the Makefile to compress the final binary.
-   Debian/Ubuntu: `sudo apt install upx-ucl rpm`
+4. **UPX (Optional)**: Used by `make build-prod` to compress the final binary.
+   Debian/Ubuntu: `sudo apt install upx-ucl`
 
 ## How to Build
 
@@ -30,32 +31,32 @@ This project supports local builds with `make` and containerized builds with Doc
 
 ### Native Build with Makefile
 
-The local build automates CSS generation and Go binary compilation.
-
 #### Dependency Installation
 
-Recommended:
-
 ```bash
-make deps
-```
-
-Manual installation:
-
-```bash
+# Install Go dependencies
 go mod download
-make install-tailwind
+
+# Install frontend dependencies (run once, or after package.json changes)
+cd frontend && npm install
 ```
 
 #### Compilation
 
 ```bash
-# Generate CSS and compile the binary
+# Build the Vue 3 frontend and compile the Go binary
+make build
+
+# Build + compress binary with UPX (for production/distribution)
 make build-prod
 
-# Remove generated files
+# Remove generated binary and web/dist
 make clean
 ```
+
+The `make build` target:
+1. Runs `cd frontend && npm install && npm run build` → produces `web/dist/`
+2. Compiles the Go binary with the frontend embedded via `//go:embed`
 
 ### Build with Docker
 
@@ -69,9 +70,9 @@ make build-docker
 
 This process:
 
-1. Compiles static assets
+1. Builds the Vue 3 frontend assets
 2. Compiles the Go binary
-3. Compresses the binary with `upx`
+3. Compresses the binary with UPX
 4. Produces a final Alpine-based image
 
 ### Quick Start with Docker Compose
@@ -95,21 +96,56 @@ This will:
 
 You can customize ports and environment variables in `docker-compose.yml`.
 
+### Frontend Development (Hot Reload)
+
+To work on the Vue 3 frontend with hot module replacement:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The Vite dev server proxies API calls to the Go backend. Start the backend separately:
+
+```bash
+./bin/postfixadmin server --port=8080
+```
+
+### Generating Swagger Documentation
+
+After adding or changing swag annotations in handler files, regenerate the docs:
+
+```bash
+make swagger
+```
+
+Then rebuild so the updated docs are embedded in the binary:
+
+```bash
+make build
+```
+
+The Swagger UI is served at `http://localhost:8080/swagger/` when `server.swagger_enable = true` in `config.toml`.
+
 ## Useful Makefile Commands
 
 | Command | Description |
 | :--- | :--- |
-| `make build-prod` | Build CSS and compile the local binary |
+| `make build` | Build Vue 3 frontend + compile Go binary |
+| `make build-prod` | Build frontend + compile binary + UPX compression |
 | `make build-docker` | Build the optimized Docker image |
+| `make frontend` | Build only the Vue 3 frontend → `web/dist/` |
+| `make swagger` | Regenerate Swagger docs from handler annotations |
 | `make run` | Compile and start the server locally |
-| `make watch-css` | Start the Tailwind watcher for UI development |
-| `make clean` | Remove generated binary and CSS files |
+| `make clean` | Remove generated binary and `web/dist/` |
 | `make tidy` | Clean and organize Go dependencies |
-| `make deps` | Install required dependencies |
+| `make deps` | Download Go module dependencies |
 | `make deb` | Build the Debian (.deb) package |
 | `make rpm` | Build the RPM (.rpm) package |
+| `make install-upx` | Install UPX binary compressor |
 
-## 💻 CLI Flags
+## CLI Flags
 
 Below are the available flags when running the `./postfixadmin` binary:
 
@@ -159,7 +195,6 @@ The binary also supports direct administrative commands via the `admin` subcomma
 ./postfixadmin admin --add-superadmin "admin@example.com:password123"
 # Or leave the password blank to generate a random one
 ./postfixadmin admin --add-superadmin "admin@example.com"
-
 ```
 
 Other available flags for `admin`:
@@ -353,7 +388,7 @@ Available flags for `transport server`:
 
 - `--debug`: Enable per-request tracing with colored zerolog output (source, subject, resolved transport)
 
-### `readlog` Command
+## `readlog` Command
 
 Parses `FILTER:` entries from `/var/log/mail.log` and stores them in the `maillog` database table. It is recommended to schedule it via cron.
 

@@ -18,15 +18,45 @@ This file lists product capabilities by area. For installation and deployment de
 - Transport list management (Postfix transport routing per domain)
 - User self-service portal
 
+## REST API
+
+A fully documented REST API at `/api/v1` with interactive Swagger UI at `/swagger/`.
+
+### Authentication
+
+- JWT-based: `POST /api/v1/auth/login` issues a short-lived access token (`Authorization: Bearer <token>`) and a long-lived httpOnly refresh cookie
+- Token refresh: `POST /api/v1/auth/refresh`
+- API Keys: persistent tokens for external integrations and automation (`/api/v1/settings/apikeys`)
+
+### Endpoints
+
+| Tag | Routes |
+|-----|--------|
+| Authentication | `POST /auth/login`, `POST /auth/refresh`, `POST /auth/logout`, `GET /auth/me` |
+| Domains | `GET/POST /domains`, `GET/PUT/DELETE /domains/{domain}` |
+| Mailboxes | `GET/POST /mailboxes`, `GET/PUT/DELETE /mailboxes/{username}` |
+| Aliases | `GET/POST /aliases`, `GET/PUT/DELETE /aliases/{address}` |
+| Alias Domains | `GET/POST /alias-domains`, `GET/PUT/DELETE /alias-domains/{alias_domain}` |
+| Admins | `GET/POST /admins`, `GET/PUT/DELETE /admins/{username}` |
+| Transports | `GET/POST /transports`, `GET/PUT/DELETE /transports/{id}` |
+| User Portal | `GET /user/me`, `GET/POST /user/forwarding`, `POST /user/password`, `GET/POST/DELETE /user/vacation` |
+| Logs | `GET /logs` (admin action logs), `GET /maillog` (SMTP logs) |
+| Dashboard | `GET /dashboard` |
+| Settings | `GET/POST /settings/apikeys`, `PUT/DELETE /settings/apikeys/{id}` |
+
+All endpoints return a structured `APIResponse` envelope with `success`, `data`, and `error` fields. All request and response schemas are typed and visible in the Swagger UI.
+
 ## Access Control
 
 - Superadmin and domain admin separation
-- User session area for password, forwarding, and vacation management
-- Session-based authentication with inactivity timeout
+- User self-service portal for password, forwarding, and vacation management
+- JWT access tokens (short-lived, configurable via `jwt_access_ttl`)
+- httpOnly refresh cookies (long-lived, configurable via `jwt_refresh_ttl`)
+- API Keys with optional expiry dates
 
 ## Passwords
 
-- Shared backend password policy for mailbox, admin, and user password changes
+- Shared backend password policy for mailbox, admin, and user portal password changes
 - Minimum 8 characters
 - At least 1 uppercase letter
 - At least 1 lowercase letter
@@ -44,7 +74,7 @@ This file lists product capabilities by area. For installation and deployment de
 
 ## Logs and Operations
 
-- Admin log viewer
+- Admin log viewer with filtering, pagination, and free-text search
 - Mail log viewer with filtering and pagination
 - `readlog` daemon to ingest `FILTER:` entries from `/var/log/mail.log`
 - CLI utilities for migration, SQL import, admin recovery, and maintenance tasks
@@ -84,9 +114,9 @@ This file lists product capabilities by area. For installation and deployment de
 
 ## UI / DX
 
-- Tailwind CSS interface
-- Modal-based admin workflows
-- AJAX-based user password and forwarding updates
+- Vue 3 SPA frontend with Vite, Pinia, Vue Router, and Tailwind CSS v4
+- Frontend embedded in the Go binary (single deployable artifact)
+- Interactive Swagger UI embedded in the binary at `/swagger/` (enable via `server.swagger_enable = true`)
 - Docker, Docker Compose, Makefile, and native build support
 - Debian (`.deb`) and RPM (`.rpm`) package build targets with automatic configuration embedding (`make deb` and `make rpm`)
 - Fully automated CI/CD pipeline to generate `.tar.gz`, `.deb` and `.rpm` packages via GitHub Actions Releases
@@ -96,4 +126,6 @@ This file lists product capabilities by area. For installation and deployment de
 - MariaDB and PostgreSQL support
 - `database.debug = true` for verbose GORM SQL logging
 - SSL-ready server configuration
+- JWT secret and token TTL configurable in `config.toml`
 - Vacation, alias, quota, transport, and fetchmail feature flags
+- Swagger UI toggled via `server.swagger_enable`
