@@ -334,7 +334,7 @@ function formatDate(ts: string): string {
 async function load() {
   loading.value = true; error.value = ''
   try {
-    const res = await axios.get('/api/v1/transports')
+    const res = await axios.get(`${API_BASE}/transports`)
     allTransports.value = res.data?.data ?? []
   } catch (e: any) {
     error.value = e?.response?.data?.error?.message || 'Failed to load transports'
@@ -361,7 +361,7 @@ async function submitAdd() {
   if (!transport.trim()) { addError.value = 'Transport is required'; return }
   savingAdd.value = true
   try {
-    await axios.post('/api/v1/transports', { domain: domain.trim(), transport: transport.trim(), active })
+    await axios.post(`${API_BASE}/transports`, { domain: domain.trim(), transport: transport.trim(), active })
     showAdd.value = false
     toast.success(`Transport for ${domain} created successfully`)
     await load()
@@ -384,7 +384,7 @@ async function openEdit(row: Transport) {
   loadingEdit.value = true
   showEdit.value = true
   try {
-    const res = await axios.get(`/api/v1/transports/${row.id}`)
+    const res = await axios.get(`${API_BASE}/transports/${row.id}`)
     const t = res.data?.data
     editForm.value = { id: t.id, domain: t.domain, transport: t.transport, active: t.active }
   } catch (e: any) {
@@ -399,7 +399,7 @@ async function submitEdit() {
   if (!f.transport.trim()) { editError.value = 'Transport is required'; return }
   savingEdit.value = true
   try {
-    await axios.put(`/api/v1/transports/${f.id}`, {
+    await axios.put(`${API_BASE}/transports/${f.id}`, {
       domain: f.domain.trim(),
       transport: f.transport.trim(),
       active: f.active,
@@ -425,7 +425,7 @@ async function submitDelete() {
   deletingRow.value = true
   try {
     const { id, domain } = deleteTarget.value
-    await axios.delete(`/api/v1/transports/${id}`)
+    await axios.delete(`${API_BASE}/transports/${id}`)
     showDeleteConfirm.value = false; deleteTarget.value = null
     toast.success(`Transport for ${domain} deleted successfully`)
     await load()

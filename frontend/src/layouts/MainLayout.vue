@@ -3,11 +3,13 @@
 
     <!-- ═══════════════════════════════ HEADER ═══════════════════════════════ -->
     <q-header class="header-bar">
-      <q-toolbar class="header-toolbar q-px-md">
+      <q-toolbar class="header-toolbar">
 
         <!-- Breadcrumb -->
         <div class="breadcrumb">
-          SYSTEM <span class="breadcrumb-sep">›</span> {{ pageTitle }}
+          <span class="breadcrumb-system">SYSTEM</span>
+          <q-icon name="chevron_right" size="16px" class="breadcrumb-icon" />
+          <span class="breadcrumb-page">{{ pageTitle }}</span>
         </div>
 
         <q-space />
@@ -30,7 +32,7 @@
             <span class="user-role">{{ auth.user.superadmin ? 'SUPERADMIN' : 'ADMIN' }}</span>
           </div>
           <div class="user-avatar">
-            <q-icon name="shield" size="18px" color="white" />
+            <q-icon name="shield" size="20px" color="white" />
           </div>
           <div class="header-divider" />
           <button class="logout-btn" @click="logout">
@@ -46,7 +48,7 @@
     <q-drawer
       v-model="leftDrawerOpen"
       show-if-above
-      :width="210"
+      :width="240"
       class="sidebar"
     >
       <!-- Logo / branding at top of sidebar -->
@@ -161,19 +163,27 @@ function logout() {
 .header-toolbar {
   min-height: 56px;
   height: 56px;
+  padding: 0 32px;
 }
 
 /* Breadcrumb */
 .breadcrumb {
-  font-size: 11px;
-  font-weight: 800;
-  color: #94a3b8;
-  letter-spacing: 0.8px;
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 1.2px;
   text-transform: uppercase;
 }
-.breadcrumb-sep {
-  margin: 0 6px;
+.breadcrumb-system {
   color: #94a3b8;
+}
+.breadcrumb-icon {
+  color: #94a3b8;
+  margin: 0 2px;
+}
+.breadcrumb-page {
+  color: var(--color-brand-text);
 }
 
 /* Language switcher */
@@ -184,9 +194,9 @@ function logout() {
 }
 .lang-btn {
   padding: 2px 8px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1px;
   border: 1px solid #d1d5db;
   border-radius: 0;
   cursor: pointer;
@@ -216,20 +226,21 @@ function logout() {
 }
 .user-name {
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 900;
   color: var(--color-brand-text);
   text-transform: uppercase;
-  letter-spacing: 0.2px;
+  letter-spacing: -0.3px;
 }
 .user-role {
   font-size: 10px;
-  font-weight: 600;
-  color: #64748b;
-  letter-spacing: 0.5px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 1.6px;
 }
 .user-avatar {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border: 2px solid #1e293b;
   border-radius: 0;
   display: flex;
@@ -239,9 +250,10 @@ function logout() {
   box-shadow: 1px 1px 0 #1e293b;
 }
 .header-divider {
-  width: 3px;
-  height: 28px;
+  width: 4px;
+  height: 32px;
   background: #1e293b;
+  margin: 0 8px;
 }
 .logout-btn {
   display: flex;
@@ -263,11 +275,12 @@ function logout() {
 }
 
 /* ─── Sidebar ─── */
-.sidebar :deep(.q-drawer__content) {
+:deep(.q-drawer__content) {
   background: #ffffff;
   border-right: 3px solid #1e293b;
   display: flex;
   flex-direction: column;
+  overflow: visible;
 }
 
 /* Sidebar logo/branding section */
@@ -292,14 +305,14 @@ function logout() {
   flex-shrink: 0;
 }
 .logo-text {
-  font-size: 17px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--color-brand-text);
-  letter-spacing: -0.3px;
+  letter-spacing: -0.5px;
   font-family: monospace;
 }
 
-.sidebar :deep(.q-scrollarea__content) {
+:deep(.q-scrollarea__content) {
   width: 100%;
 }
 .sidebar-list {
@@ -308,50 +321,67 @@ function logout() {
 }
 
 .nav-item {
-  padding: 8px 14px;
+  padding: 8px 16px;
   border-radius: 0;
-  font-size: 13px;
+  font-size: 16px;
   color: #374151;
   min-height: 40px;
   cursor: pointer;
   transition: background .12s, color .12s;
-  border: 2px solid transparent;
+  border-top: 2px solid transparent;
+  border-bottom: 2px solid transparent;
+  border-left: 6px solid transparent;
+  border-right: 0px solid transparent;
 }
 .nav-item :deep(.q-icon) {
-  color: #6b7280;
+  color: #9ca3af;
   transition: color .12s;
 }
 .nav-item:hover {
   background: rgba(59, 130, 246, .08);
   color: var(--color-brand-text);
-  border-color: var(--color-brand-text);
+  border-top-color: var(--color-brand-text);
+  border-bottom-color: var(--color-brand-text);
+  border-left-color: var(--color-brand-text);
 }
 .nav-item:hover :deep(.q-icon) {
   color: var(--color-brand-text);
 }
 .nav-item--active {
-  background: rgba(59, 130, 246, .08) !important;
-  color: var(--color-brand-primary) !important;
-  border-color: var(--color-brand-text) !important;
-  border-left-width: 6px !important;
-  border-right-color: transparent !important;
+  position: relative;
+  background: #ebf2fe !important;
+  color: var(--color-brand-text) !important;
+  border-top-color: var(--color-brand-text) !important;
+  border-bottom-color: var(--color-brand-text) !important;
+  border-left-color: var(--color-brand-text) !important;
+  border-right-width: 0 !important;
+}
+.nav-item--active::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  right: -3px;
+  width: 3px;
+  background: #ebf2fe;
+  z-index: 10;
 }
 .nav-item--active :deep(.q-icon) {
-  color: var(--color-brand-primary) !important;
+  color: var(--color-brand-text) !important;
 }
 .nav-icon-section {
   min-width: 36px;
 }
 .nav-label {
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .settings-label {
-  margin: 16px 14px 4px;
+  margin: 16px 16px 4px;
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 900;
   color: #94a3b8;
-  letter-spacing: 1.4px;
+  letter-spacing: 1px;
   text-transform: uppercase;
 }
 </style>

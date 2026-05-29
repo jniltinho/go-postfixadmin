@@ -18,7 +18,7 @@ export const useAuthStore = defineStore('auth', {
 
   actions: {
     async login(username: string, password: string) {
-      const { data } = await axios.post('/api/v1/auth/login', {
+      const { data } = await axios.post(`${API_BASE}/auth/login`, {
         username,
         password
       })
@@ -34,7 +34,7 @@ export const useAuthStore = defineStore('auth', {
 
     async refresh(): Promise<boolean> {
       try {
-        const { data } = await axios.post('/api/v1/auth/refresh')
+        const { data } = await axios.post(`${API_BASE}/auth/refresh`)
         const newToken = data.data?.access_token
         if (!newToken) return false
 
@@ -50,7 +50,7 @@ export const useAuthStore = defineStore('auth', {
     },
 
     logout() {
-      axios.post('/api/v1/auth/logout').catch(() => {})
+      axios.post(`${API_BASE}/auth/logout`).catch(() => {})
       this.forceLogout()
     },
 
@@ -100,7 +100,7 @@ axios.interceptors.response.use(
     const originalRequest = error.config
 
     // Skip refresh for auth endpoints themselves
-    const isAuthEndpoint = originalRequest?.url?.includes('/api/v1/auth/')
+    const isAuthEndpoint = originalRequest?.url?.includes(`${API_BASE}/auth/`)
     if (error.response?.status !== 401 || isAuthEndpoint || originalRequest._retry) {
       return Promise.reject(error)
     }
@@ -118,7 +118,7 @@ axios.interceptors.response.use(
     isRefreshing = true
 
     try {
-      const { data } = await axios.post('/api/v1/auth/refresh')
+      const { data } = await axios.post(`${API_BASE}/auth/refresh`)
       const newToken = data.data?.access_token
       if (!newToken) throw new Error('no token in refresh response')
 

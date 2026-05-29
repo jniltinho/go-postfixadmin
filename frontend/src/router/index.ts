@@ -98,4 +98,9 @@ router.beforeEach((to, _from, next) => {
   }
 })
 
+router.afterEach((to) => {
+  const title = to.meta.title as string | undefined
+  document.title = title ? `${title} — PostfixAdmin` : 'PostfixAdmin'
+})
+
 export default router

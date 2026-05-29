@@ -234,7 +234,7 @@ async function load() {
   loading.value = true
   error.value = ''
   try {
-    const res = await axios.get('/api/v1/settings/apikeys')
+    const res = await axios.get(`${API_BASE}/settings/apikeys`)
     keys.value = res.data?.data ?? []
   } catch (e: any) {
     error.value = e?.response?.data?.error?.message || 'Failed to load settings data'
@@ -270,7 +270,7 @@ async function submitAdd() {
 
   savingAdd.value = true
   try {
-    const res = await axios.post('/api/v1/settings/apikeys', {
+    const res = await axios.post(`${API_BASE}/settings/apikeys`, {
       name: f.name.trim(),
       days_valid: f.daysValid
     })
@@ -304,7 +304,7 @@ async function toggleActive(row: ApiKey) {
   updatingRowId.value = row.id
   const targetState = !row.active
   try {
-    await axios.put(`/api/v1/settings/apikeys/${row.id}`, { active: targetState })
+    await axios.put(`${API_BASE}/settings/apikeys/${row.id}`, { active: targetState })
     row.active = targetState
     toast.success(`Key "${row.name}" status updated successfully`)
   } catch (e: any) {
@@ -330,7 +330,7 @@ async function submitDelete() {
   try {
     const id = deleteTarget.value.id
     const name = deleteTarget.value.name
-    await axios.delete(`/api/v1/settings/apikeys/${id}`)
+    await axios.delete(`${API_BASE}/settings/apikeys/${id}`)
     showDeleteConfirm.value = false
     deleteTarget.value = null
     toast.success(`API Key "${name}" revoked successfully`)

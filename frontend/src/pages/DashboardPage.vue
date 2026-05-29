@@ -253,7 +253,7 @@ async function loadDashboardData() {
   loading.value = true
   error.value = ''
   try {
-    const res = await axios.get('/api/v1/dashboard')
+    const res = await axios.get(`${API_BASE}/dashboard`)
     const data = res.data?.data
 
     stats.value.domains   = data?.domains   ?? 0

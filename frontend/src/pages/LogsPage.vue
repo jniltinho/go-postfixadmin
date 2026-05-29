@@ -193,7 +193,7 @@ async function load(quiet = false) {
   error.value = ''
   
   try {
-    const res = await axios.get('/api/v1/logs', {
+    const res = await axios.get(`${API_BASE}/logs`, {
       params: {
         page: currentPage.value,
         per_page: rowsPerPage.value,

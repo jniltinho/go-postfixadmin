@@ -178,7 +178,7 @@ async function load(quiet = false) {
   error.value = ''
   
   try {
-    const res = await axios.get('/api/v1/maillog', {
+    const res = await axios.get(`${API_BASE}/maillog`, {
       params: {
         page: currentPage.value,
         per_page: rowsPerPage.value,

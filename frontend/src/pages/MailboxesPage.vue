@@ -186,7 +186,7 @@
               <div class="pw-field">
                 <label class="form-label">PASSWORD <span class="req">*</span></label>
                 <div class="pw-wrap">
-                  <input v-model="addForm.password" :type="showPw1 ? 'text' : 'password'" class="form-input" placeholder="Min. 8 characters" />
+                  <input v-model="addForm.password" :type="showPw1 ? 'text' : 'password'" class="form-input" placeholder="Min. 8 characters" @input="onAddPasswordInput" />
                   <button class="pw-eye" type="button" @click="showPw1 = !showPw1">
                     <q-icon :name="showPw1 ? 'visibility_off' : 'visibility'" size="18px" />
                   </button>
@@ -195,7 +195,7 @@
               <div class="pw-field">
                 <label class="form-label">CONFIRM PASSWORD <span class="req">*</span></label>
                 <div class="pw-wrap">
-                  <input v-model="addForm.passwordConfirm" :type="showPw2 ? 'text' : 'password'" class="form-input" placeholder="Repeat password" />
+                  <input v-model="addForm.passwordConfirm" :type="showPw2 ? 'text' : 'password'" class="form-input" placeholder="Repeat password" @input="onAddPasswordInput" />
                   <button class="pw-eye" type="button" @click="showPw2 = !showPw2">
                     <q-icon :name="showPw2 ? 'visibility_off' : 'visibility'" size="18px" />
                   </button>
@@ -203,12 +203,19 @@
               </div>
               <div class="pw-gen-wrap">
                 <label class="form-label">&nbsp;</label>
-                <button class="btn-generate" type="button" @click="generatePassword(addForm)">
+                <button class="btn-generate" type="button" @click="generateAddPassword()">
                   <q-icon name="auto_fix_high" size="14px" style="margin-right:4px;vertical-align:middle" />
                   GENERATE
                 </button>
               </div>
             </div>
+            <div v-if="addForm.password" class="pwd-strength">
+              <div class="strength-bar-wrap">
+                <div class="strength-bar" :style="{ width: addPwdStrength.pct + '%', background: addPwdStrength.color }"></div>
+              </div>
+              <span class="strength-label" :style="{ color: addPwdStrength.color }">{{ addPwdStrength.label }}</span>
+            </div>
+            <div v-if="addPwdMismatch" class="pwd-mismatch">Passwords do not match</div>
           </div>
 
           <!-- ADVANCED SETTINGS collapsible -->
@@ -303,7 +310,7 @@
                 <div class="pw-field">
                   <label class="form-label">NEW PASSWORD</label>
                   <div class="pw-wrap">
-                    <input v-model="editForm.password" :type="showPw3 ? 'text' : 'password'" class="form-input" placeholder="Min. 8 characters" />
+                    <input v-model="editForm.password" :type="showPw3 ? 'text' : 'password'" class="form-input" placeholder="Min. 8 characters" @input="onEditPasswordInput" />
                     <button class="pw-eye" type="button" @click="showPw3 = !showPw3">
                       <q-icon :name="showPw3 ? 'visibility_off' : 'visibility'" size="18px" />
                     </button>
@@ -312,7 +319,7 @@
                 <div class="pw-field">
                   <label class="form-label">CONFIRM PASSWORD</label>
                   <div class="pw-wrap">
-                    <input v-model="editForm.passwordConfirm" :type="showPw4 ? 'text' : 'password'" class="form-input" placeholder="Repeat password" />
+                    <input v-model="editForm.passwordConfirm" :type="showPw4 ? 'text' : 'password'" class="form-input" placeholder="Repeat password" @input="onEditPasswordInput" />
                     <button class="pw-eye" type="button" @click="showPw4 = !showPw4">
                       <q-icon :name="showPw4 ? 'visibility_off' : 'visibility'" size="18px" />
                     </button>
@@ -320,12 +327,19 @@
                 </div>
                 <div class="pw-gen-wrap">
                   <label class="form-label">&nbsp;</label>
-                  <button class="btn-generate" type="button" @click="generatePassword(editForm)">
+                  <button class="btn-generate" type="button" @click="generateEditPassword()">
                     <q-icon name="auto_fix_high" size="14px" style="margin-right:4px;vertical-align:middle" />
                     GENERATE
                   </button>
                 </div>
               </div>
+              <div v-if="editForm.password" class="pwd-strength">
+                <div class="strength-bar-wrap">
+                  <div class="strength-bar" :style="{ width: editPwdStrength.pct + '%', background: editPwdStrength.color }"></div>
+                </div>
+                <span class="strength-label" :style="{ color: editPwdStrength.color }">{{ editPwdStrength.label }}</span>
+              </div>
+              <div v-if="editPwdMismatch" class="pwd-mismatch">Passwords do not match</div>
             </div>
           </details>
 
@@ -402,6 +416,7 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import axios from 'axios'
 import { useToastStore } from '../stores/toast'
+import { calcStrength, generatePassword } from '../utils/password'
 
 const toast = useToastStore()
 
@@ -490,8 +505,8 @@ async function load() {
   loading.value = true; error.value = ''
   try {
     const [mbRes, domRes] = await Promise.all([
-      axios.get('/api/v1/mailboxes'),
-      axios.get('/api/v1/domains'),
+      axios.get(`${API_BASE}/mailboxes`),
+      axios.get(`${API_BASE}/domains`),
     ])
     allMailboxes.value = mbRes.data?.data ?? []
     domains.value = domRes.data?.data ?? []
@@ -501,20 +516,13 @@ async function load() {
 }
 onMounted(load)
 
-// ─── Shared password generator ───
-function generatePassword(form: { password: string; passwordConfirm: string; [k: string]: any }) {
-  const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%'
-  const pw = Array.from({ length: 16 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
-  form.password = pw
-  form.passwordConfirm = pw
-}
-
 // ─── Add modal ───
 const showAdd = ref(false)
 const savingAdd = ref(false)
 const addError = ref('')
 const showPw1 = ref(false)
 const showPw2 = ref(false)
+const addPwdMismatch = ref(false)
 
 const addForm = ref({
   localPart: '', domain: '', name: '', quotaMB: 1024,
@@ -522,13 +530,26 @@ const addForm = ref({
   emailOther: '', password: '', passwordConfirm: '',
 })
 
+const addPwdStrength = computed(() => calcStrength(addForm.value.password))
+
+function onAddPasswordInput() {
+  addPwdMismatch.value = !!(addForm.value.passwordConfirm && addForm.value.password !== addForm.value.passwordConfirm)
+}
+
+function generateAddPassword() {
+  generatePassword(addForm.value)
+  showPw1.value = true
+  showPw2.value = true
+  onAddPasswordInput()
+}
+
 function openAdd() {
   addForm.value = {
     localPart: '', domain: domains.value[0]?.domain || '', name: '', quotaMB: 1024,
     active: true, smtpActive: true, sendWelcome: false,
     emailOther: '', password: '', passwordConfirm: '',
   }
-  addError.value = ''; showPw1.value = false; showPw2.value = false
+  addError.value = ''; showPw1.value = false; showPw2.value = false; addPwdMismatch.value = false
   showAdd.value = true
 }
 
@@ -541,7 +562,7 @@ async function submitAdd() {
   if (f.password !== f.passwordConfirm) { addError.value = 'Passwords do not match'; return }
   savingAdd.value = true
   try {
-    await axios.post('/api/v1/mailboxes', {
+    await axios.post(`${API_BASE}/mailboxes`, {
       local_part: f.localPart.toLowerCase().trim(),
       domain: f.domain,
       name: f.name,
@@ -567,6 +588,7 @@ const savingEdit = ref(false)
 const editError = ref('')
 const showPw3 = ref(false)
 const showPw4 = ref(false)
+const editPwdMismatch = ref(false)
 
 const editForm = ref({
   username: '', name: '', quotaMB: 0,
@@ -574,10 +596,23 @@ const editForm = ref({
   password: '', passwordConfirm: '',
 })
 
+const editPwdStrength = computed(() => calcStrength(editForm.value.password))
+
+function onEditPasswordInput() {
+  editPwdMismatch.value = !!(editForm.value.passwordConfirm && editForm.value.password !== editForm.value.passwordConfirm)
+}
+
+function generateEditPassword() {
+  generatePassword(editForm.value)
+  showPw3.value = true
+  showPw4.value = true
+  onEditPasswordInput()
+}
+
 async function openEdit(row: Mailbox) {
-  editError.value = ''; showPw3.value = false; showPw4.value = false
+  editError.value = ''; showPw3.value = false; showPw4.value = false; editPwdMismatch.value = false
   try {
-    const res = await axios.get(`/api/v1/mailboxes/${encodeURIComponent(row.username)}`)
+    const res = await axios.get(`${API_BASE}/mailboxes/${encodeURIComponent(row.username)}`)
     const mb = res.data?.data
     editForm.value = {
       username: mb.username,
@@ -614,7 +649,7 @@ async function submitEdit() {
   }
   savingEdit.value = true
   try {
-    await axios.put(`/api/v1/mailboxes/${encodeURIComponent(f.username)}`, payload)
+    await axios.put(`${API_BASE}/mailboxes/${encodeURIComponent(f.username)}`, payload)
     showEdit.value = false
     toast.success(`Mailbox ${f.username} updated successfully`)
     await load()
@@ -636,7 +671,7 @@ async function submitDelete() {
   deletingRow.value = true
   try {
     const username = deleteTarget.value.username
-    await axios.delete(`/api/v1/mailboxes/${encodeURIComponent(username)}`)
+    await axios.delete(`${API_BASE}/mailboxes/${encodeURIComponent(username)}`)
     showDeleteConfirm.value = false; deleteTarget.value = null
     toast.success(`Mailbox ${username} deleted successfully`)
     await load()
@@ -759,6 +794,11 @@ async function submitDelete() {
 .pw-wrap .form-input { padding-right: 38px; }
 .pw-eye { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: transparent; border: none; cursor: pointer; color: #64748b; padding: 2px; }
 .pw-eye:hover { color: #1e293b; }
+.pwd-strength { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+.strength-bar-wrap { flex: 1; height: 5px; background: #e2e8f0; border: 1px solid #d1d5db; overflow: hidden; }
+.strength-bar { height: 100%; transition: width .3s, background .3s; }
+.strength-label { font-size: 10px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap; }
+.pwd-mismatch { font-size: 11px; color: #dc2626; font-weight: 600; }
 .btn-generate { background: #3b82f6; border: 2px solid #1e293b; color: #fff; height: 40px; padding: 0 14px; font-size: 10px; font-weight: 800; cursor: pointer; border-radius: 0; text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap; display: flex; align-items: center; transition: all .12s; box-shadow: 2px 2px 0 #1e293b; }
 .btn-generate:hover { background: #fff; color: #3b82f6; transform: translate(-1px,-1px); box-shadow: 3px 3px 0 #1e293b; }
 

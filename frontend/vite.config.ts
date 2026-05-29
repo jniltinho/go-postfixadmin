@@ -12,6 +12,9 @@ export default defineConfig({
       sassVariables: 'src/css/quasar-variables.sass'
     })
   ],
+  define: {
+    API_BASE: JSON.stringify('/api/v1'),
+  },
   server: {
     port: 9000,
     proxy: {

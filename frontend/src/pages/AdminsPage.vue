@@ -113,7 +113,7 @@
 
     <!-- ══════════ ADD MODAL ══════════ -->
     <div v-if="showAdd" class="modal-overlay" @click.self="showAdd = false">
-      <div class="modal-card modal-card-lg">
+      <div class="modal-card">
         <div class="modal-head">
           <span class="modal-head-title">
             <q-icon name="person_add" size="18px" style="margin-right:8px;vertical-align:middle" />
@@ -160,40 +160,42 @@
               <q-icon name="key" size="15px" style="margin-right:6px" />
               PASSWORD
             </div>
-            <div class="pwd-row">
-              <div class="form-group" style="flex:1">
+            <div class="pw-row">
+              <div class="pw-field">
                 <label class="form-label">PASSWORD <span class="req">*</span></label>
-                <div class="pwd-wrap">
+                <div class="pw-wrap">
                   <input
                     v-model="addForm.password"
-                    :type="showAddPwd ? 'text' : 'password'"
+                    :type="showPw1 ? 'text' : 'password'"
                     class="form-input"
                     placeholder="Min. 8 characters"
                     @input="onAddPasswordInput"
                   />
-                  <button type="button" class="pwd-toggle" @click="showAddPwd = !showAddPwd">
-                    <q-icon :name="showAddPwd ? 'visibility_off' : 'visibility'" size="16px" />
+                  <button type="button" class="pw-eye" @click="showPw1 = !showPw1">
+                    <q-icon :name="showPw1 ? 'visibility_off' : 'visibility'" size="18px" />
                   </button>
                 </div>
               </div>
-              <div class="form-group" style="flex:1">
+              <div class="pw-field">
                 <label class="form-label">CONFIRM PASSWORD <span class="req">*</span></label>
-                <div class="pwd-wrap">
+                <div class="pw-wrap">
                   <input
                     v-model="addForm.passwordConfirm"
-                    :type="showAddPwdConfirm ? 'text' : 'password'"
+                    :type="showPw2 ? 'text' : 'password'"
                     class="form-input"
                     placeholder="Repeat password"
                     @input="onAddPasswordInput"
                   />
-                  <button type="button" class="pwd-toggle" @click="showAddPwdConfirm = !showAddPwdConfirm">
-                    <q-icon :name="showAddPwdConfirm ? 'visibility_off' : 'visibility'" size="16px" />
+                  <button type="button" class="pw-eye" @click="showPw2 = !showPw2">
+                    <q-icon :name="showPw2 ? 'visibility_off' : 'visibility'" size="18px" />
                   </button>
                 </div>
               </div>
-              <div style="display:flex;align-items:flex-end;padding-bottom:0">
-                <button type="button" class="btn-generate" @click="generatePassword('add')" title="Generate strong password">
-                  <q-icon name="auto_awesome" size="16px" />
+              <div class="pw-gen-wrap">
+                <label class="form-label">&nbsp;</label>
+                <button type="button" class="btn-generate" @click="generatePassword(addForm)">
+                  <q-icon name="auto_fix_high" size="14px" style="margin-right:4px;vertical-align:middle" />
+                  GENERATE
                 </button>
               </div>
             </div>
@@ -250,7 +252,7 @@
 
     <!-- ══════════ EDIT MODAL ══════════ -->
     <div v-if="showEdit" class="modal-overlay" @click.self="showEdit = false">
-      <div class="modal-card modal-card-lg">
+      <div class="modal-card">
         <div class="modal-head">
           <span class="modal-head-title">
             <q-icon name="manage_accounts" size="18px" style="margin-right:8px;vertical-align:middle" />
@@ -293,47 +295,51 @@
             </div>
 
             <!-- Change Password (collapsible) -->
-            <details class="pwd-details">
-              <summary class="pwd-details-summary">
-                <q-icon name="key" size="15px" style="margin-right:6px" />
-                CHANGE PASSWORD
-                <q-icon name="expand_more" size="16px" style="margin-left:auto" class="chevron" />
+            <details class="adv-details">
+              <summary class="adv-summary">
+                <span class="adv-summary-left">
+                  <q-icon name="key" size="15px" style="margin-right:6px" />
+                  CHANGE PASSWORD
+                </span>
+                <q-icon name="expand_more" size="18px" class="adv-chevron" />
               </summary>
-              <div class="pwd-details-body">
-                <div class="pwd-row">
-                  <div class="form-group" style="flex:1">
+              <div class="adv-body">
+                <div class="pw-row">
+                  <div class="pw-field">
                     <label class="form-label">NEW PASSWORD</label>
-                    <div class="pwd-wrap">
+                    <div class="pw-wrap">
                       <input
                         v-model="editForm.password"
-                        :type="showEditPwd ? 'text' : 'password'"
+                        :type="showPw3 ? 'text' : 'password'"
                         class="form-input"
                         placeholder="Min. 8 characters"
                         @input="onEditPasswordInput"
                       />
-                      <button type="button" class="pwd-toggle" @click="showEditPwd = !showEditPwd">
-                        <q-icon :name="showEditPwd ? 'visibility_off' : 'visibility'" size="16px" />
+                      <button type="button" class="pw-eye" @click="showPw3 = !showPw3">
+                        <q-icon :name="showPw3 ? 'visibility_off' : 'visibility'" size="18px" />
                       </button>
                     </div>
                   </div>
-                  <div class="form-group" style="flex:1">
+                  <div class="pw-field">
                     <label class="form-label">CONFIRM NEW PASSWORD</label>
-                    <div class="pwd-wrap">
+                    <div class="pw-wrap">
                       <input
                         v-model="editForm.passwordConfirm"
-                        :type="showEditPwdConfirm ? 'text' : 'password'"
+                        :type="showPw4 ? 'text' : 'password'"
                         class="form-input"
                         placeholder="Repeat new password"
                         @input="onEditPasswordInput"
                       />
-                      <button type="button" class="pwd-toggle" @click="showEditPwdConfirm = !showEditPwdConfirm">
-                        <q-icon :name="showEditPwdConfirm ? 'visibility_off' : 'visibility'" size="16px" />
+                      <button type="button" class="pw-eye" @click="showPw4 = !showPw4">
+                        <q-icon :name="showPw4 ? 'visibility_off' : 'visibility'" size="18px" />
                       </button>
                     </div>
                   </div>
-                  <div style="display:flex;align-items:flex-end;padding-bottom:0">
-                    <button type="button" class="btn-generate" @click="generatePassword('edit')" title="Generate strong password">
-                      <q-icon name="auto_awesome" size="16px" />
+                  <div class="pw-gen-wrap">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="button" class="btn-generate" @click="generatePassword(editForm)">
+                      <q-icon name="auto_fix_high" size="14px" style="margin-right:4px;vertical-align:middle" />
+                      GENERATE
                     </button>
                   </div>
                 </div>
@@ -421,6 +427,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import axios from 'axios'
 import { useToastStore } from '../stores/toast'
 import { useAuthStore } from '../stores/auth'
+import { calcStrength, generatePassword as fillPassword } from '../utils/password'
 
 const toast = useToastStore()
 const auth = useAuthStore()
@@ -498,8 +505,8 @@ async function load() {
   loading.value = true; error.value = ''
   try {
     const [admRes, domRes] = await Promise.all([
-      axios.get('/api/v1/admins'),
-      axios.get('/api/v1/domains'),
+      axios.get(`${API_BASE}/admins`),
+      axios.get(`${API_BASE}/domains`),
     ])
     allAdmins.value = admRes.data?.data ?? []
     domains.value = domRes.data?.data ?? []
@@ -509,38 +516,15 @@ async function load() {
 }
 onMounted(load)
 
-// ─── Password strength ───
-function calcStrength(pwd: string) {
-  if (!pwd) return { pct: 0, label: '', color: '#e2e8f0' }
-  let score = 0
-  if (pwd.length >= 8)  score++
-  if (pwd.length >= 12) score++
-  if (/[A-Z]/.test(pwd)) score++
-  if (/[0-9]/.test(pwd)) score++
-  if (/[^A-Za-z0-9]/.test(pwd)) score++
-  const levels = [
-    { pct: 20,  label: 'VERY WEAK', color: '#ef4444' },
-    { pct: 40,  label: 'WEAK',      color: '#f97316' },
-    { pct: 60,  label: 'FAIR',      color: '#eab308' },
-    { pct: 80,  label: 'STRONG',    color: '#22c55e' },
-    { pct: 100, label: 'VERY STRONG', color: '#16a34a' },
-  ]
-  return levels[Math.min(score - 1, 4)] ?? levels[0]
-}
-
-function generatePassword(target: 'add' | 'edit') {
-  const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*'
-  let pwd = ''
-  for (let i = 0; i < 16; i++) pwd += chars[Math.floor(Math.random() * chars.length)]
-  if (target === 'add') {
-    addForm.value.password = pwd
-    addForm.value.passwordConfirm = pwd
-    showAddPwd.value = true
+function generatePassword(form: { password: string; passwordConfirm: string; [k: string]: any }) {
+  fillPassword(form)
+  if (form === addForm.value) {
+    showPw1.value = true
+    showPw2.value = true
     onAddPasswordInput()
   } else {
-    editForm.value.password = pwd
-    editForm.value.passwordConfirm = pwd
-    showEditPwd.value = true
+    showPw3.value = true
+    showPw4.value = true
     onEditPasswordInput()
   }
 }
@@ -549,8 +533,8 @@ function generatePassword(target: 'add' | 'edit') {
 const showAdd = ref(false)
 const savingAdd = ref(false)
 const addError = ref('')
-const showAddPwd = ref(false)
-const showAddPwdConfirm = ref(false)
+const showPw1 = ref(false)
+const showPw2 = ref(false)
 const addPwdMismatch = ref(false)
 const addForm = ref({
   username: '', password: '', passwordConfirm: '',
@@ -576,8 +560,8 @@ function toggleAddDomain(domain: string) {
 function openAdd() {
   addForm.value = { username: '', password: '', passwordConfirm: '', active: true, superadmin: false, domains: [] }
   addError.value = ''
-  showAddPwd.value = false
-  showAddPwdConfirm.value = false
+  showPw1.value = false
+  showPw2.value = false
   addPwdMismatch.value = false
   showAdd.value = true
 }
@@ -591,7 +575,7 @@ async function submitAdd() {
   if (f.password !== f.passwordConfirm) { addError.value = 'Passwords do not match'; return }
   savingAdd.value = true
   try {
-    await axios.post('/api/v1/admins', {
+    await axios.post(`${API_BASE}/admins`, {
       username: f.username.toLowerCase().trim(),
       password: f.password,
       active: f.active,
@@ -612,8 +596,8 @@ const showEdit = ref(false)
 const loadingEdit = ref(false)
 const savingEdit = ref(false)
 const editError = ref('')
-const showEditPwd = ref(false)
-const showEditPwdConfirm = ref(false)
+const showPw3 = ref(false)
+const showPw4 = ref(false)
 const editPwdMismatch = ref(false)
 const editDomains = ref<DomainOption[]>([])
 const editForm = ref({
@@ -635,13 +619,13 @@ async function openEdit(row: Admin) {
   editError.value = ''
   editForm.value = { username: row.username, password: '', passwordConfirm: '', active: row.active, superadmin: row.superadmin }
   editDomains.value = []
-  showEditPwd.value = false
-  showEditPwdConfirm.value = false
+  showPw3.value = false
+  showPw4.value = false
   editPwdMismatch.value = false
   loadingEdit.value = true
   showEdit.value = true
   try {
-    const res = await axios.get(`/api/v1/admins/${encodeURIComponent(row.username)}`)
+    const res = await axios.get(`${API_BASE}/admins/${encodeURIComponent(row.username)}`)
     const d = res.data?.data
     editForm.value.active = d.admin.active
     editForm.value.superadmin = d.admin.superadmin
@@ -668,7 +652,7 @@ async function submitEdit() {
       payload.password_confirm = f.passwordConfirm
       payload.change_password = true
     }
-    await axios.put(`/api/v1/admins/${encodeURIComponent(f.username)}`, payload)
+    await axios.put(`${API_BASE}/admins/${encodeURIComponent(f.username)}`, payload)
     showEdit.value = false
     toast.success(`Administrator ${f.username} updated successfully`)
     await load()
@@ -690,7 +674,7 @@ async function submitDelete() {
   deletingRow.value = true
   try {
     const name = deleteTarget.value.username
-    await axios.delete(`/api/v1/admins/${encodeURIComponent(name)}`)
+    await axios.delete(`${API_BASE}/admins/${encodeURIComponent(name)}`)
     showDeleteConfirm.value = false; deleteTarget.value = null
     toast.success(`Administrator ${name} deleted successfully`)
     await load()
@@ -769,7 +753,6 @@ async function submitDelete() {
 /* ─── Modals ─── */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 9000; display: flex; align-items: center; justify-content: center; padding: 20px; }
 .modal-card { background: #fff; border: 3px solid #1e293b; width: 100%; max-width: 600px; max-height: 90vh; display: flex; flex-direction: column; border-radius: 0; box-shadow: 4px 4px 0 #1e293b; }
-.modal-card-lg { max-width: 860px; }
 .modal-card-sm { max-width: 420px; }
 .modal-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; background: #3b82f6; color: #fff; flex-shrink: 0; }
 .modal-head-title { font-size: 15px; font-weight: 900; letter-spacing: 0.3px; font-family: monospace; text-transform: uppercase; display: flex; align-items: center; }
@@ -805,12 +788,14 @@ async function submitDelete() {
 .check-disabled input { cursor: not-allowed; }
 
 /* ─── Password ─── */
-.pwd-row { display: flex; gap: 12px; align-items: flex-end; }
-.pwd-wrap { position: relative; }
-.pwd-wrap .form-input { padding-right: 36px; }
-.pwd-toggle { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #64748b; padding: 0; display: flex; }
-.pwd-toggle:hover { color: #1e293b; }
-.btn-generate { height: 40px; padding: 0 12px; background: #3b82f6; color: #fff; border: 2px solid #1e293b; cursor: pointer; display: flex; align-items: center; transition: all .12s; box-shadow: 2px 2px 0 #1e293b; flex-shrink: 0; }
+.pw-row { display: flex; gap: 12px; align-items: flex-end; }
+.pw-field { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.pw-wrap { position: relative; }
+.pw-wrap .form-input { padding-right: 40px; }
+.pw-eye { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #64748b; padding: 0; display: flex; }
+.pw-eye:hover { color: #1e293b; }
+.pw-gen-wrap { display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; }
+.btn-generate { height: 40px; padding: 0 12px; background: #3b82f6; color: #fff; border: 2px solid #1e293b; cursor: pointer; display: flex; align-items: center; font-size: 11px; font-weight: 800; letter-spacing: 0.5px; transition: all .12s; box-shadow: 2px 2px 0 #1e293b; flex-shrink: 0; }
 .btn-generate:hover { background: #fff; color: #3b82f6; transform: translate(-1px,-1px); box-shadow: 3px 3px 0 #1e293b; }
 .pwd-strength { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
 .strength-bar-wrap { flex: 1; height: 5px; background: #e2e8f0; border: 1px solid #d1d5db; overflow: hidden; }
@@ -818,14 +803,15 @@ async function submitDelete() {
 .strength-label { font-size: 10px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap; }
 .pwd-mismatch { font-size: 11px; color: #dc2626; font-weight: 600; }
 
-/* ─── Password details (collapsible) ─── */
-.pwd-details { border: 2px solid #1e293b; }
-.pwd-details-summary { list-style: none; padding: 12px 16px; cursor: pointer; font-size: 12px; font-weight: 900; color: #1e293b; letter-spacing: 0.6px; text-transform: uppercase; font-family: monospace; display: flex; align-items: center; background: #f8fafc; transition: background .12s; user-select: none; }
-.pwd-details-summary:hover { background: #f1f5f9; }
-.pwd-details-summary::-webkit-details-marker { display: none; }
-.pwd-details[open] .chevron { transform: rotate(180deg); }
-.chevron { transition: transform .2s; }
-.pwd-details-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; border-top: 2px solid #1e293b; }
+/* ─── Collapsible sections ─── */
+.adv-details { border: 2px solid #1e293b; }
+.adv-summary { list-style: none; padding: 12px 16px; cursor: pointer; font-size: 12px; font-weight: 900; color: #1e293b; letter-spacing: 0.6px; text-transform: uppercase; font-family: monospace; display: flex; align-items: center; justify-content: space-between; background: #f8fafc; transition: background .12s; user-select: none; }
+.adv-summary:hover { background: #f1f5f9; }
+.adv-summary::-webkit-details-marker { display: none; }
+.adv-summary-left { display: flex; align-items: center; }
+.adv-chevron { transition: transform .2s; }
+.adv-details[open] .adv-chevron { transform: rotate(180deg); }
+.adv-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; border-top: 2px solid #1e293b; }
 
 /* ─── Domains grid ─── */
 .domains-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 180px; overflow-y: auto; padding: 10px; background: #f8fafc; border: 2px solid #e2e8f0; }

@@ -336,8 +336,8 @@ async function load() {
   loading.value = true; error.value = ''
   try {
     const [adRes, domRes] = await Promise.all([
-      axios.get('/api/v1/alias-domains'),
-      axios.get('/api/v1/domains'),
+      axios.get(`${API_BASE}/alias-domains`),
+      axios.get(`${API_BASE}/domains`),
     ])
     allAliasDomains.value = adRes.data?.data ?? []
     domains.value = domRes.data?.data ?? []
@@ -367,7 +367,7 @@ async function submitAdd() {
   if (alias_domain === target_domain) { addError.value = 'Alias domain and target domain must be different'; return }
   savingAdd.value = true
   try {
-    await axios.post('/api/v1/alias-domains', { alias_domain, target_domain, active })
+    await axios.post(`${API_BASE}/alias-domains`, { alias_domain, target_domain, active })
     showAdd.value = false
     toast.success(`Domain alias ${alias_domain} → ${target_domain} created successfully`)
     await load()
@@ -389,7 +389,7 @@ async function openEdit(row: AliasDomain) {
   loadingEdit.value = true
   showEdit.value = true
   try {
-    const res = await axios.get(`/api/v1/alias-domains/${encodeURIComponent(row.alias_domain)}`)
+    const res = await axios.get(`${API_BASE}/alias-domains/${encodeURIComponent(row.alias_domain)}`)
     const ad = res.data?.data
     editForm.value = {
       alias_domain: ad.alias_domain,
@@ -407,7 +407,7 @@ async function submitEdit() {
   if (!f.target_domain) { editError.value = 'Please select a target domain'; return }
   savingEdit.value = true
   try {
-    await axios.put(`/api/v1/alias-domains/${encodeURIComponent(f.alias_domain)}`, {
+    await axios.put(`${API_BASE}/alias-domains/${encodeURIComponent(f.alias_domain)}`, {
       target_domain: f.target_domain,
       active: f.active,
     })
@@ -432,7 +432,7 @@ async function submitDelete() {
   deletingRow.value = true
   try {
     const name = deleteTarget.value.alias_domain
-    await axios.delete(`/api/v1/alias-domains/${encodeURIComponent(name)}`)
+    await axios.delete(`${API_BASE}/alias-domains/${encodeURIComponent(name)}`)
     showDeleteConfirm.value = false; deleteTarget.value = null
     toast.success(`Domain alias ${name} deleted successfully`)
     await load()

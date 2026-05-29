@@ -480,8 +480,8 @@ async function load() {
   error.value = ''
   try {
     const [domRes, trRes] = await Promise.all([
-      axios.get('/api/v1/domains'),
-      axios.get('/api/v1/transports'),
+      axios.get(`${API_BASE}/domains`),
+      axios.get(`${API_BASE}/transports`),
     ])
     allDomains.value = domRes.data?.data ?? []
     transports.value = (trRes.data?.data ?? []).filter((t: Transport) => t.active)
@@ -521,7 +521,7 @@ async function submitAdd() {
 
   savingAdd.value = true
   try {
-    await axios.post('/api/v1/domains', {
+    await axios.post(`${API_BASE}/domains`, {
       domain: f.domain.trim().toLowerCase(),
       description: f.description,
       aliases: f.aliases,
@@ -575,7 +575,7 @@ async function submitEdit() {
   const f = editForm.value
   savingEdit.value = true
   try {
-    await axios.put(`/api/v1/domains/${encodeURIComponent(f.domain)}`, {
+    await axios.put(`${API_BASE}/domains/${encodeURIComponent(f.domain)}`, {
       description: f.description,
       aliases: f.aliases,
       mailboxes: f.mailboxes,
@@ -611,7 +611,7 @@ async function submitDelete() {
   deletingRow.value = true
   try {
     const domain = deleteTarget.value.domain
-    await axios.delete(`/api/v1/domains/${encodeURIComponent(domain)}`)
+    await axios.delete(`${API_BASE}/domains/${encodeURIComponent(domain)}`)
     showDeleteConfirm.value = false
     deleteTarget.value = null
     toast.success(`Domain ${domain} deleted successfully`)

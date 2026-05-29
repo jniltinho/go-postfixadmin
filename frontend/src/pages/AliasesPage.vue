@@ -351,8 +351,8 @@ async function load() {
   loading.value = true; error.value = ''
   try {
     const [alRes, domRes] = await Promise.all([
-      axios.get('/api/v1/aliases'),
-      axios.get('/api/v1/domains'),
+      axios.get(`${API_BASE}/aliases`),
+      axios.get(`${API_BASE}/domains`),
     ])
     allAliases.value = alRes.data?.data ?? []
     domains.value = domRes.data?.data ?? []
@@ -381,7 +381,7 @@ async function submitAdd() {
   if (!gotoVal.trim()) { addError.value = 'At least one recipient is required'; return }
   savingAdd.value = true
   try {
-    await axios.post('/api/v1/aliases', {
+    await axios.post(`${API_BASE}/aliases`, {
       local_part: localPart.toLowerCase().trim(),
       domain,
       goto: gotoVal.trim(),
@@ -405,7 +405,7 @@ const editForm = ref({ address: '', goto: '', active: true })
 async function openEdit(row: Alias) {
   editError.value = ''
   try {
-    const res = await axios.get(`/api/v1/aliases/${encodeURIComponent(row.address)}`)
+    const res = await axios.get(`${API_BASE}/aliases/${encodeURIComponent(row.address)}`)
     const al = res.data?.data
     editForm.value = {
       address: al.address,
@@ -424,7 +424,7 @@ async function submitEdit() {
   if (!f.goto.trim()) { editError.value = 'At least one recipient is required'; return }
   savingEdit.value = true
   try {
-    await axios.put(`/api/v1/aliases/${encodeURIComponent(f.address)}`, {
+    await axios.put(`${API_BASE}/aliases/${encodeURIComponent(f.address)}`, {
       goto: f.goto.trim(),
       active: f.active,
     })
@@ -449,7 +449,7 @@ async function submitDelete() {
   deletingRow.value = true
   try {
     const address = deleteTarget.value.address
-    await axios.delete(`/api/v1/aliases/${encodeURIComponent(address)}`)
+    await axios.delete(`${API_BASE}/aliases/${encodeURIComponent(address)}`)
     showDeleteConfirm.value = false; deleteTarget.value = null
     toast.success(`Alias ${address} deleted successfully`)
     await load()
