@@ -474,7 +474,7 @@ function isExpired(ts: string | null): boolean {
 .badge-yes { background: #dcfce7; color: #16a34a; }
 .badge-no  { background: #fee2e2; color: #dc2626; }
 
-.actions-td { display: flex; gap: 6px; align-items: center; }
+.actions-td { display: flex; gap: 6px; align-items: center; justify-content: flex-end; }
 .act-btn {
   padding: 4px 10px; font-size: 10px; font-weight: 800; cursor: pointer;
   border: 1px solid #1e293b; letter-spacing: 0.4px; border-radius: 0;
@@ -483,8 +483,8 @@ function isExpired(ts: string | null): boolean {
 }
 .act-btn:hover { transform: translate(-0.5px, -0.5px); }
 .act-btn:active { transform: translate(0,0); box-shadow: none; }
-.act-del  { background: #ef4444; color: #fff; }
-.act-del:hover { background: #fff; color: #ef4444; }
+.act-del  { background: #dc2626; color: #fff; }
+.act-del:hover { background: #fff; color: #dc2626; }
 
 .table-loading, .table-empty { text-align: center; padding: 28px; color: #94a3b8; font-size: 13px; }
 

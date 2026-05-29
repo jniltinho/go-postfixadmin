@@ -7,8 +7,8 @@
         <div class="page-title">ALIASES</div>
         <div class="page-subtitle">MANAGE EMAIL ALIASES</div>
       </div>
-      <button class="btn-primary" @click="openAdd">
-        <Icon name="plus-circle" :size="16" style="margin-right:6px;vertical-align:middle" />
+      <button class="btn-add-alias" @click="openAdd">
+        <Icon name="plus-circle" :size="20" style="margin-right:12px;vertical-align:middle" />
         ADD ALIAS
       </button>
     </div>
@@ -18,24 +18,14 @@
       <Icon name="alert-triangle" :size="16" class="mr-1" /> {{ error }}
     </div>
 
-    <!-- ─── Domain Filter ─── -->
-    <div class="filter-section">
-      <label class="filter-label">FILTER BY DOMAIN:</label>
-      <select v-model="domainFilter" class="filter-select" @change="currentPage = 1">
+    <!-- Filter by Domain -->
+    <div class="mb-8 flex items-center">
+      <label class="mr-4 text-xs font-black uppercase tracking-widest text-brand-text">FILTER BY DOMAIN:</label>
+      <select v-model="domainFilter" class="h-10 px-4 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors bg-white" @change="onFilterChange">
         <option value="">All Domains</option>
         <option v-for="d in domains" :key="d.domain" :value="d.domain">{{ d.domain }}</option>
       </select>
-      <a v-if="domainFilter" class="clear-filter" @click="domainFilter = ''; currentPage = 1">Clear Filter</a>
-    </div>
-
-    <!-- ─── Domain Filter (outside DataTable like the old server) ─── -->
-    <div class="filter-section">
-      <label class="filter-label">FILTER BY DOMAIN:</label>
-      <select v-model="domainFilter" class="filter-select" @change="onFilterChange">
-        <option value="">All Domains</option>
-        <option v-for="d in domains" :key="d.domain" :value="d.domain">{{ d.domain }}</option>
-      </select>
-      <a v-if="domainFilter" class="clear-filter" @click="domainFilter = ''; onFilterChange()">Clear Filter</a>
+      <a v-if="domainFilter" class="ml-4 text-xs font-bold text-red-500 hover:underline cursor-pointer" @click="domainFilter = ''; onFilterChange()">Clear Filter</a>
     </div>
 
     <!-- ─── Real DataTables (datatables.net-vue3) — exact visual match to 8081 server ─── -->
@@ -459,7 +449,7 @@ const dtColumns = [
     className: 'text-xs py-1 px-2 font-medium',
     render: (data: string) => `
       <div style="display:flex;align-items:center;gap:6px">
-        <i data-lucide="forward" class="w-3.5 h-3.5 text-[#3b82f6]"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><polyline points="15 17 20 12 15 7"/><path d="M4 18v-2a4 4 0 0 1 4-4h12"/></svg>
         <span>${data}</span>
       </div>
     `
@@ -496,10 +486,10 @@ const dtColumns = [
     orderable: false,
     render: (_data: any, _type: string, row: any) => `
       <button class="act-btn act-edit" data-action="edit" data-id="${row.address}">
-        <i data-lucide="pencil" class="w-3 h-3 mr-1"></i>EDIT
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;display:inline-block;vertical-align:middle"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>EDIT
       </button>
       <button class="act-btn act-del" data-action="delete" data-id="${row.address}">
-        <i data-lucide="trash-2" class="w-3 h-3 mr-1"></i>DELETE
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;display:inline-block;vertical-align:middle"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>DELETE
       </button>
     `
   }
@@ -541,25 +531,58 @@ function onFilterChange() {
 <style scoped>
 .alias-page { background: #ebf2fe; padding: 24px 28px 40px; }
 
-.page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
-.page-title { font-size: 28px; font-weight: 900; color: #1e293b; letter-spacing: -0.5px; line-height: 1; font-family: monospace; text-transform: uppercase; }
-.page-subtitle { font-size: 10px; color: #94a3b8; letter-spacing: 0.8px; margin-top: 6px; text-transform: uppercase; font-weight: 700; }
-
-.btn-primary {
-  background: #3b82f6; color: #fff; border: 2px solid #1e293b; padding: 20px 32px;
-  font-size: 16px; font-weight: 900; letter-spacing: 1.6px; cursor: pointer;
-  border-radius: 0; transition: all .15s; text-transform: uppercase;
-  box-shadow: 3px 3px 0 #1e293b; display: flex; align-items: center;
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 16px;
 }
-.btn-primary:hover:not(:disabled) { background: #fff; color: #3b82f6; transform: translate(-1px,-1px); }
-.btn-primary:active:not(:disabled) { transform: translate(0,0); box-shadow: none; }
-.btn-primary:disabled { opacity: .5; cursor: default; }
+.page-title {
+  font-size: 36px;
+  font-weight: 900;
+  color: #1e293b;
+  letter-spacing: -1px;
+  line-height: 1;
+  font-family: monospace;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.page-subtitle {
+  font-size: 12px;
+  color: #94a3b8;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-top: 0;
+}
 
-.filter-section { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
-.filter-label { font-size: 10px; font-weight: 800; color: #1e293b; letter-spacing: 1.2px; text-transform: uppercase; white-space: nowrap; }
-.filter-select { height: 38px; padding: 0 12px; border: 2px solid #1e293b; background: #fff; font-size: 13px; font-weight: 500; color: #374151; border-radius: 0; outline: none; cursor: pointer; }
-.filter-select:focus { border-color: #3b82f6; }
-.clear-filter { font-size: 12px; color: #ef4444; cursor: pointer; text-decoration: underline; font-weight: 600; }
+.btn-add-alias {
+  background-color: var(--color-brand-primary);
+  color: #ffffff;
+  border: 2px solid var(--color-brand-text);
+  font-weight: 900;
+  padding: 20px 32px;
+  box-shadow: 3px 3px 0px var(--color-brand-text);
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.15s ease-in-out;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 14px;
+}
+
+.btn-add-alias:hover {
+  background-color: #ffffff;
+  color: var(--color-brand-primary);
+  transform: translate(-4px, -4px);
+  box-shadow: 7px 7px 0px var(--color-brand-text);
+}
+
+.btn-add-alias:active {
+  transform: translate(0px, 0px);
+  box-shadow: none;
+}
 
 /* Duplicated styles removed — centralized in global style.css */
 .controls-left, .controls-right { display: flex; align-items: center; gap: 8px; }
@@ -583,16 +606,83 @@ function onFilterChange() {
 .goto-cell { max-width: 220px; overflow: hidden; text-overflow: ellipsis; color: #6b7280; }
 .cell-with-icon { display: flex; align-items: center; gap: 6px; }
 .row-icon { color: #3b82f6; flex-shrink: 0; }
-.badge-yes { background: #dcfce7; color: #16a34a; padding: 2px 8px; font-size: 11px; font-weight: 700; }
-.badge-no  { background: #fee2e2; color: #dc2626; padding: 2px 8px; font-size: 11px; font-weight: 700; }
-.actions-td { display: flex; gap: 6px; align-items: center; }
-.act-btn { padding: 4px 10px; font-size: 10px; font-weight: 800; cursor: pointer; border: 1px solid #1e293b; letter-spacing: 0.4px; border-radius: 0; display: inline-flex; align-items: center; transition: all .12s; box-shadow: 1px 1px 0 #1e293b; text-transform: uppercase; }
-.act-btn:hover { transform: translate(-0.5px,-0.5px); }
-.act-btn:active { transform: translate(0,0); box-shadow: none; }
-.act-edit { background: #3b82f6; color: #fff; }
-.act-edit:hover { background: #fff; color: #3b82f6; }
-.act-del  { background: #ef4444; color: #fff; }
-.act-del:hover { background: #fff; color: #ef4444; }
+:deep(.badge-yes) {
+  background: #dcfce7 !important;
+  color: #16a34a !important;
+  border: 2px solid #16a34a !important;
+  padding: 2px 8px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+}
+
+:deep(.badge-no) {
+  background: #fee2e2 !important;
+  color: #dc2626 !important;
+  border: 2px solid #dc2626 !important;
+  padding: 2px 8px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+}
+
+:deep(.act-btn) {
+  padding: 4px 10px !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+  border: 1px solid #1e293b !important;
+  letter-spacing: 0.4px !important;
+  border-radius: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  transition: all 0.12s ease-in-out !important;
+  box-shadow: 1px 1px 0 #1e293b !important;
+  text-transform: uppercase !important;
+}
+
+:deep(.act-btn:hover) {
+  transform: translate(-0.5px, -0.5px) !important;
+}
+
+:deep(.act-btn:active) {
+  transform: translate(0, 0) !important;
+  box-shadow: none !important;
+}
+
+:deep(.act-edit) {
+  background: #2563eb !important;
+  color: #fff !important;
+}
+
+:deep(.act-edit:hover) {
+  background: #fff !important;
+  color: #2563eb !important;
+}
+
+:deep(.act-del) {
+  background: #dc2626 !important;
+  color: #fff !important;
+}
+
+:deep(.act-del:hover) {
+  background: #fff !important;
+  color: #dc2626 !important;
+}
+
+/* Override table cells to match Mailboxes exactly */
+:deep(table.dataTable tbody td) {
+  padding: 6px 10px !important;
+  font-size: 12px !important;
+  color: #374151 !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+}
+
+:deep(table.dataTable thead th) {
+  font-weight: 700 !important;
+  font-size: 12px !important;
+  letter-spacing: 0.4px !important;
+  padding: 10px !important;
+  border-bottom: 3px solid #1e293b !important;
+}
 .table-loading, .table-empty { text-align: center; padding: 28px; color: #94a3b8; font-size: 13px; }
 .table-footer { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-top: 1px solid #e2e8f0; }
 .showing-text { font-size: 12.5px; color: #64748b; }

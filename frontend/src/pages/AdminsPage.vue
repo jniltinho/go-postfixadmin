@@ -688,14 +688,14 @@ async function submitDelete() {
 .badge-yes   { background: #dcfce7; color: #16a34a; padding: 2px 8px; font-size: 11px; font-weight: 700; }
 .badge-no    { background: #fee2e2; color: #dc2626; padding: 2px 8px; font-size: 11px; font-weight: 700; }
 .badge-super { background: #ede9fe; color: #7c3aed; padding: 2px 8px; font-size: 11px; font-weight: 700; border: 1px solid #c4b5fd; }
-.actions-td { display: flex; gap: 6px; align-items: center; }
+.actions-td { display: flex; gap: 6px; align-items: center; justify-content: flex-end; }
 .act-btn { padding: 4px 10px; font-size: 10px; font-weight: 800; cursor: pointer; border: 1px solid #1e293b; letter-spacing: 0.4px; border-radius: 0; display: inline-flex; align-items: center; transition: all .12s; box-shadow: 1px 1px 0 #1e293b; text-transform: uppercase; }
 .act-btn:hover { transform: translate(-0.5px,-0.5px); }
 .act-btn:active { transform: translate(0,0); box-shadow: none; }
-.act-edit { background: #3b82f6; color: #fff; }
-.act-edit:hover { background: #fff; color: #3b82f6; }
-.act-del  { background: #ef4444; color: #fff; }
-.act-del:hover { background: #fff; color: #ef4444; }
+.act-edit { background: #2563eb; color: #fff; }
+.act-edit:hover { background: #fff; color: #2563eb; }
+.act-del  { background: #dc2626; color: #fff; }
+.act-del:hover { background: #fff; color: #dc2626; }
 .act-disabled { opacity: .4; cursor: not-allowed; pointer-events: none; }
 /* More duplicated pagination/table-footer styles removed - centralized globally */
 

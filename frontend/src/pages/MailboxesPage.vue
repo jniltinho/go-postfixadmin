@@ -7,8 +7,8 @@
         <div class="dom-title">EMAIL ACCOUNTS</div>
         <div class="dom-subtitle">MANAGE YOUR EMAIL ACCOUNTS</div>
       </div>
-      <button class="btn-primary" @click="openAdd">
-        <Icon name="plus-circle" :size="16" style="margin-right:6px;vertical-align:middle" />
+      <button class="btn-add-mailbox" @click="openAdd">
+        <Icon name="plus-circle" :size="20" style="margin-right:12px;vertical-align:middle" />
         ADD EMAIL ACCOUNT
       </button>
     </div>
@@ -783,11 +783,55 @@ function onFilterChange() {
 .dom-page { background: #ebf2fe; padding: 24px 28px 40px; }
 
 .dom-header {
-  display: flex; justify-content: space-between; align-items: flex-start;
-  margin-bottom: 20px;
+  display: flex; justify-content: space-between; align-items: flex-end;
+  margin-bottom: 16px;
 }
-.dom-title { font-size: 28px; font-weight: 900; color: #1e293b; letter-spacing: -0.5px; line-height: 1; font-family: monospace; text-transform: uppercase; }
-.dom-subtitle { font-size: 10px; color: #94a3b8; letter-spacing: 0.8px; margin-top: 6px; text-transform: uppercase; font-weight: 700; }
+.dom-title {
+  font-size: 36px;
+  font-weight: 900;
+  color: #1e293b;
+  letter-spacing: -1px;
+  line-height: 1;
+  font-family: monospace;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.dom-subtitle {
+  font-size: 12px;
+  color: #94a3b8;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-top: 0;
+}
+
+.btn-add-mailbox {
+  background-color: var(--color-brand-primary);
+  color: #ffffff;
+  border: 2px solid var(--color-brand-text);
+  font-weight: 900;
+  padding: 20px 32px;
+  box-shadow: 3px 3px 0px var(--color-brand-text);
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.15s ease-in-out;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 14px;
+}
+
+.btn-add-mailbox:hover {
+  background-color: #ffffff;
+  color: var(--color-brand-primary);
+  transform: translate(-4px, -4px);
+  box-shadow: 7px 7px 0px var(--color-brand-text);
+}
+
+.btn-add-mailbox:active {
+  transform: translate(0px, 0px);
+  box-shadow: none;
+}
 
 /* .btn-primary, .error-banner, .table-card now centralized in global style.css (Tailwind-friendly) */
 
@@ -831,7 +875,7 @@ function onFilterChange() {
 .badge-yes { background: #dcfce7; color: #16a34a; padding: 2px 8px; font-size: 11px; font-weight: 700; }
 .badge-no  { background: #fee2e2; color: #dc2626; padding: 2px 8px; font-size: 11px; font-weight: 700; }
 
-.actions-td { display: flex; gap: 6px; align-items: center; }
+.actions-td { display: flex; gap: 6px; align-items: center; justify-content: flex-end; }
 .act-btn {
   padding: 4px 10px; font-size: 10px; font-weight: 800; cursor: pointer;
   border: 1px solid #1e293b; letter-spacing: 0.4px; border-radius: 0;
@@ -840,10 +884,10 @@ function onFilterChange() {
 }
 .act-btn:hover { transform: translate(-0.5px, -0.5px); }
 .act-btn:active { transform: translate(0,0); box-shadow: none; }
-.act-edit { background: #3b82f6; color: #fff; }
-.act-edit:hover { background: #fff; color: #3b82f6; }
-.act-del  { background: #ef4444; color: #fff; }
-.act-del:hover { background: #fff; color: #ef4444; }
+.act-edit { background: #2563eb; color: #fff; }
+.act-edit:hover { background: #fff; color: #2563eb; }
+.act-del  { background: #dc2626; color: #fff; }
+.act-del:hover { background: #fff; color: #dc2626; }
 
 .table-loading, .table-empty { text-align: center; padding: 28px; color: #94a3b8; font-size: 13px; }
 
