@@ -7,16 +7,12 @@
         <div class="dom-title">ALIASES</div>
         <div class="dom-subtitle">MANAGE EMAIL ALIASES</div>
       </div>
-      <button class="btn-add-big" @click="openAdd">
+      <button class="btn-add-big" @click="showAdd = true">
         <Icon name="plus-circle" :size="20" style="margin-right:12px;vertical-align:middle" />
         ADD ALIAS
       </button>
     </div>
 
-    <!-- ─── Error banner ─── -->
-    <div v-if="error" class="error-banner">
-      <Icon name="alert-triangle" :size="16" class="mr-1" /> {{ error }}
-    </div>
 
     <!-- ─── Table ─── -->
     <AppTable
@@ -54,193 +50,21 @@
       <template #cell-modified="{ value }">{{ formatDate(value) }}</template>
     </AppTable>
 
-    <!-- ══════════ ADD ALIAS MODAL (exact pattern from mailbox + form_add_alias.html) ══════════ -->
-    <div v-if="showAdd" class="modal-overlay" @click.self="closeAdd">
-      <div class="bg-white border-2 border-brand-text w-full max-w-2xl max-h-[90vh] flex flex-col">
-        <!-- Header -->
-        <div class="bg-brand-primary px-6 py-4 flex items-center justify-between flex-shrink-0">
-          <h3 class="text-lg font-mono font-black uppercase tracking-tight text-white flex items-center">
-            <Icon name="plus-circle" :size="20" class="mr-2" />
-            ADD ALIAS
-          </h3>
-          <button @click="closeAdd" class="text-white hover:text-gray-200 transition-colors">
-            <Icon name="x" :size="20" />
-          </button>
-        </div>
+    <!-- ══════════ ADD MODAL ══════════ -->
+    <AliasAddModal
+      v-model="showAdd"
+      :domains="domains"
+      :saving="savingAdd"
+      @submit="handleAdd"
+    />
 
-        <!-- Scrollable Body -->
-        <div class="overflow-y-auto flex-1">
-          <!-- Error -->
-          <div v-if="addError" class="mx-6 mt-4 bg-red-50 border-2 border-red-600 p-3 flex items-start">
-            <Icon name="alert-circle" :size="16" class="text-red-600 mr-2 mt-0.5 flex-shrink-0" />
-            <p class="text-sm text-red-700 font-medium">{{ addError }}</p>
-          </div>
-
-          <form class="p-6 space-y-5" @submit.prevent="submitAdd">
-            <!-- Alias Information Section -->
-            <div class="border-2 border-brand-text p-4 space-y-4">
-              <h4 class="text-sm font-mono font-black uppercase tracking-tight flex items-center">
-                <Icon name="info" :size="16" class="mr-2" />
-                ALIAS INFORMATION
-              </h4>
-
-              <!-- Alias + Domain -->
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-                <div>
-                  <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
-                    ALIAS <span class="text-red-500">*</span>
-                  </label>
-                  <input
-                    v-model="addForm.localPart"
-                    type="text"
-                    required
-                    placeholder="alias-name"
-                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm lowercase"
-                    style="text-transform: lowercase;"
-                    @input="onLocalPartInputAliases"
-                  />
-                  <p class="text-[10px] text-gray-500 mt-1">Local part of the alias address</p>
-                </div>
-                <div>
-                  <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
-                    DOMAIN <span class="text-red-500">*</span>
-                  </label>
-                  <select
-                    v-model="addForm.domain"
-                    required
-                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors bg-white cursor-pointer text-sm"
-                    @change="updateAliasPreview"
-                  >
-                    <option value="" disabled>Select a domain...</option>
-                    <option v-for="d in domains" :key="d.domain" :value="d.domain">{{ d.domain }}</option>
-                  </select>
-                </div>
-              </div>
-
-              <!-- Preview -->
-              <div class="bg-gray-50 border border-gray-300 px-3 h-10 flex items-center gap-2">
-                <span class="text-xs font-bold uppercase tracking-widest text-gray-400 whitespace-nowrap">FULL ADDRESS:</span>
-                <p class="font-mono text-sm font-bold">
-                  <span class="text-brand-primary">{{ addForm.localPart || 'alias' }}</span>@<span class="text-brand-primary">{{ addForm.domain || 'domain.com' }}</span>
-                </p>
-              </div>
-
-              <!-- Goto / Recipients -->
-              <div>
-                <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
-                  TO (RECIPIENTS) <span class="text-red-500">*</span>
-                </label>
-                <textarea
-                  v-model="addForm.goto"
-                  rows="4"
-                  required
-                  placeholder="recipient@example.com&#10;another@example.com"
-                  class="w-full px-3 py-2 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors resize-y text-sm"
-                ></textarea>
-                <p class="text-[10px] text-gray-500 mt-1">One email address per line. Multiple recipients are supported.</p>
-              </div>
-
-              <!-- Active -->
-              <div class="flex items-center pt-1">
-                <input type="checkbox" id="alias-add-active" v-model="addForm.active" class="w-5 h-5 border-2 border-brand-text cursor-pointer" />
-                <label for="alias-add-active" class="ml-2 text-sm font-bold cursor-pointer">Active Alias</label>
-              </div>
-            </div>
-          </form>
-        </div>
-
-        <!-- Footer -->
-        <div class="bg-gray-50 px-6 py-4 flex items-center justify-end space-x-3 border-t-2 border-brand-text flex-shrink-0">
-          <button type="button" @click="closeAdd"
-            class="bg-white hover:bg-gray-100 text-brand-text border-2 border-brand-text font-black px-6 py-2.5 shadow-[2px_2px_0px_#1E293B] hover:translate-y-px hover:shadow-[1px_1px_0px_#1E293B] active:translate-y-0.5 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center">
-            <Icon name="x" :size="16" class="mr-2" />
-            CANCEL
-          </button>
-          <button type="button" :disabled="savingAdd" @click="submitAdd"
-            class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-6 py-2.5 shadow-[3px_3px_0px_#1E293B] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center disabled:opacity-60">
-            <Icon name="plus-circle" :size="16" class="mr-2" />
-            {{ savingAdd ? 'SAVING...' : 'CREATE ALIAS' }}
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══════════ EDIT ALIAS MODAL (exact pattern from form_edit_alias.html) ══════════ -->
-    <div v-if="showEdit" class="modal-overlay" @click.self="closeEdit">
-      <div class="bg-white border-2 border-brand-text w-full max-w-2xl max-h-[90vh] flex flex-col">
-        <!-- Header -->
-        <div class="bg-brand-primary px-6 py-4 flex items-center justify-between flex-shrink-0">
-          <h3 class="text-lg font-mono font-black uppercase tracking-tight text-white flex items-center">
-            <Icon name="edit" :size="20" class="mr-2" />
-            EDIT ALIAS
-            <span class="ml-2 text-gray-200 text-base font-mono">- {{ editForm.address }}</span>
-          </h3>
-          <button @click="closeEdit" class="text-white hover:text-gray-200 transition-colors">
-            <Icon name="x" :size="20" />
-          </button>
-        </div>
-
-        <!-- Body -->
-        <div class="overflow-y-auto flex-1">
-          <div v-if="editError" class="mx-6 mt-4 bg-red-50 border-2 border-red-600 p-3 flex items-start">
-            <Icon name="alert-circle" :size="16" class="text-red-600 mr-2 mt-0.5 flex-shrink-0" />
-            <p class="text-sm text-red-700 font-medium">{{ editError }}</p>
-          </div>
-
-          <form class="p-6 space-y-5" @submit.prevent="submitEdit">
-            <div class="border-2 border-brand-text p-4 space-y-4">
-              <h4 class="text-sm font-mono font-black uppercase tracking-tight flex items-center">
-                <Icon name="info" :size="16" class="mr-2" />
-                ALIAS INFORMATION
-              </h4>
-
-              <!-- Read-only address -->
-              <div>
-                <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">ALIAS ADDRESS</label>
-                <input :value="editForm.address" readonly
-                  class="w-full h-10 px-3 border-2 border-gray-300 bg-gray-50 font-medium font-mono text-sm cursor-not-allowed" />
-                <p class="text-[10px] text-gray-500 mt-1">Alias address cannot be changed after creation</p>
-              </div>
-
-              <!-- Goto -->
-              <div>
-                <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
-                  TO (RECIPIENTS) <span class="text-red-500">*</span>
-                </label>
-                <textarea
-                  v-model="editForm.goto"
-                  rows="4"
-                  required
-                  placeholder="recipient@example.com"
-                  class="w-full px-3 py-2 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors resize-y text-sm"
-                ></textarea>
-                <p class="text-[10px] text-gray-500 mt-1">One email address per line. Multiple recipients are supported.</p>
-              </div>
-
-              <!-- Active -->
-              <div class="flex items-center pt-1">
-                <input type="checkbox" id="alias-edit-active" v-model="editForm.active" class="w-5 h-5 border-2 border-brand-text cursor-pointer" />
-                <label for="alias-edit-active" class="ml-2 text-sm font-bold cursor-pointer">Active Alias</label>
-              </div>
-            </div>
-          </form>
-        </div>
-
-        <!-- Footer -->
-        <div class="bg-gray-50 px-6 py-4 flex items-center justify-end space-x-3 border-t-2 border-brand-text flex-shrink-0">
-          <button type="button" @click="closeEdit"
-            class="bg-white hover:bg-gray-100 text-brand-text border-2 border-brand-text font-black px-6 py-2.5 shadow-[2px_2px_0px_#1E293B] hover:translate-y-px hover:shadow-[1px_1px_0px_#1E293B] active:translate-y-0.5 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center">
-            <Icon name="x" :size="16" class="mr-2" />
-            CANCEL
-          </button>
-          <button type="button" :disabled="savingEdit" @click="submitEdit"
-            class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-6 py-2.5 shadow-[3px_3px_0px_#1E293B] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center disabled:opacity-60">
-            <Icon name="save" :size="16" class="mr-2" />
-            {{ savingEdit ? 'SAVING...' : 'UPDATE ALIAS' }}
-          </button>
-        </div>
-      </div>
-    </div>
+    <!-- ══════════ EDIT MODAL ══════════ -->
+    <AliasEditModal
+      v-model="showEdit"
+      :initial-data="editInitialData"
+      :saving="savingEdit"
+      @submit="handleEdit"
+    />
 
     <!-- ══════════ DELETE CONFIRM ══════════ -->
     <ConfirmDialog
@@ -256,8 +80,10 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import axios from 'axios'
+import http from '../../utils/http'
 import { useToastStore } from '../../stores/toast'
+import AliasAddModal from './AliasAddModal.vue'
+import AliasEditModal from './AliasEditModal.vue'
 
 const toast = useToastStore()
 
@@ -275,8 +101,6 @@ interface Domain { domain: string }
 const allAliases = ref<Alias[]>([])
 const domains = ref<Domain[]>([])
 const loading = ref(true)
-const error = ref('')
-
 const domainFilter = ref('')
 
 const domainFilteredRows = computed(() => {
@@ -284,17 +108,30 @@ const domainFilteredRows = computed(() => {
   return allAliases.value.filter(r => r.domain === domainFilter.value)
 })
 
+const columns = [
+  { key: 'address',  label: 'ALIAS' },
+  { key: 'goto',     label: 'TO' },
+  { key: 'domain',   label: 'DOMAIN' },
+  { key: 'active',   label: 'ACTIVE' },
+  { key: 'modified', label: 'MODIFIED' },
+]
+
+function formatDate(ts: string): string {
+  if (!ts) return '—'
+  return new Date(ts).toLocaleString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+}
+
 async function load() {
-  loading.value = true; error.value = ''
+  loading.value = true
   try {
     const [alRes, domRes] = await Promise.all([
-      axios.get(`${API_BASE}/aliases`),
-      axios.get(`${API_BASE}/domains`),
+      http.get(`${API_BASE}/aliases`),
+      http.get(`${API_BASE}/domains`),
     ])
     allAliases.value = alRes.data?.data ?? []
     domains.value = domRes.data?.data ?? []
   } catch (e: any) {
-    error.value = e?.response?.data?.error?.message || 'Failed to load aliases'
+    toast.error(e?.response?.data?.error?.message || 'Failed to load aliases')
   } finally { loading.value = false }
 }
 onMounted(load)
@@ -302,95 +139,53 @@ onMounted(load)
 // ─── Add modal ───
 const showAdd = ref(false)
 const savingAdd = ref(false)
-const addError = ref('')
-const addForm = ref({ localPart: '', domain: '', goto: '', active: true })
 
-function openAdd() {
-  addForm.value = { localPart: '', domain: domains.value[0]?.domain || '', goto: '', active: true }
-  addError.value = ''
-  showAdd.value = true
-}
-
-function closeAdd() {
-  showAdd.value = false
-  addForm.value = { localPart: '', domain: '', goto: '', active: true }
-  addError.value = ''
-}
-
-function onLocalPartInputAliases(e: Event) {
-  const val = (e.target as HTMLInputElement).value.toLowerCase()
-  addForm.value.localPart = val
-}
-
-function updateAliasPreview() {
-  // reactive binding handles preview
-}
-
-async function submitAdd() {
-  addError.value = ''
-  const { localPart, domain, goto: gotoVal, active } = addForm.value
-  if (!localPart || !domain) { addError.value = 'Alias and domain are required'; return }
-  if (!gotoVal.trim()) { addError.value = 'At least one recipient is required'; return }
+async function handleAdd(payload: any) {
+  if (!payload.local_part || !payload.domain) { toast.error('Alias and domain are required'); return }
+  if (!payload.goto) { toast.error('At least one recipient is required'); return }
   savingAdd.value = true
   try {
-    await axios.post(`${API_BASE}/aliases`, {
-      local_part: localPart.toLowerCase().trim(),
-      domain,
-      goto: gotoVal.trim(),
-      active,
-    })
-    closeAdd()
-    toast.success(`Alias ${localPart}@${domain} created successfully`)
+    await http.post(`${API_BASE}/aliases`, payload)
+    showAdd.value = false
+    toast.success(`Alias ${payload.local_part}@${payload.domain} created successfully`)
     await load()
   } catch (e: any) {
-    addError.value = e?.response?.data?.error?.message || 'Failed to create alias'
-    toast.error(addError.value)
+    toast.error(e?.response?.data?.error?.message || 'Failed to create alias')
   } finally { savingAdd.value = false }
 }
 
 // ─── Edit modal ───
 const showEdit = ref(false)
 const savingEdit = ref(false)
-const editError = ref('')
-const editForm = ref({ address: '', goto: '', active: true })
+const editInitialData = ref<any>(null)
+const editAddress = ref('')
 
 async function openEdit(row: Alias) {
-  editError.value = ''
   try {
-    const res = await axios.get(`${API_BASE}/aliases/${encodeURIComponent(row.address)}`)
+    const res = await http.get(`${API_BASE}/aliases/${encodeURIComponent(row.address)}`)
     const al = res.data?.data
-    editForm.value = {
+    editAddress.value = al.address
+    editInitialData.value = {
       address: al.address,
       goto: (al.goto || '').replace(/,/g, '\n'),
       active: al.active,
     }
     showEdit.value = true
   } catch (e: any) {
-    error.value = e?.response?.data?.error?.message || 'Failed to load alias'
+    toast.error(e?.response?.data?.error?.message || 'Failed to load alias')
   }
 }
 
-function closeEdit() {
-  showEdit.value = false
-  editError.value = ''
-}
-
-async function submitEdit() {
-  editError.value = ''
-  const f = editForm.value
-  if (!f.goto.trim()) { editError.value = 'At least one recipient is required'; return }
+async function handleEdit(payload: any) {
+  if (!payload.goto.trim()) { toast.error('At least one recipient is required'); return }
   savingEdit.value = true
   try {
-    await axios.put(`${API_BASE}/aliases/${encodeURIComponent(f.address)}`, {
-      goto: f.goto.trim(),
-      active: f.active,
-    })
-    closeEdit()
-    toast.success(`Alias ${f.address} updated successfully`)
+    await http.put(`${API_BASE}/aliases/${encodeURIComponent(editAddress.value)}`, payload)
+    showEdit.value = false
+    toast.success(`Alias ${editAddress.value} updated successfully`)
     await load()
   } catch (e: any) {
-    editError.value = e?.response?.data?.error?.message || 'Failed to update alias'
-    toast.error(editError.value)
+    toast.error(e?.response?.data?.error?.message || 'Failed to update alias')
   } finally { savingEdit.value = false }
 }
 
@@ -406,36 +201,17 @@ async function submitDelete() {
   deletingRow.value = true
   try {
     const address = deleteTarget.value.address
-    await axios.delete(`${API_BASE}/aliases/${encodeURIComponent(address)}`)
+    await http.delete(`${API_BASE}/aliases/${encodeURIComponent(address)}`)
     showDeleteConfirm.value = false; deleteTarget.value = null
     toast.success(`Alias ${address} deleted successfully`)
     await load()
   } catch (e: any) {
-    const msg = e?.response?.data?.error?.message || 'Failed to delete alias'
-    error.value = msg
-    toast.error(msg)
+    toast.error(e?.response?.data?.error?.message || 'Failed to delete alias')
     showDeleteConfirm.value = false
   } finally { deletingRow.value = false }
 }
-
-const columns = [
-  { key: 'address',  label: 'ALIAS' },
-  { key: 'goto',     label: 'TO' },
-  { key: 'domain',   label: 'DOMAIN' },
-  { key: 'active',   label: 'ACTIVE' },
-  { key: 'modified', label: 'MODIFIED' },
-]
-
-
-function formatDate(ts: string): string {
-  if (!ts) return '—'
-  return new Date(ts).toLocaleString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
-}
-
-
 </script>
 
 <style scoped>
 .alias-page { background: #ebf2fe; padding: 24px 28px 40px; }
-
-/* Heavy CSS deduplication complete on AliasesPage */</style>
+</style>

@@ -29,11 +29,6 @@
         <h2 class="card-heading-neo">{{ t.title }}</h2>
 
         <!-- Error Message -->
-        <div v-if="error" class="error-banner-neo">
-          <Icon name="alert-triangle" :size="16" class="mr-1.5 flex-shrink-0" />
-          {{ error }}
-        </div>
-
         <form @submit.prevent="handleLogin" class="space-y-5">
           <!-- E-mail -->
           <div class="form-group">
@@ -118,14 +113,15 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
+import http from '../../utils/http'
+import { useToastStore } from '../../stores/toast'
 
 const auth = useAuthStore()
 const router = useRouter()
+const toast = useToastStore()
 
 const form = ref({ username: '', password: '' })
 const loading = ref(false)
-const error = ref('')
 const showPassword = ref(false)
 const activeLang = ref('EN')
 const appVersion = ref('1.0.0')
@@ -178,7 +174,7 @@ const t = computed(() => translations[activeLang.value as 'EN' | 'PT' | 'ES'])
 async function selectLanguage(lang: 'PT' | 'EN' | 'ES') {
   activeLang.value = lang
   try {
-    await axios.get(`/lang/${lang.toLowerCase()}`)
+    await http.get(`/lang/${lang.toLowerCase()}`)
   } catch (e) {
     // Ignore language set backend error
   }
@@ -186,26 +182,24 @@ async function selectLanguage(lang: 'PT' | 'EN' | 'ES') {
 
 async function handleLogin() {
   if (!form.value.username.trim()) {
-    error.value = 'Email is required'
+    toast.error('Email is required')
     return
   }
   if (!form.value.password.trim()) {
-    error.value = 'Password is required'
+    toast.error('Password is required')
     return
   }
 
   loading.value = true
-  error.value = ''
   try {
     await auth.login(form.value.username.trim(), form.value.password)
     if (auth.user?.type === 'mailbox') {
       router.push('/users/dashboard')
     } else {
-      // If an admin logs in here, redirect to admin dashboard
       router.push('/dashboard')
     }
   } catch (e: any) {
-    error.value = e?.response?.data?.error?.message || e.message || 'Login failed'
+    toast.error(e?.response?.data?.error?.message || e.message || 'Login failed')
   } finally {
     loading.value = false
   }
@@ -220,7 +214,7 @@ onMounted(async () => {
 
   // Fetch dynamic version from backend
   try {
-    const { data } = await axios.get(`${API_BASE}/version`)
+    const { data } = await http.get(`${API_BASE}/version`)
     if (data && data.version) {
       appVersion.value = data.version
     }

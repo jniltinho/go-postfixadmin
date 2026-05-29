@@ -84,11 +84,6 @@
 
     </div>
 
-    <!-- Error -->
-    <div v-if="error" class="error-banner">
-      <Icon name="alert-triangle" :size="16" class="mr-1" /> {{ error }}
-    </div>
-
     <!-- ─── Activity table ─── -->
     <div class="table-card">
 
@@ -182,10 +177,11 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
-import axios from 'axios'
+import http from '../../utils/http'
+import { useToastStore } from '../../stores/toast'
 
+const toast = useToastStore()
 const loading = ref(true)
-const error = ref('')
 
 const stats = ref({ domains: 0, mailboxes: 0, aliases: 0 })
 const allRows = ref<any[]>([])
@@ -201,9 +197,8 @@ watch([search, rowsPerPage], () => { currentPage.value = 1 })
 
 async function loadDashboardData() {
   loading.value = true
-  error.value = ''
   try {
-    const res = await axios.get(`${API_BASE}/dashboard`)
+    const res = await http.get(`${API_BASE}/dashboard`)
     const data = res.data?.data
 
     stats.value.domains   = data?.domains   ?? 0
@@ -218,7 +213,7 @@ async function loadDashboardData() {
       data:      log.data      || '',
     }))
   } catch (e: any) {
-    error.value = e?.response?.data?.error?.message || 'Failed to load dashboard data'
+    toast.error(e?.response?.data?.error?.message || 'Failed to load dashboard data')
   } finally {
     loading.value = false
   }
@@ -430,19 +425,6 @@ const pagedRows = computed(() => {
 .cta-btn:hover {
   transform: translate(-1px, -1px);
   box-shadow: 3px 3px 0px #1e293b;
-}
-
-/* Error banner */
-.error-banner {
-  background: #fef2f2;
-  border: 2px solid #fca5a5;
-  color: #dc2626;
-  padding: 10px 14px;
-  font-size: 13px;
-  margin-bottom: 18px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
 
 /* ─── Table Controls & Custom Elements ─── */

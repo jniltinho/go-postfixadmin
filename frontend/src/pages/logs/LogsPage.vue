@@ -21,11 +21,6 @@
       </div>
     </div>
 
-    <!-- ─── Error banner ─── -->
-    <div v-if="error" class="error-banner">
-      <Icon name="alert-triangle" :size="16" class="mr-1" /> {{ error }}
-    </div>
-
     <!-- ─── Filters & Search card ─── -->
     <div class="filter-card">
       <div class="filter-title">
@@ -143,7 +138,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
-import axios from 'axios'
+import http from '../../utils/http'
 import { useToastStore } from '../../stores/toast'
 
 const toast = useToastStore()
@@ -162,7 +157,6 @@ const totalRows = ref(0)
 const filteredCount = ref(0)
 const loading = ref(true)
 const isQuietLoading = ref(false)
-const error = ref('')
 
 // ─── Table & Filter controls ───
 const search = ref('')
@@ -190,10 +184,8 @@ async function load(quiet = false) {
   } else {
     loading.value = true
   }
-  error.value = ''
-  
   try {
-    const res = await axios.get(`${API_BASE}/logs`, {
+    const res = await http.get(`${API_BASE}/logs`, {
       params: {
         page: currentPage.value,
         per_page: rowsPerPage.value,
@@ -205,14 +197,13 @@ async function load(quiet = false) {
         order: sortDir.value,
       }
     })
-    
+
     const paginated = res.data?.data
     rows.value = paginated?.data ?? []
     totalRows.value = paginated?.total ?? 0
     filteredCount.value = paginated?.filtered ?? 0
   } catch (e: any) {
-    error.value = e?.response?.data?.error?.message || 'Failed to load logs'
-    toast.error(error.value)
+    toast.error(e?.response?.data?.error?.message || 'Failed to load logs')
   } finally {
     loading.value = false
     isQuietLoading.value = false
@@ -351,7 +342,6 @@ function getActionBadgeClass(action: string): string {
 .btn-primary:hover:not(:disabled) { background: #fff; color: #3b82f6; }
 .btn-primary:active:not(:disabled) { transform: translate(0,0); box-shadow: none; }
 
-.error-banner { background: #fef2f2; border: 1px solid #fca5a5; color: #dc2626; padding: 10px 14px; font-size: 13px; margin-bottom: 18px; display: flex; align-items: center; gap: 6px; }
 
 /* ─── Filter card ─── */
 .filter-card { background: #fff; border: 2px solid #1e293b; box-shadow: 2px 2px 0 #1e293b; padding: 14px 18px 18px; margin-bottom: 16px; }

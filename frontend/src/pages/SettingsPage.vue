@@ -13,11 +13,6 @@
       </button>
     </div>
 
-    <!-- ─── Error banner ─── -->
-    <div v-if="error" class="error-banner">
-      <Icon name="alert-triangle" :size="16" class="mr-1" /> {{ error }}
-    </div>
-
     <!-- ─── Description Callout ─── -->
     <div class="info-callout">
       <Icon name="key" :size="24" class="callout-icon" />
@@ -86,12 +81,6 @@
 
         <!-- Scrollable Body -->
         <div class="overflow-y-auto flex-1">
-          <!-- Error Area -->
-          <div v-if="addError" class="mx-6 mt-4 bg-red-50 border-2 border-red-600 p-3 flex items-start">
-            <Icon name="alert-circle" :size="16" class="text-red-600 mr-2 mt-0.5 flex-shrink-0" />
-            <p class="text-sm text-red-700 font-medium">{{ addError }}</p>
-          </div>
-
           <form class="p-6 space-y-5" @submit.prevent="submitAdd">
             <!-- Token Details Section -->
             <div class="border-2 border-brand-text p-4 space-y-4">
@@ -223,7 +212,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import http from '../utils/http'
 import { useToastStore } from '../stores/toast'
 
 const toast = useToastStore()
@@ -248,18 +237,16 @@ const columns = [
 // ─── State ───
 const keys = ref<ApiKey[]>([])
 const loading = ref(true)
-const error = ref('')
 const updatingRowId = ref<number | null>(null)
 
 // ─── Load data ───
 async function load() {
   loading.value = true
-  error.value = ''
   try {
-    const res = await axios.get(`${API_BASE}/settings/apikeys`)
+    const res = await http.get(`${API_BASE}/settings/apikeys`)
     keys.value = res.data?.data ?? []
   } catch (e: any) {
-    error.value = e?.response?.data?.error?.message || 'Failed to load settings data'
+    toast.error(e?.response?.data?.error?.message || 'Failed to load settings data')
   } finally {
     loading.value = false
   }
@@ -270,7 +257,6 @@ onMounted(load)
 // ─── Add modal ───
 const showAdd = ref(false)
 const savingAdd = ref(false)
-const addError = ref('')
 const addForm = ref({ name: '', daysValid: 0 })
 
 const showSuccessModal = ref(false)
@@ -278,32 +264,29 @@ const createdKeyToken = ref('')
 
 function openAdd() {
   addForm.value = { name: '', daysValid: 0 }
-  addError.value = ''
   showAdd.value = true
 }
 
 async function submitAdd() {
-  addError.value = ''
   const f = addForm.value
   if (!f.name.trim()) {
-    addError.value = 'Key name is required'
+    toast.error('Key name is required')
     return
   }
 
   savingAdd.value = true
   try {
-    const res = await axios.post(`${API_BASE}/settings/apikeys`, {
+    const res = await http.post(`${API_BASE}/settings/apikeys`, {
       name: f.name.trim(),
       days_valid: f.daysValid
     })
-    
+
     createdKeyToken.value = res.data?.data?.token ?? ''
     showAdd.value = false
     showSuccessModal.value = true
     await load()
   } catch (e: any) {
-    addError.value = e?.response?.data?.error?.message || 'Failed to generate API Key'
-    toast.error(addError.value)
+    toast.error(e?.response?.data?.error?.message || 'Failed to generate API Key')
   } finally {
     savingAdd.value = false
   }
@@ -326,7 +309,7 @@ async function toggleActive(row: ApiKey) {
   updatingRowId.value = row.id
   const targetState = !row.active
   try {
-    await axios.put(`${API_BASE}/settings/apikeys/${row.id}`, { active: targetState })
+    await http.put(`${API_BASE}/settings/apikeys/${row.id}`, { active: targetState })
     row.active = targetState
     toast.success(`Key "${row.name}" status updated successfully`)
   } catch (e: any) {
@@ -352,7 +335,7 @@ async function submitDelete() {
   try {
     const id = deleteTarget.value.id
     const name = deleteTarget.value.name
-    await axios.delete(`${API_BASE}/settings/apikeys/${id}`)
+    await http.delete(`${API_BASE}/settings/apikeys/${id}`)
     showDeleteConfirm.value = false
     deleteTarget.value = null
     toast.success(`API Key "${name}" revoked successfully`)
@@ -381,7 +364,7 @@ function isExpired(ts: string | null): boolean {
 <style scoped>
 .st-page { background: #ebf2fe; padding: 24px 28px 40px; }
 
-/* .page-header, .btn-primary, .error-banner, .table-card now from global style.css */
+/* .page-header, .btn-primary, .table-card now from global style.css */
 
 /* Callout */
 .info-callout {

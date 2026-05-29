@@ -364,7 +364,7 @@ import { useAuthStore } from '../../stores/auth'
 import { useRouter } from 'vue-router'
 import { useToastStore } from '../../stores/toast'
 import { calcStrength, generatePassword as fillPassword } from '../../utils/password'
-import axios from 'axios'
+import http from '../../utils/http'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -558,7 +558,7 @@ function generateRandomPassword() {
 async function selectLanguage(lang: 'PT' | 'EN' | 'ES') {
   activeLang.value = lang
   try {
-    await axios.get(`/lang/${lang.toLowerCase()}`)
+    await http.get(`/lang/${lang.toLowerCase()}`)
   } catch (e) {
     // Ignore language set backend error
   }
@@ -574,16 +574,16 @@ function handleLogout() {
 async function fetchUserData() {
   try {
     // Fetch profile
-    const profileRes = await axios.get(`${API_BASE}/user/me`)
+    const profileRes = await http.get(`${API_BASE}/user/me`)
     userProfile.value = profileRes.data
 
     // Fetch forwarding alias
-    const forwardingRes = await axios.get(`${API_BASE}/user/forwarding`)
+    const forwardingRes = await http.get(`${API_BASE}/user/forwarding`)
     // Replace commas with newlines for convenient textual layout
     forwardingForm.value.forwarding = forwardingRes.data.goto.split(',').join('\n')
 
     // Fetch vacation auto-reply settings
-    const vacationRes = await axios.get(`${API_BASE}/user/vacation`)
+    const vacationRes = await http.get(`${API_BASE}/user/vacation`)
     vacationForm.value = vacationRes.data
   } catch (e) {
     toast.error('Failed to load user portal settings.')
@@ -594,7 +594,7 @@ async function fetchUserData() {
 async function saveForwarding() {
   savingForwarding.value = true
   try {
-    await axios.post(`${API_BASE}/user/forwarding`, {
+    await http.post(`${API_BASE}/user/forwarding`, {
       forwarding: forwardingForm.value.forwarding
     })
     toast.success(t.value.successForwarding)
@@ -615,7 +615,7 @@ async function changePassword() {
 
   savingPassword.value = true
   try {
-    await axios.post(`${API_BASE}/user/password`, {
+    await http.post(`${API_BASE}/user/password`, {
       current_password: passwordForm.value.current_password,
       new_password: passwordForm.value.new_password,
       confirm_password: passwordForm.value.confirm_password
@@ -633,7 +633,7 @@ async function changePassword() {
 async function saveVacation() {
   savingVacation.value = true
   try {
-    await axios.post(`${API_BASE}/user/vacation`, vacationForm.value)
+    await http.post(`${API_BASE}/user/vacation`, vacationForm.value)
     toast.success(t.value.successVacation)
     showVacationModal.value = false
     await fetchUserData()
@@ -653,7 +653,7 @@ onMounted(async () => {
 
   // Fetch dynamic version from backend
   try {
-    const { data } = await axios.get(`${API_BASE}/version`)
+    const { data } = await http.get(`${API_BASE}/version`)
     if (data && data.version) {
       appVersion.value = data.version
     }
