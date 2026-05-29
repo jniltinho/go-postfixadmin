@@ -4,6 +4,7 @@ import (
 	"io/fs"
 	"log/slog"
 	"mime"
+	"net/http"
 	"path/filepath"
 	"strings"
 
@@ -15,11 +16,19 @@ import (
 	"github.com/spf13/viper"
 )
 
+// AppVersion stores the application version to be served by the /version endpoint
+var AppVersion string = "1.0.0"
+
 // RegisterRoutes registers all the application routes
 func RegisterRoutes(e *echo.Echo, h *handlers.Handler, spaFS fs.FS) {
 	e.GET("/lang/:code", h.SetLanguage)
 
 	apiV1 := e.Group("/api/v1")
+
+	// Public: app version
+	apiV1.GET("/version", func(c *echo.Context) error {
+		return c.JSON(http.StatusOK, map[string]string{"version": AppVersion})
+	})
 
 	// Public auth endpoints
 	apiV1.POST("/auth/login", h.AuthLogin)
@@ -30,6 +39,15 @@ func RegisterRoutes(e *echo.Echo, h *handlers.Handler, spaFS fs.FS) {
 
 	protected.POST("/auth/logout", h.AuthLogout)
 	protected.GET("/auth/me", h.AuthMe)
+
+	// User portal endpoints (virtual mailbox users)
+	protected.GET("/user/me", h.GetUserProfile)
+	protected.GET("/user/forwarding", h.GetUserForwarding)
+	protected.POST("/user/forwarding", h.UpdateUserForwardingAPI)
+	protected.POST("/user/password", h.UpdateUserPasswordAPI)
+	protected.GET("/user/vacation", h.GetUserVacation)
+	protected.POST("/user/vacation", h.UpdateUserVacationAPI)
+	protected.DELETE("/user/vacation", h.DeleteUserVacationAPI)
 
 	protected.GET("/domains", h.ListDomainsV1)
 	protected.POST("/domains", h.CreateDomainV1)

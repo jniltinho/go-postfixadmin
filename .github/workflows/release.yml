@@ -37,10 +37,13 @@ jobs:
           sudo apt-get install -y upx rpm
 
       - name: Install Project Dependencies
-        run: make install-tailwind && make deps
+        run: make deps
+
+      - name: Build Frontend
+        run: make frontend
 
       - name: Build Application
-        run: make all
+        run: make build-prod
 
       - name: Package Binary
         run: |

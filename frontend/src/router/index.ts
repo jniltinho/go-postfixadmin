@@ -77,6 +77,17 @@ const routes = [
         meta: { title: 'Settings' }
       }
     ]
+  },
+  {
+    path: '/users/login',
+    name: 'UserLogin',
+    component: () => import('../pages/UserLoginPage.vue')
+  },
+  {
+    path: '/users/dashboard',
+    name: 'UserDashboard',
+    component: () => import('../pages/UserDashboardPage.vue'),
+    meta: { requiresUserAuth: true, title: 'My Account' }
   }
 ]
 
@@ -89,10 +100,14 @@ const router = createRouter({
 router.beforeEach((to, _from, next) => {
   const auth = useAuthStore()
 
-  if (to.meta.requiresAuth && !auth.isAuthenticated) {
+  if (to.meta.requiresUserAuth && (!auth.isAuthenticated || auth.user?.type !== 'mailbox')) {
+    next({ name: 'UserLogin' })
+  } else if (to.meta.requiresAuth && (!auth.isAuthenticated || auth.user?.type !== 'admin')) {
     next({ name: 'Login' })
-  } else if (to.name === 'Login' && auth.isAuthenticated) {
+  } else if (to.name === 'Login' && auth.isAuthenticated && auth.user?.type === 'admin') {
     next({ name: 'Dashboard' })
+  } else if (to.name === 'UserLogin' && auth.isAuthenticated && auth.user?.type === 'mailbox') {
+    next({ name: 'UserDashboard' })
   } else {
     next()
   }

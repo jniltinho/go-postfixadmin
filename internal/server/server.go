@@ -57,6 +57,7 @@ func StartServer(embeddedFiles embed.FS, port int, db *gorm.DB, ssl bool, certFi
 	}
 
 	h := &handlers.Handler{DB: db}
+	routes.AppVersion = AppVersion
 	routes.RegisterRoutes(e, h, spaFS)
 
 	addr := fmt.Sprintf(":%d", port)

@@ -18,10 +18,10 @@
       <!-- Brand Header -->
       <div class="brand-header">
         <div class="brand-icon-box">
-          <Icon name="mail" :size="32" color="white" />
+          <Icon name="user" :size="32" color="white" />
         </div>
         <h1 class="brand-title-mono">Go-PostfixAdmin</h1>
-        <p class="brand-subtitle-flat">{{ t.adminSubtitle }}</p>
+        <p class="brand-subtitle-flat">{{ t.subtitle }}</p>
       </div>
 
       <!-- Square Card -->
@@ -35,16 +35,16 @@
         </div>
 
         <form @submit.prevent="handleLogin" class="space-y-5">
-          <!-- Username -->
+          <!-- E-mail -->
           <div class="form-group">
-            <label class="form-label-neo">{{ t.username }}</label>
+            <label class="form-label-neo">{{ t.email }}</label>
             <div class="relative-group">
               <div class="input-wrapper">
-                <Icon name="user" :size="18" class="input-icon-left text-[#94a3b8]" />
+                <Icon name="mail" :size="18" class="input-icon-left text-[#94a3b8]" />
                 <input
                   v-model="form.username"
                   type="text"
-                  :placeholder="t.usernamePlaceholder"
+                  :placeholder="t.emailPlaceholder"
                   class="brutal-input"
                   :disabled="loading"
                   autocomplete="username"
@@ -86,7 +86,7 @@
               class="btn-authenticate"
               :disabled="loading"
             >
-              <span>{{ loading ? '...' : t.authenticate }}</span>
+              <span>{{ loading ? '...' : t.login }}</span>
               <Icon name="arrow-right" :size="18" class="btn-arrow" />
             </button>
           </div>
@@ -94,11 +94,11 @@
 
         <div class="card-footer-neo">
           <p class="text-xs text-gray-500">
-            {{ t.userLink1 }}
-            <a href="/users/login" class="text-brand-primary font-bold hover:underline">
-              {{ t.userLink2 }}
+            {{ t.adminLink1 }}
+            <a href="/login" class="text-brand-primary font-bold hover:underline">
+              {{ t.adminLink2 }}
             </a>
-            {{ t.userLink3 }}
+            {{ t.adminLink3 }}
           </p>
           <p class="secure-system-text">
             {{ t.secureSystem }}
@@ -108,7 +108,7 @@
 
       <!-- Footer Info -->
       <p class="copyright-footer">
-        &copy; {{ currentYear }} Go-Postfixadmin. {{ appVersion }}
+        &copy; {{ currentYear }} GO-POSTFIXADMIN. V{{ appVersion }}
       </p>
     </div>
   </div>
@@ -133,43 +133,43 @@ const currentYear = new Date().getFullYear()
 
 const translations = {
   EN: {
-    title: 'LOGIN',
-    adminSubtitle: 'ADMINISTRATIVE CONTROL PANEL',
-    username: 'USERNAME',
-    usernamePlaceholder: 'admin@domain.com',
+    title: 'USER LOGIN',
+    subtitle: 'USER PORTAL',
+    email: 'E-MAIL',
+    emailPlaceholder: 'user@domain.com',
     password: 'PASSWORD',
     passwordPlaceholder: '••••••••',
-    authenticate: 'AUTHENTICATE',
-    userLink1: 'Users should ',
-    userLink2: 'click here',
-    userLink3: ' to access the user section.',
-    secureSystem: 'SECURE ADMINISTRATIVE ACCESS SYSTEM'
+    login: 'LOGIN',
+    adminLink1: 'Administrators should ',
+    adminLink2: 'click here',
+    adminLink3: ' to access the admin dashboard.',
+    secureSystem: 'USER ACCESS PORTAL'
   },
   PT: {
-    title: 'ENTRAR',
-    adminSubtitle: 'PAINEL DE CONTROLE ADMINISTRATIVO',
-    username: 'USUÁRIO',
-    usernamePlaceholder: 'admin@dominio.com',
+    title: 'USER LOGIN',
+    subtitle: 'PORTAL DO USUÁRIO',
+    email: 'E-MAIL',
+    emailPlaceholder: 'usuario@dominio.com',
     password: 'SENHA',
     passwordPlaceholder: '••••••••',
-    authenticate: 'AUTENTICAR',
-    userLink1: 'Os usuários devem ',
-    userLink2: 'clicar aqui',
-    userLink3: ' para acessar a seção do usuário.',
-    secureSystem: 'SISTEMA DE ACESSO ADMINISTRATIVO SEGURO'
+    login: 'LOGIN',
+    adminLink1: 'Os administradores devem ',
+    adminLink2: 'clicar aqui',
+    adminLink3: ' para acessar o painel de controle.',
+    secureSystem: 'PORTAL DE ACESSO DO USUÁRIO'
   },
   ES: {
     title: 'INICIAR SESIÓN',
-    adminSubtitle: 'PANEL DE CONTROL ADMINISTRATIVO',
-    username: 'USUARIO',
-    usernamePlaceholder: 'admin@dominio.com',
+    subtitle: 'PORTAL DE USUARIO',
+    email: 'E-MAIL',
+    emailPlaceholder: 'usuario@dominio.com',
     password: 'CONTRASEÑA',
     passwordPlaceholder: '••••••••',
-    authenticate: 'AUTENTICAR',
-    userLink1: 'Los usuarios deben ',
-    userLink2: 'hacer clic aquí',
-    userLink3: ' para acceder a la sección de usuario.',
-    secureSystem: 'SISTEMA DE ACCESO ADMINISTRATIVO SEGURO'
+    login: 'LOGIN',
+    adminLink1: 'Los administradores deben ',
+    adminLink2: 'hacer clic aquí',
+    adminLink3: ' para acceder al panel de administración.',
+    secureSystem: 'PORTAL DE ACCESO DE USUARIO'
   }
 }
 
@@ -186,7 +186,7 @@ async function selectLanguage(lang: 'PT' | 'EN' | 'ES') {
 
 async function handleLogin() {
   if (!form.value.username.trim()) {
-    error.value = 'Username is required'
+    error.value = 'Email is required'
     return
   }
   if (!form.value.password.trim()) {
@@ -198,7 +198,12 @@ async function handleLogin() {
   error.value = ''
   try {
     await auth.login(form.value.username.trim(), form.value.password)
-    router.push('/dashboard')
+    if (auth.user?.type === 'mailbox') {
+      router.push('/users/dashboard')
+    } else {
+      // If an admin logs in here, redirect to admin dashboard
+      router.push('/dashboard')
+    }
   } catch (e: any) {
     error.value = e?.response?.data?.error?.message || e.message || 'Login failed'
   } finally {
@@ -272,7 +277,7 @@ onMounted(async () => {
 }
 
 .lang-active {
-  background: #3B82F6 !important;
+  background: #6366F1 !important; /* Blue/Indigo color for user portal login button selection */
   color: #ffffff !important;
   border-color: #1E293B !important;
   box-shadow: 1px 1px 0px #1E293B;
@@ -293,7 +298,7 @@ onMounted(async () => {
   justify-content: center;
   width: 64px;
   height: 64px;
-  background: #3B82F6;
+  background: #6366F1; /* Indigo color for user portal branding icon */
   border: 2px solid #1E293B;
   box-shadow: 2px 2px 0px #1E293B;
   margin-bottom: 16px;
@@ -364,7 +369,6 @@ onMounted(async () => {
   position: relative;
 }
 
-/* Migration note: Form inputs converted from Quasar q-input to native brutal inputs. */
 .input-wrapper {
   position: relative;
   display: flex;
@@ -386,8 +390,8 @@ onMounted(async () => {
 }
 
 .brutal-input:focus {
-  border-color: #3B82F6;
-  box-shadow: 4px 4px 0px #3B82F6;
+  border-color: #6366F1;
+  box-shadow: 4px 4px 0px #6366F1;
 }
 
 .brutal-input:disabled {
@@ -416,7 +420,7 @@ onMounted(async () => {
 /* Authenticate Button */
 .btn-authenticate {
   width: 100%;
-  background: #3B82F6;
+  background: #6366F1; /* Indigo color for user portal login button */
   color: #ffffff;
   border: 2px solid #1E293B;
   font-weight: 700;
@@ -435,7 +439,7 @@ onMounted(async () => {
 
 .btn-authenticate:hover:not(:disabled) {
   background: #ffffff;
-  color: #3B82F6;
+  color: #6366F1;
 }
 
 .btn-authenticate:active:not(:disabled) {
@@ -488,7 +492,7 @@ onMounted(async () => {
 
 .text-xs { font-size: 12px; }
 .text-gray-500 { color: #64748B; }
-.text-brand-primary { color: #3B82F6; }
+.text-brand-primary { color: #6366F1; }
 .font-bold { font-weight: 700; }
 
 .card-footer-neo a:hover {

@@ -27,7 +27,7 @@ import (
 // @name Authorization
 // @description Type "Bearer" followed by a space and JWT token.
 
-//go:embed all:web all:locales
+//go:embed web/dist web/files all:locales
 // web/files/config.default.toml is embedded and used by the --generate-config command
 var embeddedFiles embed.FS
 
