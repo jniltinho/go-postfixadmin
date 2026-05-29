@@ -7,8 +7,8 @@
         <div class="dom-title">MY DOMAINS</div>
         <div class="dom-subtitle">MANAGE YOUR MAIL DOMAINS</div>
       </div>
-      <button class="btn-primary" @click="openAdd">
-        <Icon name="plus-circle" :size="16" style="margin-right:6px;vertical-align:middle" />
+      <button class="btn-add-domain" @click="openAdd">
+        <Icon name="plus-circle" :size="20" style="margin-right:12px;vertical-align:middle" />
         ADD DOMAIN
       </button>
     </div>
@@ -73,14 +73,24 @@
               </td>
               <td class="table-td">{{ row.description || '—' }}</td>
               <td class="table-td">
-                <span class="count-badge">{{ row.alias_count ?? 0 }}</span>
-                <span class="count-sep">/</span>
-                <span class="count-max">{{ row.aliases }}</span>
+                <div class="flex">
+                  <div class="progress-bar-wrap">
+                    <div class="progress-bar-fill" :style="{ width: (row.aliases > 0 ? Math.min(100, Math.round(((row.alias_count ?? 0) / row.aliases) * 100)) : 0) + '%' }"></div>
+                    <div class="progress-bar-text">
+                      {{ row.alias_count ?? 0 }} / {{ row.aliases }}
+                    </div>
+                  </div>
+                </div>
               </td>
               <td class="table-td">
-                <span class="count-badge">{{ row.mailbox_count ?? 0 }}</span>
-                <span class="count-sep">/</span>
-                <span class="count-max">{{ row.mailboxes }}</span>
+                <div class="flex">
+                  <div class="progress-bar-wrap">
+                    <div class="progress-bar-fill" :style="{ width: (row.mailboxes > 0 ? Math.min(100, Math.round(((row.mailbox_count ?? 0) / row.mailboxes) * 100)) : 0) + '%' }"></div>
+                    <div class="progress-bar-text">
+                      {{ row.mailbox_count ?? 0 }} / {{ row.mailboxes }}
+                    </div>
+                  </div>
+                </div>
               </td>
               <td class="table-td mono">{{ row.transport || 'virtual' }}</td>
               <td class="table-td">
@@ -649,11 +659,57 @@ async function submitDelete() {
 .dom-page { background: #ebf2fe; padding: 24px 28px 40px; }
 
 .dom-header {
-  display: flex; justify-content: space-between; align-items: flex-start;
-  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 16px;
 }
-.dom-title { font-size: 28px; font-weight: 900; color: #1e293b; letter-spacing: -0.5px; line-height: 1; font-family: monospace; text-transform: uppercase; }
-.dom-subtitle { font-size: 10px; color: #94a3b8; letter-spacing: 0.8px; margin-top: 6px; text-transform: uppercase; font-weight: 700; }
+.dom-title {
+  font-size: 36px;
+  font-weight: 900;
+  color: #1e293b;
+  letter-spacing: -1px;
+  line-height: 1;
+  font-family: monospace;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.dom-subtitle {
+  font-size: 12px;
+  color: #94a3b8;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-top: 0;
+}
+
+.btn-add-domain {
+  background-color: var(--color-brand-primary);
+  color: #ffffff;
+  border: 2px solid var(--color-brand-text);
+  font-weight: 900;
+  padding: 20px 32px;
+  box-shadow: 3px 3px 0px var(--color-brand-text);
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.15s ease-in-out;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 14px;
+}
+
+.btn-add-domain:hover {
+  background-color: #ffffff;
+  color: var(--color-brand-primary);
+  transform: translate(-4px, -4px);
+  box-shadow: 7px 7px 0px var(--color-brand-text);
+}
+
+.btn-add-domain:active {
+  transform: translate(0px, 0px);
+  box-shadow: none;
+}
 
 /* .btn-primary, .error-banner, .table-card now centralized in global style.css (Tailwind-friendly) */
 
@@ -695,9 +751,36 @@ async function submitDelete() {
 .row-icon { color: #3b82f6; flex-shrink: 0; }
 .mono { font-family: monospace; font-size: 12px; color: #64748b; }
 
-.count-badge { font-weight: 700; color: #1e293b; }
-.count-sep { color: #94a3b8; margin: 0 2px; }
-.count-max { color: #94a3b8; font-size: 11px; }
+.progress-bar-wrap {
+  width: 128px;
+  background-color: #e2e8f0;
+  height: 24px;
+  position: relative;
+  border: 1px solid #1e293b;
+  overflow: hidden;
+  box-shadow: 1px 1px 0px #1e293b;
+}
+
+.progress-bar-fill {
+  background-color: #22c55e;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: width 0.3s ease;
+}
+
+.progress-bar-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #374151;
+  z-index: 10;
+}
 
 .badge-yes { background: #dcfce7; color: #16a34a; padding: 2px 8px; font-size: 11px; font-weight: 700; }
 .badge-no  { background: #fee2e2; color: #dc2626; padding: 2px 8px; font-size: 11px; font-weight: 700; }
