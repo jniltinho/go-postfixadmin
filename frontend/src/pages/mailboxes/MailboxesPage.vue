@@ -407,8 +407,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
-import { useToastStore } from '../stores/toast'
-import { calcStrength, generatePassword } from '../utils/password'
+import { useToastStore } from '../../stores/toast'
+import { calcStrength, generatePassword } from '../../utils/password'
 
 
 const toast = useToastStore()

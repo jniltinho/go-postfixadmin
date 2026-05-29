@@ -356,9 +356,9 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
-import { useToastStore } from '../stores/toast'
-import { useAuthStore } from '../stores/auth'
-import { calcStrength, generatePassword as fillPassword } from '../utils/password'
+import { useToastStore } from '../../stores/toast'
+import { useAuthStore } from '../../stores/auth'
+import { calcStrength, generatePassword as fillPassword } from '../../utils/password'
 
 const toast = useToastStore()
 const auth = useAuthStore()

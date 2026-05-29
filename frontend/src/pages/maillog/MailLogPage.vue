@@ -114,7 +114,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import axios from 'axios'
-import { useToastStore } from '../stores/toast'
+import { useToastStore } from '../../stores/toast'
 
 const toast = useToastStore()
 

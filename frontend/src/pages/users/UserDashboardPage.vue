@@ -360,10 +360,10 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useAuthStore } from '../stores/auth'
+import { useAuthStore } from '../../stores/auth'
 import { useRouter } from 'vue-router'
-import { useToastStore } from '../stores/toast'
-import { calcStrength, generatePassword as fillPassword } from '../utils/password'
+import { useToastStore } from '../../stores/toast'
+import { calcStrength, generatePassword as fillPassword } from '../../utils/password'
 import axios from 'axios'
 
 const auth = useAuthStore()

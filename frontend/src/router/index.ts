@@ -19,55 +19,55 @@ const routes = [
       {
         path: 'dashboard',
         name: 'Dashboard',
-        component: () => import('../pages/DashboardPage.vue'),
+        component: () => import('../pages/dashboard/DashboardPage.vue'),
         meta: { title: 'Dashboard' }
       },
       {
         path: 'domains',
         name: 'Domains',
-        component: () => import('../pages/DomainsPage.vue'),
+        component: () => import('../pages/domains/DomainsPage.vue'),
         meta: { title: 'Domains' }
       },
       {
         path: 'mailboxes',
         name: 'Mailboxes',
-        component: () => import('../pages/MailboxesPage.vue'),
+        component: () => import('../pages/mailboxes/MailboxesPage.vue'),
         meta: { title: 'Mailboxes' }
       },
       {
         path: 'aliases',
         name: 'Aliases',
-        component: () => import('../pages/AliasesPage.vue'),
+        component: () => import('../pages/aliases/AliasesPage.vue'),
         meta: { title: 'Aliases' }
       },
       {
         path: 'alias-domains',
         name: 'AliasDomains',
-        component: () => import('../pages/AliasDomainsPage.vue'),
+        component: () => import('../pages/aliasdomains/AliasDomainsPage.vue'),
         meta: { title: 'Domain Aliases' }
       },
       {
         path: 'logs',
         name: 'Logs',
-        component: () => import('../pages/LogsPage.vue'),
+        component: () => import('../pages/logs/LogsPage.vue'),
         meta: { title: 'Logs' }
       },
       {
         path: 'maillog',
         name: 'MailLog',
-        component: () => import('../pages/MailLogPage.vue'),
+        component: () => import('../pages/maillog/MailLogPage.vue'),
         meta: { title: 'MailLog' }
       },
       {
         path: 'admins',
         name: 'Admins',
-        component: () => import('../pages/AdminsPage.vue'),
+        component: () => import('../pages/admins/AdminsPage.vue'),
         meta: { title: 'Administrators' }
       },
       {
         path: 'transports',
         name: 'Transports',
-        component: () => import('../pages/TransportsPage.vue'),
+        component: () => import('../pages/transports/TransportsPage.vue'),
         meta: { title: 'Transport List' }
       },
       {
@@ -81,12 +81,12 @@ const routes = [
   {
     path: '/users/login',
     name: 'UserLogin',
-    component: () => import('../pages/UserLoginPage.vue')
+    component: () => import('../pages/users/UserLoginPage.vue')
   },
   {
     path: '/users/dashboard',
     name: 'UserDashboard',
-    component: () => import('../pages/UserDashboardPage.vue'),
+    component: () => import('../pages/users/UserDashboardPage.vue'),
     meta: { requiresUserAuth: true, title: 'My Account' }
   }
 ]
