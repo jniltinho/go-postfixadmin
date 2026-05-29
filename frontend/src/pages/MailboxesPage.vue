@@ -18,114 +18,42 @@
       <Icon name="alert-triangle" :size="16" class="mr-1" /> {{ error }}
     </div>
 
-    <!-- Domain filter (kept like in old server, placed before table) -->
-    <div class="mb-4 flex items-center gap-3">
-      <label class="text-xs font-black uppercase tracking-widest text-brand-text">FILTER BY DOMAIN:</label>
-      <select v-model="domainFilter" class="h-9 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium bg-white" @change="onFilterChange">
-        <option value="">All Domains</option>
-        <option v-for="d in domains" :key="d.domain" :value="d.domain">{{ d.domain }}</option>
-      </select>
-      <a v-if="domainFilter" class="ml-2 text-xs font-bold text-red-500 hover:underline cursor-pointer" @click="domainFilter = ''; onFilterChange()">Clear Filter</a>
-    </div>
-
-    <!-- ─── Table card ─── -->
-    <div class="table-card">
-
-      <!-- Controls row -->
-      <div class="table-topbar">
-        <div class="controls-left">
-          <div class="per-page-wrap">
-            <select v-model="rowsPerPage" class="ctrl-select" @change="currentPage = 1">
-              <option :value="10">10</option>
-              <option :value="15">15</option>
-              <option :value="25">25</option>
-              <option :value="50">50</option>
-            </select>
-            <span class="ctrl-label">entries per page</span>
-          </div>
+    <!-- ─── Table ─── -->
+    <AppTable
+      :rows="domainFilteredRows"
+      :columns="columns"
+      row-key="username"
+      :search-fields="['username', 'name', 'domain']"
+      default-sort-key="username"
+      :loading="loading"
+      @edit="openEdit"
+      @delete="confirmDelete"
+    >
+      <template #toolbar>
+        <div class="mb-4 flex items-center gap-3">
+          <label class="text-xs font-black uppercase tracking-widest text-brand-text">FILTER BY DOMAIN:</label>
+          <select v-model="domainFilter" class="h-9 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium bg-white">
+            <option value="">All Domains</option>
+            <option v-for="d in domains" :key="d.domain" :value="d.domain">{{ d.domain }}</option>
+          </select>
+          <a v-if="domainFilter" class="ml-2 text-xs font-bold text-red-500 hover:underline cursor-pointer" @click="domainFilter = ''">Clear Filter</a>
         </div>
-        <div class="controls-right">
-          <span class="ctrl-label">Search:</span>
-          <input v-model="search" class="search-input" placeholder="Search records..." @input="currentPage = 1" />
-        </div>
-      </div>
+      </template>
 
-      <!-- Table -->
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead>
-            <tr class="table-head-row">
-              <th v-for="col in columns" :key="col.key" class="table-th" @click="sortBy(col.key)">
-                {{ col.label }}
-                <span class="sort-arrows">
-                  <span :class="{ 'sort-active': sortKey === col.key && sortDir === 'asc' }">▲</span>
-                  <span :class="{ 'sort-active': sortKey === col.key && sortDir === 'desc' }">▼</span>
-                </span>
-              </th>
-              <th class="table-th">ACTIONS</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="loading">
-              <td :colspan="columns.length + 1" class="table-loading">
-                <div class="spinner mx-auto" />
-              </td>
-            </tr>
-            <tr v-else-if="pagedRows.length === 0">
-              <td :colspan="columns.length + 1" class="table-empty">No records found</td>
-            </tr>
-            <tr v-for="row in pagedRows" :key="row.username" class="table-row">
-              <td class="table-td td-link">
-                <div class="cell-with-icon">
-                  <Icon name="mail" :size="14" class="row-icon" />
-                  {{ row.username }}
-                </div>
-              </td>
-              <td class="table-td">{{ row.name || '—' }}</td>
-              <td class="table-td mono">{{ row.domain }}</td>
-              <td class="table-td">
-                {{ row.quota === 0 ? 'Unlimited' : (row.quota / 1048576) + ' MB' }}
-              </td>
-              <td class="table-td">
-                <span :class="row.active ? 'badge-yes' : 'badge-no'">{{ row.active ? 'YES' : 'NO' }}</span>
-              </td>
-              <td class="table-td">{{ formatDate(row.modified) }}</td>
-              <td class="table-td actions-td">
-                <button class="act-btn act-edit" @click="openEdit(row)">
-                  <Icon name="pencil" :size="12" style="margin-right:4px;vertical-align:middle" />EDIT
-                </button>
-                <button class="act-btn act-del" @click="confirmDelete(row)">
-                  <Icon name="trash-2" :size="12" style="margin-right:4px;vertical-align:middle" />DELETE
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Footer -->
-      <div class="table-footer">
-        <div class="showing-text">
-          <template v-if="filteredRows.length === 0">Showing 0 entries</template>
-          <template v-else>
-            Showing {{ (currentPage - 1) * rowsPerPage + 1 }} to
-            {{ Math.min(currentPage * rowsPerPage, filteredRows.length) }} of
-            {{ filteredRows.length }} entries
-          </template>
+      <template #cell-username="{ row }">
+        <div class="cell-with-icon">
+          <Icon name="mail" :size="14" class="row-icon" />
+          {{ row.username }}
         </div>
-        <div class="pagination">
-          <button class="pg-btn" :disabled="currentPage === 1" @click="currentPage = 1">FIRST</button>
-          <button class="pg-btn" :disabled="currentPage === 1" @click="currentPage--">PREVIOUS</button>
-          <button
-            v-for="p in pageButtons" :key="p"
-            class="pg-btn" :class="{ 'pg-active': p === currentPage }"
-            @click="currentPage = p"
-          >{{ p }}</button>
-          <button class="pg-btn" :disabled="currentPage === totalPages" @click="currentPage++">NEXT</button>
-          <button class="pg-btn" :disabled="currentPage === totalPages" @click="currentPage = totalPages">LAST</button>
-        </div>
-      </div>
-    </div>
+      </template>
+      <template #cell-name="{ value }">{{ value || '—' }}</template>
+      <template #cell-domain="{ value }"><span class="mono">{{ value }}</span></template>
+      <template #cell-quota="{ value }">{{ value === 0 ? 'Unlimited' : (value / 1048576) + ' MB' }}</template>
+      <template #cell-active="{ value }">
+        <span :class="value ? 'badge-yes' : 'badge-no'">{{ value ? 'YES' : 'NO' }}</span>
+      </template>
+      <template #cell-modified="{ value }">{{ formatDate(value) }}</template>
+    </AppTable>
 
     <!-- ══════════ ADD MODAL (from zero - exact structure from form_add_mailbox.html) ══════════ -->
     <div v-if="showAdd" class="modal-overlay" @click.self="closeAdd">
@@ -465,30 +393,23 @@
     </div>
 
     <!-- ══════════ DELETE CONFIRM ══════════ -->
-    <BrutalModal v-model="showDeleteConfirm" title="CONFIRM DELETE" size="sm" danger>
-      <p class="confirm-text">
-        Are you sure you want to delete mailbox<br />
-        <strong>{{ deleteTarget?.username }}</strong>?<br />
-        <span class="confirm-sub">This action cannot be undone.</span>
-      </p>
-
-      <template #footer>
-        <button class="btn-cancel" @click="showDeleteConfirm = false">CANCEL</button>
-        <button class="btn-danger" :disabled="deletingRow" @click="submitDelete">
-          <Icon name="trash-2" :size="14" style="margin-right:6px;vertical-align:middle" />
-          {{ deletingRow ? 'DELETING...' : 'DELETE' }}
-        </button>
-      </template>
-    </BrutalModal>
+    <ConfirmDialog
+      v-model="showDeleteConfirm"
+      title="CONFIRM DELETE"
+      :item-name="deleteTarget?.username"
+      :loading="deletingRow"
+      @confirm="submitDelete"
+    />
 
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 import { useToastStore } from '../stores/toast'
 import { calcStrength, generatePassword } from '../utils/password'
+
 
 const toast = useToastStore()
 
@@ -513,11 +434,6 @@ const domains = ref<Domain[]>([])
 const loading = ref(true)
 const error = ref('')
 
-const search = ref('')
-const rowsPerPage = ref(15)
-const currentPage = ref(1)
-const sortKey = ref('username')
-const sortDir = ref<'asc' | 'desc'>('asc')
 const domainFilter = ref('')
 
 const columns = [
@@ -529,40 +445,10 @@ const columns = [
   { key: 'modified', label: 'MODIFIED' },
 ]
 
-function sortBy(key: string) {
-  if (sortKey.value === key) sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc'
-  else { sortKey.value = key; sortDir.value = 'asc' }
-}
-
-const filteredRows = computed(() => {
-  let rows = allMailboxes.value
-  if (domainFilter.value) rows = rows.filter(r => r.domain === domainFilter.value)
-  const q = search.value.toLowerCase()
-  if (q) rows = rows.filter(r =>
-    r.username.toLowerCase().includes(q) ||
-    r.name.toLowerCase().includes(q) ||
-    r.domain.toLowerCase().includes(q)
-  )
-  return [...rows].sort((a, b) => {
-    const av = String((a as any)[sortKey.value] ?? '')
-    const bv = String((b as any)[sortKey.value] ?? '')
-    return sortDir.value === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av)
-  })
+const domainFilteredRows = computed(() => {
+  if (!domainFilter.value) return allMailboxes.value
+  return allMailboxes.value.filter(r => r.domain === domainFilter.value)
 })
-
-const totalPages = computed(() => Math.max(1, Math.ceil(filteredRows.value.length / rowsPerPage.value)))
-const pageButtons = computed(() => {
-  const total = totalPages.value
-  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
-  const cur = currentPage.value
-  const pages = new Set([1, total, cur, cur - 1, cur + 1].filter(p => p >= 1 && p <= total))
-  return Array.from(pages).sort((a, b) => a - b)
-})
-const pagedRows = computed(() => {
-  const start = (currentPage.value - 1) * rowsPerPage.value
-  return filteredRows.value.slice(start, start + rowsPerPage.value)
-})
-watch([search, rowsPerPage, domainFilter], () => { currentPage.value = 1 })
 
 function formatDate(ts: string): string {
   if (!ts) return '—'
@@ -774,9 +660,7 @@ async function submitDelete() {
   } finally { deletingRow.value = false }
 }
 
-function onFilterChange() {
-  // filter already applied in filteredRows
-}
+
 </script>
 
 <style scoped>
