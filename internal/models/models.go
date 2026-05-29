@@ -363,3 +363,20 @@ type TransportList struct {
 func (TransportList) TableName() string {
 	return TableNameTransportList
 }
+
+const TableNameAdminApiKey = "admin_api_keys"
+
+// AdminApiKey represents an API Key used for BearerAuth (apiKey) in Swagger / external clients
+type AdminApiKey struct {
+	ID        int        `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
+	Username  string     `gorm:"column:username;type:varchar(255);not null;index:idx_admin_api_keys_username" json:"username"`
+	Name      string     `gorm:"column:name;type:varchar(255);not null" json:"name"`
+	Token     string     `gorm:"column:token;type:varchar(255);not null;uniqueIndex:idx_admin_api_keys_token" json:"token"`
+	Created   time.Time  `gorm:"column:created;not null;default:CURRENT_TIMESTAMP" json:"created"`
+	ExpiresAt *time.Time `gorm:"column:expires_at" json:"expires_at"`
+	Active    bool       `gorm:"column:active;not null;default:true" json:"active"`
+}
+
+func (AdminApiKey) TableName() string {
+	return TableNameAdminApiKey
+}

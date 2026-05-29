@@ -29,6 +29,7 @@ debug  = false
 port = 8080
 ssl_enable = false
 session_secret = "change-me-in-production"
+swagger_enable = true
 jwt_access_ttl  = "15m"
 jwt_refresh_ttl = "168h"
 `)

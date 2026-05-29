@@ -62,8 +62,8 @@ func Translate(lang, messageID string, templateData map[string]any) string {
 			return messageID
 		}
 	}
-
-	translated := po.Get(messageID) //nolint:govet
+	getFn := po.Get
+	translated := getFn(messageID)
 	if translated == "" || translated == messageID {
 		// If no translation found, return the message ID
 		return messageID

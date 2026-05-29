@@ -4,10 +4,13 @@ import (
 	"context"
 	"net/http"
 	"strings"
+	"time"
 
 	"go-postfixadmin/internal/auth"
+	"go-postfixadmin/internal/models"
 
 	"github.com/labstack/echo/v5"
+	"gorm.io/gorm"
 )
 
 // Context key for storing JWT claims (used by dual-mode getters).
@@ -18,32 +21,69 @@ const (
 	JWTClaimsKey contextKey = "jwt_claims"
 )
 
-// JWTAuthMiddleware returns an Echo middleware that validates a JWT Bearer token.
+// JWTAuthMiddleware returns an Echo middleware that validates a JWT Bearer token or DB ApiKey.
 // On success, it stores the parsed claims in the request context so that
 // GetUsername, GetIsSuperAdmin and future helpers can read them transparently.
-//
-// This middleware is intended for new API routes (/api/v1/*). It does NOT
-// perform session fallback — that is handled by the extended getters in auth.go.
-func JWTAuthMiddleware() echo.MiddlewareFunc {
+func JWTAuthMiddleware(db *gorm.DB) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c *echo.Context) error {
 			authHeader := c.Request().Header.Get("Authorization")
 			if authHeader == "" {
-				return echo.NewHTTPError(http.StatusUnauthorized, "missing Authorization header")
+				authHeader = c.Request().Header.Get("X-API-Key")
+			}
+			if authHeader == "" {
+				return echo.NewHTTPError(http.StatusUnauthorized, "missing Authorization or X-API-Key header")
 			}
 
+			var tokenString string
 			parts := strings.SplitN(authHeader, " ", 2)
-			if len(parts) != 2 || !strings.EqualFold(parts[0], "Bearer") {
-				return echo.NewHTTPError(http.StatusUnauthorized, "invalid Authorization header format (expected 'Bearer <token>')")
+			if len(parts) == 2 && strings.EqualFold(parts[0], "Bearer") {
+				tokenString = strings.TrimSpace(parts[1])
+			} else {
+				tokenString = strings.TrimSpace(authHeader)
 			}
 
-			tokenString := strings.TrimSpace(parts[1])
 			if tokenString == "" {
-				return echo.NewHTTPError(http.StatusUnauthorized, "empty bearer token")
+				return echo.NewHTTPError(http.StatusUnauthorized, "empty token")
 			}
 
-			claims, err := auth.ValidateToken(tokenString)
+			var claims *auth.Claims
+			var err error
+
+			// 1. Try to validate as a JWT first
+			claims, err = auth.ValidateToken(tokenString)
 			if err != nil {
+				// 2. Fall back to validating as a database API Key / BearerAuth
+				var apiKey models.AdminApiKey
+				dbErr := db.Where("token = ? AND active = ?", tokenString, true).First(&apiKey).Error
+				if dbErr == nil {
+					// Check if expired
+					if apiKey.ExpiresAt == nil || apiKey.ExpiresAt.After(time.Now()) {
+						// Retrieve Admin to get Superadmin status and confirm active
+						var admin models.Admin
+						adminErr := db.Where("username = ? AND active = ?", apiKey.Username, true).First(&admin).Error
+						if adminErr == nil {
+							// Determine which domains this admin can manage
+							var domains []string
+							if !admin.Superadmin {
+								// Load domains assigned to this domain admin
+								db.Model(&models.DomainAdmin{}).
+									Where("username = ? AND active = ?", admin.Username, true).
+									Pluck("domain", &domains)
+							}
+
+							claims = &auth.Claims{
+								Username:   admin.Username,
+								Superadmin: admin.Superadmin,
+								Domains:    domains,
+								Type:       "admin",
+							}
+						}
+					}
+				}
+			}
+
+			if claims == nil {
 				return echo.NewHTTPError(http.StatusUnauthorized, "invalid or expired token")
 			}
 

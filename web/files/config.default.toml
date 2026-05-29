@@ -19,6 +19,7 @@ ssl_enable = false
 # If both cert and key are provided, SSL will be enabled automatically
 # Generate a random 64-character hex string for production use, E.g., using "openssl rand -hex 32"
 session_secret = "9a048f79e88e35de37dc2c43c1fc002f358f92957a7690e60109cfe8a65178e0"
+swagger_enable = true # Set to true to enable Swagger UI /swagger/*, false to disable
 
 # JWT settings (for the new Vue/Quasar SPA frontend)
 # Access tokens should be short-lived. Refresh tokens use httpOnly cookies (7d).

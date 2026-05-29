@@ -88,5 +88,6 @@ func MigrateDB(db *gorm.DB) error {
 		&models.VacationNotification{},
 		&models.Maillog{},
 		&models.TransportList{},
+		&models.AdminApiKey{},
 	)
 }

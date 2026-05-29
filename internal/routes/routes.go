@@ -12,6 +12,7 @@ import (
 
 	httpSwagger "github.com/swaggo/http-swagger"
 	"github.com/labstack/echo/v5"
+	"github.com/spf13/viper"
 )
 
 // RegisterRoutes registers all the application routes
@@ -25,7 +26,7 @@ func RegisterRoutes(e *echo.Echo, h *handlers.Handler, spaFS fs.FS) {
 	apiV1.POST("/auth/refresh", h.AuthRefresh)
 
 	// All protected endpoints
-	protected := apiV1.Group("", middleware.JWTAuthMiddleware())
+	protected := apiV1.Group("", middleware.JWTAuthMiddleware(h.DB))
 
 	protected.POST("/auth/logout", h.AuthLogout)
 	protected.GET("/auth/me", h.AuthMe)
@@ -70,7 +71,15 @@ func RegisterRoutes(e *echo.Echo, h *handlers.Handler, spaFS fs.FS) {
 	protected.GET("/logs", h.LogsV1)
 	protected.GET("/maillog", h.MailLogV1)
 
-	e.GET("/swagger/*", echo.WrapHandler(httpSwagger.WrapHandler))
+	// API Keys CRUD settings
+	protected.GET("/settings/apikeys", h.ListApiKeys)
+	protected.POST("/settings/apikeys", h.CreateApiKey)
+	protected.PUT("/settings/apikeys/:id", h.UpdateApiKey)
+	protected.DELETE("/settings/apikeys/:id", h.DeleteApiKey)
+
+	if viper.GetBool("server.swagger_enable") {
+		e.GET("/swagger/*", echo.WrapHandler(httpSwagger.WrapHandler))
+	}
 
 	if spaFS != nil {
 		e.GET("/*", spaHandler(spaFS))
