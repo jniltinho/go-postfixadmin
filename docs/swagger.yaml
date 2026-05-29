@@ -15,6 +15,127 @@ definitions:
       success:
         type: boolean
     type: object
+  dto.AdminDetailResponse:
+    properties:
+      admin:
+        $ref: '#/definitions/dto.AdminResponse'
+      domains:
+        items:
+          $ref: '#/definitions/dto.AdminDomainOption'
+        type: array
+    type: object
+  dto.AdminDomainOption:
+    properties:
+      assigned:
+        example: true
+        type: boolean
+      domain:
+        example: example.com
+        type: string
+    type: object
+  dto.AdminResponse:
+    properties:
+      active:
+        example: true
+        type: boolean
+      created:
+        type: string
+      domain_count:
+        description: '"ALL" for superadmins'
+        example: "3"
+        type: string
+      modified:
+        type: string
+      superadmin:
+        example: false
+        type: boolean
+      username:
+        example: admin@example.com
+        type: string
+    type: object
+  dto.AliasDomainResponse:
+    properties:
+      active:
+        example: true
+        type: boolean
+      alias_domain:
+        example: alias.com
+        type: string
+      created:
+        type: string
+      modified:
+        type: string
+      target_domain:
+        example: example.com
+        type: string
+    type: object
+  dto.AliasResponse:
+    properties:
+      active:
+        example: true
+        type: boolean
+      address:
+        example: info@example.com
+        type: string
+      created:
+        type: string
+      domain:
+        example: example.com
+        type: string
+      goto:
+        example: admin@example.com,backup@example.com
+        type: string
+      modified:
+        type: string
+    type: object
+  dto.CreateAdminRequest:
+    properties:
+      active:
+        example: true
+        type: boolean
+      domains:
+        items:
+          type: string
+        type: array
+      password:
+        example: SecurePass1!
+        type: string
+      superadmin:
+        example: false
+        type: boolean
+      username:
+        example: admin@example.com
+        type: string
+    type: object
+  dto.CreateAliasDomainRequest:
+    properties:
+      active:
+        example: true
+        type: boolean
+      alias_domain:
+        example: alias.com
+        type: string
+      target_domain:
+        example: example.com
+        type: string
+    type: object
+  dto.CreateAliasRequest:
+    properties:
+      active:
+        example: true
+        type: boolean
+      domain:
+        example: example.com
+        type: string
+      goto:
+        example: |-
+          admin@example.com
+          backup@example.com
+        type: string
+      local_part:
+        example: info
+        type: string
+    type: object
   dto.CreateDomainRequest:
     properties:
       active:
@@ -34,6 +155,39 @@ definitions:
       quota:
         type: integer
       transport:
+        type: string
+    type: object
+  dto.CreateMailboxRequest:
+    properties:
+      active:
+        type: boolean
+      domain:
+        type: string
+      email_other:
+        type: string
+      local_part:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      quota:
+        type: integer
+      send_welcome:
+        type: boolean
+      smtp_active:
+        type: boolean
+    type: object
+  dto.CreateTransportRequest:
+    properties:
+      active:
+        example: true
+        type: boolean
+      domain:
+        example: example.com
+        type: string
+      transport:
+        example: smtp:[relay.example.com]:25
         type: string
     type: object
   dto.DashboardStatsResponse:
@@ -112,6 +266,88 @@ definitions:
       user:
         $ref: '#/definitions/dto.UserInfo'
     type: object
+  dto.MailLogEntryResponse:
+    properties:
+      domain_from:
+        type: string
+      domain_to:
+        type: string
+      helo:
+        type: string
+      host_ip:
+        type: string
+      host_name:
+        type: string
+      logdate:
+        type: string
+      m_from:
+        type: string
+      m_to:
+        type: string
+      msgsize:
+        type: integer
+    type: object
+  dto.MailboxResponse:
+    properties:
+      active:
+        type: boolean
+      created:
+        type: string
+      domain:
+        type: string
+      email_other:
+        type: string
+      modified:
+        type: string
+      name:
+        type: string
+      password_expiry:
+        type: string
+      quota:
+        type: integer
+      smtp_active:
+        type: boolean
+      username:
+        type: string
+    type: object
+  dto.PaginatedLogResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.LogEntryResponse'
+        type: array
+      filtered:
+        example: 42
+        type: integer
+      page:
+        example: 1
+        type: integer
+      per_page:
+        example: 25
+        type: integer
+      total:
+        example: 150
+        type: integer
+    type: object
+  dto.PaginatedMailLogResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.MailLogEntryResponse'
+        type: array
+      filtered:
+        example: 120
+        type: integer
+      page:
+        example: 1
+        type: integer
+      per_page:
+        example: 25
+        type: integer
+      total:
+        example: 5000
+        type: integer
+    type: object
   dto.RefreshResponse:
     properties:
       access_token:
@@ -121,6 +357,79 @@ definitions:
       token_type:
         type: string
     type: object
+  dto.TransportResponse:
+    properties:
+      active:
+        example: true
+        type: boolean
+      created:
+        type: string
+      domain:
+        example: example.com
+        type: string
+      id:
+        example: 1
+        type: integer
+      modified:
+        type: string
+      transport:
+        example: smtp:[relay.example.com]:25
+        type: string
+    type: object
+  dto.UpdateAdminRequest:
+    properties:
+      active:
+        type: boolean
+      change_password:
+        type: boolean
+      domains:
+        items:
+          type: string
+        type: array
+      password:
+        type: string
+      password_confirm:
+        type: string
+      superadmin:
+        type: boolean
+    type: object
+  dto.UpdateAliasDomainRequest:
+    properties:
+      active:
+        example: false
+        type: boolean
+      target_domain:
+        example: newexample.com
+        type: string
+    type: object
+  dto.UpdateAliasRequest:
+    properties:
+      active:
+        example: true
+        type: boolean
+      goto:
+        example: admin@example.com
+        type: string
+    type: object
+  dto.UpdateDomainRequest:
+    properties:
+      active:
+        type: boolean
+      aliases:
+        type: integer
+      backupmx:
+        type: boolean
+      description:
+        type: string
+      mailboxes:
+        type: integer
+      password_expiry:
+        type: integer
+      quota:
+        type: integer
+      transport:
+        type: string
+    type: object
   dto.UpdateForwardingRequest:
     properties:
       forwarding:
@@ -128,6 +437,25 @@ definitions:
           john@example.com
           backup@example.com
         type: string
+    type: object
+  dto.UpdateMailboxRequest:
+    properties:
+      active:
+        type: boolean
+      change_password:
+        type: boolean
+      email_other:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      password_confirm:
+        type: string
+      quota:
+        type: integer
+      smtp_active:
+        type: boolean
     type: object
   dto.UpdatePasswordRequest:
     properties:
@@ -139,6 +467,18 @@ definitions:
         type: string
       new_password:
         example: NewPass456!
+        type: string
+    type: object
+  dto.UpdateTransportRequest:
+    properties:
+      active:
+        example: false
+        type: boolean
+      domain:
+        example: example.com
+        type: string
+      transport:
+        example: smtp:[relay.example.com]:587
         type: string
     type: object
   dto.UpdateVacationRequest:
@@ -282,6 +622,596 @@ info:
   title: Go-PostfixAdmin API
   version: "1.0"
 paths:
+  /admins:
+    get:
+      description: Returns all administrators. Superadmins see all; regular admins
+        see only themselves.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.AdminResponse'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: List admins
+      tags:
+      - Admins
+    post:
+      consumes:
+      - application/json
+      description: Creates a new administrator. Only superadmins can call this endpoint.
+        Supply domains[] to assign domain access (ignored for superadmins).
+      parameters:
+      - description: Admin data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateAdminRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Superadmin required
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "409":
+          description: Admin already exists
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Create admin
+      tags:
+      - Admins
+  /admins/{username}:
+    delete:
+      description: Permanently deletes an administrator. Only superadmins can call
+        this endpoint.
+      parameters:
+      - description: Admin username (e.g. admin@example.com)
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Superadmin required
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete admin
+      tags:
+      - Admins
+    get:
+      description: Returns details for a single administrator plus the full list of
+        domains with assignment flags. Non-superadmins can only view themselves.
+      parameters:
+      - description: Admin username (e.g. admin@example.com)
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AdminDetailResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Get admin
+      tags:
+      - Admins
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing administrator. Superadmins can change active/superadmin
+        flags and domain assignments. Any admin can change their own password via
+        change_password=true.
+      parameters:
+      - description: Admin username (e.g. admin@example.com)
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: Fields to update
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateAdminRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Update admin
+      tags:
+      - Admins
+  /alias-domains:
+    get:
+      description: Returns all alias domains. Superadmins see all; domain admins see
+        only those where target_domain is in their scope.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.AliasDomainResponse'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: List alias domains
+      tags:
+      - Alias Domains
+    post:
+      consumes:
+      - application/json
+      description: Creates an alias domain that redirects all mail to a target domain.
+        Both alias_domain and target_domain must differ; target_domain must already
+        exist.
+      parameters:
+      - description: Alias domain data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateAliasDomainRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "409":
+          description: Alias domain already exists
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Create alias domain
+      tags:
+      - Alias Domains
+  /alias-domains/{alias_domain}:
+    delete:
+      description: Permanently deletes an alias domain. The caller must have admin
+        access to the target domain.
+      parameters:
+      - description: Alias domain name (e.g. alias.com)
+        in: path
+        name: alias_domain
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete alias domain
+      tags:
+      - Alias Domains
+    get:
+      description: Returns details for a single alias domain. The caller must have
+        admin access to the target domain.
+      parameters:
+      - description: Alias domain name (e.g. alias.com)
+        in: path
+        name: alias_domain
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AliasDomainResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Get alias domain
+      tags:
+      - Alias Domains
+    put:
+      consumes:
+      - application/json
+      description: Updates the target domain and/or active state of an existing alias
+        domain. All fields are optional.
+      parameters:
+      - description: Alias domain name (e.g. alias.com)
+        in: path
+        name: alias_domain
+        required: true
+        type: string
+      - description: Fields to update
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateAliasDomainRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Update alias domain
+      tags:
+      - Alias Domains
+  /aliases:
+    get:
+      description: Returns all aliases accessible to the authenticated admin. Superadmins
+        see all; domain admins see only their domains. Use ?domain= to filter by domain.
+      parameters:
+      - description: Filter by domain
+        in: query
+        name: domain
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.AliasResponse'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: List aliases
+      tags:
+      - Aliases
+    post:
+      consumes:
+      - application/json
+      description: Creates a new email alias. goto accepts multiple recipients separated
+        by newlines or commas. The caller must have admin access to the target domain.
+      parameters:
+      - description: Alias data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateAliasRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "409":
+          description: Alias already exists
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Create alias
+      tags:
+      - Aliases
+  /aliases/{address}:
+    delete:
+      description: Permanently deletes an alias. The caller must have admin access
+        to the alias domain.
+      parameters:
+      - description: Alias address (e.g. info@example.com)
+        in: path
+        name: address
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete alias
+      tags:
+      - Aliases
+    get:
+      description: Returns details for a single alias. The goto field is returned
+        with recipients separated by newlines. The caller must have admin access to
+        the alias domain.
+      parameters:
+      - description: Alias address (e.g. info@example.com)
+        in: path
+        name: address
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AliasResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Get alias
+      tags:
+      - Aliases
+    put:
+      consumes:
+      - application/json
+      description: Updates the goto destinations and/or active state of an existing
+        alias. All fields are optional.
+      parameters:
+      - description: Alias address (e.g. info@example.com)
+        in: path
+        name: address
+        required: true
+        type: string
+      - description: Fields to update
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateAliasRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Update alias
+      tags:
+      - Aliases
   /auth/login:
     post:
       consumes:
@@ -518,6 +1448,362 @@ paths:
       summary: Get domain
       tags:
       - Domains
+    put:
+      consumes:
+      - application/json
+      description: Updates one or more fields of an existing domain. All fields are
+        optional. Only superadmins can update domains.
+      parameters:
+      - description: Domain name (e.g. example.com)
+        in: path
+        name: domain
+        required: true
+        type: string
+      - description: Fields to update
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateDomainRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Superadmin required
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Update domain
+      tags:
+      - Domains
+  /logs:
+    get:
+      description: Returns paginated admin action logs. Superadmins see all; domain
+        admins see only their domains. Supports filtering by admin, domain, action,
+        and free-text search.
+      parameters:
+      - description: Page number (default 1)
+        in: query
+        name: page
+        type: integer
+      - description: Items per page (default 25)
+        in: query
+        name: per_page
+        type: integer
+      - description: Free-text search
+        in: query
+        name: search
+        type: string
+      - description: Filter by admin username
+        in: query
+        name: admin
+        type: string
+      - description: Filter by domain
+        in: query
+        name: domain
+        type: string
+      - description: Filter by action
+        in: query
+        name: action
+        type: string
+      - description: 'Sort field (default: timestamp)'
+        in: query
+        name: sort
+        type: string
+      - description: 'Sort direction: asc or desc (default: desc)'
+        in: query
+        name: order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.PaginatedLogResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: List admin action logs
+      tags:
+      - Logs
+  /mailboxes:
+    get:
+      description: Returns all mailboxes accessible to the authenticated admin. Superadmins
+        see all; domain admins see only their domains. Use ?domain= to filter by domain.
+      parameters:
+      - description: Filter by domain
+        in: query
+        name: domain
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.MailboxResponse'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: List mailboxes
+      tags:
+      - Mailboxes
+    post:
+      consumes:
+      - application/json
+      description: Creates a new virtual mailbox. The caller must have admin access
+        to the target domain.
+      parameters:
+      - description: Mailbox data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateMailboxRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "409":
+          description: Mailbox already exists
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Create mailbox
+      tags:
+      - Mailboxes
+  /mailboxes/{username}:
+    delete:
+      description: Permanently deletes a mailbox and its associated alias. Optionally
+        cleans up the maildir on disk if server.cleanup_maildir is enabled.
+      parameters:
+      - description: Mailbox address (e.g. user@example.com)
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete mailbox
+      tags:
+      - Mailboxes
+    get:
+      description: Returns details for a single mailbox. The caller must have admin
+        access to the mailbox domain.
+      parameters:
+      - description: Mailbox address (e.g. user@example.com)
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.MailboxResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Get mailbox
+      tags:
+      - Mailboxes
+    put:
+      consumes:
+      - application/json
+      description: Updates one or more fields of an existing mailbox. All fields are
+        optional. Set change_password=true and supply password + password_confirm
+        to reset the password.
+      parameters:
+      - description: Mailbox address (e.g. user@example.com)
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: Fields to update
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateMailboxRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Update mailbox
+      tags:
+      - Mailboxes
+  /maillog:
+    get:
+      description: Returns paginated SMTP mail log entries. Superadmins see all; domain
+        admins see only their domains. Supports free-text search and sorting.
+      parameters:
+      - description: Page number (default 1)
+        in: query
+        name: page
+        type: integer
+      - description: Items per page (default 25)
+        in: query
+        name: per_page
+        type: integer
+      - description: Free-text search across sender, recipient, host
+        in: query
+        name: search
+        type: string
+      - description: 'Sort field (default: tstamp)'
+        in: query
+        name: sort
+        type: string
+      - description: 'Sort direction: asc or desc (default: desc)'
+        in: query
+        name: order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.PaginatedMailLogResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: List mail logs
+      tags:
+      - Logs
   /settings/apikeys:
     get:
       description: Retrieves all API keys for the current authenticated administrator.
@@ -672,6 +1958,203 @@ paths:
       summary: Update API Key
       tags:
       - Settings
+  /transports:
+    get:
+      description: Returns all transport entries. Restricted to superadmins only.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.TransportResponse'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Superadmin required
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: List transports
+      tags:
+      - Transports
+    post:
+      consumes:
+      - application/json
+      description: Creates a new transport rule. Restricted to superadmins only. transport
+        value follows Postfix format, e.g. "smtp:[relay.example.com]:25".
+      parameters:
+      - description: Transport data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateTransportRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Superadmin required
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Create transport
+      tags:
+      - Transports
+  /transports/{id}:
+    delete:
+      description: Permanently deletes a transport entry. Restricted to superadmins
+        only.
+      parameters:
+      - description: Transport ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "400":
+          description: Invalid ID
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Superadmin required
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete transport
+      tags:
+      - Transports
+    get:
+      description: Returns details for a single transport entry by numeric ID. Restricted
+        to superadmins only.
+      parameters:
+      - description: Transport ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TransportResponse'
+        "400":
+          description: Invalid ID
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Superadmin required
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Get transport
+      tags:
+      - Transports
+    put:
+      consumes:
+      - application/json
+      description: Updates domain, transport string and/or active state of an existing
+        transport entry. All fields are optional. Restricted to superadmins only.
+      parameters:
+      - description: Transport ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Fields to update
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateTransportRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Superadmin required
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Update transport
+      tags:
+      - Transports
   /user/forwarding:
     get:
       description: Returns the current comma-separated forwarding destinations for

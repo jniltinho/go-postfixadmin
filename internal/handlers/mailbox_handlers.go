@@ -354,7 +354,18 @@ func (h *Handler) DeleteMailbox(c *echo.Context) error {
 // JWT + domain scoping enforced via claims
 // =====================================================
 
-// ListMailboxesV1 returns mailboxes visible to the authenticated user
+// ListMailboxesV1 godoc
+// @Summary      List mailboxes
+// @Description  Returns all mailboxes accessible to the authenticated admin. Superadmins see all; domain admins see only their domains. Use ?domain= to filter by domain.
+// @Tags         Mailboxes
+// @Produce      json
+// @Param        domain  query     string  false  "Filter by domain"
+// @Success      200     {array}   dto.MailboxResponse
+// @Failure      401     {object}  dto.APIResponse
+// @Failure      403     {object}  dto.APIResponse
+// @Failure      500     {object}  dto.APIResponse
+// @Router       /mailboxes [get]
+// @Security     BearerAuth
 func (h *Handler) ListMailboxesV1(c *echo.Context) error {
 	claims := middleware.GetJWTClaims(c)
 	if claims == nil {
@@ -390,7 +401,21 @@ func (h *Handler) ListMailboxesV1(c *echo.Context) error {
 	return dto.WriteSuccess(c, response)
 }
 
-// CreateMailboxV1 handles POST /api/v1/mailboxes
+// CreateMailboxV1 godoc
+// @Summary      Create mailbox
+// @Description  Creates a new virtual mailbox. The caller must have admin access to the target domain.
+// @Tags         Mailboxes
+// @Accept       json
+// @Produce      json
+// @Param        request  body      dto.CreateMailboxRequest  true  "Mailbox data"
+// @Success      201      {object}  dto.APIResponse
+// @Failure      400      {object}  dto.APIResponse
+// @Failure      401      {object}  dto.APIResponse
+// @Failure      403      {object}  dto.APIResponse
+// @Failure      409      {object}  dto.APIResponse  "Mailbox already exists"
+// @Failure      500      {object}  dto.APIResponse
+// @Router       /mailboxes [post]
+// @Security     BearerAuth
 func (h *Handler) CreateMailboxV1(c *echo.Context) error {
 	claims := middleware.GetJWTClaims(c)
 	if claims == nil {
@@ -485,7 +510,19 @@ func (h *Handler) CreateMailboxV1(c *echo.Context) error {
 	})
 }
 
-// GetMailboxV1 handles GET /api/v1/mailboxes/:username
+// GetMailboxV1 godoc
+// @Summary      Get mailbox
+// @Description  Returns details for a single mailbox. The caller must have admin access to the mailbox domain.
+// @Tags         Mailboxes
+// @Produce      json
+// @Param        username  path      string  true  "Mailbox address (e.g. user@example.com)"
+// @Success      200       {object}  dto.MailboxResponse
+// @Failure      401       {object}  dto.APIResponse
+// @Failure      403       {object}  dto.APIResponse
+// @Failure      404       {object}  dto.APIResponse
+// @Failure      500       {object}  dto.APIResponse
+// @Router       /mailboxes/{username} [get]
+// @Security     BearerAuth
 func (h *Handler) GetMailboxV1(c *echo.Context) error {
 	claims := middleware.GetJWTClaims(c)
 	if claims == nil {
@@ -535,7 +572,22 @@ func (h *Handler) GetMailboxV1(c *echo.Context) error {
 	return dto.WriteSuccess(c, resp)
 }
 
-// UpdateMailboxV1 handles PUT /api/v1/mailboxes/:username
+// UpdateMailboxV1 godoc
+// @Summary      Update mailbox
+// @Description  Updates one or more fields of an existing mailbox. All fields are optional. Set change_password=true and supply password + password_confirm to reset the password.
+// @Tags         Mailboxes
+// @Accept       json
+// @Produce      json
+// @Param        username  path      string                   true  "Mailbox address (e.g. user@example.com)"
+// @Param        request   body      dto.UpdateMailboxRequest  true  "Fields to update"
+// @Success      200       {object}  dto.APIResponse
+// @Failure      400       {object}  dto.APIResponse
+// @Failure      401       {object}  dto.APIResponse
+// @Failure      403       {object}  dto.APIResponse
+// @Failure      404       {object}  dto.APIResponse
+// @Failure      500       {object}  dto.APIResponse
+// @Router       /mailboxes/{username} [put]
+// @Security     BearerAuth
 func (h *Handler) UpdateMailboxV1(c *echo.Context) error {
 	claims := middleware.GetJWTClaims(c)
 	if claims == nil {
@@ -614,7 +666,19 @@ func (h *Handler) UpdateMailboxV1(c *echo.Context) error {
 	return dto.WriteSuccess(c, map[string]bool{"updated": true})
 }
 
-// DeleteMailboxV1 handles DELETE /api/v1/mailboxes/:username
+// DeleteMailboxV1 godoc
+// @Summary      Delete mailbox
+// @Description  Permanently deletes a mailbox and its associated alias. Optionally cleans up the maildir on disk if server.cleanup_maildir is enabled.
+// @Tags         Mailboxes
+// @Produce      json
+// @Param        username  path      string  true  "Mailbox address (e.g. user@example.com)"
+// @Success      200       {object}  dto.APIResponse
+// @Failure      401       {object}  dto.APIResponse
+// @Failure      403       {object}  dto.APIResponse
+// @Failure      404       {object}  dto.APIResponse
+// @Failure      500       {object}  dto.APIResponse
+// @Router       /mailboxes/{username} [delete]
+// @Security     BearerAuth
 func (h *Handler) DeleteMailboxV1(c *echo.Context) error {
 	claims := middleware.GetJWTClaims(c)
 	if claims == nil {

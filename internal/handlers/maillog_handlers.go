@@ -89,7 +89,21 @@ func (h *Handler) MailLogData(c *echo.Context) error {
 	})
 }
 
-// MailLogV1 provides a clean modern API for maillog (for Vue/Quasar SPA)
+// MailLogV1 godoc
+// @Summary      List mail logs
+// @Description  Returns paginated SMTP mail log entries. Superadmins see all; domain admins see only their domains. Supports free-text search and sorting.
+// @Tags         Logs
+// @Produce      json
+// @Param        page      query     int     false  "Page number (default 1)"
+// @Param        per_page  query     int     false  "Items per page (default 25)"
+// @Param        search    query     string  false  "Free-text search across sender, recipient, host"
+// @Param        sort      query     string  false  "Sort field (default: tstamp)"
+// @Param        order     query     string  false  "Sort direction: asc or desc (default: desc)"
+// @Success      200       {object}  dto.PaginatedMailLogResponse
+// @Failure      401       {object}  dto.APIResponse
+// @Failure      500       {object}  dto.APIResponse
+// @Router       /maillog [get]
+// @Security     BearerAuth
 func (h *Handler) MailLogV1(c *echo.Context) error {
 	claims := middleware.GetJWTClaims(c)
 	if claims == nil {

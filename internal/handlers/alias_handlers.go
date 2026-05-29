@@ -287,7 +287,18 @@ func (h *Handler) DeleteAlias(c *echo.Context) error {
 // API v1 Alias Handlers (PR 07+)
 // =====================================================
 
-// ListAliasesV1 returns aliases visible to the authenticated user (JWT)
+// ListAliasesV1 godoc
+// @Summary      List aliases
+// @Description  Returns all aliases accessible to the authenticated admin. Superadmins see all; domain admins see only their domains. Use ?domain= to filter by domain.
+// @Tags         Aliases
+// @Produce      json
+// @Param        domain  query     string  false  "Filter by domain"
+// @Success      200     {array}   dto.AliasResponse
+// @Failure      401     {object}  dto.APIResponse
+// @Failure      403     {object}  dto.APIResponse
+// @Failure      500     {object}  dto.APIResponse
+// @Router       /aliases [get]
+// @Security     BearerAuth
 func (h *Handler) ListAliasesV1(c *echo.Context) error {
 	claims := middleware.GetJWTClaims(c)
 	if claims == nil {
@@ -319,7 +330,21 @@ func (h *Handler) ListAliasesV1(c *echo.Context) error {
 	return dto.WriteSuccess(c, response)
 }
 
-// CreateAliasV1 handles POST /api/v1/aliases
+// CreateAliasV1 godoc
+// @Summary      Create alias
+// @Description  Creates a new email alias. goto accepts multiple recipients separated by newlines or commas. The caller must have admin access to the target domain.
+// @Tags         Aliases
+// @Accept       json
+// @Produce      json
+// @Param        request  body      dto.CreateAliasRequest  true  "Alias data"
+// @Success      201      {object}  dto.APIResponse
+// @Failure      400      {object}  dto.APIResponse
+// @Failure      401      {object}  dto.APIResponse
+// @Failure      403      {object}  dto.APIResponse
+// @Failure      409      {object}  dto.APIResponse  "Alias already exists"
+// @Failure      500      {object}  dto.APIResponse
+// @Router       /aliases [post]
+// @Security     BearerAuth
 func (h *Handler) CreateAliasV1(c *echo.Context) error {
 	claims := middleware.GetJWTClaims(c)
 	if claims == nil {
@@ -408,7 +433,19 @@ func (h *Handler) CreateAliasV1(c *echo.Context) error {
 	return dto.WriteSuccessWithStatus(c, http.StatusCreated, map[string]string{"address": address})
 }
 
-// GetAliasV1 handles GET /api/v1/aliases/:address
+// GetAliasV1 godoc
+// @Summary      Get alias
+// @Description  Returns details for a single alias. The goto field is returned with recipients separated by newlines. The caller must have admin access to the alias domain.
+// @Tags         Aliases
+// @Produce      json
+// @Param        address  path      string  true  "Alias address (e.g. info@example.com)"
+// @Success      200      {object}  dto.AliasResponse
+// @Failure      401      {object}  dto.APIResponse
+// @Failure      403      {object}  dto.APIResponse
+// @Failure      404      {object}  dto.APIResponse
+// @Failure      500      {object}  dto.APIResponse
+// @Router       /aliases/{address} [get]
+// @Security     BearerAuth
 func (h *Handler) GetAliasV1(c *echo.Context) error {
 	claims := middleware.GetJWTClaims(c)
 	if claims == nil {
@@ -445,7 +482,22 @@ func (h *Handler) GetAliasV1(c *echo.Context) error {
 	return dto.WriteSuccess(c, alias)
 }
 
-// UpdateAliasV1 handles PUT /api/v1/aliases/:address
+// UpdateAliasV1 godoc
+// @Summary      Update alias
+// @Description  Updates the goto destinations and/or active state of an existing alias. All fields are optional.
+// @Tags         Aliases
+// @Accept       json
+// @Produce      json
+// @Param        address  path      string                  true  "Alias address (e.g. info@example.com)"
+// @Param        request  body      dto.UpdateAliasRequest  true  "Fields to update"
+// @Success      200      {object}  dto.APIResponse
+// @Failure      400      {object}  dto.APIResponse
+// @Failure      401      {object}  dto.APIResponse
+// @Failure      403      {object}  dto.APIResponse
+// @Failure      404      {object}  dto.APIResponse
+// @Failure      500      {object}  dto.APIResponse
+// @Router       /aliases/{address} [put]
+// @Security     BearerAuth
 func (h *Handler) UpdateAliasV1(c *echo.Context) error {
 	claims := middleware.GetJWTClaims(c)
 	if claims == nil {
@@ -508,7 +560,19 @@ func (h *Handler) UpdateAliasV1(c *echo.Context) error {
 	return dto.WriteSuccess(c, map[string]bool{"updated": true})
 }
 
-// DeleteAliasV1 handles DELETE /api/v1/aliases/:address
+// DeleteAliasV1 godoc
+// @Summary      Delete alias
+// @Description  Permanently deletes an alias. The caller must have admin access to the alias domain.
+// @Tags         Aliases
+// @Produce      json
+// @Param        address  path      string  true  "Alias address (e.g. info@example.com)"
+// @Success      200      {object}  dto.APIResponse
+// @Failure      401      {object}  dto.APIResponse
+// @Failure      403      {object}  dto.APIResponse
+// @Failure      404      {object}  dto.APIResponse
+// @Failure      500      {object}  dto.APIResponse
+// @Router       /aliases/{address} [delete]
+// @Security     BearerAuth
 func (h *Handler) DeleteAliasV1(c *echo.Context) error {
 	claims := middleware.GetJWTClaims(c)
 	if claims == nil {

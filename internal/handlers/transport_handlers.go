@@ -150,7 +150,17 @@ func (h *Handler) DeleteTransport(c *echo.Context) error {
 // Note: Transports are superadmin-only
 // =====================================================
 
-// ListTransportsV1 returns all transports (superadmin only)
+// ListTransportsV1 godoc
+// @Summary      List transports
+// @Description  Returns all transport entries. Restricted to superadmins only.
+// @Tags         Transports
+// @Produce      json
+// @Success      200  {array}   dto.TransportResponse
+// @Failure      401  {object}  dto.APIResponse
+// @Failure      403  {object}  dto.APIResponse  "Superadmin required"
+// @Failure      500  {object}  dto.APIResponse
+// @Router       /transports [get]
+// @Security     BearerAuth
 func (h *Handler) ListTransportsV1(c *echo.Context) error {
 	claims := middleware.GetJWTClaims(c)
 	if claims == nil {
@@ -180,7 +190,20 @@ func (h *Handler) ListTransportsV1(c *echo.Context) error {
 	return dto.WriteSuccess(c, response)
 }
 
-// CreateTransportV1 handles POST /api/v1/transports
+// CreateTransportV1 godoc
+// @Summary      Create transport
+// @Description  Creates a new transport rule. Restricted to superadmins only. transport value follows Postfix format, e.g. "smtp:[relay.example.com]:25".
+// @Tags         Transports
+// @Accept       json
+// @Produce      json
+// @Param        request  body      dto.CreateTransportRequest  true  "Transport data"
+// @Success      201      {object}  dto.APIResponse
+// @Failure      400      {object}  dto.APIResponse
+// @Failure      401      {object}  dto.APIResponse
+// @Failure      403      {object}  dto.APIResponse  "Superadmin required"
+// @Failure      500      {object}  dto.APIResponse
+// @Router       /transports [post]
+// @Security     BearerAuth
 func (h *Handler) CreateTransportV1(c *echo.Context) error {
 	claims := middleware.GetJWTClaims(c)
 	if claims == nil {
@@ -214,7 +237,20 @@ func (h *Handler) CreateTransportV1(c *echo.Context) error {
 	return dto.WriteSuccessWithStatus(c, http.StatusCreated, map[string]int{"id": 0}) // ID will be auto-generated
 }
 
-// GetTransportV1 handles GET /api/v1/transports/:id
+// GetTransportV1 godoc
+// @Summary      Get transport
+// @Description  Returns details for a single transport entry by numeric ID. Restricted to superadmins only.
+// @Tags         Transports
+// @Produce      json
+// @Param        id   path      int     true  "Transport ID"
+// @Success      200  {object}  dto.TransportResponse
+// @Failure      400  {object}  dto.APIResponse  "Invalid ID"
+// @Failure      401  {object}  dto.APIResponse
+// @Failure      403  {object}  dto.APIResponse  "Superadmin required"
+// @Failure      404  {object}  dto.APIResponse
+// @Failure      500  {object}  dto.APIResponse
+// @Router       /transports/{id} [get]
+// @Security     BearerAuth
 func (h *Handler) GetTransportV1(c *echo.Context) error {
 	claims := middleware.GetJWTClaims(c)
 	if claims == nil {
@@ -238,7 +274,22 @@ func (h *Handler) GetTransportV1(c *echo.Context) error {
 	return dto.WriteSuccess(c, transport)
 }
 
-// UpdateTransportV1 handles PUT /api/v1/transports/:id
+// UpdateTransportV1 godoc
+// @Summary      Update transport
+// @Description  Updates domain, transport string and/or active state of an existing transport entry. All fields are optional. Restricted to superadmins only.
+// @Tags         Transports
+// @Accept       json
+// @Produce      json
+// @Param        id       path      int                         true  "Transport ID"
+// @Param        request  body      dto.UpdateTransportRequest  true  "Fields to update"
+// @Success      200      {object}  dto.APIResponse
+// @Failure      400      {object}  dto.APIResponse
+// @Failure      401      {object}  dto.APIResponse
+// @Failure      403      {object}  dto.APIResponse  "Superadmin required"
+// @Failure      404      {object}  dto.APIResponse
+// @Failure      500      {object}  dto.APIResponse
+// @Router       /transports/{id} [put]
+// @Security     BearerAuth
 func (h *Handler) UpdateTransportV1(c *echo.Context) error {
 	claims := middleware.GetJWTClaims(c)
 	if claims == nil {
@@ -280,7 +331,19 @@ func (h *Handler) UpdateTransportV1(c *echo.Context) error {
 	return dto.WriteSuccess(c, map[string]bool{"updated": true})
 }
 
-// DeleteTransportV1 handles DELETE /api/v1/transports/:id
+// DeleteTransportV1 godoc
+// @Summary      Delete transport
+// @Description  Permanently deletes a transport entry. Restricted to superadmins only.
+// @Tags         Transports
+// @Produce      json
+// @Param        id   path      int     true  "Transport ID"
+// @Success      200  {object}  dto.APIResponse
+// @Failure      400  {object}  dto.APIResponse  "Invalid ID"
+// @Failure      401  {object}  dto.APIResponse
+// @Failure      403  {object}  dto.APIResponse  "Superadmin required"
+// @Failure      500  {object}  dto.APIResponse
+// @Router       /transports/{id} [delete]
+// @Security     BearerAuth
 func (h *Handler) DeleteTransportV1(c *echo.Context) error {
 	claims := middleware.GetJWTClaims(c)
 	if claims == nil {

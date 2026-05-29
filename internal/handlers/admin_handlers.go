@@ -237,7 +237,16 @@ func (h *Handler) EditAdminAPI(c *echo.Context) error {
 // API v1 Admin Handlers (PR 09+)
 // =====================================================
 
-// ListAdminsV1 returns admins visible to the authenticated user
+// ListAdminsV1 godoc
+// @Summary      List admins
+// @Description  Returns all administrators. Superadmins see all; regular admins see only themselves.
+// @Tags         Admins
+// @Produce      json
+// @Success      200  {array}   dto.AdminResponse
+// @Failure      401  {object}  dto.APIResponse
+// @Failure      500  {object}  dto.APIResponse
+// @Router       /admins [get]
+// @Security     BearerAuth
 func (h *Handler) ListAdminsV1(c *echo.Context) error {
 	claims := middleware.GetJWTClaims(c)
 	if claims == nil {
@@ -271,7 +280,21 @@ func (h *Handler) ListAdminsV1(c *echo.Context) error {
 	return dto.WriteSuccess(c, response)
 }
 
-// CreateAdminV1 handles POST /api/v1/admins
+// CreateAdminV1 godoc
+// @Summary      Create admin
+// @Description  Creates a new administrator. Only superadmins can call this endpoint. Supply domains[] to assign domain access (ignored for superadmins).
+// @Tags         Admins
+// @Accept       json
+// @Produce      json
+// @Param        request  body      dto.CreateAdminRequest  true  "Admin data"
+// @Success      201      {object}  dto.APIResponse
+// @Failure      400      {object}  dto.APIResponse
+// @Failure      401      {object}  dto.APIResponse
+// @Failure      403      {object}  dto.APIResponse  "Superadmin required"
+// @Failure      409      {object}  dto.APIResponse  "Admin already exists"
+// @Failure      500      {object}  dto.APIResponse
+// @Router       /admins [post]
+// @Security     BearerAuth
 func (h *Handler) CreateAdminV1(c *echo.Context) error {
 	claims := middleware.GetJWTClaims(c)
 	if claims == nil {
@@ -322,7 +345,19 @@ func (h *Handler) CreateAdminV1(c *echo.Context) error {
 	return dto.WriteSuccessWithStatus(c, http.StatusCreated, map[string]string{"username": req.Username})
 }
 
-// GetAdminV1 handles GET /api/v1/admins/:username
+// GetAdminV1 godoc
+// @Summary      Get admin
+// @Description  Returns details for a single administrator plus the full list of domains with assignment flags. Non-superadmins can only view themselves.
+// @Tags         Admins
+// @Produce      json
+// @Param        username  path      string  true  "Admin username (e.g. admin@example.com)"
+// @Success      200       {object}  dto.AdminDetailResponse
+// @Failure      401       {object}  dto.APIResponse
+// @Failure      403       {object}  dto.APIResponse
+// @Failure      404       {object}  dto.APIResponse
+// @Failure      500       {object}  dto.APIResponse
+// @Router       /admins/{username} [get]
+// @Security     BearerAuth
 func (h *Handler) GetAdminV1(c *echo.Context) error {
 	claims := middleware.GetJWTClaims(c)
 	if claims == nil {
@@ -352,22 +387,47 @@ func (h *Handler) GetAdminV1(c *echo.Context) error {
 		assignedMap[da.Domain] = true
 	}
 
-	type DomainOption struct {
-		Domain   string `json:"domain"`
-		Assigned bool   `json:"assigned"`
-	}
-	var domainOptions []DomainOption
-	for _, d := range allDomains {
-		domainOptions = append(domainOptions, DomainOption{Domain: d.Domain, Assigned: assignedMap[d.Domain]})
+	var domainCountStr string
+	if admin.Superadmin {
+		domainCountStr = "ALL"
+	} else {
+		count, _ := repositories.CountAdminDomains(h.DB, targetUsername)
+		domainCountStr = fmt.Sprintf("%d", count)
 	}
 
-	return dto.WriteSuccess(c, map[string]interface{}{
-		"admin":   admin,
-		"domains": domainOptions,
+	var domainOptions []dto.AdminDomainOption
+	for _, d := range allDomains {
+		domainOptions = append(domainOptions, dto.AdminDomainOption{Domain: d.Domain, Assigned: assignedMap[d.Domain]})
+	}
+
+	return dto.WriteSuccess(c, dto.AdminDetailResponse{
+		Admin: dto.AdminResponse{
+			Username:    admin.Username,
+			Active:      admin.Active,
+			Superadmin:  admin.Superadmin,
+			Created:     admin.Created,
+			Modified:    admin.Modified,
+			DomainCount: domainCountStr,
+		},
+		Domains: domainOptions,
 	})
 }
 
-// UpdateAdminV1 handles PUT /api/v1/admins/:username
+// UpdateAdminV1 godoc
+// @Summary      Update admin
+// @Description  Updates an existing administrator. Superadmins can change active/superadmin flags and domain assignments. Any admin can change their own password via change_password=true.
+// @Tags         Admins
+// @Accept       json
+// @Produce      json
+// @Param        username  path      string                   true  "Admin username (e.g. admin@example.com)"
+// @Param        request   body      dto.UpdateAdminRequest   true  "Fields to update"
+// @Success      200       {object}  dto.APIResponse
+// @Failure      400       {object}  dto.APIResponse
+// @Failure      401       {object}  dto.APIResponse
+// @Failure      403       {object}  dto.APIResponse
+// @Failure      500       {object}  dto.APIResponse
+// @Router       /admins/{username} [put]
+// @Security     BearerAuth
 func (h *Handler) UpdateAdminV1(c *echo.Context) error {
 	claims := middleware.GetJWTClaims(c)
 	if claims == nil {
@@ -426,7 +486,19 @@ func (h *Handler) UpdateAdminV1(c *echo.Context) error {
 	return dto.WriteSuccess(c, map[string]bool{"updated": true})
 }
 
-// DeleteAdminV1 handles DELETE /api/v1/admins/:username
+// DeleteAdminV1 godoc
+// @Summary      Delete admin
+// @Description  Permanently deletes an administrator. Only superadmins can call this endpoint.
+// @Tags         Admins
+// @Produce      json
+// @Param        username  path      string  true  "Admin username (e.g. admin@example.com)"
+// @Success      200       {object}  dto.APIResponse
+// @Failure      401       {object}  dto.APIResponse
+// @Failure      403       {object}  dto.APIResponse  "Superadmin required"
+// @Failure      404       {object}  dto.APIResponse
+// @Failure      500       {object}  dto.APIResponse
+// @Router       /admins/{username} [delete]
+// @Security     BearerAuth
 func (h *Handler) DeleteAdminV1(c *echo.Context) error {
 	claims := middleware.GetJWTClaims(c)
 	if claims == nil {

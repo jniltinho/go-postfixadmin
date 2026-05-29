@@ -84,7 +84,24 @@ func (h *Handler) LogsData(c *echo.Context) error {
 	})
 }
 
-// LogsV1 provides a clean modern API for admin action logs (for Vue/Quasar SPA)
+// LogsV1 godoc
+// @Summary      List admin action logs
+// @Description  Returns paginated admin action logs. Superadmins see all; domain admins see only their domains. Supports filtering by admin, domain, action, and free-text search.
+// @Tags         Logs
+// @Produce      json
+// @Param        page      query     int     false  "Page number (default 1)"
+// @Param        per_page  query     int     false  "Items per page (default 25)"
+// @Param        search    query     string  false  "Free-text search"
+// @Param        admin     query     string  false  "Filter by admin username"
+// @Param        domain    query     string  false  "Filter by domain"
+// @Param        action    query     string  false  "Filter by action"
+// @Param        sort      query     string  false  "Sort field (default: timestamp)"
+// @Param        order     query     string  false  "Sort direction: asc or desc (default: desc)"
+// @Success      200       {object}  dto.PaginatedLogResponse
+// @Failure      401       {object}  dto.APIResponse
+// @Failure      500       {object}  dto.APIResponse
+// @Router       /logs [get]
+// @Security     BearerAuth
 func (h *Handler) LogsV1(c *echo.Context) error {
 	claims := middleware.GetJWTClaims(c)
 	if claims == nil {

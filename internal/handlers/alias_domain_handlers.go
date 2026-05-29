@@ -254,7 +254,16 @@ func (h *Handler) EditAliasDomainAPI(c *echo.Context) error {
 // API v1 Alias Domain Handlers (PR 08+)
 // =====================================================
 
-// ListAliasDomainsV1 returns alias domains visible to the authenticated user
+// ListAliasDomainsV1 godoc
+// @Summary      List alias domains
+// @Description  Returns all alias domains. Superadmins see all; domain admins see only those where target_domain is in their scope.
+// @Tags         Alias Domains
+// @Produce      json
+// @Success      200  {array}   dto.AliasDomainResponse
+// @Failure      401  {object}  dto.APIResponse
+// @Failure      500  {object}  dto.APIResponse
+// @Router       /alias-domains [get]
+// @Security     BearerAuth
 func (h *Handler) ListAliasDomainsV1(c *echo.Context) error {
 	claims := middleware.GetJWTClaims(c)
 	if claims == nil {
@@ -280,7 +289,21 @@ func (h *Handler) ListAliasDomainsV1(c *echo.Context) error {
 	return dto.WriteSuccess(c, response)
 }
 
-// CreateAliasDomainV1 handles POST /api/v1/alias-domains
+// CreateAliasDomainV1 godoc
+// @Summary      Create alias domain
+// @Description  Creates an alias domain that redirects all mail to a target domain. Both alias_domain and target_domain must differ; target_domain must already exist.
+// @Tags         Alias Domains
+// @Accept       json
+// @Produce      json
+// @Param        request  body      dto.CreateAliasDomainRequest  true  "Alias domain data"
+// @Success      201      {object}  dto.APIResponse
+// @Failure      400      {object}  dto.APIResponse
+// @Failure      401      {object}  dto.APIResponse
+// @Failure      403      {object}  dto.APIResponse
+// @Failure      409      {object}  dto.APIResponse  "Alias domain already exists"
+// @Failure      500      {object}  dto.APIResponse
+// @Router       /alias-domains [post]
+// @Security     BearerAuth
 func (h *Handler) CreateAliasDomainV1(c *echo.Context) error {
 	claims := middleware.GetJWTClaims(c)
 	if claims == nil {
@@ -340,7 +363,19 @@ func (h *Handler) CreateAliasDomainV1(c *echo.Context) error {
 	return dto.WriteSuccessWithStatus(c, http.StatusCreated, map[string]string{"alias_domain": req.AliasDomain})
 }
 
-// GetAliasDomainV1 handles GET /api/v1/alias-domains/:alias_domain
+// GetAliasDomainV1 godoc
+// @Summary      Get alias domain
+// @Description  Returns details for a single alias domain. The caller must have admin access to the target domain.
+// @Tags         Alias Domains
+// @Produce      json
+// @Param        alias_domain  path      string  true  "Alias domain name (e.g. alias.com)"
+// @Success      200           {object}  dto.AliasDomainResponse
+// @Failure      401           {object}  dto.APIResponse
+// @Failure      403           {object}  dto.APIResponse
+// @Failure      404           {object}  dto.APIResponse
+// @Failure      500           {object}  dto.APIResponse
+// @Router       /alias-domains/{alias_domain} [get]
+// @Security     BearerAuth
 func (h *Handler) GetAliasDomainV1(c *echo.Context) error {
 	claims := middleware.GetJWTClaims(c)
 	if claims == nil {
@@ -375,7 +410,22 @@ func (h *Handler) GetAliasDomainV1(c *echo.Context) error {
 	return dto.WriteSuccess(c, aliasDomain)
 }
 
-// UpdateAliasDomainV1 handles PUT /api/v1/alias-domains/:alias_domain
+// UpdateAliasDomainV1 godoc
+// @Summary      Update alias domain
+// @Description  Updates the target domain and/or active state of an existing alias domain. All fields are optional.
+// @Tags         Alias Domains
+// @Accept       json
+// @Produce      json
+// @Param        alias_domain  path      string                        true  "Alias domain name (e.g. alias.com)"
+// @Param        request       body      dto.UpdateAliasDomainRequest  true  "Fields to update"
+// @Success      200           {object}  dto.APIResponse
+// @Failure      400           {object}  dto.APIResponse
+// @Failure      401           {object}  dto.APIResponse
+// @Failure      403           {object}  dto.APIResponse
+// @Failure      404           {object}  dto.APIResponse
+// @Failure      500           {object}  dto.APIResponse
+// @Router       /alias-domains/{alias_domain} [put]
+// @Security     BearerAuth
 func (h *Handler) UpdateAliasDomainV1(c *echo.Context) error {
 	claims := middleware.GetJWTClaims(c)
 	if claims == nil {
@@ -445,7 +495,19 @@ func (h *Handler) UpdateAliasDomainV1(c *echo.Context) error {
 	return dto.WriteSuccess(c, map[string]bool{"updated": true})
 }
 
-// DeleteAliasDomainV1 handles DELETE /api/v1/alias-domains/:alias_domain
+// DeleteAliasDomainV1 godoc
+// @Summary      Delete alias domain
+// @Description  Permanently deletes an alias domain. The caller must have admin access to the target domain.
+// @Tags         Alias Domains
+// @Produce      json
+// @Param        alias_domain  path      string  true  "Alias domain name (e.g. alias.com)"
+// @Success      200           {object}  dto.APIResponse
+// @Failure      401           {object}  dto.APIResponse
+// @Failure      403           {object}  dto.APIResponse
+// @Failure      404           {object}  dto.APIResponse
+// @Failure      500           {object}  dto.APIResponse
+// @Router       /alias-domains/{alias_domain} [delete]
+// @Security     BearerAuth
 func (h *Handler) DeleteAliasDomainV1(c *echo.Context) error {
 	claims := middleware.GetJWTClaims(c)
 	if claims == nil {

@@ -418,7 +418,22 @@ func (h *Handler) GetDomainV1(c *echo.Context) error {
 	return dto.WriteSuccess(c, resp)
 }
 
-// UpdateDomainV1 handles PUT /api/v1/domains/:domain
+// UpdateDomainV1 godoc
+// @Summary      Update domain
+// @Description  Updates one or more fields of an existing domain. All fields are optional. Only superadmins can update domains.
+// @Tags         Domains
+// @Accept       json
+// @Produce      json
+// @Param        domain   path      string                   true  "Domain name (e.g. example.com)"
+// @Param        request  body      dto.UpdateDomainRequest  true  "Fields to update"
+// @Success      200      {object}  dto.APIResponse
+// @Failure      400      {object}  dto.APIResponse
+// @Failure      401      {object}  dto.APIResponse
+// @Failure      403      {object}  dto.APIResponse  "Superadmin required"
+// @Failure      404      {object}  dto.APIResponse
+// @Failure      500      {object}  dto.APIResponse
+// @Router       /domains/{domain} [put]
+// @Security     BearerAuth
 func (h *Handler) UpdateDomainV1(c *echo.Context) error {
 	claims := middleware.GetJWTClaims(c)
 	if claims == nil {

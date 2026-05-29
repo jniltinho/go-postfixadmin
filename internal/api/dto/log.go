@@ -26,11 +26,29 @@ type MailLogEntryResponse struct {
 
 // PaginatedResponse is a generic wrapper for paginated results
 type PaginatedResponse[T any] struct {
-	Data       []T   `json:"data"`
-	Total      int64 `json:"total"`
-	Filtered   int64 `json:"filtered"`
-	Page       int   `json:"page"`
-	PerPage    int   `json:"per_page"`
+	Data     []T   `json:"data"`
+	Total    int64 `json:"total"`
+	Filtered int64 `json:"filtered"`
+	Page     int   `json:"page"`
+	PerPage  int   `json:"per_page"`
+}
+
+// PaginatedLogResponse is the concrete paginated response for admin action logs (used in swagger docs)
+type PaginatedLogResponse struct {
+	Data     []LogEntryResponse `json:"data"`
+	Total    int64              `json:"total"    example:"150"`
+	Filtered int64              `json:"filtered" example:"42"`
+	Page     int                `json:"page"     example:"1"`
+	PerPage  int                `json:"per_page" example:"25"`
+}
+
+// PaginatedMailLogResponse is the concrete paginated response for mail logs (used in swagger docs)
+type PaginatedMailLogResponse struct {
+	Data     []MailLogEntryResponse `json:"data"`
+	Total    int64                  `json:"total"    example:"5000"`
+	Filtered int64                  `json:"filtered" example:"120"`
+	Page     int                    `json:"page"     example:"1"`
+	PerPage  int                    `json:"per_page" example:"25"`
 }
 
 // DashboardStatsResponse for GET /api/v1/dashboard
