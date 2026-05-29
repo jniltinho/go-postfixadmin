@@ -72,7 +72,7 @@
 
     <!-- ══════════ GENERATE MODAL ══════════ -->
     <div v-if="showAdd" class="modal-overlay" @click.self="showAdd = false">
-      <div class="bg-white border-4 border-brand-text w-full max-w-2xl max-h-[90vh] flex flex-col">
+      <div class="bg-white border-2 border-brand-text w-full max-w-2xl max-h-[90vh] flex flex-col">
         <!-- Header (blue bar) -->
         <div class="bg-brand-primary px-6 py-4 flex items-center justify-between flex-shrink-0" style="border-bottom: 2px solid #1e293b;">
           <h3 class="text-lg font-mono font-black uppercase tracking-tight text-white flex items-center">
@@ -155,7 +155,7 @@
 
     <!-- ══════════ KEY CREATED SUCCESS MODAL ══════════ -->
     <div v-if="showSuccessModal" class="modal-overlay" @click.self="showSuccessModal = false">
-      <div class="bg-white border-4 border-brand-text w-full max-w-xl max-h-[90vh] flex flex-col">
+      <div class="bg-white border-2 border-brand-text w-full max-w-xl max-h-[90vh] flex flex-col">
         <!-- Header (emerald green success bar) -->
         <div class="bg-emerald-600 px-6 py-4 flex items-center justify-between flex-shrink-0" style="border-bottom: 2px solid #1e293b;">
           <h3 class="text-lg font-mono font-black uppercase tracking-tight text-white flex items-center">

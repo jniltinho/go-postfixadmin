@@ -1,7 +1,7 @@
 @import './fonts.css';
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   Tailwind CSS v4 + Neo-Brutalist Design System
+   Tailwind CSS v4 + Design System
    ═══════════════════════════════════════════════════════════════════════════ */
 @import "tailwindcss";
 
@@ -239,7 +239,7 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   NEO-BRUTALIST ADMIN UI PRIMITIVES (Centralized - Tailwind friendly)
+   ADMIN UI PRIMITIVES (Centralized - Tailwind friendly)
    All repeated patterns from pages moved here after Quasar removal.
    ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -365,7 +365,7 @@ body {
   background: transparent;
 }
 
-/* ─── Modal (fallback for pages not yet using BrutalModal) ───────────────── */
+/* ─── Modal Primitives ───────────────────────────────────────────────────── */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -378,25 +378,25 @@ body {
 }
 .modal-card {
   background: #fff;
-  border: 3px solid #1e293b;
+  border: 2px solid #1e293b;
   width: 100%;
   max-width: 520px;
   max-height: 90vh;
   overflow: auto;
 }
-.modal-card-sm { max-width: 420px; }
+
 .modal-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
-  border-bottom: 3px solid #1e293b;
+  border-bottom: 2px solid #1e293b;
   background: #f8fafc;
   font-weight: 900;
   font-size: 13px;
   letter-spacing: 0.5px;
 }
-.modal-head-danger { background: #fef2f2; }
+
 .modal-close {
   width: 26px; height: 26px;
   display: flex; align-items: center; justify-content: center;
@@ -412,8 +412,7 @@ body {
 }
 
 /* ─── Global Table Primitives (match reference visual from 8081) ─────────── */
-.data-table,
-.activity-table {
+.data-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 12.5px;
@@ -606,7 +605,7 @@ tbody tr:hover {
   margin-top: 0;
 }
 
-/* ─── Big Brutalist Add Button ─── */
+/* ─── Big Add Button ─── */
 .btn-add-big {
   background-color: var(--color-brand-primary);
   color: #ffffff;
@@ -688,9 +687,3 @@ tbody tr:hover {
   color: #ffffff !important;
   border-color: #3b82f6 !important;
 }
-
-/* ==========================================================================
-   DataTables.net (datatables.net-vue3) — Neo-Brutalist Theme
-   Exact match to the original server (8081) look from projeto_base templates
-   ========================================================================== */
-@import './css/datatables-theme.css';

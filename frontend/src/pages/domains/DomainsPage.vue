@@ -59,7 +59,7 @@
 
     <!-- ══════════ ADD DOMAIN MODAL (exact pattern from form_add_domain.html) ══════════ -->
     <div v-if="showAdd" class="modal-overlay" @click.self="closeAddDomain">
-      <div class="bg-white border-4 border-brand-text w-full max-w-2xl max-h-[90vh] flex flex-col">
+      <div class="bg-white border-2 border-brand-text w-full max-w-2xl max-h-[90vh] flex flex-col">
         <!-- Header -->
         <div class="bg-brand-primary px-6 py-4 flex items-center justify-between flex-shrink-0">
           <h3 class="text-lg font-mono font-black uppercase tracking-tight text-white flex items-center">
@@ -182,7 +182,7 @@
 
     <!-- ══════════ EDIT DOMAIN MODAL (exact pattern from form_edit_domain.html) ══════════ -->
     <div v-if="showEdit" class="modal-overlay" @click.self="closeEditDomain">
-      <div class="bg-white border-4 border-brand-text w-full max-w-2xl max-h-[90vh] flex flex-col">
+      <div class="bg-white border-2 border-brand-text w-full max-w-2xl max-h-[90vh] flex flex-col">
         <!-- Header -->
         <div class="bg-brand-primary px-6 py-4 flex items-center justify-between flex-shrink-0">
           <h3 class="text-lg font-mono font-black uppercase tracking-tight text-white flex items-center">

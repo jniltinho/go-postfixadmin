@@ -57,7 +57,7 @@
 
     <!-- ══════════ ADD MODAL (from zero - exact structure from form_add_mailbox.html) ══════════ -->
     <div v-if="showAdd" class="modal-overlay" @click.self="closeAdd">
-      <div class="bg-white border-4 border-brand-text w-full max-w-2xl max-h-[90vh] flex flex-col">
+      <div class="bg-white border-2 border-brand-text w-full max-w-2xl max-h-[90vh] flex flex-col">
         <!-- Header (exact blue bar from reference) -->
         <div class="bg-brand-primary px-6 py-4 flex items-center justify-between flex-shrink-0">
           <h3 class="text-lg font-mono font-black uppercase tracking-tight text-white flex items-center">
@@ -268,7 +268,7 @@
 
     <!-- ══════════ EDIT MODAL ══════════ -->
     <div v-if="showEdit" class="modal-overlay" @click.self="showEdit = false">
-      <div class="modal-card" style="border: 4px solid #1e293b; max-width: 720px;">
+      <div class="modal-card" style="border: 2px solid #1e293b; max-width: 720px;">
         <!-- Blue header bar like the old template -->
         <div class="bg-brand-primary px-6 py-4 flex items-center justify-between flex-shrink-0" style="border-bottom: 2px solid #1e293b;">
           <h3 class="text-lg font-mono font-black uppercase tracking-tight text-white flex items-center">

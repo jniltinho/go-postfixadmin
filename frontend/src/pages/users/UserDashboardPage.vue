@@ -58,7 +58,7 @@
         </div>
 
         <!-- User Info Card -->
-        <div class="bg-white border-4 border-brand-text neo-shadow px-8 py-5 mb-8">
+        <div class="bg-white border-2 border-brand-text neo-shadow px-8 py-5 mb-8">
           <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div class="flex items-center">
               <div class="w-16 h-16 bg-brand-secondary border-2 border-brand-text flex items-center justify-center text-white mr-6 shrink-0">
@@ -87,7 +87,7 @@
         <!-- Settings Cards Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <!-- Configure Forwarding Card -->
-          <div class="bg-white border-4 border-brand-text neo-shadow p-8 h-full flex flex-col">
+          <div class="bg-white border-2 border-brand-text neo-shadow p-8 h-full flex flex-col">
             <h3 class="text-xl font-mono font-black uppercase tracking-tight text-brand-text mb-6 flex items-center">
               <Icon name="corner-up-right" :size="20" class="mr-2 text-brand-text" />
               {{ t.forwardingTitle }}
@@ -122,7 +122,7 @@
           </div>
 
           <!-- Change Password Card -->
-          <div class="bg-white border-4 border-brand-text neo-shadow p-8 h-full flex flex-col">
+          <div class="bg-white border-2 border-brand-text neo-shadow p-8 h-full flex flex-col">
             <h3 class="text-xl font-mono font-black uppercase tracking-tight text-brand-text mb-6 flex items-center">
               <Icon name="key" :size="20" class="mr-2 text-brand-text" />
               {{ t.passwordTitle }}
