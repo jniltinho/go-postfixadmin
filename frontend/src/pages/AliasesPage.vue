@@ -2,12 +2,12 @@
   <div class="alias-page">
 
     <!-- ─── Header ─── -->
-    <div class="page-header">
+    <div class="dom-header">
       <div>
-        <div class="page-title">ALIASES</div>
-        <div class="page-subtitle">MANAGE EMAIL ALIASES</div>
+        <div class="dom-title">ALIASES</div>
+        <div class="dom-subtitle">MANAGE EMAIL ALIASES</div>
       </div>
-      <button class="btn-add-alias" @click="openAdd">
+      <button class="btn-add-big" @click="openAdd">
         <Icon name="plus-circle" :size="20" style="margin-right:12px;vertical-align:middle" />
         ADD ALIAS
       </button>
@@ -28,15 +28,100 @@
       <a v-if="domainFilter" class="ml-4 text-xs font-bold text-red-500 hover:underline cursor-pointer" @click="domainFilter = ''; onFilterChange()">Clear Filter</a>
     </div>
 
-    <!-- ─── Real DataTables (datatables.net-vue3) — exact visual match to 8081 server ─── -->
+    <!-- ─── Table card ─── -->
     <div class="table-card">
-      <BrutalDataTable
-        :data="dtRows"
-        :columns="dtColumns"
-        :language="'EN'"
-        :page-length="15"
-        @draw="onDataTableDraw"
-      />
+
+      <!-- Controls row -->
+      <div class="table-topbar">
+        <div class="controls-left">
+          <div class="per-page-wrap">
+            <select v-model="rowsPerPage" class="ctrl-select" @change="currentPage = 1">
+              <option :value="10">10</option>
+              <option :value="15">15</option>
+              <option :value="25">25</option>
+              <option :value="50">50</option>
+            </select>
+            <span class="ctrl-label">entries per page</span>
+          </div>
+        </div>
+        <div class="controls-right">
+          <span class="ctrl-label">Search:</span>
+          <input v-model="search" class="search-input" placeholder="Search records..." @input="currentPage = 1" />
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr class="table-head-row">
+              <th v-for="col in columns" :key="col.key" class="table-th" @click="sortBy(col.key)">
+                {{ col.label }}
+                <span class="sort-arrows">
+                  <span :class="{ 'sort-active': sortKey === col.key && sortDir === 'asc' }">▲</span>
+                  <span :class="{ 'sort-active': sortKey === col.key && sortDir === 'desc' }">▼</span>
+                </span>
+              </th>
+              <th class="table-th">ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="loading">
+              <td :colspan="columns.length + 1" class="table-loading">
+                <div class="spinner mx-auto" />
+              </td>
+            </tr>
+            <tr v-else-if="pagedRows.length === 0">
+              <td :colspan="columns.length + 1" class="table-empty">No records found</td>
+            </tr>
+            <tr v-for="row in pagedRows" :key="row.address" class="table-row">
+              <td class="table-td td-link">
+                <div class="cell-with-icon">
+                  <Icon name="arrow-left-right" :size="14" class="row-icon" />
+                  {{ row.address }}
+                </div>
+              </td>
+              <td class="table-td mono" style="word-break: break-all;">{{ row.goto }}</td>
+              <td class="table-td mono">{{ row.domain }}</td>
+              <td class="table-td">
+                <span :class="row.active ? 'badge-yes' : 'badge-no'">{{ row.active ? 'YES' : 'NO' }}</span>
+              </td>
+              <td class="table-td">{{ formatDate(row.modified) }}</td>
+              <td class="table-td actions-td">
+                <button class="act-btn act-edit" @click="openEdit(row)">
+                  <Icon name="pencil" :size="12" style="margin-right:4px;vertical-align:middle" />EDIT
+                </button>
+                <button class="act-btn act-del" @click="confirmDelete(row)">
+                  <Icon name="trash-2" :size="12" style="margin-right:4px;vertical-align:middle" />DELETE
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Footer -->
+      <div class="table-footer">
+        <div class="showing-text">
+          <template v-if="filteredRows.length === 0">Showing 0 entries</template>
+          <template v-else>
+            Showing {{ (currentPage - 1) * rowsPerPage + 1 }} to
+            {{ Math.min(currentPage * rowsPerPage, filteredRows.length) }} of
+            {{ filteredRows.length }} entries
+          </template>
+        </div>
+        <div class="pagination">
+          <button class="pg-btn" :disabled="currentPage === 1" @click="currentPage = 1">FIRST</button>
+          <button class="pg-btn" :disabled="currentPage === 1" @click="currentPage--">PREVIOUS</button>
+          <button
+            v-for="p in pageButtons" :key="p"
+            class="pg-btn" :class="{ 'pg-active': p === currentPage }"
+            @click="currentPage = p"
+          >{{ p }}</button>
+          <button class="pg-btn" :disabled="currentPage === totalPages" @click="currentPage++">NEXT</button>
+          <button class="pg-btn" :disabled="currentPage === totalPages" @click="currentPage = totalPages">LAST</button>
+        </div>
+      </div>
     </div>
 
     <!-- ══════════ ADD ALIAS MODAL (exact pattern from mailbox + form_add_alias.html) ══════════ -->
@@ -434,264 +519,43 @@ async function submitDelete() {
   } finally { deletingRow.value = false }
 }
 
-// =============================================
-// DataTables.net-vue3 integration (exact match to 8081 old server)
-// =============================================
-const dtRows = computed(() => {
-  // DataTables receives the already filtered + searched data
-  return filteredRows.value
-})
-
-const dtColumns = [
-  {
-    data: 'address',
-    title: 'ALIAS',
-    className: 'text-xs py-1 px-2 font-medium',
-    render: (data: string) => `
-      <div style="display:flex;align-items:center;gap:6px">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><polyline points="15 17 20 12 15 7"/><path d="M4 18v-2a4 4 0 0 1 4-4h12"/></svg>
-        <span>${data}</span>
-      </div>
-    `
-  },
-  {
-    data: 'goto',
-    title: 'TO',
-    className: 'text-xs py-1 px-2 text-gray-600',
-    render: (data: string) => `<span style="font-family:monospace">${data}</span>`
-  },
-  {
-    data: 'domain',
-    title: 'DOMAIN',
-    className: 'text-xs py-1 px-2 text-gray-600 font-mono'
-  },
-  {
-    data: 'active',
-    title: 'ACTIVE',
-    className: 'text-xs py-1 px-2',
-    render: (data: boolean) => data
-      ? '<span class="badge-yes">YES</span>'
-      : '<span class="badge-no">NO</span>'
-  },
-  {
-    data: 'modified',
-    title: 'MODIFIED',
-    className: 'text-xs py-1 px-2 text-gray-500',
-    render: (data: string) => new Date(data).toLocaleString('sv-SE', { hour12: false }).replace('T', ' ').substring(0, 16)
-  },
-  {
-    data: null,
-    title: 'ACTIONS',
-    className: 'text-xs py-1 px-2 text-right',
-    orderable: false,
-    render: (_data: any, _type: string, row: any) => `
-      <button class="act-btn act-edit" data-action="edit" data-id="${row.address}">
-        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;display:inline-block;vertical-align:middle"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>EDIT
-      </button>
-      <button class="act-btn act-del" data-action="delete" data-id="${row.address}">
-        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;display:inline-block;vertical-align:middle"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>DELETE
-      </button>
-    `
-  }
+const columns = [
+  { key: 'address',  label: 'ALIAS' },
+  { key: 'goto',     label: 'TO' },
+  { key: 'domain',   label: 'DOMAIN' },
+  { key: 'active',   label: 'ACTIVE' },
+  { key: 'modified', label: 'MODIFIED' },
 ]
 
-function onDataTableDraw() {
-  // Attach click handlers to action buttons after every draw (pagination, search, sort)
-  const container = document.querySelector('.table-card')
-  if (!container) return
+function sortBy(key: string) {
+  if (sortKey.value === key) sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc'
+  else { sortKey.value = key; sortDir.value = 'asc' }
+}
 
-  container.querySelectorAll('button[data-action]').forEach((btn) => {
-    const el = btn as HTMLElement
-    const action = el.dataset.action
-    const id = el.dataset.id
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredRows.value.length / rowsPerPage.value)))
+const pageButtons = computed(() => {
+  const total = totalPages.value
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
+  const cur = currentPage.value
+  const pages = new Set([1, total, cur, cur - 1, cur + 1].filter(p => p >= 1 && p <= total))
+  return Array.from(pages).sort((a, b) => a - b)
+})
+const pagedRows = computed(() => {
+  const start = (currentPage.value - 1) * rowsPerPage.value
+  return filteredRows.value.slice(start, start + rowsPerPage.value)
+})
 
-    if (!action || !id) return
-
-    // remove old listener if any
-    el.onclick = null
-
-    el.onclick = (e) => {
-      e.preventDefault()
-      const row = dtRows.value.find((r: any) => r.address === id)
-      if (!row) return
-
-      if (action === 'edit') openEdit(row)
-      if (action === 'delete') confirmDelete(row)
-    }
-  })
+function formatDate(ts: string): string {
+  if (!ts) return '—'
+  return new Date(ts).toLocaleString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
 }
 
 function onFilterChange() {
-  // When domain filter changes we just let the computed filteredRows update
-  // DataTables will see new data on next render (we can force redraw if needed)
-  // For now the reactive data binding + re-mount on key change works well
+  // filter auto-applied in computed filteredRows
 }
 </script>
 
 <style scoped>
 .alias-page { background: #ebf2fe; padding: 24px 28px 40px; }
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 16px;
-}
-.page-title {
-  font-size: 36px;
-  font-weight: 900;
-  color: #1e293b;
-  letter-spacing: -1px;
-  line-height: 1;
-  font-family: monospace;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-.page-subtitle {
-  font-size: 12px;
-  color: #94a3b8;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  font-weight: 700;
-  margin-top: 0;
-}
-
-.btn-add-alias {
-  background-color: var(--color-brand-primary);
-  color: #ffffff;
-  border: 2px solid var(--color-brand-text);
-  font-weight: 900;
-  padding: 20px 32px;
-  box-shadow: 3px 3px 0px var(--color-brand-text);
-  display: inline-flex;
-  align-items: center;
-  transition: all 0.15s ease-in-out;
-  cursor: pointer;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-size: 14px;
-}
-
-.btn-add-alias:hover {
-  background-color: #ffffff;
-  color: var(--color-brand-primary);
-  transform: translate(-4px, -4px);
-  box-shadow: 7px 7px 0px var(--color-brand-text);
-}
-
-.btn-add-alias:active {
-  transform: translate(0px, 0px);
-  box-shadow: none;
-}
-
-/* Duplicated styles removed — centralized in global style.css */
-.controls-left, .controls-right { display: flex; align-items: center; gap: 8px; }
-.per-page-wrap { display: flex; align-items: center; gap: 6px; }
-.ctrl-select { border: 1px solid #d1d5db; padding: 4px 6px; font-size: 13px; color: #374151; background: #fff; border-radius: 0; outline: none; }
-.ctrl-label { font-size: 12px; color: #64748b; font-weight: 500; }
-.search-input { border: 1px solid #d1d5db; padding: 4px 8px; font-size: 13px; color: #374151; width: 200px; outline: none; border-radius: 0; }
-.search-input:focus { border-color: #3b82f6; }
-
-.table-wrap { overflow-x: auto; }
-.data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-.table-head-row { background: #3b82f6; }
-.table-th { color: #fff; font-weight: 700; letter-spacing: 0.4px; padding: 10px; text-align: left; cursor: pointer; white-space: nowrap; user-select: none; font-size: 12px; }
-.table-th:hover { background: #2563eb; }
-.sort-arrows { margin-left: 4px; font-size: 9px; opacity: .5; }
-.sort-active { opacity: 1 !important; }
-.table-row:nth-child(even) { background: #f8fafc; }
-.table-row:hover { background: #eff6ff; }
-.table-td { padding: 6px 10px; color: #374151; border-bottom: 1px solid #f1f5f9; font-size: 12px; }
-.td-link { color: #1e293b; font-weight: 600; }
-.goto-cell { max-width: 220px; overflow: hidden; text-overflow: ellipsis; color: #6b7280; }
-.cell-with-icon { display: flex; align-items: center; gap: 6px; }
-.row-icon { color: #3b82f6; flex-shrink: 0; }
-:deep(.badge-yes) {
-  background: #dcfce7 !important;
-  color: #16a34a !important;
-  border: 2px solid #16a34a !important;
-  padding: 2px 8px !important;
-  font-size: 11px !important;
-  font-weight: 700 !important;
-}
-
-:deep(.badge-no) {
-  background: #fee2e2 !important;
-  color: #dc2626 !important;
-  border: 2px solid #dc2626 !important;
-  padding: 2px 8px !important;
-  font-size: 11px !important;
-  font-weight: 700 !important;
-}
-
-:deep(.act-btn) {
-  padding: 4px 10px !important;
-  font-size: 10px !important;
-  font-weight: 800 !important;
-  cursor: pointer !important;
-  border: 1px solid #1e293b !important;
-  letter-spacing: 0.4px !important;
-  border-radius: 0 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  transition: all 0.12s ease-in-out !important;
-  box-shadow: 1px 1px 0 #1e293b !important;
-  text-transform: uppercase !important;
-}
-
-:deep(.act-btn:hover) {
-  transform: translate(-0.5px, -0.5px) !important;
-}
-
-:deep(.act-btn:active) {
-  transform: translate(0, 0) !important;
-  box-shadow: none !important;
-}
-
-:deep(.act-edit) {
-  background: #2563eb !important;
-  color: #fff !important;
-}
-
-:deep(.act-edit:hover) {
-  background: #fff !important;
-  color: #2563eb !important;
-}
-
-:deep(.act-del) {
-  background: #dc2626 !important;
-  color: #fff !important;
-}
-
-:deep(.act-del:hover) {
-  background: #fff !important;
-  color: #dc2626 !important;
-}
-
-/* Override table cells to match Mailboxes exactly */
-:deep(table.dataTable tbody td) {
-  padding: 6px 10px !important;
-  font-size: 12px !important;
-  color: #374151 !important;
-  border-bottom: 1px solid #f1f5f9 !important;
-}
-
-:deep(table.dataTable thead th) {
-  font-weight: 700 !important;
-  font-size: 12px !important;
-  letter-spacing: 0.4px !important;
-  padding: 10px !important;
-  border-bottom: 3px solid #1e293b !important;
-}
-.table-loading, .table-empty { text-align: center; padding: 28px; color: #94a3b8; font-size: 13px; }
-.table-footer { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-top: 1px solid #e2e8f0; }
-.showing-text { font-size: 12.5px; color: #64748b; }
-.pagination { display: flex; gap: 3px; }
-.pg-btn { height: 28px; padding: 0 10px; font-size: 10px; font-weight: 700; color: #374151; background: #fff; border: 1px solid #d1d5db; border-radius: 0; cursor: pointer; letter-spacing: 0.4px; text-transform: uppercase; white-space: nowrap; }
-.pg-btn:hover:not(:disabled) { border-color: #1e293b; color: #1e293b; background: #f8fafc; }
-.pg-btn:disabled { opacity: .35; cursor: default; }
-.pg-active { background: #3b82f6 !important; color: #fff !important; border-color: #3b82f6 !important; }
-
-/* Heavy CSS deduplication complete — only Delete modal converted; Add/Edit legacy. */
 
 /* Heavy CSS deduplication complete on AliasesPage */</style>

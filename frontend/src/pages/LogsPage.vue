@@ -365,13 +365,7 @@ function getActionBadgeClass(action: string): string {
   .filter-grid { grid-template-columns: 1fr; }
 }
 
-/* ─── Table card ─── */
-.table-card { background: #fff; border: 3px solid #1e293b; box-shadow: 3px 3px 0 #1e293b; }
-.table-topbar { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid #e2e8f0; gap: 12px; flex-wrap: wrap; }
-.controls-left, .controls-right { display: flex; align-items: center; gap: 8px; }
-.per-page-wrap { display: flex; align-items: center; gap: 6px; }
-.ctrl-select { border: 1px solid #d1d5db; padding: 4px 6px; font-size: 13px; color: #374151; background: #fff; border-radius: 0; outline: none; }
-.ctrl-label { font-size: 12px; color: #64748b; font-weight: 500; }
+/* ─── Table Controls & Custom Elements ─── */
 
 .btn-clear-filters {
   background: #f8fafc; border: 1px solid #cbd5e1; color: #475569; padding: 5px 12px;
@@ -381,15 +375,6 @@ function getActionBadgeClass(action: string): string {
 .btn-clear-filters:hover { background: #f1f5f9; border-color: #94a3b8; color: #1e293b; }
 
 .table-wrap { overflow-x: auto; }
-.data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-.table-head-row { background: #3b82f6; }
-.table-th { color: #fff; font-weight: 700; letter-spacing: 0.4px; padding: 10px; text-align: left; cursor: pointer; white-space: nowrap; user-select: none; font-size: 12px; }
-.table-th:hover { background: #2563eb; }
-.sort-arrows { margin-left: 4px; font-size: 9px; opacity: .5; }
-.sort-active { opacity: 1 !important; }
-.table-row:nth-child(even) { background: #f8fafc; }
-.table-row:hover { background: #eff6ff; }
-.table-td { padding: 10px 14px; color: #374151; border-bottom: 1px solid #f1f5f9; font-size: 12px; }
 .text-nowrap { white-space: nowrap; }
 .font-mono { font-family: 'Fira Code', var(--font-mono), monospace; }
 .font-semibold { font-weight: 600; }
@@ -406,7 +391,6 @@ function getActionBadgeClass(action: string): string {
 .badge-action-other  { background: #f1f5f9; color: #475569; }
 
 .table-loading, .table-empty { text-align: center; padding: 40px; color: #94a3b8; font-size: 13px; }
-.table-footer { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-top: 1px solid #e2e8f0; }
 .showing-text { font-size: 12.5px; color: #64748b; }
 .pagination { display: flex; gap: 3px; }
 .pg-btn { height: 28px; padding: 0 10px; font-size: 10px; font-weight: 700; color: #374151; background: #fff; border: 1px solid #d1d5db; border-radius: 0; cursor: pointer; letter-spacing: 0.4px; text-transform: uppercase; white-space: nowrap; }

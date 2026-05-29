@@ -4,10 +4,10 @@
     <!-- ─── Header ─── -->
     <div class="dom-header">
       <div>
-        <div class="dom-title">MY DOMAINS</div>
-        <div class="dom-subtitle">MANAGE YOUR MAIL DOMAINS</div>
+        <div class="dom-title">DOMAINS</div>
+        <div class="dom-subtitle">MANAGE AND MONITOR YOUR REGISTERED EMAIL DOMAINS.</div>
       </div>
-      <button class="btn-add-domain" @click="openAdd">
+      <button class="btn-add-big" @click="openAdd">
         <Icon name="plus-circle" :size="20" style="margin-right:12px;vertical-align:middle" />
         ADD DOMAIN
       </button>
@@ -93,10 +93,12 @@
                 </div>
               </td>
               <td class="table-td mono">{{ row.transport || 'virtual' }}</td>
+              <td class="table-td">{{ row.backupmx ? 'Yes' : 'No' }}</td>
               <td class="table-td">
                 <span :class="row.active ? 'badge-yes' : 'badge-no'">{{ row.active ? 'YES' : 'NO' }}</span>
               </td>
               <td class="table-td">{{ formatDate(row.modified) }}</td>
+              <td class="table-td mono">{{ row.password_expiry ?? 0 }}</td>
               <td class="table-td actions-td">
                 <button class="act-btn act-edit" @click="openEdit(row)">
                   <Icon name="pencil" :size="12" style="margin-right:4px;vertical-align:middle" />EDIT
@@ -447,10 +449,12 @@ const columns = [
   { key: 'domain',      label: 'DOMAIN' },
   { key: 'description', label: 'DESCRIPTION' },
   { key: 'aliases',     label: 'ALIASES' },
-  { key: 'mailboxes',   label: 'MAILBOXES' },
+  { key: 'mailboxes',   label: 'EMAIL ACCOUNTS' },
   { key: 'transport',   label: 'TRANSPORT' },
+  { key: 'backupmx',    label: 'BACKUP MX' },
   { key: 'active',      label: 'ACTIVE' },
   { key: 'modified',    label: 'MODIFIED' },
+  { key: 'password_expiry', label: 'PASS EXPIRES' },
 ]
 
 function sortBy(key: string) {
@@ -658,97 +662,60 @@ async function submitDelete() {
 <style scoped>
 .dom-page { background: #ebf2fe; padding: 24px 28px 40px; }
 
-.dom-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 16px;
-}
-.dom-title {
-  font-size: 36px;
-  font-weight: 900;
-  color: #1e293b;
-  letter-spacing: -1px;
-  line-height: 1;
-  font-family: monospace;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-.dom-subtitle {
-  font-size: 12px;
-  color: #94a3b8;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  font-weight: 700;
-  margin-top: 0;
-}
-
-.btn-add-domain {
-  background-color: var(--color-brand-primary);
-  color: #ffffff;
-  border: 2px solid var(--color-brand-text);
-  font-weight: 900;
-  padding: 20px 32px;
-  box-shadow: 3px 3px 0px var(--color-brand-text);
-  display: inline-flex;
-  align-items: center;
-  transition: all 0.15s ease-in-out;
-  cursor: pointer;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-size: 14px;
-}
-
-.btn-add-domain:hover {
-  background-color: #ffffff;
-  color: var(--color-brand-primary);
-  transform: translate(-4px, -4px);
-  box-shadow: 7px 7px 0px var(--color-brand-text);
-}
-
-.btn-add-domain:active {
-  transform: translate(0px, 0px);
-  box-shadow: none;
-}
-
 /* .btn-primary, .error-banner, .table-card now centralized in global style.css (Tailwind-friendly) */
+.table-card {
+  border: 2px solid #1e293b;
+  box-shadow: 2px 2px 0 #1e293b;
+  padding: 16px 8px 4px;
+}
 
 .table-topbar {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 10px 14px; border-bottom: 1px solid #e2e8f0; gap: 12px; flex-wrap: wrap;
+  padding: 0 0 12px; border-bottom: none; gap: 12px; flex-wrap: wrap;
+  background: transparent;
 }
-.controls-left { display: flex; align-items: center; gap: 8px; }
-.controls-right { display: flex; align-items: center; gap: 8px; }
-.per-page-wrap { display: flex; align-items: center; gap: 6px; }
-.ctrl-select {
-  border: 1px solid #d1d5db; padding: 4px 6px; font-size: 13px; color: #374151;
-  background: #fff; border-radius: 0; outline: none;
-}
-.ctrl-label { font-size: 12px; color: #64748b; font-weight: 500; }
-.search-input {
-  border: 1px solid #d1d5db; padding: 4px 8px; font-size: 13px; color: #374151;
-  width: 200px; outline: none; border-radius: 0;
-}
-.search-input:focus { border-color: #3b82f6; }
 
 .table-wrap { overflow-x: auto; }
-.data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-.table-head-row { background: #3b82f6; }
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  border: 2px solid #1e293b;
+}
+.table-head-row {
+  background: #3b82f6;
+  border-bottom: 2px solid #1e293b;
+}
 .table-th {
-  color: #fff; font-weight: 700; letter-spacing: 0.4px; padding: 10px;
-  text-align: left; cursor: pointer; white-space: nowrap; user-select: none;
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  padding: 10px;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
   font-size: 12px;
+  font-family: var(--font-sans);
 }
 .table-th:hover { background: #2563eb; }
 .sort-arrows { margin-left: 4px; font-size: 9px; opacity: .5; }
 .sort-active { opacity: 1 !important; }
 
+.table-row {
+  border-bottom: 1px solid #e2e8f0;
+}
+.table-row:last-child {
+  border-bottom: none;
+}
 .table-row:nth-child(even) { background: #f8fafc; }
 .table-row:hover { background: #eff6ff; }
-.table-td { padding: 6px 10px; color: #374151; border-bottom: 1px solid #f1f5f9; font-size: 12px; }
+.table-td {
+  padding: 8px 10px;
+  color: #1e293b;
+  font-size: 12px;
+}
 .td-link { color: #1e293b; font-weight: 600; }
-.cell-with-icon { display: flex; align-items: center; gap: 6px; }
-.row-icon { color: #3b82f6; flex-shrink: 0; }
 .mono { font-family: monospace; font-size: 12px; color: #64748b; }
 
 .progress-bar-wrap {
@@ -782,28 +749,45 @@ async function submitDelete() {
   z-index: 10;
 }
 
-.badge-yes { background: #dcfce7; color: #16a34a; padding: 2px 8px; font-size: 11px; font-weight: 700; }
-.badge-no  { background: #fee2e2; color: #dc2626; padding: 2px 8px; font-size: 11px; font-weight: 700; }
+.badge-yes {
+  background: oklch(0.962 0.044 156.743);
+  color: oklch(0.527 0.154 150.069);
+  border: 2px solid oklch(0.527 0.154 150.069);
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-block;
+}
+.badge-no {
+  background: #fee2e2;
+  color: #dc2626;
+  border: 2px solid #dc2626;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-block;
+}
 
 .actions-td { display: flex; gap: 6px; align-items: center; justify-content: flex-end; }
 .act-btn {
-  padding: 4px 10px; font-size: 10px; font-weight: 800; cursor: pointer;
+  padding: 4px 8px; font-size: 12px; font-weight: 800; cursor: pointer;
   border: 1px solid #1e293b; letter-spacing: 0.4px; border-radius: 0;
   display: inline-flex; align-items: center; transition: all .12s;
   box-shadow: 1px 1px 0 #1e293b; text-transform: uppercase;
 }
 .act-btn:hover { transform: translate(-0.5px, -0.5px); }
 .act-btn:active { transform: translate(0,0); box-shadow: none; }
-.act-edit { background: #2563eb; color: #fff; }
-.act-edit:hover { background: #fff; color: #2563eb; }
-.act-del  { background: #dc2626; color: #fff; }
-.act-del:hover { background: #fff; color: #dc2626; }
+.act-edit { background: oklch(0.546 0.245 262.881); color: #fff; }
+.act-edit:hover { background: #fff; color: oklch(0.546 0.245 262.881); }
+.act-del  { background: oklch(0.577 0.245 27.325); color: #fff; }
+.act-del:hover { background: #fff; color: oklch(0.577 0.245 27.325); }
 
 .table-loading, .table-empty { text-align: center; padding: 28px; color: #94a3b8; font-size: 13px; }
 
 .table-footer {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 10px 14px; border-top: 1px solid #e2e8f0;
+  padding: 12px 0 0; border-top: none;
+  background: transparent;
 }
 .showing-text { font-size: 12.5px; color: #64748b; }
 .pagination { display: flex; gap: 3px; }

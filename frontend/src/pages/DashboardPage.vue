@@ -391,27 +391,7 @@ function onRecentDraw() {
   gap: 6px;
 }
 
-/* ─── Table card ─── */
-.table-card {
-  background: #ffffff;
-  border: 3px solid #1e293b;
-  box-shadow: 3px 3px 0 #1e293b;
-}
-
-.table-topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 16px 10px;
-  border-bottom: 2px solid #1e293b;
-}
-.table-topbar-title {
-  font-size: 13px;
-  font-weight: 900;
-  color: #1e293b;
-  letter-spacing: 0.6px;
-  text-transform: uppercase;
-}
+/* ─── Table Controls & Custom Elements ─── */
 .view-logs-link {
   display: flex;
   align-items: center;
@@ -425,7 +405,6 @@ function onRecentDraw() {
 }
 .view-logs-link:hover { text-decoration: underline; }
 
-/* Controls */
 .table-controls {
   display: flex;
   justify-content: space-between;
@@ -463,45 +442,7 @@ function onRecentDraw() {
 }
 .search-input:focus { border-color: #3b82f6; }
 
-/* Table */
 .table-wrap { overflow-x: auto; }
-.activity-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12.5px;
-}
-.table-head-row {
-  background: #3b82f6;
-  border-bottom: 2px solid #1e293b;
-}
-.table-th {
-  color: #fff;
-  font-weight: 700;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-  padding: 10px;
-  text-align: left;
-  cursor: pointer;
-  white-space: nowrap;
-  user-select: none;
-  font-size: 12px;
-}
-.table-th:hover { background: #2563eb; }
-.sort-arrows {
-  margin-left: 4px;
-  font-size: 9px;
-  opacity: .6;
-}
-.sort-active { opacity: 1 !important; }
-
-.table-row:nth-child(even) { background: #f8fafc; }
-.table-row:hover { background: #eff6ff; }
-.table-td {
-  padding: 9px 14px;
-  color: #374151;
-  border-bottom: 1px solid #f1f5f9;
-  white-space: nowrap;
-}
 .td-link { color: #3b82f6; }
 .td-bold { font-weight: 700; color: #1e293b; }
 
@@ -513,14 +454,6 @@ function onRecentDraw() {
   font-size: 13px;
 }
 
-/* Footer */
-.table-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 16px;
-  border-top: 1px solid #e2e8f0;
-}
 .showing-text { font-size: 12.5px; color: #64748b; }
 
 .pagination { display: flex; gap: 3px; }

@@ -335,17 +335,18 @@ body {
 /* ─── Table Container (shared by most list pages) ────────────────────────── */
 .table-card {
   background: #fff;
-  border: 3px solid #1e293b;
-  box-shadow: 3px 3px 0 #1e293b;
+  border: 2px solid #1e293b;
+  box-shadow: 2px 2px 0 #1e293b;
   overflow: hidden;
+  padding: 16px 8px 4px;
 }
 .table-topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 14px;
-  border-bottom: 2px solid #1e293b;
-  background: #f8fafc;
+  padding: 0 0 12px;
+  border-bottom: none;
+  background: transparent;
   font-size: 12px;
   font-weight: 800;
   text-transform: uppercase;
@@ -354,6 +355,14 @@ body {
 .table-topbar-title {
   font-weight: 900;
   color: #1e293b;
+}
+.table-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0 0;
+  border-top: none;
+  background: transparent;
 }
 
 /* ─── Modal (fallback for pages not yet using BrutalModal) ───────────────── */
@@ -408,6 +417,7 @@ body {
   width: 100%;
   border-collapse: collapse;
   font-size: 12.5px;
+  border: 2px solid #1e293b;
 }
 
 .table-head-row {
@@ -425,12 +435,13 @@ body {
   cursor: pointer;
   white-space: nowrap;
   user-select: none;
+  font-family: var(--font-sans);
 }
 
 .table-th:hover { background: #2563eb; }
 
 .table-card table {
-  border: 3px solid #1e293b;
+  border: 2px solid #1e293b;
 }
 
 tbody tr {
@@ -439,6 +450,243 @@ tbody tr {
 
 tbody tr:last-child {
   border-bottom: none;
+}
+
+tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+tbody tr:hover {
+  background: #eff6ff;
+}
+
+.table-td {
+  padding: 8px 10px;
+  color: #1e293b;
+  font-size: 12px;
+}
+
+.td-link {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+/* ─── Emblemas de Status (YES / NO) ─── */
+.badge-yes {
+  background: oklch(0.962 0.044 156.743);
+  color: oklch(0.527 0.154 150.069);
+  border: 2px solid oklch(0.527 0.154 150.069);
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-block;
+}
+
+.badge-no {
+  background: #fee2e2;
+  color: #dc2626;
+  border: 2px solid #dc2626;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-block;
+}
+
+/* ─── Botões de Ação ─── */
+.actions-td {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.act-btn {
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  border: 1px solid #1e293b;
+  letter-spacing: 0.4px;
+  border-radius: 0;
+  display: inline-flex;
+  align-items: center;
+  transition: all .12s;
+  box-shadow: 1px 1px 0 #1e293b;
+  text-transform: uppercase;
+}
+
+.act-btn:hover { transform: translate(-0.5px, -0.5px); }
+.act-btn:active { transform: translate(0,0); box-shadow: none; }
+.act-edit { background: oklch(0.546 0.245 262.881); color: #fff; }
+.act-edit:hover { background: #fff; color: oklch(0.546 0.245 262.881); }
+.act-del  { background: oklch(0.577 0.245 27.325); color: #fff; }
+.act-del:hover { background: #fff; color: oklch(0.577 0.245 27.325); }
+
+/* ─── Cell with Icon Alignment Utility ─── */
+.cell-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.row-icon {
+  color: #3b82f6;
+  flex-shrink: 0;
+}
+
+/* ─── Table Topbar Controls (Search & Length Select) ─── */
+.controls-left,
+.controls-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.per-page-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ctrl-label {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ctrl-select,
+.search-input {
+  border: 2px solid #1e293b !important;
+  padding: 4px 8px !important;
+  font-size: 13px !important;
+  color: #1e293b !important;
+  background-color: #ffffff !important;
+  outline: none !important;
+  border-radius: 0 !important;
+  box-sizing: border-box !important;
+  font-weight: 600;
+  transition: border-color 0.15s ease-in-out;
+}
+
+.ctrl-select:focus,
+.search-input:focus {
+  border-color: #3b82f6 !important;
+}
+
+.search-input {
+  width: 200px;
+}
+
+/* ─── Domain-style Big Headers (Domains, Mailboxes, Alias Domains) ─── */
+.dom-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 16px;
+}
+
+.dom-title {
+  font-size: 36px;
+  font-weight: 900;
+  color: #1e293b;
+  letter-spacing: -1px;
+  line-height: 1;
+  font-family: monospace;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.dom-subtitle {
+  font-size: 12px;
+  color: #94a3b8;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-top: 0;
+}
+
+/* ─── Big Brutalist Add Button ─── */
+.btn-add-big {
+  background-color: var(--color-brand-primary);
+  color: #ffffff;
+  border: 2px solid var(--color-brand-text);
+  font-weight: 900;
+  padding: 20px 32px;
+  box-shadow: 3px 3px 0px var(--color-brand-text);
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.15s ease-in-out;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 16px;
+}
+
+.btn-add-big:hover {
+  background-color: #ffffff;
+  color: var(--color-brand-primary);
+  transform: translate(-4px, -4px);
+  box-shadow: 7px 7px 0px var(--color-brand-text);
+}
+
+.btn-add-big:active {
+  transform: translate(0px, 0px);
+  box-shadow: none;
+}
+
+/* ─── Global Table Pagination & Footer ─── */
+.table-loading,
+.table-empty {
+  text-align: center;
+  padding: 28px;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.showing-text {
+  font-size: 12.5px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.pagination {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+
+.pg-btn {
+  height: 28px;
+  padding: 0 10px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #374151;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 0;
+  cursor: pointer;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: all 0.1s ease-in-out;
+}
+
+.pg-btn:hover:not(:disabled) {
+  border-color: #1e293b;
+  color: #1e293b;
+  background: #f8fafc;
+}
+
+.pg-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.pg-active {
+  background: #3b82f6 !important;
+  color: #ffffff !important;
+  border-color: #3b82f6 !important;
 }
 
 /* ==========================================================================

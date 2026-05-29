@@ -7,8 +7,8 @@
         <div class="dom-title">DOMAIN ALIASES</div>
         <div class="dom-subtitle">MANAGE ALIAS DOMAIN MAPPINGS</div>
       </div>
-      <button class="btn-primary" @click="openAdd">
-        <Icon name="plus-circle" :size="16" style="margin-right:6px;vertical-align:middle" />
+      <button class="btn-add-big" @click="openAdd">
+        <Icon name="plus-circle" :size="20" style="margin-right:12px;vertical-align:middle" />
         ADD DOMAIN ALIAS
       </button>
     </div>
@@ -503,45 +503,9 @@ const availableAliasDomains = computed(() => {
 .dom-page { background: #ebf2fe; padding: 24px 28px 40px; }
 
 /* .page-header, .btn-primary, .error-banner, .table-card, .table-topbar now centralized in global style.css */
-.controls-left, .controls-right { display: flex; align-items: center; gap: 8px; }
-.per-page-wrap { display: flex; align-items: center; gap: 6px; }
-.ctrl-select { border: 1px solid #d1d5db; padding: 4px 6px; font-size: 13px; color: #374151; background: #fff; border-radius: 0; outline: none; }
-.ctrl-label { font-size: 12px; color: #64748b; font-weight: 500; }
-.search-input { border: 1px solid #d1d5db; padding: 4px 8px; font-size: 13px; color: #374151; width: 200px; outline: none; border-radius: 0; }
-.search-input:focus { border-color: #3b82f6; }
 
 .table-wrap { overflow-x: auto; }
-.data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-.table-head-row { background: #3b82f6; }
-.table-th { color: #fff; font-weight: 700; letter-spacing: 0.4px; padding: 10px; text-align: left; cursor: pointer; white-space: nowrap; user-select: none; font-size: 12px; }
-.table-th:hover { background: #2563eb; }
-.sort-arrows { margin-left: 4px; font-size: 9px; opacity: .5; }
-.sort-active { opacity: 1 !important; }
-.table-row:nth-child(even) { background: #f8fafc; }
-.table-row:hover { background: #eff6ff; }
-.table-td { padding: 6px 10px; color: #374151; border-bottom: 1px solid #f1f5f9; font-size: 12px; }
-.td-link { color: #1e293b; font-weight: 600; }
 .mono-text { font-family: monospace; font-size: 12px; color: #6b7280; }
-.cell-with-icon { display: flex; align-items: center; gap: 6px; }
-.row-icon { color: #3b82f6; flex-shrink: 0; }
-.badge-yes { background: #dcfce7; color: #16a34a; padding: 2px 8px; font-size: 11px; font-weight: 700; }
-.badge-no  { background: #fee2e2; color: #dc2626; padding: 2px 8px; font-size: 11px; font-weight: 700; }
-.actions-td { display: flex; gap: 6px; align-items: center; justify-content: flex-end; }
-.act-btn { padding: 4px 10px; font-size: 10px; font-weight: 800; cursor: pointer; border: 1px solid #1e293b; letter-spacing: 0.4px; border-radius: 0; display: inline-flex; align-items: center; transition: all .12s; box-shadow: 1px 1px 0 #1e293b; text-transform: uppercase; }
-.act-btn:hover { transform: translate(-0.5px,-0.5px); }
-.act-btn:active { transform: translate(0,0); box-shadow: none; }
-.act-edit { background: #2563eb; color: #fff; }
-.act-edit:hover { background: #fff; color: #2563eb; }
-.act-del  { background: #dc2626; color: #fff; }
-.act-del:hover { background: #fff; color: #dc2626; }
-.table-loading, .table-empty { text-align: center; padding: 28px; color: #94a3b8; font-size: 13px; }
-.table-footer { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-top: 1px solid #e2e8f0; }
-.showing-text { font-size: 12.5px; color: #64748b; }
-.pagination { display: flex; gap: 3px; }
-.pg-btn { height: 28px; padding: 0 10px; font-size: 10px; font-weight: 700; color: #374151; background: #fff; border: 1px solid #d1d5db; border-radius: 0; cursor: pointer; letter-spacing: 0.4px; text-transform: uppercase; white-space: nowrap; }
-.pg-btn:hover:not(:disabled) { border-color: #1e293b; color: #1e293b; background: #f8fafc; }
-.pg-btn:disabled { opacity: .35; cursor: default; }
-.pg-active { background: #3b82f6 !important; color: #fff !important; border-color: #3b82f6 !important; }
 
 /* Old custom modal CSS fully removed — all modals use BrutalModal */
 
