@@ -298,13 +298,13 @@ function copyText(txt: string) {
   border-radius: 0; transition: all .15s; text-transform: uppercase;
   box-shadow: 2px 2px 0 #1e293b; display: flex; align-items: center;
 }
-.btn-primary:hover:not(:disabled) { background: #fff; color: #3b82f6; transform: translate(-1px,-1px); box-shadow: 3px 3px 0 #1e293b; }
+.btn-primary:hover:not(:disabled) { background: #fff; color: #3b82f6; }
 .btn-primary:active:not(:disabled) { transform: translate(0,0); box-shadow: none; }
 
 .error-banner { background: #fef2f2; border: 1px solid #fca5a5; color: #dc2626; padding: 10px 14px; font-size: 13px; margin-bottom: 18px; display: flex; align-items: center; gap: 6px; }
 
 /* ─── Table card ─── */
-.table-card { background: #fff; border: 2px solid #1e293b; box-shadow: 2px 2px 0 #1e293b; }
+.table-card { background: #fff; border: 2px solid #1e293b; }
 .table-topbar { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid #e2e8f0; gap: 12px; flex-wrap: wrap; }
 .controls-left, .controls-right { display: flex; align-items: center; gap: 8px; }
 .per-page-wrap { display: flex; align-items: center; gap: 6px; }

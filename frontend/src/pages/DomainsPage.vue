@@ -657,7 +657,7 @@ async function submitDelete() {
 }
 
 /* ─── Table card ─── */
-.table-card { background: #fff; border: 2px solid #1e293b; box-shadow: 2px 2px 0 #1e293b; }
+.table-card { background: #fff; border: 2px solid #1e293b; }
 
 .table-topbar {
   display: flex; justify-content: space-between; align-items: center;
@@ -710,7 +710,7 @@ async function submitDelete() {
   display: inline-flex; align-items: center; transition: all .12s;
   box-shadow: 1px 1px 0 #1e293b; text-transform: uppercase;
 }
-.act-btn:hover { transform: translate(-0.5px, -0.5px); box-shadow: 2px 2px 0 #1e293b; }
+.act-btn:hover { transform: translate(-0.5px, -0.5px); }
 .act-btn:active { transform: translate(0,0); box-shadow: none; }
 .act-edit { background: #3b82f6; color: #fff; }
 .act-edit:hover { background: #fff; color: #3b82f6; }
@@ -834,6 +834,8 @@ async function submitDelete() {
   display: flex; align-items: center;
 }
 .btn-cancel:hover { background: #f1f5f9; transform: translate(-1px,-1px); box-shadow: 3px 3px 0 #1e293b; }
+.modal-footer .btn-primary { padding: 12px 24px !important; font-size: 14px !important; font-weight: 900 !important; letter-spacing: 1.4px !important; }
+.modal-footer .btn-primary:hover:not(:disabled) { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 #1e293b; }
 .btn-cancel:active { transform: translate(0,0); box-shadow: none; }
 .btn-danger {
   background: #ef4444; color: #fff; border: 2px solid #1e293b; padding: 8px 20px;
@@ -841,7 +843,7 @@ async function submitDelete() {
   text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 2px 2px 0 #1e293b;
   transition: all .12s;
 }
-.btn-danger:hover:not(:disabled) { background: #dc2626; transform: translate(-1px,-1px); box-shadow: 3px 3px 0 #1e293b; }
+.btn-danger:hover:not(:disabled) { background: #dc2626; }
 .btn-danger:active:not(:disabled) { transform: translate(0,0); box-shadow: none; }
 .btn-danger:disabled { opacity: .5; cursor: default; }
 
