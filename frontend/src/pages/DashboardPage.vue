@@ -101,35 +101,81 @@
         </router-link>
       </div>
 
-      <!-- Controls: entries per page + search -->
-      <div class="table-controls">
-        <div class="entries-control">
-          <select v-model="rowsPerPage" class="entries-select">
-            <option :value="10">10</option>
-            <option :value="25">25</option>
-            <option :value="50">50</option>
-          </select>
-          <span class="entries-text">entries per page</span>
+      <!-- Controls row -->
+      <div class="table-topbar" style="border-top: 1px solid #e2e8f0; padding-top: 12px; margin-top: 8px;">
+        <div class="controls-left">
+          <div class="per-page-wrap">
+            <select v-model="rowsPerPage" class="ctrl-select" @change="currentPage = 1">
+              <option :value="10">10</option>
+              <option :value="15">15</option>
+              <option :value="25">25</option>
+              <option :value="50">50</option>
+            </select>
+            <span class="ctrl-label">entries per page</span>
+          </div>
         </div>
-        <div class="search-control">
-          <span class="search-label">Search:</span>
-          <input v-model="search" class="search-input" type="text" />
+        <div class="controls-right">
+          <span class="ctrl-label">Search:</span>
+          <input v-model="search" class="search-input" placeholder="Search records..." @input="currentPage = 1" />
         </div>
       </div>
 
-      <!-- Real DataTables for RECENT ACTIVITY (matching 8081 old server) -->
+      <!-- Table -->
       <div class="table-wrap">
-        <BrutalDataTable
-          :data="dtRecentLogs"
-          :columns="dtRecentColumns"
-          :language="'EN'"
-          :page-length="10"
-          @draw="onRecentDraw"
-        />
+        <table class="data-table">
+          <thead>
+            <tr class="table-head-row">
+              <th v-for="col in columns" :key="col.key" class="table-th" @click="sortBy(col.key)">
+                {{ col.label }}
+                <span class="sort-arrows">
+                  <span :class="{ 'sort-active': sortKey === col.key && sortDir === 'asc' }">▲</span>
+                  <span :class="{ 'sort-active': sortKey === col.key && sortDir === 'desc' }">▼</span>
+                </span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="loading">
+              <td :colspan="columns.length" class="table-loading">
+                <div class="spinner mx-auto" />
+              </td>
+            </tr>
+            <tr v-else-if="pagedRows.length === 0">
+              <td :colspan="columns.length" class="table-empty">No records found</td>
+            </tr>
+            <tr v-for="row in pagedRows" :key="row.timestamp + row.username + row.action" class="table-row">
+              <td class="table-td">{{ row.timestamp }}</td>
+              <td class="table-td td-link" style="color: #3b82f6; font-weight: 700;">{{ row.username }}</td>
+              <td class="table-td mono">{{ row.domain }}</td>
+              <td class="table-td" style="font-weight: 900; text-transform: uppercase;">{{ row.action }}</td>
+              <td class="table-td mono" style="word-break: break-all;">{{ row.data || '—' }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
-      <!-- DataTables now renders its own footer (info + pagination) below the table -->
-
+      <!-- Footer -->
+      <div class="table-footer">
+        <div class="showing-text">
+          <template v-if="filteredRows.length === 0">Showing 0 entries</template>
+          <template v-else>
+            Showing {{ (currentPage - 1) * rowsPerPage + 1 }} to
+            {{ Math.min(currentPage * rowsPerPage, filteredRows.length) }} of
+            {{ filteredRows.length }} entries
+          </template>
+        </div>
+        <div class="pagination">
+          <button class="pg-btn" :disabled="currentPage === 1" @click="currentPage = 1">FIRST</button>
+          <button class="pg-btn" :disabled="currentPage === 1" @click="currentPage--">PREVIOUS</button>
+          <button
+            v-for="p in pageButtons" :key="p"
+            class="pg-btn" :class="{ 'pg-active': p === currentPage }"
+            @click="currentPage = p"
+          >{{ p }}</button>
+          <button class="pg-btn" :disabled="currentPage === totalPages" @click="currentPage++">NEXT</button>
+          <button class="pg-btn" :disabled="currentPage === totalPages" @click="currentPage = totalPages">LAST</button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -180,45 +226,53 @@ async function loadDashboardData() {
 
 onMounted(loadDashboardData)
 
-// =============================================
-// DataTables for RECENT ACTIVITY (matching old server)
-// =============================================
-const dtRecentLogs = computed(() => allRows.value)
+const sortKey = ref('timestamp')
+const sortDir = ref<'asc' | 'desc'>('desc')
 
-const dtRecentColumns = [
-  {
-    data: 'timestamp',
-    title: 'DATE/TIME',
-    className: 'text-xs py-1 px-2 text-gray-600 font-medium'
-  },
-  {
-    data: 'username',
-    title: 'ADMINISTRATOR',
-    className: 'text-xs py-1 px-2 text-brand-primary font-bold'
-  },
-  {
-    data: 'domain',
-    title: 'DOMAIN',
-    className: 'text-xs py-1 px-2 text-gray-600'
-  },
-  {
-    data: 'action',
-    title: 'ACTION',
-    className: 'text-xs py-1 px-2 uppercase font-black tracking-wide'
-  },
-  {
-    data: 'data',
-    title: 'DESCRIPTION',
-    className: 'text-xs py-1 px-2 text-gray-600 font-mono'
-  }
+const columns = [
+  { key: 'timestamp', label: 'DATE/TIME' },
+  { key: 'username',  label: 'ADMINISTRATOR' },
+  { key: 'domain',    label: 'DOMAIN' },
+  { key: 'action',    label: 'ACTION' },
+  { key: 'data',      label: 'DESCRIPTION' },
 ]
 
-function onRecentDraw() {
-  // No action buttons here, just re-init icons if needed
-  if (typeof window !== 'undefined' && (window as any).lucide) {
-    (window as any).lucide.createIcons()
-  }
+function sortBy(key: string) {
+  if (sortKey.value === key) sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc'
+  else { sortKey.value = key; sortDir.value = 'asc' }
 }
+
+const filteredRows = computed(() => {
+  const q = search.value.toLowerCase()
+  let rows = allRows.value
+  if (q) {
+    rows = rows.filter(r =>
+      r.timestamp.toLowerCase().includes(q) ||
+      r.username.toLowerCase().includes(q) ||
+      r.domain.toLowerCase().includes(q) ||
+      r.action.toLowerCase().includes(q) ||
+      r.data.toLowerCase().includes(q)
+    )
+  }
+  return [...rows].sort((a, b) => {
+    const av = String((a as any)[sortKey.value] ?? '')
+    const bv = String((b as any)[sortKey.value] ?? '')
+    return sortDir.value === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av)
+  })
+})
+
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredRows.value.length / rowsPerPage.value)))
+const pageButtons = computed(() => {
+  const total = totalPages.value
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
+  const cur = currentPage.value
+  const pages = new Set([1, total, cur, cur - 1, cur + 1].filter(p => p >= 1 && p <= total))
+  return Array.from(pages).sort((a, b) => a - b)
+})
+const pagedRows = computed(() => {
+  const start = (currentPage.value - 1) * rowsPerPage.value
+  return filteredRows.value.slice(start, start + rowsPerPage.value)
+})
 </script>
 
 <style scoped>
@@ -405,77 +459,9 @@ function onRecentDraw() {
 }
 .view-logs-link:hover { text-decoration: underline; }
 
-.table-controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 16px;
-  border-bottom: 1px solid #f1f5f9;
-}
-.entries-control {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.entries-select {
-  border: 1px solid #d1d5db;
-  padding: 2px 4px;
-  font-size: 13px;
-  color: #374151;
-  background: #fff;
-}
-.entries-text { font-size: 13px; color: #64748b; }
-
-.search-control {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.search-label { font-size: 13px; color: #374151; font-weight: 500; }
-.search-input {
-  border: 1px solid #d1d5db;
-  padding: 4px 8px;
-  font-size: 13px;
-  color: #374151;
-  width: 180px;
-  outline: none;
-}
-.search-input:focus { border-color: #3b82f6; }
-
 .table-wrap { overflow-x: auto; }
 .td-link { color: #3b82f6; }
 .td-bold { font-weight: 700; color: #1e293b; }
-
-.table-loading,
-.table-empty {
-  text-align: center;
-  padding: 24px;
-  color: #94a3b8;
-  font-size: 13px;
-}
-
-.showing-text { font-size: 12.5px; color: #64748b; }
-
-.pagination { display: flex; gap: 3px; }
-.pg-btn {
-  min-width: 28px;
-  height: 28px;
-  padding: 0 6px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #374151;
-  background: #fff;
-  border: 1px solid #d1d5db;
-  cursor: pointer;
-  transition: all .12s;
-}
-.pg-btn:hover:not(:disabled) { border-color: #3b82f6; color: #3b82f6; }
-.pg-btn:disabled { opacity: .4; cursor: default; }
-.pg-active {
-  background: #3b82f6 !important;
-  color: #fff !important;
-  border-color: #1e293b !important;
-}
 
 /* Responsive */
 @media (max-width: 1100px) {
