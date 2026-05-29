@@ -18,7 +18,7 @@
       <!-- Brand Header -->
       <div class="brand-header">
         <div class="brand-icon-box">
-          <q-icon name="mail" size="32px" color="white" />
+          <Icon name="mail" :size="32" color="white" />
         </div>
         <h1 class="brand-title-mono">Go-PostfixAdmin</h1>
         <p class="brand-subtitle-flat">{{ t.adminSubtitle }}</p>
@@ -30,28 +30,26 @@
 
         <!-- Error Message -->
         <div v-if="error" class="error-banner-neo">
-          <q-icon name="warning" size="16px" style="margin-right:6px;flex-shrink:0" />
+          <Icon name="alert-triangle" :size="16" class="mr-1.5 flex-shrink-0" />
           {{ error }}
         </div>
 
-        <q-form @submit.prevent="handleLogin" class="q-gutter-y-md">
+        <form @submit.prevent="handleLogin" class="space-y-5">
           <!-- Username -->
           <div class="form-group">
             <label class="form-label-neo">{{ t.username }}</label>
             <div class="relative-group">
-              <q-input
-                v-model="form.username"
-                dense
-                outlined
-                :placeholder="t.usernamePlaceholder"
-                class="field-input-neo"
-                bg-color="white"
-                :disable="loading"
-              >
-                <template v-slot:prepend>
-                  <q-icon name="person" size="20px" color="#94a3b8" />
-                </template>
-              </q-input>
+              <div class="input-wrapper">
+                <Icon name="user" :size="18" class="input-icon-left text-[#94a3b8]" />
+                <input
+                  v-model="form.username"
+                  type="text"
+                  :placeholder="t.usernamePlaceholder"
+                  class="brutal-input"
+                  :disabled="loading"
+                  autocomplete="username"
+                />
+              </div>
             </div>
           </div>
 
@@ -59,29 +57,25 @@
           <div class="form-group">
             <label class="form-label-neo">{{ t.password }}</label>
             <div class="relative-group">
-              <q-input
-                v-model="form.password"
-                :type="showPassword ? 'text' : 'password'"
-                dense
-                outlined
-                :placeholder="t.passwordPlaceholder"
-                class="field-input-neo"
-                bg-color="white"
-                :disable="loading"
-              >
-                <template v-slot:prepend>
-                  <q-icon name="lock" size="20px" color="#94a3b8" />
-                </template>
-                <template v-slot:append>
-                  <q-icon
-                    :name="showPassword ? 'visibility_off' : 'visibility'"
-                    size="18px"
-                    color="#94a3b8"
-                    class="cursor-pointer"
-                    @click="showPassword = !showPassword"
-                  />
-                </template>
-              </q-input>
+              <div class="input-wrapper">
+                <Icon name="lock" :size="18" class="input-icon-left text-[#94a3b8]" />
+                <input
+                  v-model="form.password"
+                  :type="showPassword ? 'text' : 'password'"
+                  :placeholder="t.passwordPlaceholder"
+                  class="brutal-input pr-10"
+                  :disabled="loading"
+                  autocomplete="current-password"
+                />
+                <button
+                  type="button"
+                  class="input-icon-right text-[#94a3b8] hover:text-[#1e293b]"
+                  @click="showPassword = !showPassword"
+                  tabindex="-1"
+                >
+                  <Icon :name="showPassword ? 'eye-off' : 'eye'" :size="18" />
+                </button>
+              </div>
             </div>
           </div>
 
@@ -93,14 +87,10 @@
               :disabled="loading"
             >
               <span>{{ loading ? '...' : t.authenticate }}</span>
-              <q-icon
-                name="arrow_forward"
-                size="18px"
-                class="btn-arrow"
-              />
+              <Icon name="arrow-right" :size="18" class="btn-arrow" />
             </button>
           </div>
-        </q-form>
+        </form>
 
         <div class="card-footer-neo">
           <p class="text-xs text-gray-500">
@@ -362,24 +352,53 @@ onMounted(() => {
   position: relative;
 }
 
-.field-input-neo :deep(.q-field__control) {
-  border-radius: 0 !important;
-  border: 2px solid #1E293B !important;
-  box-shadow: none !important;
-  height: 46px !important;
+/* Migration note: Form inputs converted from Quasar q-input to native brutal inputs. */
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
-.field-input-neo :deep(.q-field__control:before) {
-  border: none !important;
+.brutal-input {
+  width: 100%;
+  height: 46px;
+  padding-left: 42px;
+  padding-right: 12px;
+  font-size: 14px;
+  border: 2px solid #1E293B;
+  border-radius: 0;
+  background: #ffffff;
+  color: #1E293B;
+  transition: border-color 0.1s, box-shadow 0.1s;
+  outline: none;
 }
 
-.field-input-neo :deep(.q-field__control:after) {
-  border: none !important;
+.brutal-input:focus {
+  border-color: #3B82F6;
+  box-shadow: 4px 4px 0px #3B82F6;
 }
 
-.field-input-neo :deep(.q-field__control--focused) {
-  border-color: #3B82F6 !important;
-  box-shadow: 4px 4px 0px #3B82F6 !important;
+.brutal-input:disabled {
+  background: #f8fafc;
+  opacity: 0.7;
+}
+
+.input-icon-left {
+  position: absolute;
+  left: 14px;
+  pointer-events: none;
+}
+
+.input-icon-right {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Authenticate Button */

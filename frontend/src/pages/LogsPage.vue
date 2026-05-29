@@ -1,5 +1,5 @@
 <template>
-  <q-page class="log-page">
+  <div class="log-page">
 
     <!-- ─── Header ─── -->
     <div class="page-header">
@@ -15,7 +15,7 @@
           <span>AUTO REFRESH (10s)</span>
         </label>
         <button class="btn-primary btn-refresh-manual" @click="load(false)">
-          <q-icon name="refresh" size="16px" style="margin-right:6px;vertical-align:middle" />
+          <Icon name="refresh-cw" :size="16" style="margin-right:6px;vertical-align:middle" />
           REFRESH
         </button>
       </div>
@@ -23,13 +23,13 @@
 
     <!-- ─── Error banner ─── -->
     <div v-if="error" class="error-banner">
-      <q-icon name="warning" size="16px" /> {{ error }}
+      <Icon name="alert-triangle" :size="16" class="mr-1" /> {{ error }}
     </div>
 
     <!-- ─── Filters & Search card ─── -->
     <div class="filter-card">
       <div class="filter-title">
-        <q-icon name="filter_alt" size="16px" />
+        <Icon name="filter" :size="16" />
         SEARCH & ADVANCED FILTERS
       </div>
       <div class="filter-grid">
@@ -97,7 +97,7 @@
           <tbody>
             <tr v-if="loading && !isQuietLoading">
               <td :colspan="columns.length" class="table-loading">
-                <q-spinner color="primary" size="24px" />
+                <div class="spinner mx-auto" />
               </td>
             </tr>
             <tr v-else-if="rows.length === 0">
@@ -138,7 +138,7 @@
       </div>
     </div>
 
-  </q-page>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -366,7 +366,7 @@ function getActionBadgeClass(action: string): string {
 }
 
 /* ─── Table card ─── */
-.table-card { background: #fff; border: 2px solid #1e293b; }
+.table-card { background: #fff; border: 3px solid #1e293b; box-shadow: 3px 3px 0 #1e293b; }
 .table-topbar { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid #e2e8f0; gap: 12px; flex-wrap: wrap; }
 .controls-left, .controls-right { display: flex; align-items: center; gap: 8px; }
 .per-page-wrap { display: flex; align-items: center; gap: 6px; }
@@ -383,7 +383,7 @@ function getActionBadgeClass(action: string): string {
 .table-wrap { overflow-x: auto; }
 .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
 .table-head-row { background: #3b82f6; }
-.table-th { color: #fff; font-weight: 600; letter-spacing: 0.4px; padding: 10px 14px; text-align: left; cursor: pointer; white-space: nowrap; user-select: none; }
+.table-th { color: #fff; font-weight: 700; letter-spacing: 0.4px; padding: 10px; text-align: left; cursor: pointer; white-space: nowrap; user-select: none; font-size: 12px; }
 .table-th:hover { background: #2563eb; }
 .sort-arrows { margin-left: 4px; font-size: 9px; opacity: .5; }
 .sort-active { opacity: 1 !important; }

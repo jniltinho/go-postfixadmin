@@ -1,5 +1,5 @@
 <template>
-  <q-page class="dash-page">
+  <div class="dash-page">
 
     <!-- Page title -->
     <div class="dash-header">
@@ -14,13 +14,13 @@
       <div class="stat-card">
         <div class="stat-card-top">
           <div class="stat-icon-wrap">
-            <q-icon name="public" size="20px" color="white" />
+            <Icon name="globe" :size="20" color="white" />
           </div>
           <span class="stat-badge badge-green">ACTIVE</span>
         </div>
         <p class="stat-label">TOTAL DOMAINS</p>
         <div class="stat-value-row">
-          <q-skeleton v-if="loading" type="text" width="2rem" height="40px" />
+          <div v-if="loading" class="skeleton w-16 h-10" />
           <span v-else class="stat-value">{{ stats.domains }}</span>
           <span class="stat-sub">AVAILABLE</span>
         </div>
@@ -30,13 +30,13 @@
       <div class="stat-card">
         <div class="stat-card-top">
           <div class="stat-icon-wrap">
-            <q-icon name="mail" size="20px" color="white" />
+            <Icon name="mail" :size="20" color="white" />
           </div>
           <span class="stat-badge badge-green">IN USE</span>
         </div>
         <p class="stat-label">EMAIL ACCOUNTS</p>
         <div class="stat-value-row">
-          <q-skeleton v-if="loading" type="text" width="2rem" height="40px" />
+          <div v-if="loading" class="skeleton w-16 h-10" />
           <span v-else class="stat-value">{{ stats.mailboxes }}</span>
           <span class="stat-sub">ACCOUNTS</span>
         </div>
@@ -46,13 +46,13 @@
       <div class="stat-card">
         <div class="stat-card-top">
           <div class="stat-icon-wrap">
-            <q-icon name="swap_horiz" size="20px" color="white" />
+            <Icon name="arrow-left-right" :size="20" color="white" />
           </div>
           <span class="stat-badge badge-green">ACTIVE</span>
         </div>
         <p class="stat-label">TOTAL ALIASES</p>
         <div class="stat-value-row">
-          <q-skeleton v-if="loading" type="text" width="2rem" height="40px" />
+          <div v-if="loading" class="skeleton w-16 h-10" />
           <span v-else class="stat-value">{{ stats.aliases }}</span>
           <span class="stat-sub">ALIASES</span>
         </div>
@@ -66,7 +66,7 @@
         </div>
         <router-link to="/domains" class="cta-btn">
           ADD DOMAIN
-          <q-icon name="add_circle_outline" size="16px" />
+          <Icon name="plus-circle" :size="16" />
         </router-link>
       </div>
 
@@ -78,7 +78,7 @@
         </div>
         <router-link to="/mailboxes" class="cta-btn">
           ADD EMAIL
-          <q-icon name="add_circle_outline" size="16px" />
+          <Icon name="plus-circle" :size="16" />
         </router-link>
       </div>
 
@@ -86,7 +86,7 @@
 
     <!-- Error -->
     <div v-if="error" class="error-banner">
-      <q-icon name="warning" size="16px" /> {{ error }}
+      <Icon name="alert-triangle" :size="16" class="mr-1" /> {{ error }}
     </div>
 
     <!-- ─── Activity table ─── -->
@@ -97,7 +97,7 @@
         <div class="table-topbar-title">RECENT ACTIVITY</div>
         <router-link to="/logs" class="view-logs-link">
           VIEW LOGS
-          <q-icon name="arrow_forward" size="16px" />
+          <Icon name="arrow-right" :size="16" />
         </router-link>
       </div>
 
@@ -117,71 +117,21 @@
         </div>
       </div>
 
-      <!-- Table -->
+      <!-- Real DataTables for RECENT ACTIVITY (matching 8081 old server) -->
       <div class="table-wrap">
-        <table class="activity-table">
-          <thead>
-            <tr class="table-head-row">
-              <th v-for="col in columns" :key="col.key" @click="sortBy(col.key)" class="table-th">
-                {{ col.label }}
-                <span class="sort-arrows">
-                  <span :class="sortKey === col.key && sortDir === 'asc' ? 'sort-active' : ''">▲</span>
-                  <span :class="sortKey === col.key && sortDir === 'desc' ? 'sort-active' : ''">▼</span>
-                </span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="loading">
-              <td :colspan="columns.length" class="table-loading">
-                <q-spinner color="primary" size="24px" />
-              </td>
-            </tr>
-            <tr v-else-if="pagedRows.length === 0">
-              <td :colspan="columns.length" class="table-empty">
-                <q-icon name="warning" size="16px" /> No data available
-              </td>
-            </tr>
-            <tr v-for="(row, i) in pagedRows" :key="i" class="table-row">
-              <td class="table-td">{{ row.timestamp }}</td>
-              <td class="table-td td-link">{{ row.username }}</td>
-              <td class="table-td">{{ row.domain }}</td>
-              <td class="table-td td-bold">{{ row.action }}</td>
-              <td class="table-td">{{ row.data }}</td>
-            </tr>
-          </tbody>
-        </table>
+        <BrutalDataTable
+          :data="dtRecentLogs"
+          :columns="dtRecentColumns"
+          :language="'EN'"
+          :page-length="10"
+          @draw="onRecentDraw"
+        />
       </div>
 
-      <!-- Table footer: showing + pagination -->
-      <div class="table-footer">
-        <div class="showing-text">
-          <template v-if="filteredRows.length === 0">
-            Showing 0 entries
-          </template>
-          <template v-else>
-            Showing {{ (currentPage - 1) * rowsPerPage + 1 }} to
-            {{ Math.min(currentPage * rowsPerPage, filteredRows.length) }} of
-            {{ filteredRows.length }} entries
-          </template>
-        </div>
-        <div class="pagination">
-          <button class="pg-btn" :disabled="currentPage === 1" @click="currentPage = 1">«</button>
-          <button class="pg-btn" :disabled="currentPage === 1" @click="currentPage--">‹</button>
-          <button
-            v-for="p in pageButtons"
-            :key="p"
-            class="pg-btn"
-            :class="{ 'pg-active': p === currentPage }"
-            @click="currentPage = p"
-          >{{ p }}</button>
-          <button class="pg-btn" :disabled="currentPage === totalPages" @click="currentPage++">›</button>
-          <button class="pg-btn" :disabled="currentPage === totalPages" @click="currentPage = totalPages">»</button>
-        </div>
-      </div>
+      <!-- DataTables now renders its own footer (info + pagination) below the table -->
 
     </div>
-  </q-page>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -197,56 +147,10 @@ const allRows = ref<any[]>([])
 const search = ref('')
 const rowsPerPage = ref(10)
 const currentPage = ref(1)
-const sortKey = ref('timestamp')
-const sortDir = ref<'asc' | 'desc'>('desc')
 
-const columns = [
-  { key: 'timestamp', label: 'DATE/TIME' },
-  { key: 'username',  label: 'ADMINISTRATOR' },
-  { key: 'domain',    label: 'DOMAIN' },
-  { key: 'action',    label: 'ACTION' },
-  { key: 'data',      label: 'DESCRIPTION' },
-]
+// Old custom activity table logic removed — now using BrutalDataTable (datatables.net-vue3)
 
-function sortBy(key: string) {
-  if (sortKey.value === key) {
-    sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc'
-  } else {
-    sortKey.value = key
-    sortDir.value = 'asc'
-  }
-}
-
-const filteredRows = computed(() => {
-  const q = search.value.toLowerCase()
-  const rows = q
-    ? allRows.value.filter(r =>
-        Object.values(r).some(v => String(v).toLowerCase().includes(q))
-      )
-    : allRows.value
-
-  return [...rows].sort((a, b) => {
-    const av = String(a[sortKey.value] ?? '')
-    const bv = String(b[sortKey.value] ?? '')
-    return sortDir.value === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av)
-  })
-})
-
-const totalPages = computed(() => Math.max(1, Math.ceil(filteredRows.value.length / rowsPerPage.value)))
-
-const pageButtons = computed(() => {
-  const total = totalPages.value
-  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
-  const cur = currentPage.value
-  const pages = new Set([1, total, cur, cur - 1, cur + 1].filter(p => p >= 1 && p <= total))
-  return Array.from(pages).sort((a, b) => a - b)
-})
-
-const pagedRows = computed(() => {
-  const start = (currentPage.value - 1) * rowsPerPage.value
-  return filteredRows.value.slice(start, start + rowsPerPage.value)
-})
-
+// Old manual pagination for recent activity removed (DataTables handles it now)
 watch([search, rowsPerPage], () => { currentPage.value = 1 })
 
 async function loadDashboardData() {
@@ -275,6 +179,46 @@ async function loadDashboardData() {
 }
 
 onMounted(loadDashboardData)
+
+// =============================================
+// DataTables for RECENT ACTIVITY (matching old server)
+// =============================================
+const dtRecentLogs = computed(() => allRows.value)
+
+const dtRecentColumns = [
+  {
+    data: 'timestamp',
+    title: 'DATE/TIME',
+    className: 'text-xs py-1 px-2 text-gray-600 font-medium'
+  },
+  {
+    data: 'username',
+    title: 'ADMINISTRATOR',
+    className: 'text-xs py-1 px-2 text-brand-primary font-bold'
+  },
+  {
+    data: 'domain',
+    title: 'DOMAIN',
+    className: 'text-xs py-1 px-2 text-gray-600'
+  },
+  {
+    data: 'action',
+    title: 'ACTION',
+    className: 'text-xs py-1 px-2 uppercase font-black tracking-wide'
+  },
+  {
+    data: 'data',
+    title: 'DESCRIPTION',
+    className: 'text-xs py-1 px-2 text-gray-600 font-mono'
+  }
+]
+
+function onRecentDraw() {
+  // No action buttons here, just re-init icons if needed
+  if (typeof window !== 'undefined' && (window as any).lucide) {
+    (window as any).lucide.createIcons()
+  }
+}
 </script>
 
 <style scoped>
@@ -450,8 +394,8 @@ onMounted(loadDashboardData)
 /* ─── Table card ─── */
 .table-card {
   background: #ffffff;
-  border: 2px solid #1e293b;
-  box-shadow: 2px 2px 0px #1e293b;
+  border: 3px solid #1e293b;
+  box-shadow: 3px 3px 0 #1e293b;
 }
 
 .table-topbar {
@@ -525,7 +469,6 @@ onMounted(loadDashboardData)
   width: 100%;
   border-collapse: collapse;
   font-size: 12.5px;
-  border: 2px solid #1e293b;
 }
 .table-head-row {
   background: #3b82f6;
@@ -533,15 +476,15 @@ onMounted(loadDashboardData)
 }
 .table-th {
   color: #fff;
-  font-weight: 900;
-  letter-spacing: 0.6px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
   text-transform: uppercase;
-  padding: 10px 14px;
+  padding: 10px;
   text-align: left;
   cursor: pointer;
   white-space: nowrap;
   user-select: none;
-  font-size: 11px;
+  font-size: 12px;
 }
 .table-th:hover { background: #2563eb; }
 .sort-arrows {

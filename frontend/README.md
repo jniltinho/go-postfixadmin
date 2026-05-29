@@ -1,5 +1,35 @@
-# Vue 3 + TypeScript + Vite
+# Go-PostfixAdmin Frontend
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Vue 3 + TypeScript + Vite + Tailwind CSS v4 + Lucide Icons
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+## Stack
+
+- **Vue 3** (script setup + Pinia + Vue Router)
+- **Tailwind CSS v4** (via `@tailwindcss/vite`)
+- **Lucide Icons** (`@lucide/vue`)
+- **Neo-Brutalist Design System** (custom components + centralized primitives)
+
+## Key Components
+
+Located in `src/components/ui/`:
+
+- `Icon.vue` – Wrapper for Lucide icons
+- `BrutalButton.vue`
+- `BrutalCard.vue`
+- `BrutalModal.vue` – Replaces old custom modals
+
+All are registered globally.
+
+## Development
+
+```bash
+npm install
+npm run dev     # http://localhost:9000 (proxies to Go backend :8080)
+npm run build   # outputs to ../web/dist
+```
+
+## Migration Note (2026)
+
+This frontend was migrated from Quasar v2 to a lightweight Tailwind + custom brutalist stack to reduce CSS complexity while preserving the exact visual identity (thick borders, hard shadows, Fira fonts, brand colors).
+
+See `DOCUMENTS/MIGRATION_PLAN_REMOVE_QUASAR_TAILWIND_LUCIDE.md` for full history.

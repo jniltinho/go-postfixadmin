@@ -1,5 +1,5 @@
 <template>
-  <q-page class="st-page">
+  <div class="st-page">
 
     <!-- ─── Header ─── -->
     <div class="page-header">
@@ -8,19 +8,19 @@
         <div class="page-subtitle">MANAGE YOUR ACCOUNT, INTEGRATIONS AND API KEYS</div>
       </div>
       <button class="btn-primary" @click="openAdd">
-        <q-icon name="add_circle" size="16px" style="margin-right:6px;vertical-align:middle" />
+        <Icon name="plus-circle" :size="16" style="margin-right:6px;vertical-align:middle" />
         GENERATE API KEY
       </button>
     </div>
 
     <!-- ─── Error banner ─── -->
     <div v-if="error" class="error-banner">
-      <q-icon name="warning" size="16px" /> {{ error }}
+      <Icon name="alert-triangle" :size="16" class="mr-1" /> {{ error }}
     </div>
 
     <!-- ─── Description Callout ─── -->
     <div class="info-callout">
-      <q-icon name="vpn_key" size="24px" class="callout-icon" />
+      <Icon name="key" :size="24" class="callout-icon" />
       <div>
         <div class="callout-heading">BearerAuth API Keys (Personal Access Tokens)</div>
         <div class="callout-text">
@@ -38,7 +38,7 @@
         </div>
         <div class="controls-right">
           <button class="btn-refresh" @click="load">
-            <q-icon name="refresh" size="14px" /> REFRESH
+            <Icon name="refresh-cw" :size="14" /> REFRESH
           </button>
         </div>
       </div>
@@ -58,7 +58,7 @@
           <tbody>
             <tr v-if="loading">
               <td colspan="6" class="table-loading">
-                <q-spinner color="primary" size="24px" />
+                <div class="spinner mx-auto" />
               </td>
             </tr>
             <tr v-else-if="keys.length === 0">
@@ -84,7 +84,7 @@
               </td>
               <td class="table-td actions-td text-center justify-center">
                 <button class="act-btn act-del" @click="confirmDelete(row)">
-                  <q-icon name="delete" size="12px" style="margin-right:4px;vertical-align:middle" />REVOKE
+                  <Icon name="trash-2" :size="12" style="margin-right:4px;vertical-align:middle" />REVOKE
                 </button>
               </td>
             </tr>
@@ -95,51 +95,81 @@
 
     <!-- ══════════ GENERATE MODAL ══════════ -->
     <div v-if="showAdd" class="modal-overlay" @click.self="showAdd = false">
-      <div class="modal-card">
-        <div class="modal-head">
-          <span class="modal-head-title">
-            <q-icon name="vpn_key" size="18px" style="margin-right:8px;vertical-align:middle" />
+      <div class="bg-white border-4 border-brand-text w-full max-w-2xl max-h-[90vh] flex flex-col">
+        <!-- Header (blue bar) -->
+        <div class="bg-brand-primary px-6 py-4 flex items-center justify-between flex-shrink-0" style="border-bottom: 2px solid #1e293b;">
+          <h3 class="text-lg font-mono font-black uppercase tracking-tight text-white flex items-center">
+            <Icon name="key" :size="20" class="mr-2" />
             GENERATE NEW API KEY
-          </span>
-          <button class="modal-close" @click="showAdd = false">✕</button>
-        </div>
-        <div class="modal-body">
-          <div v-if="addError" class="modal-error">
-            <q-icon name="warning" size="14px" style="margin-right:6px;flex-shrink:0" />
-            {{ addError }}
-          </div>
-
-          <div class="info-card">
-            <div class="info-card-title">
-              <q-icon name="info" size="15px" style="margin-right:6px" />
-              TOKEN DETAILS
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">KEY NAME <span class="req">*</span></label>
-              <input v-model="addForm.name" class="form-input" placeholder="e.g. My Swagger Client, Python Script" />
-              <span class="form-hint">Enter a descriptive name to identify this token later</span>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">EXPIRATION</label>
-              <select v-model.number="addForm.daysValid" class="form-select-plain">
-                <option :value="0">Never expires</option>
-                <option :value="30">30 Days</option>
-                <option :value="60">60 Days</option>
-                <option :value="90">90 Days</option>
-                <option :value="365">1 Year (365 Days)</option>
-              </select>
-              <span class="form-hint">Choose when this token should expire for safety</span>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn-cancel" @click="showAdd = false">
-            <q-icon name="close" size="14px" style="margin-right:4px;vertical-align:middle" />CANCEL
+          </h3>
+          <button @click="showAdd = false" class="text-white hover:text-gray-200 transition-colors">
+            <Icon name="x" :size="20" />
           </button>
-          <button class="btn-primary" :disabled="savingAdd" @click="submitAdd">
-            <q-icon name="add_circle" size="14px" style="margin-right:6px;vertical-align:middle" />
+        </div>
+
+        <!-- Scrollable Body -->
+        <div class="overflow-y-auto flex-1">
+          <!-- Error Area -->
+          <div v-if="addError" class="mx-6 mt-4 bg-red-50 border-2 border-red-600 p-3 flex items-start">
+            <Icon name="alert-circle" :size="16" class="text-red-600 mr-2 mt-0.5 flex-shrink-0" />
+            <p class="text-sm text-red-700 font-medium">{{ addError }}</p>
+          </div>
+
+          <form class="p-6 space-y-5" @submit.prevent="submitAdd">
+            <!-- Token Details Section -->
+            <div class="border-2 border-brand-text p-4 space-y-4">
+              <h4 class="text-sm font-mono font-black uppercase tracking-tight flex items-center">
+                <Icon name="info" :size="16" class="mr-2" />
+                TOKEN DETAILS
+              </h4>
+
+              <!-- Key Name -->
+              <div>
+                <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                  KEY NAME <span class="text-red-500">*</span>
+                </label>
+                <input
+                  v-model="addForm.name"
+                  type="text"
+                  required
+                  placeholder="e.g. My Swagger Client, Python Script"
+                  class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm"
+                />
+                <p class="text-[10px] text-gray-400 mt-1">Enter a descriptive name to identify this token later</p>
+              </div>
+
+              <!-- Expiration -->
+              <div>
+                <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                  EXPIRATION
+                </label>
+                <select
+                  v-model.number="addForm.daysValid"
+                  required
+                  class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors cursor-pointer text-sm bg-white"
+                >
+                  <option :value="0">Never expires</option>
+                  <option :value="30">30 Days</option>
+                  <option :value="60">60 Days</option>
+                  <option :value="90">90 Days</option>
+                  <option :value="365">1 Year (365 Days)</option>
+                </select>
+                <p class="text-[10px] text-gray-400 mt-1">Choose when this token should expire for safety</p>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Footer Buttons -->
+        <div class="flex items-center justify-end space-x-3 px-6 py-4 border-t-2 border-brand-text flex-shrink-0 bg-white">
+          <button type="button" @click="showAdd = false"
+            class="bg-white hover:bg-gray-50 text-brand-text border-2 border-brand-text font-black px-6 py-3 shadow-[2px_2px_0px_#1E293B] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm">
+            <Icon name="x" :size="16" class="mr-2" />
+            CANCEL
+          </button>
+          <button type="button" :disabled="savingAdd" @click="submitAdd"
+            class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-6 py-3 shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm disabled:opacity-60">
+            <Icon name="plus-circle" :size="16" class="mr-2" />
             {{ savingAdd ? 'GENERATING...' : 'GENERATE TOKEN' }}
           </button>
         </div>
@@ -147,31 +177,49 @@
     </div>
 
     <!-- ══════════ KEY CREATED SUCCESS MODAL ══════════ -->
-    <div v-if="showSuccessModal" class="modal-overlay">
-      <div class="modal-card">
-        <div class="modal-head modal-head-success">
-          <span class="modal-head-title">
-            <q-icon name="check_circle" size="18px" style="margin-right:8px;vertical-align:middle" />
+    <div v-if="showSuccessModal" class="modal-overlay" @click.self="showSuccessModal = false">
+      <div class="bg-white border-4 border-brand-text w-full max-w-xl max-h-[90vh] flex flex-col">
+        <!-- Header (emerald green success bar) -->
+        <div class="bg-emerald-600 px-6 py-4 flex items-center justify-between flex-shrink-0" style="border-bottom: 2px solid #1e293b;">
+          <h3 class="text-lg font-mono font-black uppercase tracking-tight text-white flex items-center">
+            <Icon name="check-circle" :size="20" class="mr-2" />
             API KEY GENERATED SUCCESSFULLY!
-          </span>
+          </h3>
+          <button @click="showSuccessModal = false" class="text-white hover:text-gray-200 transition-colors">
+            <Icon name="x" :size="20" />
+          </button>
         </div>
-        <div class="modal-body">
-          <div class="success-banner">
-            <q-icon name="warning" size="20px" class="q-mr-sm" />
-            <span>Make sure to copy your API key now. You will not be able to see it again!</span>
+
+        <div class="overflow-y-auto flex-1 p-6 space-y-5">
+          <!-- Warning Banner -->
+          <div class="bg-amber-50 border-2 border-amber-600 p-3 flex items-start">
+            <Icon name="alert-triangle" :size="20" class="text-amber-600 mr-2 mt-0.5 flex-shrink-0" />
+            <p class="text-sm text-amber-700 font-bold">
+              Make sure to copy your API key now. You will not be able to see it again!
+            </p>
           </div>
 
-          <div class="info-card">
-            <div class="info-card-title">YOUR PERSONAL ACCESS TOKEN</div>
-            <div class="raw-token-box font-mono" @click="copyText(createdKeyToken)">
+          <!-- Token Details Block -->
+          <div class="border-2 border-brand-text p-4 space-y-3">
+            <h4 class="text-xs font-mono font-black uppercase tracking-tight flex items-center text-brand-text">
+              YOUR PERSONAL ACCESS TOKEN
+            </h4>
+            <div 
+              @click="copyText(createdKeyToken)"
+              class="w-full bg-slate-50 hover:bg-blue-50 border-2 border-dashed border-blue-500 hover:border-solid p-4 text-center font-mono text-base font-bold text-blue-600 cursor-pointer break-all transition-all"
+              title="Click to copy token"
+            >
               {{ createdKeyToken }}
             </div>
-            <span class="form-hint text-center">Click the token block or the button below to copy</span>
+            <p class="text-[10px] text-gray-400 text-center">Click the token block above to copy</p>
           </div>
         </div>
-        <div class="modal-footer">
-          <button class="btn-primary" @click="copyAndClose">
-            <q-icon name="content_copy" size="14px" style="margin-right:6px;vertical-align:middle" />
+
+        <!-- Footer -->
+        <div class="flex items-center justify-end px-6 py-4 border-t-2 border-brand-text bg-white">
+          <button type="button" @click="copyAndClose"
+            class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-6 py-3 shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm">
+            <Icon name="copy" :size="16" class="mr-2" />
             COPY & CLOSE
           </button>
         </div>
@@ -180,31 +228,45 @@
 
     <!-- ══════════ REVOKE CONFIRM ══════════ -->
     <div v-if="showDeleteConfirm" class="modal-overlay" @click.self="showDeleteConfirm = false">
-      <div class="modal-card modal-card-sm">
-        <div class="modal-head modal-head-danger">
-          <span class="modal-head-title">
-            <q-icon name="delete" size="16px" style="margin-right:6px;vertical-align:middle" />
+      <div class="bg-white border-4 border-brand-text w-full max-w-md flex flex-col">
+        <!-- Header -->
+        <div class="bg-red-600 px-6 py-4 flex items-center justify-between flex-shrink-0" style="border-bottom: 2px solid #1e293b;">
+          <h3 class="text-lg font-mono font-black uppercase tracking-tight text-white flex items-center">
+            <Icon name="trash-2" :size="20" class="mr-2" />
             REVOKE TOKEN
-          </span>
-          <button class="modal-close" @click="showDeleteConfirm = false">✕</button>
+          </h3>
+          <button @click="showDeleteConfirm = false" class="text-white hover:text-gray-200 transition-colors">
+            <Icon name="x" :size="20" />
+          </button>
         </div>
-        <div class="modal-body">
-          <p class="confirm-text">
+
+        <!-- Body -->
+        <div class="p-6">
+          <p class="text-sm font-bold text-brand-text leading-relaxed">
             Are you sure you want to revoke API key<br />
-            <strong>{{ deleteTarget?.name }}</strong>?<br />
-            <span class="confirm-sub">Any external client or script using this key will immediately be blocked. This action is permanent.</span>
+            <strong class="text-red-600">{{ deleteTarget?.name }}</strong>?<br />
+            <span class="block text-xs text-gray-500 font-medium mt-2 leading-normal">
+              Any external client or script using this key will immediately be blocked. This action is permanent.
+            </span>
           </p>
         </div>
-        <div class="modal-footer">
-          <button class="btn-cancel" @click="showDeleteConfirm = false">CANCEL</button>
-          <button class="btn-danger" :disabled="deletingRow" @click="submitDelete">
+
+        <!-- Footer -->
+        <div class="flex items-center justify-end space-x-3 px-6 py-4 border-t-2 border-brand-text bg-white">
+          <button type="button" @click="showDeleteConfirm = false"
+            class="bg-white hover:bg-gray-50 text-brand-text border-2 border-brand-text font-black px-4 py-2 shadow-[2px_2px_0px_#1E293B] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-xs">
+            CANCEL
+          </button>
+          <button type="button" :disabled="deletingRow" @click="submitDelete"
+            class="bg-red-600 hover:bg-white hover:text-red-600 text-white border-2 border-brand-text font-black px-4 py-2 shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-xs">
+            <Icon name="trash-2" :size="14" style="margin-right:4px;vertical-align:middle" />
             {{ deletingRow ? 'REVOKING...' : 'REVOKE' }}
           </button>
         </div>
       </div>
     </div>
 
-  </q-page>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -359,31 +421,7 @@ function isExpired(ts: string | null): boolean {
 <style scoped>
 .st-page { background: #ebf2fe; padding: 24px 28px 40px; }
 
-.page-header {
-  display: flex; justify-content: space-between; align-items: flex-start;
-  margin-bottom: 20px;
-}
-.page-title { font-size: 28px; font-weight: 900; color: #1e293b; letter-spacing: -0.5px; line-height: 1; font-family: monospace; text-transform: uppercase; }
-.page-subtitle { font-size: 10px; color: #94a3b8; letter-spacing: 0.8px; margin-top: 6px; text-transform: uppercase; font-weight: 700; }
-
-.btn-primary {
-  background: #3b82f6; color: #fff; border: 2px solid #1e293b; padding: 20px 32px;
-  font-size: 16px; font-weight: 900; letter-spacing: 1.6px; cursor: pointer;
-  border-radius: 0; transition: all .15s; text-transform: uppercase;
-  box-shadow: 3px 3px 0 #1e293b; display: flex; align-items: center;
-}
-.btn-primary:hover:not(:disabled) {
-  background: #fff; color: #3b82f6;
-  transform: translate(-1px, -1px); box-shadow: 4px 4px 0 #1e293b;
-}
-.btn-primary:active:not(:disabled) { transform: translate(0,0); box-shadow: none; }
-.btn-primary:disabled { opacity: .5; cursor: default; }
-
-.error-banner {
-  background: #fef2f2; border: 1px solid #fca5a5; color: #dc2626;
-  padding: 10px 14px; font-size: 13px; margin-bottom: 18px;
-  display: flex; align-items: center; gap: 6px;
-}
+/* .page-header, .btn-primary, .error-banner, .table-card now from global style.css */
 
 /* Callout */
 .info-callout {
@@ -396,7 +434,7 @@ function isExpired(ts: string | null): boolean {
 .callout-text code { background: #f1f5f9; padding: 2px 6px; border: 1px solid #cbd5e1; font-family: monospace; font-size: 11.5px; font-weight: bold; }
 
 /* ─── Table card ─── */
-.table-card { background: #fff; border: 2px solid #1e293b; }
+.table-card { background: #fff; border: 3px solid #1e293b; box-shadow: 3px 3px 0 #1e293b; }
 .table-topbar {
   display: flex; justify-content: space-between; align-items: center;
   padding: 12px 14px; border-bottom: 1px solid #e2e8f0; gap: 12px;
@@ -414,8 +452,8 @@ function isExpired(ts: string | null): boolean {
 .data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 .table-head-row { background: #3b82f6; }
 .table-th {
-  color: #fff; font-weight: 600; letter-spacing: 0.4px; padding: 10px 14px;
-  text-align: left; white-space: nowrap; user-select: none;
+  color: #fff; font-weight: 700; letter-spacing: 0.4px; padding: 10px;
+  text-align: left; white-space: nowrap; user-select: none; font-size: 12px;
 }
 .table-row:nth-child(even) { background: #f8fafc; }
 .table-row:hover { background: #eff6ff; }
@@ -450,40 +488,7 @@ function isExpired(ts: string | null): boolean {
 
 .table-loading, .table-empty { text-align: center; padding: 28px; color: #94a3b8; font-size: 13px; }
 
-/* ─── Modals ─── */
-.modal-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 9000;
-  display: flex; align-items: center; justify-content: center; padding: 20px;
-}
-.modal-card {
-  background: #fff; border: 3px solid #1e293b; width: 100%; max-width: 500px;
-  max-height: 90vh; display: flex; flex-direction: column; border-radius: 0;
-  box-shadow: 4px 4px 0 #1e293b;
-}
-.modal-card-sm { max-width: 400px; }
-
-.modal-head {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 14px 20px; background: #3b82f6; color: #fff; flex-shrink: 0;
-}
-.modal-head-title {
-  font-size: 14px; font-weight: 900; letter-spacing: 0.5px; font-family: monospace;
-  text-transform: uppercase; display: flex; align-items: center;
-}
-.modal-head-success { background: #16a34a; }
-.modal-head-danger { background: #dc2626; }
-.modal-close {
-  background: transparent; border: none; color: #fff; cursor: pointer;
-  font-size: 18px; line-height: 1; padding: 2px 6px; font-weight: 300;
-}
-.modal-close:hover { opacity: .75; }
-
-.modal-body { padding: 20px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 16px; }
-
-.modal-error {
-  background: #fef2f2; border: 2px solid #dc2626; color: #dc2626;
-  padding: 10px 14px; font-size: 13px; display: flex; align-items: flex-start;
-}
+/* Migration note: Main Add and Revoke modals converted to BrutalModal. Success modal still legacy. Old CSS cleaned. */
 
 .success-banner {
   background: #fef3c7; border: 2px solid #d97706; color: #d97706;
@@ -517,17 +522,5 @@ function isExpired(ts: string | null): boolean {
 .form-select-plain:focus { border-color: #3b82f6; }
 .form-hint { font-size: 10px; color: #94a3b8; margin-top: 2px; }
 
-/* ─── Modal footer ─── */
-.modal-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px; border-top: 2px solid #e2e8f0; flex-shrink: 0; background: #f8fafc; }
-.btn-cancel { background: #fff; border: 2px solid #1e293b; color: #374151; padding: 12px 24px; font-size: 14px; font-weight: 900; cursor: pointer; border-radius: 0; text-transform: uppercase; letter-spacing: 1.4px; box-shadow: 2px 2px 0 #1e293b; transition: all .12s; display: flex; align-items: center; }
-.btn-cancel:hover { background: #f1f5f9; transform: translate(-1px,-1px); box-shadow: 3px 3px 0 #1e293b; }
-.modal-footer .btn-primary { padding: 12px 24px !important; font-size: 14px !important; font-weight: 900 !important; letter-spacing: 1.4px !important; }
-.modal-footer .btn-primary:hover:not(:disabled) { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 #1e293b; }
-.btn-cancel:active { transform: translate(0,0); box-shadow: none; }
-.btn-danger { background: #ef4444; color: #fff; border: 2px solid #1e293b; padding: 8px 20px; font-size: 11px; font-weight: 800; cursor: pointer; border-radius: 0; text-transform: uppercase; letter-spacing: 0.5px; transition: all .12s; }
-.btn-danger:hover:not(:disabled) { background: #dc2626; }
-.btn-danger:active:not(:disabled) { transform: translate(0,0); box-shadow: none; }
-.btn-danger:disabled { opacity: .5; cursor: default; }
-.confirm-text { font-size: 13px; color: #374151; line-height: 1.8; text-align: center; margin: 8px 0; }
-.confirm-sub { font-size: 11px; color: #dc2626; display: block; margin-top: 6px; }
+/* Old modal footer styles removed (handled by BrutalModal + global buttons) */
 </style>

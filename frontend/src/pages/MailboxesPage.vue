@@ -1,35 +1,37 @@
 <template>
-  <q-page class="mbox-page">
+  <div class="dom-page">
 
     <!-- ─── Header ─── -->
-    <div class="page-header">
+    <div class="dom-header">
       <div>
-        <div class="page-title">EMAIL ACCOUNTS</div>
-        <div class="page-subtitle">MANAGE YOUR EMAIL ACCOUNTS</div>
+        <div class="dom-title">EMAIL ACCOUNTS</div>
+        <div class="dom-subtitle">MANAGE YOUR EMAIL ACCOUNTS</div>
       </div>
       <button class="btn-primary" @click="openAdd">
-        <q-icon name="add_circle" size="16px" style="margin-right:6px;vertical-align:middle" />
+        <Icon name="plus-circle" :size="16" style="margin-right:6px;vertical-align:middle" />
         ADD EMAIL ACCOUNT
       </button>
     </div>
 
     <!-- ─── Error banner ─── -->
     <div v-if="error" class="error-banner">
-      <q-icon name="warning" size="16px" /> {{ error }}
+      <Icon name="alert-triangle" :size="16" class="mr-1" /> {{ error }}
     </div>
 
-    <!-- ─── Domain Filter ─── -->
-    <div class="filter-section">
-      <label class="filter-label">FILTER BY DOMAIN:</label>
-      <select v-model="domainFilter" class="filter-select" @change="currentPage = 1">
+    <!-- Domain filter (kept like in old server, placed before table) -->
+    <div class="mb-4 flex items-center gap-3">
+      <label class="text-xs font-black uppercase tracking-widest text-brand-text">FILTER BY DOMAIN:</label>
+      <select v-model="domainFilter" class="h-9 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium bg-white" @change="onFilterChange">
         <option value="">All Domains</option>
         <option v-for="d in domains" :key="d.domain" :value="d.domain">{{ d.domain }}</option>
       </select>
-      <a v-if="domainFilter" class="clear-filter" @click="domainFilter = ''; currentPage = 1">Clear Filter</a>
+      <a v-if="domainFilter" class="ml-2 text-xs font-bold text-red-500 hover:underline cursor-pointer" @click="domainFilter = ''; onFilterChange()">Clear Filter</a>
     </div>
 
     <!-- ─── Table card ─── -->
     <div class="table-card">
+
+      <!-- Controls row -->
       <div class="table-topbar">
         <div class="controls-left">
           <div class="per-page-wrap">
@@ -48,6 +50,7 @@
         </div>
       </div>
 
+      <!-- Table -->
       <div class="table-wrap">
         <table class="data-table">
           <thead>
@@ -64,7 +67,9 @@
           </thead>
           <tbody>
             <tr v-if="loading">
-              <td :colspan="columns.length + 1" class="table-loading"><q-spinner color="primary" size="24px" /></td>
+              <td :colspan="columns.length + 1" class="table-loading">
+                <div class="spinner mx-auto" />
+              </td>
             </tr>
             <tr v-else-if="pagedRows.length === 0">
               <td :colspan="columns.length + 1" class="table-empty">No records found</td>
@@ -72,23 +77,25 @@
             <tr v-for="row in pagedRows" :key="row.username" class="table-row">
               <td class="table-td td-link">
                 <div class="cell-with-icon">
-                  <q-icon name="mail_outline" size="14px" class="row-icon" />
+                  <Icon name="mail" :size="14" class="row-icon" />
                   {{ row.username }}
                 </div>
               </td>
-              <td class="table-td">{{ row.name }}</td>
-              <td class="table-td">{{ row.domain }}</td>
-              <td class="table-td">{{ formatQuota(row.quota) }}</td>
+              <td class="table-td">{{ row.name || '—' }}</td>
+              <td class="table-td mono">{{ row.domain }}</td>
+              <td class="table-td">
+                {{ row.quota === 0 ? 'Unlimited' : (row.quota / 1048576) + ' MB' }}
+              </td>
               <td class="table-td">
                 <span :class="row.active ? 'badge-yes' : 'badge-no'">{{ row.active ? 'YES' : 'NO' }}</span>
               </td>
               <td class="table-td">{{ formatDate(row.modified) }}</td>
               <td class="table-td actions-td">
                 <button class="act-btn act-edit" @click="openEdit(row)">
-                  <q-icon name="edit" size="12px" style="margin-right:4px;vertical-align:middle" />EDIT
+                  <Icon name="pencil" :size="12" style="margin-right:4px;vertical-align:middle" />EDIT
                 </button>
                 <button class="act-btn act-del" @click="confirmDelete(row)">
-                  <q-icon name="delete" size="12px" style="margin-right:4px;vertical-align:middle" />DELETE
+                  <Icon name="trash-2" :size="12" style="margin-right:4px;vertical-align:middle" />DELETE
                 </button>
               </td>
             </tr>
@@ -96,6 +103,7 @@
         </table>
       </div>
 
+      <!-- Footer -->
       <div class="table-footer">
         <div class="showing-text">
           <template v-if="filteredRows.length === 0">Showing 0 entries</template>
@@ -108,151 +116,222 @@
         <div class="pagination">
           <button class="pg-btn" :disabled="currentPage === 1" @click="currentPage = 1">FIRST</button>
           <button class="pg-btn" :disabled="currentPage === 1" @click="currentPage--">PREVIOUS</button>
-          <button v-for="p in pageButtons" :key="p" class="pg-btn" :class="{ 'pg-active': p === currentPage }" @click="currentPage = p">{{ p }}</button>
+          <button
+            v-for="p in pageButtons" :key="p"
+            class="pg-btn" :class="{ 'pg-active': p === currentPage }"
+            @click="currentPage = p"
+          >{{ p }}</button>
           <button class="pg-btn" :disabled="currentPage === totalPages" @click="currentPage++">NEXT</button>
           <button class="pg-btn" :disabled="currentPage === totalPages" @click="currentPage = totalPages">LAST</button>
         </div>
       </div>
     </div>
 
-    <!-- ══════════ ADD MODAL ══════════ -->
-    <div v-if="showAdd" class="modal-overlay" @click.self="showAdd = false">
-      <div class="modal-card">
-        <div class="modal-head">
-          <span class="modal-head-title">
-            <q-icon name="add_circle" size="18px" style="margin-right:8px;vertical-align:middle" />
+    <!-- ══════════ ADD MODAL (from zero - exact structure from form_add_mailbox.html) ══════════ -->
+    <div v-if="showAdd" class="modal-overlay" @click.self="closeAdd">
+      <div class="bg-white border-4 border-brand-text w-full max-w-2xl max-h-[90vh] flex flex-col">
+        <!-- Header (exact blue bar from reference) -->
+        <div class="bg-brand-primary px-6 py-4 flex items-center justify-between flex-shrink-0">
+          <h3 class="text-lg font-mono font-black uppercase tracking-tight text-white flex items-center">
+            <Icon name="plus-circle" :size="20" class="mr-2" />
             ADD EMAIL ACCOUNT
-          </span>
-          <button class="modal-close" @click="showAdd = false">✕</button>
+          </h3>
+          <button @click="closeAdd" class="text-white hover:text-gray-200 transition-colors">
+            <Icon name="x" :size="20" />
+          </button>
         </div>
-        <div class="modal-body">
-          <div v-if="addError" class="modal-error">
-            <q-icon name="warning" size="14px" style="margin-right:6px;flex-shrink:0" />{{ addError }}
+
+        <!-- Scrollable Body -->
+        <div class="overflow-y-auto flex-1">
+          <!-- Error Area (exact match) -->
+          <div v-if="addError" class="mx-6 mt-4 bg-red-50 border-2 border-red-600 p-3 flex items-start">
+            <Icon name="alert-circle" :size="16" class="text-red-600 mr-2 mt-0.5 flex-shrink-0" />
+            <p class="text-sm text-red-700 font-medium">{{ addError }}</p>
           </div>
 
-          <!-- EMAIL ACCOUNT card -->
-          <div class="info-card">
-            <div class="info-card-title">
-              <q-icon name="mail" size="15px" style="margin-right:6px" />
-              EMAIL ACCOUNT
-            </div>
+          <form class="p-6 space-y-5" @submit.prevent="submitAdd">
+            <!-- Email Account Section (border-2 exact) -->
+            <div class="border-2 border-brand-text p-4 space-y-4">
+              <h4 class="text-sm font-mono font-black uppercase tracking-tight flex items-center">
+                <Icon name="mail" :size="16" class="mr-2" />
+                EMAIL ACCOUNT
+              </h4>
 
-            <div class="form-row2">
-              <div class="form-group">
-                <label class="form-label">USERNAME <span class="req">*</span></label>
-                <input v-model="addForm.localPart" class="form-input" placeholder="username" @input="addForm.localPart = addForm.localPart.toLowerCase()" />
-                <span class="form-hint">Lowercase letters, numbers, dots, hyphens (min. 4 chars)</span>
-              </div>
-              <div class="form-group">
-                <label class="form-label">DOMAIN <span class="req">*</span></label>
-                <select v-model="addForm.domain" class="form-select-plain">
-                  <option value="" disabled>Select a domain...</option>
-                  <option v-for="d in domains" :key="d.domain" :value="d.domain">{{ d.domain }}</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Email preview -->
-            <div class="email-preview">
-              <span class="email-preview-label">FULL ADDRESS:</span>
-              <span class="email-preview-value">
-                <span class="email-preview-local">{{ addForm.localPart || 'user' }}</span>@<span class="email-preview-domain">{{ addForm.domain || 'domain.com' }}</span>
-              </span>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">DISPLAY NAME</label>
-              <input v-model="addForm.name" class="form-input" placeholder="Full Name" />
-            </div>
-
-            <div class="form-row-checks">
-              <label class="check-label">
-                <input type="checkbox" v-model="addForm.active" /> Active Account
-              </label>
-              <label class="check-label">
-                <input type="checkbox" v-model="addForm.sendWelcome" /> Send Welcome Email
-              </label>
-            </div>
-          </div>
-
-          <!-- PASSWORD card -->
-          <div class="info-card">
-            <div class="info-card-title">
-              <q-icon name="key" size="15px" style="margin-right:6px" />
-              PASSWORD
-            </div>
-
-            <div class="pw-row">
-              <div class="pw-field">
-                <label class="form-label">PASSWORD <span class="req">*</span></label>
-                <div class="pw-wrap">
-                  <input v-model="addForm.password" :type="showPw1 ? 'text' : 'password'" class="form-input" placeholder="Min. 8 characters" @input="onAddPasswordInput" />
-                  <button class="pw-eye" type="button" @click="showPw1 = !showPw1">
-                    <q-icon :name="showPw1 ? 'visibility_off' : 'visibility'" size="18px" />
-                  </button>
+              <!-- Username + Domain grid -->
+              <div class="grid grid-cols-2 gap-3 items-start">
+                <div>
+                  <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                    USERNAME <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    v-model="addForm.localPart"
+                    type="text"
+                    required
+                    minlength="4"
+                    pattern="[a-z0-9._-]{4,}"
+                    placeholder="username"
+                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm lowercase"
+                    style="text-transform: lowercase;"
+                    @input="onLocalPartInput"
+                  />
+                  <p class="text-[10px] text-gray-400 mt-1">Lowercase letters, numbers, dots, hyphens (min. 4 chars)</p>
+                </div>
+                <div>
+                  <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                    DOMAIN <span class="text-red-500">*</span>
+                  </label>
+                  <select
+                    v-model="addForm.domain"
+                    required
+                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors cursor-pointer text-sm"
+                    @change="updateEmailPreview"
+                  >
+                    <option value="" disabled>Select a domain...</option>
+                    <option v-for="d in domains" :key="d.domain" :value="d.domain">{{ d.domain }}</option>
+                  </select>
                 </div>
               </div>
-              <div class="pw-field">
-                <label class="form-label">CONFIRM PASSWORD <span class="req">*</span></label>
-                <div class="pw-wrap">
-                  <input v-model="addForm.passwordConfirm" :type="showPw2 ? 'text' : 'password'" class="form-input" placeholder="Repeat password" @input="onAddPasswordInput" />
-                  <button class="pw-eye" type="button" @click="showPw2 = !showPw2">
-                    <q-icon :name="showPw2 ? 'visibility_off' : 'visibility'" size="18px" />
-                  </button>
+
+              <!-- Email Preview (exact styling from reference) -->
+              <div class="bg-gray-50 border border-gray-300 px-3 h-10 flex items-center gap-2">
+                <span class="text-xs font-bold uppercase tracking-widest text-gray-400 whitespace-nowrap">FULL ADDRESS:</span>
+                <p class="font-mono text-sm font-bold">
+                  <span class="text-brand-primary">{{ addForm.localPart || 'user' }}</span>@<span class="text-brand-primary">{{ addForm.domain || 'domain.com' }}</span>
+                </p>
+              </div>
+
+              <!-- Display Name -->
+              <div>
+                <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">DISPLAY NAME</label>
+                <input
+                  v-model="addForm.name"
+                  type="text"
+                  placeholder="Full Name"
+                  class="w-full px-3 py-2 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm"
+                />
+              </div>
+
+              <!-- Active + Welcome Mail -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="flex items-center">
+                  <input type="checkbox" id="add-active" v-model="addForm.active" class="w-5 h-5 border-2 border-brand-text cursor-pointer" />
+                  <label for="add-active" class="ml-2 text-sm font-bold cursor-pointer">Active Account</label>
+                </div>
+                <div class="flex items-center">
+                  <input type="checkbox" id="add-welcome" v-model="addForm.sendWelcome" class="w-5 h-5 border-2 border-brand-text cursor-pointer" />
+                  <label for="add-welcome" class="ml-2 text-sm font-bold cursor-pointer">Send Welcome Email</label>
                 </div>
               </div>
-              <div class="pw-gen-wrap">
-                <label class="form-label">&nbsp;</label>
-                <button class="btn-generate" type="button" @click="generateAddPassword()">
-                  <q-icon name="auto_fix_high" size="14px" style="margin-right:4px;vertical-align:middle" />
+            </div>
+
+            <!-- Password Section (border-2 exact) -->
+            <div class="border-2 border-brand-text p-4 space-y-3">
+              <h4 class="text-sm font-mono font-black uppercase tracking-tight flex items-center">
+                <Icon name="key" :size="16" class="mr-2" />
+                PASSWORD
+              </h4>
+
+              <div class="flex gap-2 items-center">
+                <!-- Password -->
+                <div class="relative flex-1">
+                  <input
+                    :type="showPw1 ? 'text' : 'password'"
+                    v-model="addForm.password"
+                    required
+                    minlength="8"
+                    placeholder="New password"
+                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm pr-10"
+                    @input="onAddPasswordInput"
+                  />
+                  <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary transition-colors" @click="showPw1 = !showPw1">
+                    <Icon :name="showPw1 ? 'eye-off' : 'eye'" :size="16" />
+                  </button>
+                </div>
+                <!-- Confirm -->
+                <div class="relative flex-1">
+                  <input
+                    :type="showPw2 ? 'text' : 'password'"
+                    v-model="addForm.passwordConfirm"
+                    required
+                    minlength="8"
+                    placeholder="Repeat password"
+                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm pr-10"
+                    @input="onAddPasswordInput"
+                  />
+                  <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary transition-colors" @click="showPw2 = !showPw2">
+                    <Icon :name="showPw2 ? 'eye-off' : 'eye'" :size="16" />
+                  </button>
+                </div>
+                <!-- Generate (exact button style) -->
+                <button type="button" @click="generateAddPassword"
+                  class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white text-xs font-black px-3 h-10 border-2 border-brand-text cursor-pointer uppercase tracking-widest flex items-center gap-1 whitespace-nowrap flex-shrink-0 transition-colors">
+                  <Icon name="wand-2" :size="14" />
                   GENERATE
                 </button>
               </div>
-            </div>
-            <div v-if="addForm.password" class="pwd-strength">
-              <div class="strength-bar-wrap">
-                <div class="strength-bar" :style="{ width: addPwdStrength.pct + '%', background: addPwdStrength.color }"></div>
-              </div>
-              <span class="strength-label" :style="{ color: addPwdStrength.color }">{{ addPwdStrength.label }}</span>
-            </div>
-            <div v-if="addPwdMismatch" class="pwd-mismatch">Passwords do not match</div>
-          </div>
 
-          <!-- ADVANCED SETTINGS collapsible -->
-          <details class="adv-details">
-            <summary class="adv-summary">
-              <span class="adv-summary-left">
-                <q-icon name="settings" size="15px" style="margin-right:6px" />
-                ADVANCED SETTINGS
-              </span>
-              <q-icon name="expand_more" size="18px" class="adv-chevron" />
-            </summary>
-            <div class="adv-body">
-              <div class="form-row2">
-                <div class="form-group">
-                  <label class="form-label">QUOTA (MB)</label>
-                  <input v-model.number="addForm.quotaMB" class="form-input" type="number" min="0" />
-                  <span class="form-hint">Storage limit in MB (0 = unlimited)</span>
+              <p v-if="addPwdMismatch" class="text-xs text-red-600 font-bold">Passwords do not match</p>
+
+              <!-- Strength Meter (exact structure) -->
+              <div v-if="addForm.password" id="add-strengthMeter">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs font-black uppercase tracking-widest text-brand-text">STRENGTH</span>
+                  <span class="text-xs font-bold uppercase tracking-wider" :style="{ color: addPwdStrength.color }">{{ addPwdStrength.label }}</span>
                 </div>
-                <div class="form-group adv-check-group">
-                  <label class="check-label" style="margin-top:22px">
-                    <input type="checkbox" v-model="addForm.smtpActive" /> SMTP Active (can send email)
-                  </label>
+                <div class="h-2 bg-gray-200 border border-brand-text overflow-hidden">
+                  <div class="h-full transition-all duration-300" :style="{ width: addPwdStrength.pct + '%', background: addPwdStrength.color }"></div>
                 </div>
-              </div>
-              <div class="form-group">
-                <label class="form-label">ALTERNATIVE EMAIL</label>
-                <input v-model="addForm.emailOther" class="form-input" placeholder="other@example.com" type="email" />
               </div>
             </div>
-          </details>
+
+            <!-- Advanced Settings (exact <details> from reference) -->
+            <details class="border-2 border-brand-text">
+              <summary class="px-4 py-3 cursor-pointer font-bold uppercase tracking-tight text-xs flex items-center hover:bg-gray-50 transition-colors">
+                <Icon name="settings" :size="14" class="mr-2" />
+                ADVANCED SETTINGS
+                <Icon name="chevron-down" :size="14" class="ml-auto" />
+              </summary>
+              <div class="px-4 pb-4 pt-2 space-y-3 border-t-2 border-brand-text">
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">QUOTA (MB)</label>
+                    <input
+                      v-model.number="addForm.quotaMB"
+                      type="number"
+                      min="0"
+                      class="w-full px-3 py-2 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm"
+                    />
+                    <p class="text-xs text-gray-500 mt-1">Storage limit in MB (0 = unlimited)</p>
+                  </div>
+                  <div class="flex items-center pt-5">
+                    <input type="checkbox" id="add-smtp" v-model="addForm.smtpActive" class="w-5 h-5 border-2 border-brand-text cursor-pointer" />
+                    <label for="add-smtp" class="ml-2 text-sm font-bold cursor-pointer">SMTP Active (can send email)</label>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">ALTERNATIVE EMAIL</label>
+                  <input
+                    v-model="addForm.emailOther"
+                    type="email"
+                    placeholder="other@example.com"
+                    class="w-full px-3 py-2 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm"
+                  />
+                </div>
+              </div>
+            </details>
+          </form>
         </div>
-        <div class="modal-footer">
-          <button class="btn-cancel" @click="showAdd = false">
-            <q-icon name="close" size="14px" style="margin-right:4px;vertical-align:middle" />CANCEL
+
+        <!-- Footer Buttons (exact shadows and hover from reference) -->
+        <div class="flex items-center justify-end space-x-3 px-6 py-4 border-t-2 border-brand-text flex-shrink-0 bg-white">
+          <button type="button" @click="closeAdd"
+            class="bg-white hover:bg-gray-50 text-brand-text border-2 border-brand-text font-black px-6 py-3 shadow-[2px_2px_0px_#1E293B] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm">
+            <Icon name="x" :size="16" class="mr-2" />
+            CANCEL
           </button>
-          <button class="btn-primary" :disabled="savingAdd" @click="submitAdd">
-            <q-icon name="save" size="14px" style="margin-right:6px;vertical-align:middle" />
+          <button type="button" :disabled="savingAdd" @click="submitAdd"
+            class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-6 py-3 shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm disabled:opacity-60">
+            <Icon name="save" :size="16" class="mr-2" />
             {{ savingAdd ? 'SAVING...' : 'SAVE EMAIL ACCOUNT' }}
           </button>
         </div>
@@ -261,123 +340,124 @@
 
     <!-- ══════════ EDIT MODAL ══════════ -->
     <div v-if="showEdit" class="modal-overlay" @click.self="showEdit = false">
-      <div class="modal-card">
-        <div class="modal-head">
-          <span class="modal-head-title">
-            <q-icon name="edit" size="18px" style="margin-right:8px;vertical-align:middle" />
+      <div class="modal-card" style="border: 4px solid #1e293b; max-width: 720px;">
+        <!-- Blue header bar like the old template -->
+        <div class="bg-brand-primary px-6 py-4 flex items-center justify-between flex-shrink-0" style="border-bottom: 2px solid #1e293b;">
+          <h3 class="text-lg font-mono font-black uppercase tracking-tight text-white flex items-center">
+            <Icon name="edit" :size="20" class="mr-2" />
             EDIT EMAIL ACCOUNT
-          </span>
-          <button class="modal-close" @click="showEdit = false">✕</button>
+          </h3>
+          <button @click="showEdit = false" class="text-white hover:text-gray-200 transition-colors">
+            <Icon name="x" :size="20" />
+          </button>
         </div>
         <div class="modal-body">
-          <div v-if="editError" class="modal-error">
-            <q-icon name="warning" size="14px" style="margin-right:6px;flex-shrink:0" />{{ editError }}
+          <div v-if="editError" class="mx-6 mt-4 bg-red-50 border-2 border-red-600 p-3 flex items-start">
+            <Icon name="alert-circle" :size="16" class="text-red-600 mr-2 mt-0.5 flex-shrink-0" />
+            <p class="text-sm text-red-700 font-medium">{{ editError }}</p>
           </div>
 
-          <!-- EMAIL ACCOUNT card -->
-          <div class="info-card">
-            <div class="info-card-title">
-              <q-icon name="mail" size="15px" style="margin-right:6px" />
+          <!-- EMAIL ACCOUNT Section (border-2 like old template) -->
+          <div class="border-2 border-brand-text p-4 space-y-4">
+            <h4 class="text-sm font-mono font-black uppercase tracking-tight flex items-center">
+              <Icon name="mail" :size="16" class="mr-2" />
               EMAIL ACCOUNT
+            </h4>
+
+            <div>
+              <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">EMAIL ADDRESS</label>
+              <div class="h-10 px-3 flex items-center border-2 border-gray-300 bg-gray-50 font-mono text-sm font-medium text-gray-700">
+                {{ editForm.username }}
+              </div>
             </div>
 
-            <div class="form-group">
-              <label class="form-label">EMAIL ADDRESS</label>
-              <div class="email-readonly">{{ editForm.username }}</div>
+            <div>
+              <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">DISPLAY NAME</label>
+              <input v-model="editForm.name" type="text" class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium text-sm" placeholder="Full name" />
             </div>
 
-            <div class="form-group">
-              <label class="form-label">DISPLAY NAME</label>
-              <input v-model="editForm.name" class="form-input" placeholder="Full Name" />
+            <div class="flex items-center">
+              <input type="checkbox" id="edit-active" v-model="editForm.active" class="w-5 h-5 border-2 border-brand-text cursor-pointer" />
+              <label for="edit-active" class="ml-2 text-sm font-bold cursor-pointer">Active Account</label>
             </div>
-
-            <label class="check-label">
-              <input type="checkbox" v-model="editForm.active" /> Active Account
-            </label>
           </div>
 
-          <!-- CHANGE PASSWORD collapsible (closed by default) -->
-          <details class="adv-details">
-            <summary class="adv-summary">
-              <span class="adv-summary-left">
-                <q-icon name="key" size="15px" style="margin-right:6px" />
-                CHANGE PASSWORD
-              </span>
-              <q-icon name="expand_more" size="18px" class="adv-chevron" />
+          <!-- CHANGE PASSWORD (collapsible with border-2 like old template) -->
+          <details class="border-2 border-brand-text">
+            <summary class="px-4 py-3 cursor-pointer font-bold uppercase tracking-tight text-xs flex items-center hover:bg-gray-50 transition-colors">
+              <Icon name="key" :size="14" class="mr-2" />
+              CHANGE PASSWORD
+              <Icon name="chevron-down" :size="14" class="ml-auto" />
             </summary>
-            <div class="adv-body">
-              <div class="pw-row">
-                <div class="pw-field">
-                  <label class="form-label">NEW PASSWORD</label>
-                  <div class="pw-wrap">
-                    <input v-model="editForm.password" :type="showPw3 ? 'text' : 'password'" class="form-input" placeholder="Min. 8 characters" @input="onEditPasswordInput" />
-                    <button class="pw-eye" type="button" @click="showPw3 = !showPw3">
-                      <q-icon :name="showPw3 ? 'visibility_off' : 'visibility'" size="18px" />
-                    </button>
-                  </div>
-                </div>
-                <div class="pw-field">
-                  <label class="form-label">CONFIRM PASSWORD</label>
-                  <div class="pw-wrap">
-                    <input v-model="editForm.passwordConfirm" :type="showPw4 ? 'text' : 'password'" class="form-input" placeholder="Repeat password" @input="onEditPasswordInput" />
-                    <button class="pw-eye" type="button" @click="showPw4 = !showPw4">
-                      <q-icon :name="showPw4 ? 'visibility_off' : 'visibility'" size="18px" />
-                    </button>
-                  </div>
-                </div>
-                <div class="pw-gen-wrap">
-                  <label class="form-label">&nbsp;</label>
-                  <button class="btn-generate" type="button" @click="generateEditPassword()">
-                    <q-icon name="auto_fix_high" size="14px" style="margin-right:4px;vertical-align:middle" />
-                    GENERATE
+            <div class="px-4 pb-4 pt-3 space-y-3 border-t-2 border-brand-text">
+              <div class="flex gap-2 items-center">
+                <div class="relative flex-1">
+                  <input v-model="editForm.password" :type="showPw3 ? 'text' : 'password'" class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium text-sm pr-10" placeholder="New password (min 8 chars)" @input="onEditPasswordInput" />
+                  <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary" @click="showPw3 = !showPw3">
+                    <Icon :name="showPw3 ? 'eye-off' : 'eye'" :size="16" />
                   </button>
                 </div>
-              </div>
-              <div v-if="editForm.password" class="pwd-strength">
-                <div class="strength-bar-wrap">
-                  <div class="strength-bar" :style="{ width: editPwdStrength.pct + '%', background: editPwdStrength.color }"></div>
+                <div class="relative flex-1">
+                  <input v-model="editForm.passwordConfirm" :type="showPw4 ? 'text' : 'password'" class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium text-sm pr-10" placeholder="Confirm new password" @input="onEditPasswordInput" />
+                  <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary" @click="showPw4 = !showPw4">
+                    <Icon :name="showPw4 ? 'eye-off' : 'eye'" :size="16" />
+                  </button>
                 </div>
-                <span class="strength-label" :style="{ color: editPwdStrength.color }">{{ editPwdStrength.label }}</span>
+                <button type="button" class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white text-xs font-black px-3 h-10 border-2 border-brand-text cursor-pointer uppercase tracking-widest flex items-center gap-1 whitespace-nowrap flex-shrink-0 transition-colors" @click="generateEditPassword()">
+                  <Icon name="wand-2" :size="14" class="mr-1" />
+                  GENERATE
+                </button>
               </div>
-              <div v-if="editPwdMismatch" class="pwd-mismatch">Passwords do not match</div>
+
+              <div v-if="editForm.password" class="pwd-strength">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs font-black uppercase tracking-widest text-brand-text">STRENGTH</span>
+                  <span class="text-xs font-bold uppercase tracking-wider" :style="{ color: editPwdStrength.color }">{{ editPwdStrength.label }}</span>
+                </div>
+                <div class="h-2 bg-gray-200 border border-brand-text overflow-hidden">
+                  <div class="h-full transition-all duration-300" :style="{ width: editPwdStrength.pct + '%', background: editPwdStrength.color }"></div>
+                </div>
+              </div>
+              <div v-if="editPwdMismatch" class="text-xs text-red-600 font-bold">Passwords do not match</div>
             </div>
           </details>
 
-          <!-- ADVANCED SETTINGS collapsible (open by default) -->
-          <details class="adv-details" open>
-            <summary class="adv-summary">
-              <span class="adv-summary-left">
-                <q-icon name="settings" size="15px" style="margin-right:6px" />
-                ADVANCED SETTINGS
-              </span>
-              <q-icon name="expand_less" size="18px" class="adv-chevron" />
+          <!-- ADVANCED SETTINGS (collapsible with border-2 like old template, open by default) -->
+          <details class="border-2 border-brand-text" open>
+            <summary class="px-4 py-3 cursor-pointer font-bold uppercase tracking-tight text-xs flex items-center hover:bg-gray-50 transition-colors">
+              <Icon name="settings" :size="14" class="mr-2" />
+              ADVANCED SETTINGS
+              <Icon name="chevron-down" :size="14" class="ml-auto" />
             </summary>
-            <div class="adv-body">
-              <div class="form-row2">
-                <div class="form-group">
-                  <label class="form-label">QUOTA (MB)</label>
-                  <input v-model.number="editForm.quotaMB" class="form-input" type="number" min="0" />
-                  <span class="form-hint">Storage limit in MB (0 = unlimited)</span>
+            <div class="px-4 pb-4 pt-2 space-y-3 border-t-2 border-brand-text">
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">QUOTA (MB)</label>
+                  <input v-model.number="editForm.quotaMB" type="number" min="0" class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium text-sm" />
+                  <p class="text-[10px] text-gray-400 mt-1">Storage limit in MB (0 = unlimited)</p>
                 </div>
-                <div class="form-group adv-check-group">
-                  <label class="check-label" style="margin-top:22px">
-                    <input type="checkbox" v-model="editForm.smtpActive" /> SMTP Active (can send email)
-                  </label>
+                <div class="flex items-center pt-5">
+                  <input type="checkbox" id="edit-smtp" v-model="editForm.smtpActive" class="w-5 h-5 border-2 border-brand-text cursor-pointer" />
+                  <label for="edit-smtp" class="ml-2 text-sm font-bold cursor-pointer">SMTP Active (can send email)</label>
                 </div>
               </div>
-              <div class="form-group">
-                <label class="form-label">ALTERNATIVE EMAIL</label>
-                <input v-model="editForm.emailOther" class="form-input" placeholder="other@example.com" type="email" />
+              <div>
+                <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">ALTERNATIVE EMAIL</label>
+                <input v-model="editForm.emailOther" type="email" class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium text-sm" placeholder="other@example.com" />
               </div>
             </div>
           </details>
         </div>
-        <div class="modal-footer">
-          <button class="btn-cancel" @click="showEdit = false">
-            <q-icon name="close" size="14px" style="margin-right:4px;vertical-align:middle" />CANCEL
+        <!-- Footer buttons matching old template style -->
+        <div class="flex items-center justify-end space-x-3 px-6 py-4 border-t-2 border-brand-text flex-shrink-0 bg-white">
+          <button type="button" @click="showEdit = false"
+            class="bg-white hover:bg-gray-50 text-brand-text border-2 border-brand-text font-black px-6 py-3 shadow-[2px_2px_0px_#1E293B] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm">
+            <Icon name="x" :size="16" class="mr-2" />
+            CANCEL
           </button>
-          <button class="btn-primary" :disabled="savingEdit" @click="submitEdit">
-            <q-icon name="save" size="14px" style="margin-right:6px;vertical-align:middle" />
+          <button type="button" @click="submitEdit" :disabled="savingEdit"
+            class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-6 py-3 shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm">
+            <Icon name="save" :size="16" class="mr-2" />
             {{ savingEdit ? 'SAVING...' : 'UPDATE EMAIL ACCOUNT' }}
           </button>
         </div>
@@ -385,31 +465,23 @@
     </div>
 
     <!-- ══════════ DELETE CONFIRM ══════════ -->
-    <div v-if="showDeleteConfirm" class="modal-overlay" @click.self="showDeleteConfirm = false">
-      <div class="modal-card modal-card-sm">
-        <div class="modal-head modal-head-danger">
-          <span class="modal-head-title">
-            <q-icon name="delete" size="16px" style="margin-right:6px;vertical-align:middle" />CONFIRM DELETE
-          </span>
-          <button class="modal-close" @click="showDeleteConfirm = false">✕</button>
-        </div>
-        <div class="modal-body">
-          <p class="confirm-text">
-            Are you sure you want to delete mailbox<br />
-            <strong>{{ deleteTarget?.username }}</strong>?<br />
-            <span class="confirm-sub">This action cannot be undone.</span>
-          </p>
-        </div>
-        <div class="modal-footer">
-          <button class="btn-cancel" @click="showDeleteConfirm = false">CANCEL</button>
-          <button class="btn-danger" :disabled="deletingRow" @click="submitDelete">
-            {{ deletingRow ? 'DELETING...' : 'DELETE' }}
-          </button>
-        </div>
-      </div>
-    </div>
+    <BrutalModal v-model="showDeleteConfirm" title="CONFIRM DELETE" size="sm" danger>
+      <p class="confirm-text">
+        Are you sure you want to delete mailbox<br />
+        <strong>{{ deleteTarget?.username }}</strong>?<br />
+        <span class="confirm-sub">This action cannot be undone.</span>
+      </p>
 
-  </q-page>
+      <template #footer>
+        <button class="btn-cancel" @click="showDeleteConfirm = false">CANCEL</button>
+        <button class="btn-danger" :disabled="deletingRow" @click="submitDelete">
+          <Icon name="trash-2" :size="14" style="margin-right:6px;vertical-align:middle" />
+          {{ deletingRow ? 'DELETING...' : 'DELETE' }}
+        </button>
+      </template>
+    </BrutalModal>
+
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -492,10 +564,6 @@ const pagedRows = computed(() => {
 })
 watch([search, rowsPerPage, domainFilter], () => { currentPage.value = 1 })
 
-function formatQuota(bytes: number): string {
-  if (!bytes || bytes === 0) return 'Unlimited'
-  return `${Math.round(bytes / QUOTA_MULTIPLIER)} MB`
-}
 function formatDate(ts: string): string {
   if (!ts) return '—'
   return new Date(ts).toLocaleString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
@@ -553,6 +621,29 @@ function openAdd() {
   showAdd.value = true
 }
 
+function closeAdd() {
+  showAdd.value = false
+  // reset like the reference
+  addForm.value = {
+    localPart: '', domain: '', name: '', quotaMB: 1024,
+    active: true, smtpActive: true, sendWelcome: false,
+    emailOther: '', password: '', passwordConfirm: '',
+  }
+  addError.value = ''
+  showPw1.value = false
+  showPw2.value = false
+  addPwdMismatch.value = false
+}
+
+function onLocalPartInput(e: Event) {
+  const val = (e.target as HTMLInputElement).value.toLowerCase()
+  addForm.value.localPart = val
+}
+
+function updateEmailPreview() {
+  // no-op, template uses direct binding on addForm
+}
+
 async function submitAdd() {
   addError.value = ''
   const f = addForm.value
@@ -573,7 +664,7 @@ async function submitAdd() {
       send_welcome: f.sendWelcome,
       email_other: f.emailOther,
     })
-    showAdd.value = false
+    closeAdd()
     toast.success(`Mailbox ${f.localPart}@${f.domain} created successfully`)
     await load()
   } catch (e: any) {
@@ -682,152 +773,88 @@ async function submitDelete() {
     showDeleteConfirm.value = false
   } finally { deletingRow.value = false }
 }
+
+function onFilterChange() {
+  // filter already applied in filteredRows
+}
 </script>
 
 <style scoped>
-.mbox-page { background: #ebf2fe; padding: 24px 28px 40px; }
+.dom-page { background: #ebf2fe; padding: 24px 28px 40px; }
 
-.page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
-.page-title { font-size: 28px; font-weight: 900; color: #1e293b; letter-spacing: -0.5px; line-height: 1; font-family: monospace; text-transform: uppercase; }
-.page-subtitle { font-size: 10px; color: #94a3b8; letter-spacing: 0.8px; margin-top: 6px; text-transform: uppercase; font-weight: 700; }
-
-.btn-primary {
-  background: #3b82f6; color: #fff; border: 2px solid #1e293b; padding: 20px 32px;
-  font-size: 16px; font-weight: 900; letter-spacing: 1.6px; cursor: pointer;
-  border-radius: 0; transition: all .15s; text-transform: uppercase;
-  box-shadow: 3px 3px 0 #1e293b; display: flex; align-items: center;
+.dom-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 20px;
 }
-.btn-primary:hover:not(:disabled) { background: #fff; color: #3b82f6; transform: translate(-1px,-1px); }
-.btn-primary:active:not(:disabled) { transform: translate(0,0); box-shadow: none; }
-.btn-primary:disabled { opacity: .5; cursor: default; }
+.dom-title { font-size: 28px; font-weight: 900; color: #1e293b; letter-spacing: -0.5px; line-height: 1; font-family: monospace; text-transform: uppercase; }
+.dom-subtitle { font-size: 10px; color: #94a3b8; letter-spacing: 0.8px; margin-top: 6px; text-transform: uppercase; font-weight: 700; }
 
-.filter-section { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
-.filter-label { font-size: 10px; font-weight: 800; color: #1e293b; letter-spacing: 1.2px; text-transform: uppercase; white-space: nowrap; }
-.filter-select { height: 38px; padding: 0 12px; border: 2px solid #1e293b; background: #fff; font-size: 13px; font-weight: 500; color: #374151; border-radius: 0; outline: none; cursor: pointer; }
-.filter-select:focus { border-color: #3b82f6; }
-.clear-filter { font-size: 12px; color: #ef4444; cursor: pointer; text-decoration: underline; font-weight: 600; }
+/* .btn-primary, .error-banner, .table-card now centralized in global style.css (Tailwind-friendly) */
 
-.error-banner { background: #fef2f2; border: 1px solid #fca5a5; color: #dc2626; padding: 10px 14px; font-size: 13px; margin-bottom: 18px; display: flex; align-items: center; gap: 6px; }
-
-.table-card { background: #fff; border: 2px solid #1e293b; }
-.table-topbar { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid #e2e8f0; gap: 12px; flex-wrap: wrap; }
-.controls-left, .controls-right { display: flex; align-items: center; gap: 8px; }
+.table-topbar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 14px; border-bottom: 1px solid #e2e8f0; gap: 12px; flex-wrap: wrap;
+}
+.controls-left { display: flex; align-items: center; gap: 8px; }
+.controls-right { display: flex; align-items: center; gap: 8px; }
 .per-page-wrap { display: flex; align-items: center; gap: 6px; }
-.ctrl-select { border: 1px solid #d1d5db; padding: 4px 6px; font-size: 13px; color: #374151; background: #fff; border-radius: 0; outline: none; }
+.ctrl-select {
+  border: 1px solid #d1d5db; padding: 4px 6px; font-size: 13px; color: #374151;
+  background: #fff; border-radius: 0; outline: none;
+}
 .ctrl-label { font-size: 12px; color: #64748b; font-weight: 500; }
-.search-input { border: 1px solid #d1d5db; padding: 4px 8px; font-size: 13px; color: #374151; width: 200px; outline: none; border-radius: 0; }
+.search-input {
+  border: 1px solid #d1d5db; padding: 4px 8px; font-size: 13px; color: #374151;
+  width: 200px; outline: none; border-radius: 0;
+}
 .search-input:focus { border-color: #3b82f6; }
 
 .table-wrap { overflow-x: auto; }
 .data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 .table-head-row { background: #3b82f6; }
-.table-th { color: #fff; font-weight: 600; letter-spacing: 0.4px; padding: 10px 14px; text-align: left; cursor: pointer; white-space: nowrap; user-select: none; }
+.table-th {
+  color: #fff; font-weight: 700; letter-spacing: 0.4px; padding: 10px;
+  text-align: left; cursor: pointer; white-space: nowrap; user-select: none;
+  font-size: 12px;
+}
 .table-th:hover { background: #2563eb; }
 .sort-arrows { margin-left: 4px; font-size: 9px; opacity: .5; }
 .sort-active { opacity: 1 !important; }
+
 .table-row:nth-child(even) { background: #f8fafc; }
 .table-row:hover { background: #eff6ff; }
 .table-td { padding: 6px 10px; color: #374151; border-bottom: 1px solid #f1f5f9; font-size: 12px; }
 .td-link { color: #1e293b; font-weight: 600; }
 .cell-with-icon { display: flex; align-items: center; gap: 6px; }
 .row-icon { color: #3b82f6; flex-shrink: 0; }
+
 .badge-yes { background: #dcfce7; color: #16a34a; padding: 2px 8px; font-size: 11px; font-weight: 700; }
 .badge-no  { background: #fee2e2; color: #dc2626; padding: 2px 8px; font-size: 11px; font-weight: 700; }
+
 .actions-td { display: flex; gap: 6px; align-items: center; }
-.act-btn { padding: 4px 10px; font-size: 10px; font-weight: 800; cursor: pointer; border: 1px solid #1e293b; letter-spacing: 0.4px; border-radius: 0; display: inline-flex; align-items: center; transition: all .12s; box-shadow: 1px 1px 0 #1e293b; text-transform: uppercase; }
-.act-btn:hover { transform: translate(-0.5px,-0.5px); }
+.act-btn {
+  padding: 4px 10px; font-size: 10px; font-weight: 800; cursor: pointer;
+  border: 1px solid #1e293b; letter-spacing: 0.4px; border-radius: 0;
+  display: inline-flex; align-items: center; transition: all .12s;
+  box-shadow: 1px 1px 0 #1e293b; text-transform: uppercase;
+}
+.act-btn:hover { transform: translate(-0.5px, -0.5px); }
 .act-btn:active { transform: translate(0,0); box-shadow: none; }
 .act-edit { background: #3b82f6; color: #fff; }
 .act-edit:hover { background: #fff; color: #3b82f6; }
 .act-del  { background: #ef4444; color: #fff; }
 .act-del:hover { background: #fff; color: #ef4444; }
+
 .table-loading, .table-empty { text-align: center; padding: 28px; color: #94a3b8; font-size: 13px; }
-.table-footer { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-top: 1px solid #e2e8f0; }
+
+.table-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 14px; border-top: 1px solid #e2e8f0;
+}
 .showing-text { font-size: 12.5px; color: #64748b; }
 .pagination { display: flex; gap: 3px; }
 .pg-btn { height: 28px; padding: 0 10px; font-size: 10px; font-weight: 700; color: #374151; background: #fff; border: 1px solid #d1d5db; border-radius: 0; cursor: pointer; letter-spacing: 0.4px; text-transform: uppercase; white-space: nowrap; }
 .pg-btn:hover:not(:disabled) { border-color: #1e293b; color: #1e293b; background: #f8fafc; }
 .pg-btn:disabled { opacity: .35; cursor: default; }
 .pg-active { background: #3b82f6 !important; color: #fff !important; border-color: #3b82f6 !important; }
-
-/* ─── Modals ─── */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 9000; display: flex; align-items: center; justify-content: center; padding: 20px; }
-.modal-card { background: #fff; border: 3px solid #1e293b; width: 100%; max-width: 640px; max-height: 90vh; display: flex; flex-direction: column; border-radius: 0; }
-.modal-card-sm { max-width: 420px; }
-.modal-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; background: #3b82f6; color: #fff; flex-shrink: 0; }
-.modal-head-title { font-size: 15px; font-weight: 900; letter-spacing: 0.3px; font-family: monospace; text-transform: uppercase; display: flex; align-items: center; }
-.modal-head-danger { background: #dc2626; }
-.modal-close { background: transparent; border: none; color: #fff; cursor: pointer; font-size: 18px; line-height: 1; padding: 2px 6px; }
-.modal-close:hover { opacity: .75; }
-.modal-body { padding: 20px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 16px; }
-.modal-error { background: #fef2f2; border: 2px solid #dc2626; color: #dc2626; padding: 10px 14px; font-size: 13px; display: flex; align-items: flex-start; }
-
-/* ─── Info card ─── */
-.info-card { border: 2px solid #1e293b; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
-.info-card-title { font-size: 12px; font-weight: 900; color: #1e293b; letter-spacing: 0.6px; text-transform: uppercase; font-family: monospace; display: flex; align-items: center; }
-
-/* ─── Email preview ─── */
-.email-preview { background: #f8fafc; border: 1px solid #d1d5db; padding: 0 12px; height: 40px; display: flex; align-items: center; gap: 8px; }
-.email-preview-label { font-size: 10px; font-weight: 800; letter-spacing: 1px; color: #94a3b8; text-transform: uppercase; white-space: nowrap; }
-.email-preview-value { font-family: monospace; font-size: 13px; font-weight: 700; }
-.email-preview-local, .email-preview-domain { color: #3b82f6; }
-
-/* ─── Email readonly display ─── */
-.email-readonly { height: 40px; padding: 0 10px; border: 2px solid #d1d5db; background: #f1f5f9; display: flex; align-items: center; font-family: monospace; font-size: 13px; font-weight: 600; color: #64748b; }
-
-/* ─── Advanced collapsible ─── */
-.adv-details { border: 2px solid #1e293b; }
-.adv-summary { padding: 10px 14px; cursor: pointer; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; background: #f8fafc; list-style: none; user-select: none; border-bottom: 2px solid transparent; transition: background .12s; }
-.adv-details[open] .adv-summary { border-bottom-color: #1e293b; background: #f1f5f9; }
-.adv-summary:hover { background: #e2e8f0; }
-.adv-summary::-webkit-details-marker { display: none; }
-.adv-summary-left { display: flex; align-items: center; flex: 1; color: #1e293b; }
-.adv-chevron { color: #64748b; transition: transform .2s; }
-.adv-details[open] .adv-chevron { transform: rotate(180deg); }
-.adv-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-
-/* ─── Password row ─── */
-.pw-row { display: flex; gap: 10px; align-items: flex-end; }
-.pw-field { flex: 1; display: flex; flex-direction: column; gap: 3px; }
-.pw-gen-wrap { display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; }
-.pw-wrap { position: relative; }
-.pw-wrap .form-input { padding-right: 38px; }
-.pw-eye { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: transparent; border: none; cursor: pointer; color: #64748b; padding: 2px; }
-.pw-eye:hover { color: #1e293b; }
-.pwd-strength { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
-.strength-bar-wrap { flex: 1; height: 5px; background: #e2e8f0; border: 1px solid #d1d5db; overflow: hidden; }
-.strength-bar { height: 100%; transition: width .3s, background .3s; }
-.strength-label { font-size: 10px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap; }
-.pwd-mismatch { font-size: 11px; color: #dc2626; font-weight: 600; }
-.btn-generate { background: #3b82f6; border: 2px solid #1e293b; color: #fff; height: 40px; padding: 0 14px; font-size: 10px; font-weight: 800; cursor: pointer; border-radius: 0; text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap; display: flex; align-items: center; transition: all .12s; }
-.btn-generate:hover { background: #fff; color: #3b82f6; }
-
-/* ─── Form elements ─── */
-.form-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.form-row-checks { display: flex; flex-wrap: wrap; gap: 16px; }
-.form-group { display: flex; flex-direction: column; gap: 3px; }
-.adv-check-group { justify-content: flex-end; }
-.form-label { font-size: 11px; font-weight: 800; color: #1e293b; letter-spacing: 0.7px; text-transform: uppercase; }
-.req { color: #ef4444; }
-.form-input { border: 2px solid #1e293b; padding: 8px 10px; font-size: 13px; color: #374151; outline: none; border-radius: 0; width: 100%; box-sizing: border-box; transition: border-color .12s; height: 40px; }
-.form-input:focus { border-color: #3b82f6; }
-.form-select-plain { border: 2px solid #1e293b; padding: 0 10px; font-size: 13px; color: #374151; background: #fff; border-radius: 0; width: 100%; height: 40px; outline: none; cursor: pointer; }
-.form-select-plain:focus { border-color: #3b82f6; }
-.form-hint { font-size: 10px; color: #94a3b8; margin-top: 2px; }
-.check-label { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #374151; cursor: pointer; }
-.check-label input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: #3b82f6; }
-
-/* ─── Modal footer ─── */
-.modal-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px; border-top: 2px solid #e2e8f0; flex-shrink: 0; background: #f8fafc; }
-.btn-cancel { background: #fff; border: 2px solid #1e293b; color: #374151; padding: 12px 24px; font-size: 14px; font-weight: 900; cursor: pointer; border-radius: 0; text-transform: uppercase; letter-spacing: 1.4px; box-shadow: 2px 2px 0 #1e293b; transition: all .12s; display: flex; align-items: center; }
-.btn-cancel:hover { background: #f1f5f9; transform: translate(-1px,-1px); box-shadow: 3px 3px 0 #1e293b; }
-.modal-footer .btn-primary { padding: 12px 24px !important; font-size: 14px !important; font-weight: 900 !important; letter-spacing: 1.4px !important; }
-.modal-footer .btn-primary:hover:not(:disabled) { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 #1e293b; }
-.btn-cancel:active { transform: translate(0,0); box-shadow: none; }
-.btn-danger { background: #ef4444; color: #fff; border: 2px solid #1e293b; padding: 8px 20px; font-size: 11px; font-weight: 800; cursor: pointer; border-radius: 0; text-transform: uppercase; letter-spacing: 0.5px; transition: all .12s; }
-.btn-danger:hover:not(:disabled) { background: #dc2626; }
-.btn-danger:active:not(:disabled) { transform: translate(0,0); box-shadow: none; }
-.btn-danger:disabled { opacity: .5; cursor: default; }
-.confirm-text { font-size: 14px; color: #374151; line-height: 1.8; text-align: center; margin: 8px 0; }
-.confirm-sub { font-size: 12px; color: #dc2626; }
 </style>

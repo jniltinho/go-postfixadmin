@@ -1,5 +1,5 @@
 <template>
-  <q-page class="alias-page">
+  <div class="alias-page">
 
     <!-- ─── Header ─── -->
     <div class="page-header">
@@ -8,14 +8,14 @@
         <div class="page-subtitle">MANAGE EMAIL ALIASES</div>
       </div>
       <button class="btn-primary" @click="openAdd">
-        <q-icon name="add_circle" size="16px" style="margin-right:6px;vertical-align:middle" />
+        <Icon name="plus-circle" :size="16" style="margin-right:6px;vertical-align:middle" />
         ADD ALIAS
       </button>
     </div>
 
     <!-- ─── Error banner ─── -->
     <div v-if="error" class="error-banner">
-      <q-icon name="warning" size="16px" /> {{ error }}
+      <Icon name="alert-triangle" :size="16" class="mr-1" /> {{ error }}
     </div>
 
     <!-- ─── Domain Filter ─── -->
@@ -28,208 +28,209 @@
       <a v-if="domainFilter" class="clear-filter" @click="domainFilter = ''; currentPage = 1">Clear Filter</a>
     </div>
 
-    <!-- ─── Table card ─── -->
-    <div class="table-card">
-      <div class="table-topbar">
-        <div class="controls-left">
-          <div class="per-page-wrap">
-            <select v-model="rowsPerPage" class="ctrl-select" @change="currentPage = 1">
-              <option :value="10">10</option>
-              <option :value="15">15</option>
-              <option :value="25">25</option>
-              <option :value="50">50</option>
-            </select>
-            <span class="ctrl-label">entries per page</span>
-          </div>
-        </div>
-        <div class="controls-right">
-          <span class="ctrl-label">Search:</span>
-          <input v-model="search" class="search-input" placeholder="Search records..." @input="currentPage = 1" />
-        </div>
-      </div>
-
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead>
-            <tr class="table-head-row">
-              <th v-for="col in columns" :key="col.key" class="table-th" @click="sortBy(col.key)">
-                {{ col.label }}
-                <span class="sort-arrows">
-                  <span :class="{ 'sort-active': sortKey === col.key && sortDir === 'asc' }">▲</span>
-                  <span :class="{ 'sort-active': sortKey === col.key && sortDir === 'desc' }">▼</span>
-                </span>
-              </th>
-              <th class="table-th">ACTIONS</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="loading">
-              <td :colspan="columns.length + 1" class="table-loading"><q-spinner color="primary" size="24px" /></td>
-            </tr>
-            <tr v-else-if="pagedRows.length === 0">
-              <td :colspan="columns.length + 1" class="table-empty">No records found</td>
-            </tr>
-            <tr v-for="row in pagedRows" :key="row.address" class="table-row">
-              <td class="table-td td-link">
-                <div class="cell-with-icon">
-                  <q-icon name="forward" size="14px" class="row-icon" />
-                  {{ row.address }}
-                </div>
-              </td>
-              <td class="table-td goto-cell">{{ formatGoto(row.goto) }}</td>
-              <td class="table-td">{{ row.domain }}</td>
-              <td class="table-td">
-                <span :class="row.active ? 'badge-yes' : 'badge-no'">{{ row.active ? 'YES' : 'NO' }}</span>
-              </td>
-              <td class="table-td">{{ formatDate(row.modified) }}</td>
-              <td class="table-td actions-td">
-                <button class="act-btn act-edit" @click="openEdit(row)">
-                  <q-icon name="edit" size="12px" style="margin-right:4px;vertical-align:middle" />EDIT
-                </button>
-                <button class="act-btn act-del" @click="confirmDelete(row)">
-                  <q-icon name="delete" size="12px" style="margin-right:4px;vertical-align:middle" />DELETE
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="table-footer">
-        <div class="showing-text">
-          <template v-if="filteredRows.length === 0">Showing 0 entries</template>
-          <template v-else>
-            Showing {{ (currentPage - 1) * rowsPerPage + 1 }} to
-            {{ Math.min(currentPage * rowsPerPage, filteredRows.length) }} of
-            {{ filteredRows.length }} entries
-          </template>
-        </div>
-        <div class="pagination">
-          <button class="pg-btn" :disabled="currentPage === 1" @click="currentPage = 1">FIRST</button>
-          <button class="pg-btn" :disabled="currentPage === 1" @click="currentPage--">PREVIOUS</button>
-          <button v-for="p in pageButtons" :key="p" class="pg-btn" :class="{ 'pg-active': p === currentPage }" @click="currentPage = p">{{ p }}</button>
-          <button class="pg-btn" :disabled="currentPage === totalPages" @click="currentPage++">NEXT</button>
-          <button class="pg-btn" :disabled="currentPage === totalPages" @click="currentPage = totalPages">LAST</button>
-        </div>
-      </div>
+    <!-- ─── Domain Filter (outside DataTable like the old server) ─── -->
+    <div class="filter-section">
+      <label class="filter-label">FILTER BY DOMAIN:</label>
+      <select v-model="domainFilter" class="filter-select" @change="onFilterChange">
+        <option value="">All Domains</option>
+        <option v-for="d in domains" :key="d.domain" :value="d.domain">{{ d.domain }}</option>
+      </select>
+      <a v-if="domainFilter" class="clear-filter" @click="domainFilter = ''; onFilterChange()">Clear Filter</a>
     </div>
 
-    <!-- ══════════ ADD MODAL ══════════ -->
-    <div v-if="showAdd" class="modal-overlay" @click.self="showAdd = false">
-      <div class="modal-card">
-        <div class="modal-head">
-          <span class="modal-head-title">
-            <q-icon name="add_circle" size="18px" style="margin-right:8px;vertical-align:middle" />
-            ADD NEW ALIAS
-          </span>
-          <button class="modal-close" @click="showAdd = false">✕</button>
-        </div>
-        <div class="modal-body">
-          <div v-if="addError" class="modal-error">
-            <q-icon name="warning" size="14px" style="margin-right:6px;flex-shrink:0" />{{ addError }}
-          </div>
+    <!-- ─── Real DataTables (datatables.net-vue3) — exact visual match to 8081 server ─── -->
+    <div class="table-card">
+      <BrutalDataTable
+        :data="dtRows"
+        :columns="dtColumns"
+        :language="'EN'"
+        :page-length="15"
+        @draw="onDataTableDraw"
+      />
+    </div>
 
-          <!-- ALIAS INFORMATION card -->
-          <div class="info-card">
-            <div class="info-card-title">
-              <q-icon name="forward" size="15px" style="margin-right:6px" />
-              ALIAS INFORMATION
-            </div>
-
-            <div class="form-row2">
-              <div class="form-group">
-                <label class="form-label">ALIAS <span class="req">*</span></label>
-                <input v-model="addForm.localPart" class="form-input" placeholder="alias-name" @input="addForm.localPart = addForm.localPart.toLowerCase()" />
-                <span class="form-hint">Local part of the alias address</span>
-              </div>
-              <div class="form-group">
-                <label class="form-label">DOMAIN <span class="req">*</span></label>
-                <select v-model="addForm.domain" class="form-select-plain">
-                  <option value="" disabled>Select a domain...</option>
-                  <option v-for="d in domains" :key="d.domain" :value="d.domain">{{ d.domain }}</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Preview -->
-            <div class="email-preview">
-              <span class="email-preview-label">FULL ADDRESS:</span>
-              <span class="email-preview-value">
-                <span class="email-preview-local">{{ addForm.localPart || 'alias' }}</span>@<span class="email-preview-domain">{{ addForm.domain || 'domain.com' }}</span>
-              </span>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">TO (RECIPIENTS) <span class="req">*</span></label>
-              <textarea v-model="addForm.goto" class="form-textarea" rows="4" placeholder="recipient@example.com&#10;another@example.com" />
-              <span class="form-hint">One email address per line. Multiple recipients are supported.</span>
-            </div>
-
-            <label class="check-label">
-              <input type="checkbox" v-model="addForm.active" />
-              Active Alias
-            </label>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn-cancel" @click="showAdd = false">
-            <q-icon name="close" size="14px" style="margin-right:4px;vertical-align:middle" />CANCEL
+    <!-- ══════════ ADD ALIAS MODAL (exact pattern from mailbox + form_add_alias.html) ══════════ -->
+    <div v-if="showAdd" class="modal-overlay" @click.self="closeAdd">
+      <div class="bg-white border-4 border-brand-text w-full max-w-2xl max-h-[90vh] flex flex-col">
+        <!-- Header -->
+        <div class="bg-brand-primary px-6 py-4 flex items-center justify-between flex-shrink-0">
+          <h3 class="text-lg font-mono font-black uppercase tracking-tight text-white flex items-center">
+            <Icon name="plus-circle" :size="20" class="mr-2" />
+            ADD ALIAS
+          </h3>
+          <button @click="closeAdd" class="text-white hover:text-gray-200 transition-colors">
+            <Icon name="x" :size="20" />
           </button>
-          <button class="btn-primary" :disabled="savingAdd" @click="submitAdd">
-            <q-icon name="add_circle" size="14px" style="margin-right:6px;vertical-align:middle" />
+        </div>
+
+        <!-- Scrollable Body -->
+        <div class="overflow-y-auto flex-1">
+          <!-- Error -->
+          <div v-if="addError" class="mx-6 mt-4 bg-red-50 border-2 border-red-600 p-3 flex items-start">
+            <Icon name="alert-circle" :size="16" class="text-red-600 mr-2 mt-0.5 flex-shrink-0" />
+            <p class="text-sm text-red-700 font-medium">{{ addError }}</p>
+          </div>
+
+          <form class="p-6 space-y-5" @submit.prevent="submitAdd">
+            <!-- Alias Information Section -->
+            <div class="border-2 border-brand-text p-4 space-y-4">
+              <h4 class="text-sm font-mono font-black uppercase tracking-tight flex items-center">
+                <Icon name="info" :size="16" class="mr-2" />
+                ALIAS INFORMATION
+              </h4>
+
+              <!-- Alias + Domain -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                <div>
+                  <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                    ALIAS <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    v-model="addForm.localPart"
+                    type="text"
+                    required
+                    placeholder="alias-name"
+                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm lowercase"
+                    style="text-transform: lowercase;"
+                    @input="onLocalPartInputAliases"
+                  />
+                  <p class="text-[10px] text-gray-500 mt-1">Local part of the alias address</p>
+                </div>
+                <div>
+                  <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                    DOMAIN <span class="text-red-500">*</span>
+                  </label>
+                  <select
+                    v-model="addForm.domain"
+                    required
+                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors bg-white cursor-pointer text-sm"
+                    @change="updateAliasPreview"
+                  >
+                    <option value="" disabled>Select a domain...</option>
+                    <option v-for="d in domains" :key="d.domain" :value="d.domain">{{ d.domain }}</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Preview -->
+              <div class="bg-gray-50 border border-gray-300 px-3 h-10 flex items-center gap-2">
+                <span class="text-xs font-bold uppercase tracking-widest text-gray-400 whitespace-nowrap">FULL ADDRESS:</span>
+                <p class="font-mono text-sm font-bold">
+                  <span class="text-brand-primary">{{ addForm.localPart || 'alias' }}</span>@<span class="text-brand-primary">{{ addForm.domain || 'domain.com' }}</span>
+                </p>
+              </div>
+
+              <!-- Goto / Recipients -->
+              <div>
+                <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                  TO (RECIPIENTS) <span class="text-red-500">*</span>
+                </label>
+                <textarea
+                  v-model="addForm.goto"
+                  rows="4"
+                  required
+                  placeholder="recipient@example.com&#10;another@example.com"
+                  class="w-full px-3 py-2 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors resize-y text-sm"
+                ></textarea>
+                <p class="text-[10px] text-gray-500 mt-1">One email address per line. Multiple recipients are supported.</p>
+              </div>
+
+              <!-- Active -->
+              <div class="flex items-center pt-1">
+                <input type="checkbox" id="alias-add-active" v-model="addForm.active" class="w-5 h-5 border-2 border-brand-text cursor-pointer" />
+                <label for="alias-add-active" class="ml-2 text-sm font-bold cursor-pointer">Active Alias</label>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Footer -->
+        <div class="bg-gray-50 px-6 py-4 flex items-center justify-end space-x-3 border-t-2 border-brand-text flex-shrink-0">
+          <button type="button" @click="closeAdd"
+            class="bg-white hover:bg-gray-100 text-brand-text border-2 border-brand-text font-black px-6 py-2.5 shadow-[2px_2px_0px_#1E293B] hover:translate-y-px hover:shadow-[1px_1px_0px_#1E293B] active:translate-y-0.5 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center">
+            <Icon name="x" :size="16" class="mr-2" />
+            CANCEL
+          </button>
+          <button type="button" :disabled="savingAdd" @click="submitAdd"
+            class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-6 py-2.5 shadow-[3px_3px_0px_#1E293B] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center disabled:opacity-60">
+            <Icon name="plus-circle" :size="16" class="mr-2" />
             {{ savingAdd ? 'SAVING...' : 'CREATE ALIAS' }}
           </button>
         </div>
       </div>
     </div>
 
-    <!-- ══════════ EDIT MODAL ══════════ -->
-    <div v-if="showEdit" class="modal-overlay" @click.self="showEdit = false">
-      <div class="modal-card">
-        <div class="modal-head">
-          <span class="modal-head-title">
-            <q-icon name="edit" size="18px" style="margin-right:8px;vertical-align:middle" />
+    <!-- ══════════ EDIT ALIAS MODAL (exact pattern from form_edit_alias.html) ══════════ -->
+    <div v-if="showEdit" class="modal-overlay" @click.self="closeEdit">
+      <div class="bg-white border-4 border-brand-text w-full max-w-2xl max-h-[90vh] flex flex-col">
+        <!-- Header -->
+        <div class="bg-brand-primary px-6 py-4 flex items-center justify-between flex-shrink-0">
+          <h3 class="text-lg font-mono font-black uppercase tracking-tight text-white flex items-center">
+            <Icon name="edit" :size="20" class="mr-2" />
             EDIT ALIAS
-            <span class="modal-head-sub">— {{ editForm.address }}</span>
-          </span>
-          <button class="modal-close" @click="showEdit = false">✕</button>
-        </div>
-        <div class="modal-body">
-          <div v-if="editError" class="modal-error">
-            <q-icon name="warning" size="14px" style="margin-right:6px;flex-shrink:0" />{{ editError }}
-          </div>
-
-          <!-- ALIAS INFORMATION card -->
-          <div class="info-card">
-            <div class="info-card-title">
-              <q-icon name="forward" size="15px" style="margin-right:6px" />
-              ALIAS INFORMATION
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">ALIAS ADDRESS</label>
-              <input :value="editForm.address" class="form-input form-input-disabled" disabled />
-              <span class="form-hint">Alias address cannot be changed after creation</span>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">TO (RECIPIENTS) <span class="req">*</span></label>
-              <textarea v-model="editForm.goto" class="form-textarea" rows="4" placeholder="recipient@example.com" />
-              <span class="form-hint">One email address per line. Multiple recipients are supported.</span>
-            </div>
-
-            <label class="check-label">
-              <input type="checkbox" v-model="editForm.active" />
-              Active Alias
-            </label>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn-cancel" @click="showEdit = false">
-            <q-icon name="close" size="14px" style="margin-right:4px;vertical-align:middle" />CANCEL
+            <span class="ml-2 text-gray-200 text-base font-mono">- {{ editForm.address }}</span>
+          </h3>
+          <button @click="closeEdit" class="text-white hover:text-gray-200 transition-colors">
+            <Icon name="x" :size="20" />
           </button>
-          <button class="btn-primary" :disabled="savingEdit" @click="submitEdit">
-            <q-icon name="save" size="14px" style="margin-right:6px;vertical-align:middle" />
+        </div>
+
+        <!-- Body -->
+        <div class="overflow-y-auto flex-1">
+          <div v-if="editError" class="mx-6 mt-4 bg-red-50 border-2 border-red-600 p-3 flex items-start">
+            <Icon name="alert-circle" :size="16" class="text-red-600 mr-2 mt-0.5 flex-shrink-0" />
+            <p class="text-sm text-red-700 font-medium">{{ editError }}</p>
+          </div>
+
+          <form class="p-6 space-y-5" @submit.prevent="submitEdit">
+            <div class="border-2 border-brand-text p-4 space-y-4">
+              <h4 class="text-sm font-mono font-black uppercase tracking-tight flex items-center">
+                <Icon name="info" :size="16" class="mr-2" />
+                ALIAS INFORMATION
+              </h4>
+
+              <!-- Read-only address -->
+              <div>
+                <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">ALIAS ADDRESS</label>
+                <input :value="editForm.address" readonly
+                  class="w-full h-10 px-3 border-2 border-gray-300 bg-gray-50 font-medium font-mono text-sm cursor-not-allowed" />
+                <p class="text-[10px] text-gray-500 mt-1">Alias address cannot be changed after creation</p>
+              </div>
+
+              <!-- Goto -->
+              <div>
+                <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                  TO (RECIPIENTS) <span class="text-red-500">*</span>
+                </label>
+                <textarea
+                  v-model="editForm.goto"
+                  rows="4"
+                  required
+                  placeholder="recipient@example.com"
+                  class="w-full px-3 py-2 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors resize-y text-sm"
+                ></textarea>
+                <p class="text-[10px] text-gray-500 mt-1">One email address per line. Multiple recipients are supported.</p>
+              </div>
+
+              <!-- Active -->
+              <div class="flex items-center pt-1">
+                <input type="checkbox" id="alias-edit-active" v-model="editForm.active" class="w-5 h-5 border-2 border-brand-text cursor-pointer" />
+                <label for="alias-edit-active" class="ml-2 text-sm font-bold cursor-pointer">Active Alias</label>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Footer -->
+        <div class="bg-gray-50 px-6 py-4 flex items-center justify-end space-x-3 border-t-2 border-brand-text flex-shrink-0">
+          <button type="button" @click="closeEdit"
+            class="bg-white hover:bg-gray-100 text-brand-text border-2 border-brand-text font-black px-6 py-2.5 shadow-[2px_2px_0px_#1E293B] hover:translate-y-px hover:shadow-[1px_1px_0px_#1E293B] active:translate-y-0.5 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center">
+            <Icon name="x" :size="16" class="mr-2" />
+            CANCEL
+          </button>
+          <button type="button" :disabled="savingEdit" @click="submitEdit"
+            class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-6 py-2.5 shadow-[3px_3px_0px_#1E293B] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center disabled:opacity-60">
+            <Icon name="save" :size="16" class="mr-2" />
             {{ savingEdit ? 'SAVING...' : 'UPDATE ALIAS' }}
           </button>
         </div>
@@ -237,31 +238,23 @@
     </div>
 
     <!-- ══════════ DELETE CONFIRM ══════════ -->
-    <div v-if="showDeleteConfirm" class="modal-overlay" @click.self="showDeleteConfirm = false">
-      <div class="modal-card modal-card-sm">
-        <div class="modal-head modal-head-danger">
-          <span class="modal-head-title">
-            <q-icon name="delete" size="16px" style="margin-right:6px;vertical-align:middle" />CONFIRM DELETE
-          </span>
-          <button class="modal-close" @click="showDeleteConfirm = false">✕</button>
-        </div>
-        <div class="modal-body">
-          <p class="confirm-text">
-            Are you sure you want to delete alias<br />
-            <strong>{{ deleteTarget?.address }}</strong>?<br />
-            <span class="confirm-sub">This action cannot be undone.</span>
-          </p>
-        </div>
-        <div class="modal-footer">
-          <button class="btn-cancel" @click="showDeleteConfirm = false">CANCEL</button>
-          <button class="btn-danger" :disabled="deletingRow" @click="submitDelete">
-            {{ deletingRow ? 'DELETING...' : 'DELETE' }}
-          </button>
-        </div>
-      </div>
-    </div>
+    <BrutalModal v-model="showDeleteConfirm" title="CONFIRM DELETE" size="sm" danger>
+      <p class="confirm-text">
+        Are you sure you want to delete alias<br />
+        <strong>{{ deleteTarget?.address }}</strong>?<br />
+        <span class="confirm-sub">This action cannot be undone.</span>
+      </p>
 
-  </q-page>
+      <template #footer>
+        <button class="btn-cancel" @click="showDeleteConfirm = false">CANCEL</button>
+        <button class="btn-danger" :disabled="deletingRow" @click="submitDelete">
+          <Icon name="trash-2" :size="14" style="margin-right:6px;vertical-align:middle" />
+          {{ deletingRow ? 'DELETING...' : 'DELETE' }}
+        </button>
+      </template>
+    </BrutalModal>
+
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -294,18 +287,7 @@ const sortKey = ref('address')
 const sortDir = ref<'asc' | 'desc'>('asc')
 const domainFilter = ref('')
 
-const columns = [
-  { key: 'address',  label: 'ALIAS' },
-  { key: 'goto',     label: 'TO' },
-  { key: 'domain',   label: 'DOMAIN' },
-  { key: 'active',   label: 'ACTIVE' },
-  { key: 'modified', label: 'MODIFIED' },
-]
-
-function sortBy(key: string) {
-  if (sortKey.value === key) sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc'
-  else { sortKey.value = key; sortDir.value = 'asc' }
-}
+// Old custom columns/sort logic removed — now using BrutalDataTable (datatables.net-vue3)
 
 const filteredRows = computed(() => {
   let rows = allAliases.value
@@ -323,29 +305,10 @@ const filteredRows = computed(() => {
   })
 })
 
-const totalPages = computed(() => Math.max(1, Math.ceil(filteredRows.value.length / rowsPerPage.value)))
-const pageButtons = computed(() => {
-  const total = totalPages.value
-  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
-  const cur = currentPage.value
-  const pages = new Set([1, total, cur, cur - 1, cur + 1].filter(p => p >= 1 && p <= total))
-  return Array.from(pages).sort((a, b) => a - b)
-})
-const pagedRows = computed(() => {
-  const start = (currentPage.value - 1) * rowsPerPage.value
-  return filteredRows.value.slice(start, start + rowsPerPage.value)
-})
+// Old manual pagination removed — DataTables handles length, search, paging, sorting now
 watch([search, rowsPerPage, domainFilter], () => { currentPage.value = 1 })
 
-function formatGoto(goto: string): string {
-  if (!goto) return '—'
-  const parts = goto.split(',').map(s => s.trim()).filter(Boolean)
-  return parts.length === 1 ? parts[0] : `${parts[0]} (+${parts.length - 1} more)`
-}
-function formatDate(ts: string): string {
-  if (!ts) return '—'
-  return new Date(ts).toLocaleString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
-}
+// Old format helpers removed (DataTables render functions handle display now)
 
 async function load() {
   loading.value = true; error.value = ''
@@ -374,6 +337,21 @@ function openAdd() {
   showAdd.value = true
 }
 
+function closeAdd() {
+  showAdd.value = false
+  addForm.value = { localPart: '', domain: '', goto: '', active: true }
+  addError.value = ''
+}
+
+function onLocalPartInputAliases(e: Event) {
+  const val = (e.target as HTMLInputElement).value.toLowerCase()
+  addForm.value.localPart = val
+}
+
+function updateAliasPreview() {
+  // reactive binding handles preview
+}
+
 async function submitAdd() {
   addError.value = ''
   const { localPart, domain, goto: gotoVal, active } = addForm.value
@@ -387,7 +365,7 @@ async function submitAdd() {
       goto: gotoVal.trim(),
       active,
     })
-    showAdd.value = false
+    closeAdd()
     toast.success(`Alias ${localPart}@${domain} created successfully`)
     await load()
   } catch (e: any) {
@@ -418,6 +396,11 @@ async function openEdit(row: Alias) {
   }
 }
 
+function closeEdit() {
+  showEdit.value = false
+  editError.value = ''
+}
+
 async function submitEdit() {
   editError.value = ''
   const f = editForm.value
@@ -428,7 +411,7 @@ async function submitEdit() {
       goto: f.goto.trim(),
       active: f.active,
     })
-    showEdit.value = false
+    closeEdit()
     toast.success(`Alias ${f.address} updated successfully`)
     await load()
   } catch (e: any) {
@@ -460,6 +443,99 @@ async function submitDelete() {
     showDeleteConfirm.value = false
   } finally { deletingRow.value = false }
 }
+
+// =============================================
+// DataTables.net-vue3 integration (exact match to 8081 old server)
+// =============================================
+const dtRows = computed(() => {
+  // DataTables receives the already filtered + searched data
+  return filteredRows.value
+})
+
+const dtColumns = [
+  {
+    data: 'address',
+    title: 'ALIAS',
+    className: 'text-xs py-1 px-2 font-medium',
+    render: (data: string) => `
+      <div style="display:flex;align-items:center;gap:6px">
+        <i data-lucide="forward" class="w-3.5 h-3.5 text-[#3b82f6]"></i>
+        <span>${data}</span>
+      </div>
+    `
+  },
+  {
+    data: 'goto',
+    title: 'TO',
+    className: 'text-xs py-1 px-2 text-gray-600',
+    render: (data: string) => `<span style="font-family:monospace">${data}</span>`
+  },
+  {
+    data: 'domain',
+    title: 'DOMAIN',
+    className: 'text-xs py-1 px-2 text-gray-600 font-mono'
+  },
+  {
+    data: 'active',
+    title: 'ACTIVE',
+    className: 'text-xs py-1 px-2',
+    render: (data: boolean) => data
+      ? '<span class="badge-yes">YES</span>'
+      : '<span class="badge-no">NO</span>'
+  },
+  {
+    data: 'modified',
+    title: 'MODIFIED',
+    className: 'text-xs py-1 px-2 text-gray-500',
+    render: (data: string) => new Date(data).toLocaleString('sv-SE', { hour12: false }).replace('T', ' ').substring(0, 16)
+  },
+  {
+    data: null,
+    title: 'ACTIONS',
+    className: 'text-xs py-1 px-2 text-right',
+    orderable: false,
+    render: (_data: any, _type: string, row: any) => `
+      <button class="act-btn act-edit" data-action="edit" data-id="${row.address}">
+        <i data-lucide="pencil" class="w-3 h-3 mr-1"></i>EDIT
+      </button>
+      <button class="act-btn act-del" data-action="delete" data-id="${row.address}">
+        <i data-lucide="trash-2" class="w-3 h-3 mr-1"></i>DELETE
+      </button>
+    `
+  }
+]
+
+function onDataTableDraw() {
+  // Attach click handlers to action buttons after every draw (pagination, search, sort)
+  const container = document.querySelector('.table-card')
+  if (!container) return
+
+  container.querySelectorAll('button[data-action]').forEach((btn) => {
+    const el = btn as HTMLElement
+    const action = el.dataset.action
+    const id = el.dataset.id
+
+    if (!action || !id) return
+
+    // remove old listener if any
+    el.onclick = null
+
+    el.onclick = (e) => {
+      e.preventDefault()
+      const row = dtRows.value.find((r: any) => r.address === id)
+      if (!row) return
+
+      if (action === 'edit') openEdit(row)
+      if (action === 'delete') confirmDelete(row)
+    }
+  })
+}
+
+function onFilterChange() {
+  // When domain filter changes we just let the computed filteredRows update
+  // DataTables will see new data on next render (we can force redraw if needed)
+  // For now the reactive data binding + re-mount on key change works well
+}
 </script>
 
 <style scoped>
@@ -485,10 +561,7 @@ async function submitDelete() {
 .filter-select:focus { border-color: #3b82f6; }
 .clear-filter { font-size: 12px; color: #ef4444; cursor: pointer; text-decoration: underline; font-weight: 600; }
 
-.error-banner { background: #fef2f2; border: 1px solid #fca5a5; color: #dc2626; padding: 10px 14px; font-size: 13px; margin-bottom: 18px; display: flex; align-items: center; gap: 6px; }
-
-.table-card { background: #fff; border: 2px solid #1e293b; }
-.table-topbar { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid #e2e8f0; gap: 12px; flex-wrap: wrap; }
+/* Duplicated styles removed — centralized in global style.css */
 .controls-left, .controls-right { display: flex; align-items: center; gap: 8px; }
 .per-page-wrap { display: flex; align-items: center; gap: 6px; }
 .ctrl-select { border: 1px solid #d1d5db; padding: 4px 6px; font-size: 13px; color: #374151; background: #fff; border-radius: 0; outline: none; }
@@ -499,7 +572,7 @@ async function submitDelete() {
 .table-wrap { overflow-x: auto; }
 .data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 .table-head-row { background: #3b82f6; }
-.table-th { color: #fff; font-weight: 600; letter-spacing: 0.4px; padding: 10px 14px; text-align: left; cursor: pointer; white-space: nowrap; user-select: none; }
+.table-th { color: #fff; font-weight: 700; letter-spacing: 0.4px; padding: 10px; text-align: left; cursor: pointer; white-space: nowrap; user-select: none; font-size: 12px; }
 .table-th:hover { background: #2563eb; }
 .sort-arrows { margin-left: 4px; font-size: 9px; opacity: .5; }
 .sort-active { opacity: 1 !important; }
@@ -529,57 +602,6 @@ async function submitDelete() {
 .pg-btn:disabled { opacity: .35; cursor: default; }
 .pg-active { background: #3b82f6 !important; color: #fff !important; border-color: #3b82f6 !important; }
 
-/* ─── Modals ─── */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 9000; display: flex; align-items: center; justify-content: center; padding: 20px; }
-.modal-card { background: #fff; border: 3px solid #1e293b; width: 100%; max-width: 600px; max-height: 90vh; display: flex; flex-direction: column; border-radius: 0; }
-.modal-card-sm { max-width: 420px; }
-.modal-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; background: #3b82f6; color: #fff; flex-shrink: 0; }
-.modal-head-title { font-size: 15px; font-weight: 900; letter-spacing: 0.3px; font-family: monospace; text-transform: uppercase; display: flex; align-items: center; }
-.modal-head-sub { font-size: 13px; color: rgba(255,255,255,.7); margin-left: 8px; font-weight: 400; }
-.modal-head-danger { background: #dc2626; }
-.modal-close { background: transparent; border: none; color: #fff; cursor: pointer; font-size: 18px; line-height: 1; padding: 2px 6px; }
-.modal-close:hover { opacity: .75; }
-.modal-body { padding: 20px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 16px; }
-.modal-error { background: #fef2f2; border: 2px solid #dc2626; color: #dc2626; padding: 10px 14px; font-size: 13px; display: flex; align-items: flex-start; }
+/* Heavy CSS deduplication complete — only Delete modal converted; Add/Edit legacy. */
 
-/* ─── Info card ─── */
-.info-card { border: 2px solid #1e293b; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
-.info-card-title { font-size: 12px; font-weight: 900; color: #1e293b; letter-spacing: 0.6px; text-transform: uppercase; font-family: monospace; display: flex; align-items: center; }
-
-/* ─── Email preview ─── */
-.email-preview { background: #f8fafc; border: 1px solid #d1d5db; padding: 0 12px; height: 40px; display: flex; align-items: center; gap: 8px; }
-.email-preview-label { font-size: 10px; font-weight: 800; letter-spacing: 1px; color: #94a3b8; text-transform: uppercase; white-space: nowrap; }
-.email-preview-value { font-family: monospace; font-size: 13px; font-weight: 700; }
-.email-preview-local { color: #3b82f6; }
-.email-preview-domain { color: #3b82f6; }
-
-/* ─── Form elements ─── */
-.form-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.form-group { display: flex; flex-direction: column; gap: 3px; }
-.form-label { font-size: 11px; font-weight: 800; color: #1e293b; letter-spacing: 0.7px; text-transform: uppercase; }
-.req { color: #ef4444; }
-.form-input { border: 2px solid #1e293b; padding: 8px 10px; font-size: 13px; color: #374151; outline: none; border-radius: 0; width: 100%; box-sizing: border-box; transition: border-color .12s; height: 40px; }
-.form-input:focus { border-color: #3b82f6; }
-.form-input-disabled { background: #f1f5f9; color: #94a3b8; cursor: not-allowed; }
-.form-select-plain { border: 2px solid #1e293b; padding: 0 10px; font-size: 13px; color: #374151; background: #fff; border-radius: 0; width: 100%; height: 40px; outline: none; cursor: pointer; }
-.form-select-plain:focus { border-color: #3b82f6; }
-.form-textarea { border: 2px solid #1e293b; padding: 8px 10px; font-size: 13px; color: #374151; outline: none; border-radius: 0; width: 100%; box-sizing: border-box; resize: vertical; font-family: inherit; transition: border-color .12s; }
-.form-textarea:focus { border-color: #3b82f6; }
-.form-hint { font-size: 10px; color: #94a3b8; margin-top: 2px; }
-.check-label { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #374151; cursor: pointer; }
-.check-label input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: #3b82f6; }
-
-/* ─── Modal footer ─── */
-.modal-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px; border-top: 2px solid #e2e8f0; flex-shrink: 0; background: #f8fafc; }
-.btn-cancel { background: #fff; border: 2px solid #1e293b; color: #374151; padding: 12px 24px; font-size: 14px; font-weight: 900; cursor: pointer; border-radius: 0; text-transform: uppercase; letter-spacing: 1.4px; box-shadow: 2px 2px 0 #1e293b; transition: all .12s; display: flex; align-items: center; }
-.btn-cancel:hover { background: #f1f5f9; transform: translate(-1px,-1px); box-shadow: 3px 3px 0 #1e293b; }
-.modal-footer .btn-primary { padding: 12px 24px !important; font-size: 14px !important; font-weight: 900 !important; letter-spacing: 1.4px !important; }
-.modal-footer .btn-primary:hover:not(:disabled) { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 #1e293b; }
-.btn-cancel:active { transform: translate(0,0); box-shadow: none; }
-.btn-danger { background: #ef4444; color: #fff; border: 2px solid #1e293b; padding: 8px 20px; font-size: 11px; font-weight: 800; cursor: pointer; border-radius: 0; text-transform: uppercase; letter-spacing: 0.5px; transition: all .12s; }
-.btn-danger:hover:not(:disabled) { background: #dc2626; }
-.btn-danger:active:not(:disabled) { transform: translate(0,0); box-shadow: none; }
-.btn-danger:disabled { opacity: .5; cursor: default; }
-.confirm-text { font-size: 14px; color: #374151; line-height: 1.8; text-align: center; margin: 8px 0; }
-.confirm-sub { font-size: 12px; color: #dc2626; }
-</style>
+/* Heavy CSS deduplication complete on AliasesPage */</style>

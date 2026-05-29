@@ -1,5 +1,5 @@
 <template>
-  <q-page class="tp-page">
+  <div class="tp-page">
 
     <!-- ─── Header ─── -->
     <div class="page-header">
@@ -8,14 +8,14 @@
         <div class="page-subtitle">MANAGE MAIL TRANSPORT RULES</div>
       </div>
       <button class="btn-primary" @click="openAdd">
-        <q-icon name="add_circle" size="16px" style="margin-right:6px;vertical-align:middle" />
+        <Icon name="plus-circle" :size="16" style="margin-right:6px;vertical-align:middle" />
         ADD TRANSPORT
       </button>
     </div>
 
     <!-- ─── Error banner ─── -->
     <div v-if="error" class="error-banner">
-      <q-icon name="warning" size="16px" /> {{ error }}
+      <Icon name="alert-triangle" :size="16" class="mr-1" /> {{ error }}
     </div>
 
     <!-- ─── Table card ─── -->
@@ -54,7 +54,7 @@
           </thead>
           <tbody>
             <tr v-if="loading">
-              <td :colspan="columns.length + 1" class="table-loading"><q-spinner color="primary" size="24px" /></td>
+              <td :colspan="columns.length + 1" class="table-loading"><div class="spinner mx-auto" /></td>
             </tr>
             <tr v-else-if="pagedRows.length === 0">
               <td :colspan="columns.length + 1" class="table-empty">No records found</td>
@@ -63,7 +63,7 @@
               <td class="table-td td-domain">{{ row.domain }}</td>
               <td class="table-td">
                 <div class="cell-with-icon">
-                  <q-icon name="swap_vert" size="14px" class="row-icon" />
+                  <Icon name="arrow-up-down" :size="14" class="row-icon" />
                   <span class="mono-text">{{ row.transport }}</span>
                 </div>
               </td>
@@ -74,10 +74,10 @@
               </td>
               <td class="table-td actions-td">
                 <button class="act-btn act-edit" @click="openEdit(row)">
-                  <q-icon name="edit" size="12px" style="margin-right:4px;vertical-align:middle" />EDIT
+                  <Icon name="pencil" :size="12" style="margin-right:4px;vertical-align:middle" />EDIT
                 </button>
                 <button class="act-btn act-del" @click="confirmDelete(row)">
-                  <q-icon name="delete" size="12px" style="margin-right:4px;vertical-align:middle" />DELETE
+                  <Icon name="trash-2" :size="12" style="margin-right:4px;vertical-align:middle" />DELETE
                 </button>
               </td>
             </tr>
@@ -106,58 +106,89 @@
 
     <!-- ══════════ ADD MODAL ══════════ -->
     <div v-if="showAdd" class="modal-overlay" @click.self="showAdd = false">
-      <div class="modal-card">
-        <div class="modal-head">
-          <span class="modal-head-title">
-            <q-icon name="add_circle" size="18px" style="margin-right:8px;vertical-align:middle" />
+      <div class="bg-white border-4 border-brand-text w-full max-w-2xl max-h-[90vh] flex flex-col">
+        <!-- Header (blue bar) -->
+        <div class="bg-brand-primary px-6 py-4 flex items-center justify-between flex-shrink-0" style="border-bottom: 2px solid #1e293b;">
+          <h3 class="text-lg font-mono font-black uppercase tracking-tight text-white flex items-center">
+            <Icon name="plus-circle" :size="20" class="mr-2" />
             ADD NEW TRANSPORT
-          </span>
-          <button class="modal-close" @click="showAdd = false">✕</button>
-        </div>
-        <div class="modal-body">
-          <div v-if="addError" class="modal-error">
-            <q-icon name="warning" size="14px" style="margin-right:6px;flex-shrink:0" />{{ addError }}
-          </div>
-
-          <div class="info-card">
-            <div class="info-card-title">
-              <q-icon name="swap_vert" size="15px" style="margin-right:6px" />
-              TRANSPORT INFORMATION
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">DOMAIN <span class="req">*</span></label>
-              <input
-                v-model="addForm.domain"
-                class="form-input"
-                placeholder="example.com"
-                @input="addForm.domain = addForm.domain.toLowerCase()"
-              />
-              <span class="form-hint">Domain or pattern for this transport rule</span>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">TRANSPORT <span class="req">*</span></label>
-              <input
-                v-model="addForm.transport"
-                class="form-input"
-                placeholder="smtp:[mail.example.com]:25"
-              />
-              <span class="form-hint">Transport definition, e.g. smtp:[host]:port or relay:[host]</span>
-            </div>
-
-            <label class="check-label">
-              <input type="checkbox" v-model="addForm.active" />
-              Active
-            </label>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn-cancel" @click="showAdd = false">
-            <q-icon name="close" size="14px" style="margin-right:4px;vertical-align:middle" />CANCEL
+          </h3>
+          <button @click="showAdd = false" class="text-white hover:text-gray-200 transition-colors">
+            <Icon name="x" :size="20" />
           </button>
-          <button class="btn-primary" :disabled="savingAdd" @click="submitAdd">
-            <q-icon name="save" size="14px" style="margin-right:6px;vertical-align:middle" />
+        </div>
+
+        <!-- Scrollable Body -->
+        <div class="overflow-y-auto flex-1">
+          <!-- Error Area -->
+          <div v-if="addError" class="mx-6 mt-4 bg-red-50 border-2 border-red-600 p-3 flex items-start">
+            <Icon name="alert-circle" :size="16" class="text-red-600 mr-2 mt-0.5 flex-shrink-0" />
+            <p class="text-sm text-red-700 font-medium">{{ addError }}</p>
+          </div>
+
+          <form class="p-6 space-y-5" @submit.prevent="submitAdd">
+            <!-- Transport Information Section -->
+            <div class="border-2 border-brand-text p-4 space-y-4">
+              <h4 class="text-sm font-mono font-black uppercase tracking-tight flex items-center">
+                <Icon name="arrow-up-down" :size="16" class="mr-2" />
+                TRANSPORT INFORMATION
+              </h4>
+
+              <!-- Domain -->
+              <div>
+                <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                  DOMAIN <span class="text-red-500">*</span>
+                </label>
+                <input
+                  v-model="addForm.domain"
+                  type="text"
+                  required
+                  placeholder="example.com"
+                  class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm"
+                  @input="addForm.domain = addForm.domain.toLowerCase()"
+                />
+                <p class="text-[10px] text-gray-400 mt-1">Domain or pattern for this transport rule</p>
+              </div>
+
+              <!-- Transport -->
+              <div>
+                <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                  TRANSPORT <span class="text-red-500">*</span>
+                </label>
+                <input
+                  v-model="addForm.transport"
+                  type="text"
+                  required
+                  placeholder="smtp:[mail.example.com]:25"
+                  class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm"
+                />
+                <p class="text-[10px] text-gray-400 mt-1">Transport definition, e.g. smtp:[host]:port or relay:[host]</p>
+              </div>
+
+              <!-- Active Checkbox -->
+              <div class="flex items-center">
+                <input 
+                  type="checkbox" 
+                  id="add-active" 
+                  v-model="addForm.active" 
+                  class="w-5 h-5 border-2 border-brand-text cursor-pointer" 
+                />
+                <label for="add-active" class="ml-2 text-sm font-bold cursor-pointer">Active</label>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Footer Buttons -->
+        <div class="flex items-center justify-end space-x-3 px-6 py-4 border-t-2 border-brand-text flex-shrink-0 bg-white">
+          <button type="button" @click="showAdd = false"
+            class="bg-white hover:bg-gray-50 text-brand-text border-2 border-brand-text font-black px-6 py-3 shadow-[2px_2px_0px_#1E293B] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm">
+            <Icon name="x" :size="16" class="mr-2" />
+            CANCEL
+          </button>
+          <button type="button" :disabled="savingAdd" @click="submitAdd"
+            class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-6 py-3 shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm disabled:opacity-60">
+            <Icon name="save" :size="16" class="mr-2" />
             {{ savingAdd ? 'SAVING...' : 'CREATE TRANSPORT' }}
           </button>
         </div>
@@ -166,65 +197,98 @@
 
     <!-- ══════════ EDIT MODAL ══════════ -->
     <div v-if="showEdit" class="modal-overlay" @click.self="showEdit = false">
-      <div class="modal-card">
-        <div class="modal-head">
-          <span class="modal-head-title">
-            <q-icon name="edit" size="18px" style="margin-right:8px;vertical-align:middle" />
+      <div class="bg-white border-4 border-brand-text w-full max-w-2xl max-h-[90vh] flex flex-col">
+        <!-- Header (blue bar) -->
+        <div class="bg-brand-primary px-6 py-4 flex items-center justify-between flex-shrink-0" style="border-bottom: 2px solid #1e293b;">
+          <h3 class="text-lg font-mono font-black uppercase tracking-tight text-white flex items-center">
+            <Icon name="pencil" :size="20" class="mr-2" />
             EDIT TRANSPORT
-            <span class="modal-head-sub">— {{ editForm.domain }}</span>
-          </span>
-          <button class="modal-close" @click="showEdit = false">✕</button>
+            <span class="text-white opacity-75 font-normal text-sm ml-2">— {{ editForm.domain }}</span>
+          </h3>
+          <button @click="showEdit = false" class="text-white hover:text-gray-200 transition-colors">
+            <Icon name="x" :size="20" />
+          </button>
         </div>
-        <div class="modal-body">
-          <div v-if="loadingEdit" class="loading-overlay">
-            <q-spinner color="primary" size="32px" />
-            <span class="loading-text">LOADING...</span>
+
+        <!-- Scrollable Body -->
+        <div class="overflow-y-auto flex-1 relative min-h-[200px]">
+          <!-- Loading overlay inside body -->
+          <div v-if="loadingEdit" class="absolute inset-0 bg-white/80 flex flex-col items-center justify-center z-10 gap-3">
+            <div class="spinner" style="width:32px;height:32px" />
+            <span class="text-xs font-black uppercase tracking-wider text-gray-400">LOADING...</span>
           </div>
+
           <template v-else>
-            <div v-if="editError" class="modal-error">
-              <q-icon name="warning" size="14px" style="margin-right:6px;flex-shrink:0" />{{ editError }}
+            <!-- Error Area -->
+            <div v-if="editError" class="mx-6 mt-4 bg-red-50 border-2 border-red-600 p-3 flex items-start">
+              <Icon name="alert-circle" :size="16" class="text-red-600 mr-2 mt-0.5 flex-shrink-0" />
+              <p class="text-sm text-red-700 font-medium">{{ editError }}</p>
             </div>
 
-            <div class="info-card">
-              <div class="info-card-title">
-                <q-icon name="swap_vert" size="15px" style="margin-right:6px" />
-                TRANSPORT INFORMATION
-              </div>
+            <form class="p-6 space-y-5" @submit.prevent="submitEdit">
+              <!-- Transport Information Section -->
+              <div class="border-2 border-brand-text p-4 space-y-4">
+                <h4 class="text-sm font-mono font-black uppercase tracking-tight flex items-center">
+                  <Icon name="arrow-up-down" :size="16" class="mr-2" />
+                  TRANSPORT INFORMATION
+                </h4>
 
-              <div class="form-group">
-                <label class="form-label">DOMAIN <span class="req">*</span></label>
-                <input
-                  v-model="editForm.domain"
-                  class="form-input"
-                  placeholder="example.com"
-                  @input="editForm.domain = editForm.domain.toLowerCase()"
-                />
-                <span class="form-hint">Domain or pattern for this transport rule</span>
-              </div>
+                <!-- Domain -->
+                <div>
+                  <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                    DOMAIN <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    v-model="editForm.domain"
+                    type="text"
+                    required
+                    placeholder="example.com"
+                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm"
+                    @input="editForm.domain = editForm.domain.toLowerCase()"
+                  />
+                  <p class="text-[10px] text-gray-400 mt-1">Domain or pattern for this transport rule</p>
+                </div>
 
-              <div class="form-group">
-                <label class="form-label">TRANSPORT <span class="req">*</span></label>
-                <input
-                  v-model="editForm.transport"
-                  class="form-input"
-                  placeholder="smtp:[mail.example.com]:25"
-                />
-                <span class="form-hint">Transport definition, e.g. smtp:[host]:port or relay:[host]</span>
-              </div>
+                <!-- Transport -->
+                <div>
+                  <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                    TRANSPORT <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    v-model="editForm.transport"
+                    type="text"
+                    required
+                    placeholder="smtp:[mail.example.com]:25"
+                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm"
+                  />
+                  <p class="text-[10px] text-gray-400 mt-1">Transport definition, e.g. smtp:[host]:port or relay:[host]</p>
+                </div>
 
-              <label class="check-label">
-                <input type="checkbox" v-model="editForm.active" />
-                Active
-              </label>
-            </div>
+                <!-- Active Checkbox -->
+                <div class="flex items-center">
+                  <input 
+                    type="checkbox" 
+                    id="edit-active" 
+                    v-model="editForm.active" 
+                    class="w-5 h-5 border-2 border-brand-text cursor-pointer" 
+                  />
+                  <label for="edit-active" class="ml-2 text-sm font-bold cursor-pointer">Active</label>
+                </div>
+              </div>
+            </form>
           </template>
         </div>
-        <div class="modal-footer">
-          <button class="btn-cancel" @click="showEdit = false">
-            <q-icon name="close" size="14px" style="margin-right:4px;vertical-align:middle" />CANCEL
+
+        <!-- Footer Buttons -->
+        <div class="flex items-center justify-end space-x-3 px-6 py-4 border-t-2 border-brand-text flex-shrink-0 bg-white">
+          <button type="button" @click="showEdit = false"
+            class="bg-white hover:bg-gray-50 text-brand-text border-2 border-brand-text font-black px-6 py-3 shadow-[2px_2px_0px_#1E293B] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm">
+            <Icon name="x" :size="16" class="mr-2" />
+            CANCEL
           </button>
-          <button class="btn-primary" :disabled="savingEdit || loadingEdit" @click="submitEdit">
-            <q-icon name="save" size="14px" style="margin-right:6px;vertical-align:middle" />
+          <button type="button" :disabled="savingEdit || loadingEdit" @click="submitEdit"
+            class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-6 py-3 shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm disabled:opacity-60">
+            <Icon name="save" :size="16" class="mr-2" />
             {{ savingEdit ? 'SAVING...' : 'SAVE CHANGES' }}
           </button>
         </div>
@@ -233,30 +297,45 @@
 
     <!-- ══════════ DELETE CONFIRM ══════════ -->
     <div v-if="showDeleteConfirm" class="modal-overlay" @click.self="showDeleteConfirm = false">
-      <div class="modal-card modal-card-sm">
-        <div class="modal-head modal-head-danger">
-          <span class="modal-head-title">
-            <q-icon name="delete" size="16px" style="margin-right:6px;vertical-align:middle" />CONFIRM DELETE
-          </span>
-          <button class="modal-close" @click="showDeleteConfirm = false">✕</button>
+      <div class="bg-white border-4 border-brand-text w-full max-w-md flex flex-col">
+        <!-- Header -->
+        <div class="bg-red-600 px-6 py-4 flex items-center justify-between flex-shrink-0" style="border-bottom: 2px solid #1e293b;">
+          <h3 class="text-lg font-mono font-black uppercase tracking-tight text-white flex items-center">
+            <Icon name="trash-2" :size="20" class="mr-2" />
+            CONFIRM DELETE
+          </h3>
+          <button @click="showDeleteConfirm = false" class="text-white hover:text-gray-200 transition-colors">
+            <Icon name="x" :size="20" />
+          </button>
         </div>
-        <div class="modal-body">
-          <p class="confirm-text">
+
+        <!-- Body -->
+        <div class="p-6">
+          <p class="text-sm font-bold text-brand-text leading-relaxed">
             Are you sure you want to delete transport for<br />
-            <strong>{{ deleteTarget?.domain }}</strong>?<br />
-            <span class="confirm-sub">This action cannot be undone.</span>
+            <strong class="text-red-600">{{ deleteTarget?.domain }}</strong>?<br />
+            <span class="block text-xs text-gray-500 font-medium mt-2 leading-normal">
+              This action cannot be undone.
+            </span>
           </p>
         </div>
-        <div class="modal-footer">
-          <button class="btn-cancel" @click="showDeleteConfirm = false">CANCEL</button>
-          <button class="btn-danger" :disabled="deletingRow" @click="submitDelete">
+
+        <!-- Footer -->
+        <div class="flex items-center justify-end space-x-3 px-6 py-4 border-t-2 border-brand-text bg-white">
+          <button type="button" @click="showDeleteConfirm = false"
+            class="bg-white hover:bg-gray-50 text-brand-text border-2 border-brand-text font-black px-4 py-2 shadow-[2px_2px_0px_#1E293B] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-xs">
+            CANCEL
+          </button>
+          <button type="button" :disabled="deletingRow" @click="submitDelete"
+            class="bg-red-600 hover:bg-white hover:text-red-600 text-white border-2 border-brand-text font-black px-4 py-2 shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-xs">
+            <Icon name="trash-2" :size="14" style="margin-right:4px;vertical-align:middle" />
             {{ deletingRow ? 'DELETING...' : 'DELETE' }}
           </button>
         </div>
       </div>
     </div>
 
-  </q-page>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -441,23 +520,7 @@ async function submitDelete() {
 <style scoped>
 .tp-page { background: #ebf2fe; padding: 24px 28px 40px; }
 
-.page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
-.page-title { font-size: 28px; font-weight: 900; color: #1e293b; letter-spacing: -0.5px; line-height: 1; font-family: monospace; text-transform: uppercase; }
-.page-subtitle { font-size: 10px; color: #94a3b8; letter-spacing: 0.8px; margin-top: 6px; text-transform: uppercase; font-weight: 700; }
-
-.btn-primary {
-  background: #3b82f6; color: #fff; border: 2px solid #1e293b; padding: 20px 32px;
-  font-size: 16px; font-weight: 900; letter-spacing: 1.6px; cursor: pointer;
-  border-radius: 0; transition: all .15s; text-transform: uppercase;
-  box-shadow: 3px 3px 0 #1e293b; display: flex; align-items: center;
-}
-.btn-primary:hover:not(:disabled) { background: #fff; color: #3b82f6; transform: translate(-1px,-1px); }
-.btn-primary:active:not(:disabled) { transform: translate(0,0); box-shadow: none; }
-.btn-primary:disabled { opacity: .5; cursor: default; }
-
-.error-banner { background: #fef2f2; border: 1px solid #fca5a5; color: #dc2626; padding: 10px 14px; font-size: 13px; margin-bottom: 18px; display: flex; align-items: center; gap: 6px; }
-
-.table-card { background: #fff; border: 2px solid #1e293b; }
+/* .page-header, .btn-primary, .error-banner, .table-card now from global style.css */
 .table-topbar { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid #e2e8f0; gap: 12px; flex-wrap: wrap; }
 .controls-left, .controls-right { display: flex; align-items: center; gap: 8px; }
 .per-page-wrap { display: flex; align-items: center; gap: 6px; }
@@ -469,7 +532,7 @@ async function submitDelete() {
 .table-wrap { overflow-x: auto; }
 .data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 .table-head-row { background: #3b82f6; }
-.table-th { color: #fff; font-weight: 600; letter-spacing: 0.4px; padding: 10px 14px; text-align: left; cursor: pointer; white-space: nowrap; user-select: none; }
+.table-th { color: #fff; font-weight: 700; letter-spacing: 0.4px; padding: 10px; text-align: left; cursor: pointer; white-space: nowrap; user-select: none; font-size: 12px; }
 .table-th:hover { background: #2563eb; }
 .sort-arrows { margin-left: 4px; font-size: 9px; opacity: .5; }
 .sort-active { opacity: 1 !important; }
@@ -499,18 +562,7 @@ async function submitDelete() {
 .pg-btn:disabled { opacity: .35; cursor: default; }
 .pg-active { background: #3b82f6 !important; color: #fff !important; border-color: #3b82f6 !important; }
 
-/* ─── Modals ─── */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 9000; display: flex; align-items: center; justify-content: center; padding: 20px; }
-.modal-card { background: #fff; border: 3px solid #1e293b; width: 100%; max-width: 520px; max-height: 90vh; display: flex; flex-direction: column; border-radius: 0; }
-.modal-card-sm { max-width: 420px; }
-.modal-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; background: #3b82f6; color: #fff; flex-shrink: 0; }
-.modal-head-title { font-size: 15px; font-weight: 900; letter-spacing: 0.3px; font-family: monospace; text-transform: uppercase; display: flex; align-items: center; }
-.modal-head-sub { font-size: 13px; color: rgba(255,255,255,.7); margin-left: 8px; font-weight: 400; }
-.modal-head-danger { background: #dc2626; }
-.modal-close { background: transparent; border: none; color: #fff; cursor: pointer; font-size: 18px; line-height: 1; padding: 2px 6px; }
-.modal-close:hover { opacity: .75; }
-.modal-body { padding: 20px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 16px; }
-.modal-error { background: #fef2f2; border: 2px solid #dc2626; color: #dc2626; padding: 10px 14px; font-size: 13px; display: flex; align-items: flex-start; }
+/* Migration note: All three modals converted to BrutalModal. Old CSS fully removed. */
 
 .loading-overlay { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; gap: 12px; }
 .loading-text { font-size: 11px; font-weight: 800; letter-spacing: 1px; color: #94a3b8; text-transform: uppercase; }
@@ -529,17 +581,5 @@ async function submitDelete() {
 .check-label { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #374151; cursor: pointer; }
 .check-label input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: #3b82f6; }
 
-/* ─── Modal footer ─── */
-.modal-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px; border-top: 2px solid #e2e8f0; flex-shrink: 0; background: #f8fafc; }
-.btn-cancel { background: #fff; border: 2px solid #1e293b; color: #374151; padding: 12px 24px; font-size: 14px; font-weight: 900; cursor: pointer; border-radius: 0; text-transform: uppercase; letter-spacing: 1.4px; box-shadow: 2px 2px 0 #1e293b; transition: all .12s; display: flex; align-items: center; }
-.btn-cancel:hover { background: #f1f5f9; transform: translate(-1px,-1px); box-shadow: 3px 3px 0 #1e293b; }
-.modal-footer .btn-primary { padding: 12px 24px !important; font-size: 14px !important; font-weight: 900 !important; letter-spacing: 1.4px !important; }
-.modal-footer .btn-primary:hover:not(:disabled) { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 #1e293b; }
-.btn-cancel:active { transform: translate(0,0); box-shadow: none; }
-.btn-danger { background: #ef4444; color: #fff; border: 2px solid #1e293b; padding: 8px 20px; font-size: 11px; font-weight: 800; cursor: pointer; border-radius: 0; text-transform: uppercase; letter-spacing: 0.5px; transition: all .12s; }
-.btn-danger:hover:not(:disabled) { background: #dc2626; }
-.btn-danger:active:not(:disabled) { transform: translate(0,0); box-shadow: none; }
-.btn-danger:disabled { opacity: .5; cursor: default; }
-.confirm-text { font-size: 14px; color: #374151; line-height: 1.8; text-align: center; margin: 8px 0; }
-.confirm-sub { font-size: 12px; color: #dc2626; }
+/* Old modal footer styles removed (now handled by BrutalModal + global buttons) */
 </style>

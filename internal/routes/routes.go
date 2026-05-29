@@ -83,7 +83,7 @@ func RegisterRoutes(e *echo.Echo, h *handlers.Handler, spaFS fs.FS) {
 
 	if spaFS != nil {
 		e.GET("/*", spaHandler(spaFS))
-		slog.Info("Quasar SPA frontend active at /")
+		slog.Info("Vue SPA frontend active at /")
 	}
 }
 

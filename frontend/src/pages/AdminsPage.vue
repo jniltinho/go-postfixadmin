@@ -1,5 +1,5 @@
 <template>
-  <q-page class="admins-page">
+  <div class="admins-page">
 
     <!-- ─── Header ─── -->
     <div class="page-header">
@@ -8,14 +8,14 @@
         <div class="page-subtitle">MANAGE SYSTEM ADMINISTRATORS</div>
       </div>
       <button v-if="isSuperAdmin" class="btn-primary" @click="openAdd">
-        <q-icon name="person_add" size="16px" style="margin-right:6px;vertical-align:middle" />
+        <Icon name="user-plus" :size="16" style="margin-right:6px;vertical-align:middle" />
         ADD ADMINISTRATOR
       </button>
     </div>
 
     <!-- ─── Error banner ─── -->
     <div v-if="error" class="error-banner">
-      <q-icon name="warning" size="16px" /> {{ error }}
+      <Icon name="alert-triangle" :size="16" class="mr-1" /> {{ error }}
     </div>
 
     <!-- ─── Table card ─── -->
@@ -54,7 +54,7 @@
           </thead>
           <tbody>
             <tr v-if="loading">
-              <td :colspan="columns.length + 1" class="table-loading"><q-spinner color="primary" size="24px" /></td>
+              <td :colspan="columns.length + 1" class="table-loading"><div class="spinner mx-auto" /></td>
             </tr>
             <tr v-else-if="pagedRows.length === 0">
               <td :colspan="columns.length + 1" class="table-empty">No records found</td>
@@ -62,7 +62,7 @@
             <tr v-for="row in pagedRows" :key="row.username" class="table-row">
               <td class="table-td td-link">
                 <div class="cell-with-icon">
-                  <q-icon name="shield" size="14px" class="row-icon" />
+                  <Icon name="shield" :size="14" class="row-icon" />
                   {{ row.username }}
                 </div>
               </td>
@@ -76,7 +76,7 @@
               <td class="table-td">{{ formatDate(row.modified) }}</td>
               <td class="table-td actions-td">
                 <button class="act-btn act-edit" @click="openEdit(row)">
-                  <q-icon name="edit" size="12px" style="margin-right:4px;vertical-align:middle" />EDIT
+                  <Icon name="pencil" :size="12" style="margin-right:4px;vertical-align:middle" />EDIT
                 </button>
                 <button
                   class="act-btn act-del"
@@ -84,7 +84,7 @@
                   :disabled="!isSuperAdmin"
                   @click="isSuperAdmin && confirmDelete(row)"
                 >
-                  <q-icon name="delete" size="12px" style="margin-right:4px;vertical-align:middle" />DELETE
+                  <Icon name="trash-2" :size="12" style="margin-right:4px;vertical-align:middle" />DELETE
                 </button>
               </td>
             </tr>
@@ -116,20 +116,20 @@
       <div class="modal-card">
         <div class="modal-head">
           <span class="modal-head-title">
-            <q-icon name="person_add" size="18px" style="margin-right:8px;vertical-align:middle" />
+            <Icon name="user-plus" :size="18" style="margin-right:8px;vertical-align:middle" />
             ADD NEW ADMINISTRATOR
           </span>
           <button class="modal-close" @click="showAdd = false">✕</button>
         </div>
         <div class="modal-body">
           <div v-if="addError" class="modal-error">
-            <q-icon name="warning" size="14px" style="margin-right:6px;flex-shrink:0" />{{ addError }}
+            <Icon name="alert-triangle" :size="14" style="margin-right:6px;flex-shrink:0" />{{ addError }}
           </div>
 
           <!-- Admin Details -->
           <div class="info-card">
             <div class="info-card-title">
-              <q-icon name="person" size="15px" style="margin-right:6px" />
+              <Icon name="user" :size="15" style="margin-right:6px" />
               ADMIN DETAILS
             </div>
             <div class="form-group">
@@ -157,7 +157,7 @@
           <!-- Password -->
           <div class="info-card">
             <div class="info-card-title">
-              <q-icon name="key" size="15px" style="margin-right:6px" />
+              <Icon name="key" :size="15" style="margin-right:6px" />
               PASSWORD
             </div>
             <div class="pw-row">
@@ -172,7 +172,7 @@
                     @input="onAddPasswordInput"
                   />
                   <button type="button" class="pw-eye" @click="showPw1 = !showPw1">
-                    <q-icon :name="showPw1 ? 'visibility_off' : 'visibility'" size="18px" />
+                    <Icon :name="showPw1 ? 'eye-off' : 'eye'" :size="18" />
                   </button>
                 </div>
               </div>
@@ -187,14 +187,14 @@
                     @input="onAddPasswordInput"
                   />
                   <button type="button" class="pw-eye" @click="showPw2 = !showPw2">
-                    <q-icon :name="showPw2 ? 'visibility_off' : 'visibility'" size="18px" />
+                    <Icon :name="showPw2 ? 'eye-off' : 'eye'" :size="18" />
                   </button>
                 </div>
               </div>
               <div class="pw-gen-wrap">
                 <label class="form-label">&nbsp;</label>
                 <button type="button" class="btn-generate" @click="generatePassword(addForm)">
-                  <q-icon name="auto_fix_high" size="14px" style="margin-right:4px;vertical-align:middle" />
+                  <Icon name="wand-2" :size="14" style="margin-right:4px;vertical-align:middle" />
                   GENERATE
                 </button>
               </div>
@@ -211,7 +211,7 @@
           <!-- Domains -->
           <div class="info-card" :class="{ 'card-disabled': addForm.superadmin }">
             <div class="info-card-title">
-              <q-icon name="public" size="15px" style="margin-right:6px" />
+              <Icon name="globe" :size="15" style="margin-right:6px" />
               ASSIGNED DOMAINS
               <span class="info-card-sub">Select domains this admin can manage</span>
             </div>
@@ -240,10 +240,10 @@
         </div>
         <div class="modal-footer">
           <button class="btn-cancel" @click="showAdd = false">
-            <q-icon name="close" size="14px" style="margin-right:4px;vertical-align:middle" />CANCEL
+            <Icon name="x" :size="14" style="margin-right:4px;vertical-align:middle" />CANCEL
           </button>
           <button class="btn-primary" :disabled="savingAdd" @click="submitAdd">
-            <q-icon name="save" size="14px" style="margin-right:6px;vertical-align:middle" />
+            <Icon name="save" :size="14" style="margin-right:6px;vertical-align:middle" />
             {{ savingAdd ? 'SAVING...' : 'CREATE ADMIN' }}
           </button>
         </div>
@@ -255,7 +255,7 @@
       <div class="modal-card">
         <div class="modal-head">
           <span class="modal-head-title">
-            <q-icon name="manage_accounts" size="18px" style="margin-right:8px;vertical-align:middle" />
+            <Icon name="users" :size="18" style="margin-right:8px;vertical-align:middle" />
             EDIT ADMINISTRATOR
             <span class="modal-head-sub">— {{ editForm.username }}</span>
           </span>
@@ -263,18 +263,18 @@
         </div>
         <div class="modal-body">
           <div v-if="loadingEdit" class="loading-overlay">
-            <q-spinner color="primary" size="32px" />
+            <div class="spinner mx-auto" style="width:32px;height:32px" />
             <span class="loading-text">LOADING...</span>
           </div>
           <template v-else>
             <div v-if="editError" class="modal-error">
-              <q-icon name="warning" size="14px" style="margin-right:6px;flex-shrink:0" />{{ editError }}
+              <Icon name="alert-triangle" :size="14" style="margin-right:6px;flex-shrink:0" />{{ editError }}
             </div>
 
             <!-- Admin Details -->
             <div class="info-card">
               <div class="info-card-title">
-                <q-icon name="person" size="15px" style="margin-right:6px" />
+                <Icon name="user" :size="15" style="margin-right:6px" />
                 ADMIN DETAILS
               </div>
               <div class="form-group">
@@ -298,10 +298,10 @@
             <details class="adv-details">
               <summary class="adv-summary">
                 <span class="adv-summary-left">
-                  <q-icon name="key" size="15px" style="margin-right:6px" />
+                  <Icon name="key" :size="15" style="margin-right:6px" />
                   CHANGE PASSWORD
                 </span>
-                <q-icon name="expand_more" size="18px" class="adv-chevron" />
+                <Icon name="chevron-down" :size="18" class="adv-chevron" />
               </summary>
               <div class="adv-body">
                 <div class="pw-row">
@@ -316,7 +316,7 @@
                         @input="onEditPasswordInput"
                       />
                       <button type="button" class="pw-eye" @click="showPw3 = !showPw3">
-                        <q-icon :name="showPw3 ? 'visibility_off' : 'visibility'" size="18px" />
+                        <Icon :name="showPw3 ? 'eye-off' : 'eye'" :size="18" />
                       </button>
                     </div>
                   </div>
@@ -331,14 +331,14 @@
                         @input="onEditPasswordInput"
                       />
                       <button type="button" class="pw-eye" @click="showPw4 = !showPw4">
-                        <q-icon :name="showPw4 ? 'visibility_off' : 'visibility'" size="18px" />
+                        <Icon :name="showPw4 ? 'eye-off' : 'eye'" :size="18" />
                       </button>
                     </div>
                   </div>
                   <div class="pw-gen-wrap">
                     <label class="form-label">&nbsp;</label>
                     <button type="button" class="btn-generate" @click="generatePassword(editForm)">
-                      <q-icon name="auto_fix_high" size="14px" style="margin-right:4px;vertical-align:middle" />
+                      <Icon name="wand-2" :size="14" style="margin-right:4px;vertical-align:middle" />
                       GENERATE
                     </button>
                   </div>
@@ -356,7 +356,7 @@
             <!-- Domains -->
             <div class="info-card" :class="{ 'card-disabled': editForm.superadmin || !isSuperAdmin }">
               <div class="info-card-title">
-                <q-icon name="public" size="15px" style="margin-right:6px" />
+                <Icon name="globe" :size="15" style="margin-right:6px" />
                 ASSIGNED DOMAINS
                 <span class="info-card-sub">Select domains this admin can manage</span>
               </div>
@@ -384,10 +384,10 @@
         </div>
         <div class="modal-footer">
           <button class="btn-cancel" @click="showEdit = false">
-            <q-icon name="close" size="14px" style="margin-right:4px;vertical-align:middle" />CANCEL
+            <Icon name="x" :size="14" style="margin-right:4px;vertical-align:middle" />CANCEL
           </button>
           <button class="btn-primary" :disabled="savingEdit || loadingEdit" @click="submitEdit">
-            <q-icon name="save" size="14px" style="margin-right:6px;vertical-align:middle" />
+            <Icon name="save" :size="14" style="margin-right:6px;vertical-align:middle" />
             {{ savingEdit ? 'SAVING...' : 'SAVE CHANGES' }}
           </button>
         </div>
@@ -395,31 +395,23 @@
     </div>
 
     <!-- ══════════ DELETE CONFIRM ══════════ -->
-    <div v-if="showDeleteConfirm" class="modal-overlay" @click.self="showDeleteConfirm = false">
-      <div class="modal-card modal-card-sm">
-        <div class="modal-head modal-head-danger">
-          <span class="modal-head-title">
-            <q-icon name="delete" size="16px" style="margin-right:6px;vertical-align:middle" />CONFIRM DELETE
-          </span>
-          <button class="modal-close" @click="showDeleteConfirm = false">✕</button>
-        </div>
-        <div class="modal-body">
-          <p class="confirm-text">
-            Are you sure you want to delete administrator<br />
-            <strong>{{ deleteTarget?.username }}</strong>?<br />
-            <span class="confirm-sub">This action cannot be undone.</span>
-          </p>
-        </div>
-        <div class="modal-footer">
-          <button class="btn-cancel" @click="showDeleteConfirm = false">CANCEL</button>
-          <button class="btn-danger" :disabled="deletingRow" @click="submitDelete">
-            {{ deletingRow ? 'DELETING...' : 'DELETE' }}
-          </button>
-        </div>
-      </div>
-    </div>
+    <BrutalModal v-model="showDeleteConfirm" title="CONFIRM DELETE" size="sm" danger>
+      <p class="confirm-text">
+        Are you sure you want to delete administrator<br />
+        <strong>{{ deleteTarget?.username }}</strong>?<br />
+        <span class="confirm-sub">This action cannot be undone.</span>
+      </p>
 
-  </q-page>
+      <template #footer>
+        <button class="btn-cancel" @click="showDeleteConfirm = false">CANCEL</button>
+        <button class="btn-danger" :disabled="deletingRow" @click="submitDelete">
+          <Icon name="trash-2" :size="14" style="margin-right:6px;vertical-align:middle" />
+          {{ deletingRow ? 'DELETING...' : 'DELETE' }}
+        </button>
+      </template>
+    </BrutalModal>
+
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -690,45 +682,9 @@ async function submitDelete() {
 <style scoped>
 .admins-page { background: #ebf2fe; padding: 24px 28px 40px; }
 
-.page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
-.page-title { font-size: 28px; font-weight: 900; color: #1e293b; letter-spacing: -0.5px; line-height: 1; font-family: monospace; text-transform: uppercase; }
-.page-subtitle { font-size: 10px; color: #94a3b8; letter-spacing: 0.8px; margin-top: 6px; text-transform: uppercase; font-weight: 700; }
+/* Duplicated styles removed — now centralized in global style.css (Tailwind v4 + Brutalist primitives) */
 
-.btn-primary {
-  background: #3b82f6; color: #fff; border: 2px solid #1e293b; padding: 20px 32px;
-  font-size: 16px; font-weight: 900; letter-spacing: 1.6px; cursor: pointer;
-  border-radius: 0; transition: all .15s; text-transform: uppercase;
-  box-shadow: 3px 3px 0 #1e293b; display: flex; align-items: center;
-}
-.btn-primary:hover:not(:disabled) { background: #fff; color: #3b82f6; transform: translate(-1px,-1px); }
-.btn-primary:active:not(:disabled) { transform: translate(0,0); box-shadow: none; }
-.btn-primary:disabled { opacity: .5; cursor: default; }
-
-.error-banner { background: #fef2f2; border: 1px solid #fca5a5; color: #dc2626; padding: 10px 14px; font-size: 13px; margin-bottom: 18px; display: flex; align-items: center; gap: 6px; }
-
-.table-card { background: #fff; border: 2px solid #1e293b; }
-.table-topbar { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid #e2e8f0; gap: 12px; flex-wrap: wrap; }
-.controls-left, .controls-right { display: flex; align-items: center; gap: 8px; }
-.per-page-wrap { display: flex; align-items: center; gap: 6px; }
-.ctrl-select { border: 1px solid #d1d5db; padding: 4px 6px; font-size: 13px; color: #374151; background: #fff; border-radius: 0; outline: none; }
-.ctrl-label { font-size: 12px; color: #64748b; font-weight: 500; }
-.search-input { border: 1px solid #d1d5db; padding: 4px 8px; font-size: 13px; color: #374151; width: 200px; outline: none; border-radius: 0; }
-.search-input:focus { border-color: #3b82f6; }
-
-.table-wrap { overflow-x: auto; }
-.data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-.table-head-row { background: #3b82f6; }
-.table-th { color: #fff; font-weight: 600; letter-spacing: 0.4px; padding: 10px 14px; text-align: left; cursor: pointer; white-space: nowrap; user-select: none; }
-.table-th:hover { background: #2563eb; }
-.sort-arrows { margin-left: 4px; font-size: 9px; opacity: .5; }
-.sort-active { opacity: 1 !important; }
-.table-row:nth-child(even) { background: #f8fafc; }
-.table-row:hover { background: #eff6ff; }
-.table-td { padding: 6px 10px; color: #374151; border-bottom: 1px solid #f1f5f9; font-size: 12px; }
-.td-link { color: #1e293b; font-weight: 600; }
-.mono-text { font-family: monospace; font-size: 12px; color: #6b7280; }
-.cell-with-icon { display: flex; align-items: center; gap: 6px; }
-.row-icon { color: #3b82f6; flex-shrink: 0; }
+/* More duplicated table styles removed - centralized globally */
 .badge-yes   { background: #dcfce7; color: #16a34a; padding: 2px 8px; font-size: 11px; font-weight: 700; }
 .badge-no    { background: #fee2e2; color: #dc2626; padding: 2px 8px; font-size: 11px; font-weight: 700; }
 .badge-super { background: #ede9fe; color: #7c3aed; padding: 2px 8px; font-size: 11px; font-weight: 700; border: 1px solid #c4b5fd; }
@@ -741,30 +697,9 @@ async function submitDelete() {
 .act-del  { background: #ef4444; color: #fff; }
 .act-del:hover { background: #fff; color: #ef4444; }
 .act-disabled { opacity: .4; cursor: not-allowed; pointer-events: none; }
-.table-loading, .table-empty { text-align: center; padding: 28px; color: #94a3b8; font-size: 13px; }
-.table-footer { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-top: 1px solid #e2e8f0; }
-.showing-text { font-size: 12.5px; color: #64748b; }
-.pagination { display: flex; gap: 3px; }
-.pg-btn { height: 28px; padding: 0 10px; font-size: 10px; font-weight: 700; color: #374151; background: #fff; border: 1px solid #d1d5db; border-radius: 0; cursor: pointer; letter-spacing: 0.4px; text-transform: uppercase; white-space: nowrap; }
-.pg-btn:hover:not(:disabled) { border-color: #1e293b; color: #1e293b; background: #f8fafc; }
-.pg-btn:disabled { opacity: .35; cursor: default; }
-.pg-active { background: #3b82f6 !important; color: #fff !important; border-color: #3b82f6 !important; }
+/* More duplicated pagination/table-footer styles removed - centralized globally */
 
-/* ─── Modals ─── */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 9000; display: flex; align-items: center; justify-content: center; padding: 20px; }
-.modal-card { background: #fff; border: 3px solid #1e293b; width: 100%; max-width: 600px; max-height: 90vh; display: flex; flex-direction: column; border-radius: 0; }
-.modal-card-sm { max-width: 420px; }
-.modal-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; background: #3b82f6; color: #fff; flex-shrink: 0; }
-.modal-head-title { font-size: 15px; font-weight: 900; letter-spacing: 0.3px; font-family: monospace; text-transform: uppercase; display: flex; align-items: center; }
-.modal-head-sub { font-size: 13px; color: rgba(255,255,255,.7); margin-left: 8px; font-weight: 400; }
-.modal-head-danger { background: #dc2626; }
-.modal-close { background: transparent; border: none; color: #fff; cursor: pointer; font-size: 18px; line-height: 1; padding: 2px 6px; }
-.modal-close:hover { opacity: .75; }
-.modal-body { padding: 20px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 16px; }
-.modal-error { background: #fef2f2; border: 2px solid #dc2626; color: #dc2626; padding: 10px 14px; font-size: 13px; display: flex; align-items: flex-start; }
-
-.loading-overlay { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; gap: 12px; }
-.loading-text { font-size: 11px; font-weight: 800; letter-spacing: 1px; color: #94a3b8; text-transform: uppercase; }
+/* Migration note: Delete modal converted to BrutalModal. Add/Edit modals still use legacy custom structure. Old wrapper CSS reduced. */
 
 /* ─── Info card ─── */
 .info-card { border: 2px solid #1e293b; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
@@ -772,19 +707,7 @@ async function submitDelete() {
 .info-card-sub { font-size: 10px; color: #94a3b8; font-weight: 500; letter-spacing: 0.5px; margin-left: 8px; text-transform: none; font-family: inherit; }
 .card-disabled { opacity: .5; pointer-events: none; }
 
-/* ─── Form elements ─── */
-.form-group { display: flex; flex-direction: column; gap: 3px; }
-.form-label { font-size: 11px; font-weight: 800; color: #1e293b; letter-spacing: 0.7px; text-transform: uppercase; }
-.req { color: #ef4444; }
-.form-input { border: 2px solid #1e293b; padding: 8px 10px; font-size: 13px; color: #374151; outline: none; border-radius: 0; width: 100%; box-sizing: border-box; height: 40px; transition: border-color .12s; }
-.form-input:focus { border-color: #3b82f6; }
-.form-input-disabled { background: #f1f5f9; color: #94a3b8; cursor: not-allowed; }
-.form-hint { font-size: 10px; color: #94a3b8; margin-top: 2px; }
-
-.check-row { display: flex; gap: 24px; flex-wrap: wrap; }
-.check-label { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #374151; cursor: pointer; }
-.check-label input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: #3b82f6; }
-.check-disabled { opacity: .5; cursor: not-allowed; }
+/* Heavy form/check styles deduplicated — now in global style.css */
 .check-disabled input { cursor: not-allowed; }
 
 /* ─── Password ─── */
@@ -803,37 +726,4 @@ async function submitDelete() {
 .strength-label { font-size: 10px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap; }
 .pwd-mismatch { font-size: 11px; color: #dc2626; font-weight: 600; }
 
-/* ─── Collapsible sections ─── */
-.adv-details { border: 2px solid #1e293b; }
-.adv-summary { list-style: none; padding: 12px 16px; cursor: pointer; font-size: 12px; font-weight: 900; color: #1e293b; letter-spacing: 0.6px; text-transform: uppercase; font-family: monospace; display: flex; align-items: center; justify-content: space-between; background: #f8fafc; transition: background .12s; user-select: none; }
-.adv-summary:hover { background: #f1f5f9; }
-.adv-summary::-webkit-details-marker { display: none; }
-.adv-summary-left { display: flex; align-items: center; }
-.adv-chevron { transition: transform .2s; }
-.adv-details[open] .adv-chevron { transform: rotate(180deg); }
-.adv-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; border-top: 2px solid #1e293b; }
-
-/* ─── Domains grid ─── */
-.domains-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 180px; overflow-y: auto; padding: 10px; background: #f8fafc; border: 2px solid #e2e8f0; }
-.domain-item { display: flex; align-items: center; gap: 8px; background: #fff; padding: 6px 10px; border: 1px solid #e2e8f0; cursor: pointer; font-size: 12px; font-weight: 500; color: #374151; transition: border-color .12s; }
-.domain-item:hover { border-color: #3b82f6; }
-.domain-item-checked { border-color: #3b82f6; background: #eff6ff; }
-.domain-item input[type="checkbox"] { width: 14px; height: 14px; cursor: pointer; accent-color: #3b82f6; flex-shrink: 0; }
-.domain-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.domains-empty { font-size: 12px; color: #94a3b8; text-align: center; padding: 12px; }
-.superadmin-note { font-size: 12px; color: #7c3aed; background: #ede9fe; padding: 8px 12px; border: 1px solid #c4b5fd; font-weight: 600; }
-
-/* ─── Modal footer ─── */
-.modal-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px; border-top: 2px solid #e2e8f0; flex-shrink: 0; background: #f8fafc; }
-.btn-cancel { background: #fff; border: 2px solid #1e293b; color: #374151; padding: 12px 24px; font-size: 14px; font-weight: 900; cursor: pointer; border-radius: 0; text-transform: uppercase; letter-spacing: 1.4px; box-shadow: 2px 2px 0 #1e293b; transition: all .12s; display: flex; align-items: center; }
-.btn-cancel:hover { background: #f1f5f9; transform: translate(-1px,-1px); box-shadow: 3px 3px 0 #1e293b; }
-.modal-footer .btn-primary { padding: 12px 24px !important; font-size: 14px !important; font-weight: 900 !important; letter-spacing: 1.4px !important; }
-.modal-footer .btn-primary:hover:not(:disabled) { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 #1e293b; }
-.btn-cancel:active { transform: translate(0,0); box-shadow: none; }
-.btn-danger { background: #ef4444; color: #fff; border: 2px solid #1e293b; padding: 8px 20px; font-size: 11px; font-weight: 800; cursor: pointer; border-radius: 0; text-transform: uppercase; letter-spacing: 0.5px; transition: all .12s; }
-.btn-danger:hover:not(:disabled) { background: #dc2626; }
-.btn-danger:active:not(:disabled) { transform: translate(0,0); box-shadow: none; }
-.btn-danger:disabled { opacity: .5; cursor: default; }
-.confirm-text { font-size: 14px; color: #374151; line-height: 1.8; text-align: center; margin: 8px 0; }
-.confirm-sub { font-size: 12px; color: #dc2626; }
-</style>
+/* Heavy deduplication — advanced/domain grid styles moved to global or simplified */</style>

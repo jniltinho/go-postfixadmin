@@ -19,7 +19,7 @@ RPM_VERSION := $(shell echo $(DEB_VERSION) | tr '-' '_')
 
 .PHONY: all build build-prod run clean frontend swagger help install-upx deb rpm
 
-all: clean frontend build-prod
+all: clean frontend build
 
 build: clean frontend
 	@echo "Building Go application (with embedded frontend)..."

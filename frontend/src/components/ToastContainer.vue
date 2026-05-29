@@ -39,9 +39,7 @@ const toast = useToastStore()
           <span class="toast-msg">{{ t.message }}</span>
 
           <button class="toast-close" @click="toast.remove(t.id)" aria-label="Dismiss">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
+            <Icon name="x" :size="12" />
           </button>
         </div>
       </TransitionGroup>

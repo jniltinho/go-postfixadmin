@@ -1,5 +1,5 @@
 <template>
-  <q-page class="dom-page">
+  <div class="dom-page">
 
     <!-- ─── Header ─── -->
     <div class="dom-header">
@@ -8,14 +8,14 @@
         <div class="dom-subtitle">MANAGE YOUR MAIL DOMAINS</div>
       </div>
       <button class="btn-primary" @click="openAdd">
-        <q-icon name="add_circle" size="16px" style="margin-right:6px;vertical-align:middle" />
+        <Icon name="plus-circle" :size="16" style="margin-right:6px;vertical-align:middle" />
         ADD DOMAIN
       </button>
     </div>
 
     <!-- ─── Error banner ─── -->
     <div v-if="error" class="error-banner">
-      <q-icon name="warning" size="16px" /> {{ error }}
+      <Icon name="alert-triangle" :size="16" class="mr-1" /> {{ error }}
     </div>
 
     <!-- ─── Table card ─── -->
@@ -58,7 +58,7 @@
           <tbody>
             <tr v-if="loading">
               <td :colspan="columns.length + 1" class="table-loading">
-                <q-spinner color="primary" size="24px" />
+                <div class="spinner mx-auto" />
               </td>
             </tr>
             <tr v-else-if="pagedRows.length === 0">
@@ -67,7 +67,7 @@
             <tr v-for="row in pagedRows" :key="row.domain" class="table-row">
               <td class="table-td td-link">
                 <div class="cell-with-icon">
-                  <q-icon name="public" size="14px" class="row-icon" />
+                  <Icon name="globe" :size="14" class="row-icon" />
                   {{ row.domain }}
                 </div>
               </td>
@@ -89,10 +89,10 @@
               <td class="table-td">{{ formatDate(row.modified) }}</td>
               <td class="table-td actions-td">
                 <button class="act-btn act-edit" @click="openEdit(row)">
-                  <q-icon name="edit" size="12px" style="margin-right:4px;vertical-align:middle" />EDIT
+                  <Icon name="pencil" :size="12" style="margin-right:4px;vertical-align:middle" />EDIT
                 </button>
                 <button class="act-btn act-del" @click="confirmDelete(row)">
-                  <q-icon name="delete" size="12px" style="margin-right:4px;vertical-align:middle" />DELETE
+                  <Icon name="trash-2" :size="12" style="margin-right:4px;vertical-align:middle" />DELETE
                 </button>
               </td>
             </tr>
@@ -124,231 +124,245 @@
       </div>
     </div>
 
-    <!-- ══════════ ADD MODAL ══════════ -->
-    <div v-if="showAdd" class="modal-overlay" @click.self="showAdd = false">
-      <div class="modal-card">
-
-        <!-- Modal header -->
-        <div class="modal-head">
-          <span class="modal-head-title">
-            <q-icon name="add_circle" size="18px" style="margin-right:8px;vertical-align:middle" />
-            ADD NEW DOMAIN
-          </span>
-          <button class="modal-close" @click="showAdd = false">✕</button>
+    <!-- ══════════ ADD DOMAIN MODAL (exact pattern from form_add_domain.html) ══════════ -->
+    <div v-if="showAdd" class="modal-overlay" @click.self="closeAddDomain">
+      <div class="bg-white border-4 border-brand-text w-full max-w-2xl max-h-[90vh] flex flex-col">
+        <!-- Header -->
+        <div class="bg-brand-primary px-6 py-4 flex items-center justify-between flex-shrink-0">
+          <h3 class="text-lg font-mono font-black uppercase tracking-tight text-white flex items-center">
+            <Icon name="plus-circle" :size="20" class="mr-2" />
+            ADD DOMAIN
+          </h3>
+          <button @click="closeAddDomain" class="text-white hover:text-gray-200 transition-colors">
+            <Icon name="x" :size="20" />
+          </button>
         </div>
 
-        <!-- Modal body -->
-        <div class="modal-body">
-
+        <!-- Scrollable Body -->
+        <div class="overflow-y-auto flex-1">
           <!-- Error -->
-          <div v-if="addError" class="modal-error">
-            <q-icon name="warning" size="14px" style="margin-right:6px;flex-shrink:0" />
-            {{ addError }}
+          <div v-if="addError" class="mx-6 mt-4 bg-red-50 border-2 border-red-600 p-3 flex items-start">
+            <Icon name="alert-circle" :size="16" class="text-red-600 mr-2 mt-0.5 flex-shrink-0" />
+            <p class="text-sm text-red-700 font-medium">{{ addError }}</p>
           </div>
 
-          <!-- ── BASIC INFORMATION ── -->
-          <div class="info-card">
-            <div class="info-card-title">
-              <q-icon name="info" size="15px" style="margin-right:6px" />
-              BASIC INFORMATION
+          <form class="p-6 space-y-5" @submit.prevent="submitAdd">
+            <!-- Basic Information -->
+            <div class="border-2 border-brand-text p-4 space-y-4">
+              <h4 class="text-sm font-mono font-black uppercase tracking-tight flex items-center">
+                <Icon name="info" :size="16" class="mr-2" />
+                BASIC INFORMATION
+              </h4>
+
+              <div>
+                <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
+                  DOMAIN NAME <span class="text-red-500">*</span>
+                </label>
+                <input v-model="addForm.domain" type="text" required placeholder="example.com"
+                  class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm" />
+                <p class="text-[10px] text-gray-500 mt-1">Enter a valid domain name (e.g., example.com)</p>
+              </div>
+
+              <div>
+                <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">DESCRIPTION</label>
+                <input v-model="addForm.description" type="text" placeholder="Optional description for this domain"
+                  class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm" />
+              </div>
+
+              <div class="flex items-center pt-1">
+                <input type="checkbox" id="dom-add-active" v-model="addForm.active" class="w-5 h-5 border-2 border-brand-text cursor-pointer" />
+                <label for="dom-add-active" class="ml-2 text-sm font-bold cursor-pointer">Active Domain</label>
+              </div>
             </div>
 
-            <div class="form-group">
-              <label class="form-label">DOMAIN NAME <span class="req">*</span></label>
-              <input v-model="addForm.domain" class="form-input" placeholder="example.com" />
-              <span class="form-hint">Enter a valid domain name (e.g., example.com)</span>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">DESCRIPTION</label>
-              <input v-model="addForm.description" class="form-input" placeholder="Optional description for this domain" />
-            </div>
-
-            <label class="check-label">
-              <input type="checkbox" v-model="addForm.active" />
-              Active Domain
-            </label>
-          </div>
-
-          <!-- ── ADVANCED SETTINGS (collapsible) ── -->
-          <details class="adv-details" open>
-            <summary class="adv-summary">
-              <span class="adv-summary-left">
-                <q-icon name="settings" size="15px" style="margin-right:6px" />
+            <!-- Advanced Settings (exact from reference) -->
+            <details class="border-2 border-brand-text group" open>
+              <summary class="p-3 cursor-pointer font-bold uppercase tracking-tight text-sm flex items-center bg-gray-50 hover:bg-gray-100 transition-colors">
+                <Icon name="settings" :size="16" class="mr-2" />
                 ADVANCED SETTINGS
-              </span>
-              <q-icon name="expand_less" size="18px" class="adv-chevron" />
-            </summary>
+                <Icon name="chevron-down" :size="16" class="ml-auto group-open:rotate-180 transition-transform" />
+              </summary>
+              <div class="p-4 space-y-4 border-t-2 border-brand-text">
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">ALIAS LIMIT</label>
+                    <input v-model.number="addForm.aliases" type="number" min="0" class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm" />
+                    <p class="text-[10px] text-gray-500 mt-1">Maximum number of aliases (0 = unlimited)</p>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">MAILBOX LIMIT</label>
+                    <input v-model.number="addForm.mailboxes" type="number" min="0" class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm" />
+                    <p class="text-[10px] text-gray-500 mt-1">Maximum number of mailboxes (0 = unlimited)</p>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">QUOTA LIMIT (MB)</label>
+                    <input v-model.number="addForm.quotaMB" type="number" min="0" class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm" />
+                    <p class="text-[10px] text-gray-500 mt-1">Maximum quota limit in MB (0 = unlimited)</p>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">PASSWORD EXPIRY (DAYS)</label>
+                    <input v-model.number="addForm.passwordExpiry" type="number" min="0" placeholder="365" class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm" />
+                    <p class="text-[10px] text-gray-500 mt-1">Password expiry in days (empty = never)</p>
+                  </div>
+                </div>
 
-            <div class="adv-body">
-              <div class="form-row2">
-                <div class="form-group">
-                  <label class="form-label">ALIAS LIMIT</label>
-                  <input v-model.number="addForm.aliases" class="form-input" type="number" min="0" />
-                  <span class="form-hint">Maximum number of aliases (0 = unlimited)</span>
+                <div>
+                  <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">TRANSPORT</label>
+                  <div class="relative">
+                    <select v-model="addForm.transport"
+                      class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm appearance-none bg-white cursor-pointer pr-10">
+                      <option value="virtual">virtual</option>
+                      <option v-for="t in transports" :key="t.id" :value="t.transport">{{ t.domain }} → {{ t.transport }}</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-brand-text border-l-2 border-brand-text">
+                      <Icon name="chevron-down" :size="16" />
+                    </div>
+                  </div>
+                  <p class="text-[10px] text-gray-500 mt-1">Select the mail transport for this domain</p>
                 </div>
-                <div class="form-group">
-                  <label class="form-label">MAILBOX LIMIT</label>
-                  <input v-model.number="addForm.mailboxes" class="form-input" type="number" min="0" />
-                  <span class="form-hint">Maximum number of mailboxes (0 = unlimited)</span>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">QUOTA LIMIT (MB)</label>
-                  <input v-model.number="addForm.quotaMB" class="form-input" type="number" min="0" />
-                  <span class="form-hint">Maximum quota limit in MB (0 = unlimited)</span>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">PASSWORD EXPIRY (DAYS)</label>
-                  <input v-model.number="addForm.passwordExpiry" class="form-input" type="number" min="0" placeholder="365" />
-                  <span class="form-hint">Password expiry in days (empty = never)</span>
+
+                <div class="flex items-center pt-2">
+                  <input type="checkbox" id="dom-add-backupmx" v-model="addForm.backupmx" class="w-5 h-5 border-2 border-brand-text cursor-pointer" />
+                  <label for="dom-add-backupmx" class="ml-2 text-sm font-bold cursor-pointer">Enable Backup MX</label>
+                  <span class="ml-auto text-[10px] text-gray-500 hidden sm:block">Use this server as a backup mail exchanger</span>
                 </div>
               </div>
-
-              <div class="form-group">
-                <label class="form-label">TRANSPORT</label>
-                <select v-model="addForm.transport" class="form-select-plain">
-                  <option value="virtual">virtual</option>
-                  <option v-for="t in transports" :key="t.id" :value="t.transport">
-                    {{ t.domain }} -&gt; {{ t.transport }}
-                  </option>
-                </select>
-                <span class="form-hint">Select the mail transport for this domain</span>
-              </div>
-
-              <label class="check-label backupmx-row">
-                <input type="checkbox" v-model="addForm.backupmx" />
-                Enable Backup MX
-                <span class="backupmx-hint">Use this server as a backup mail exchanger</span>
-              </label>
-            </div>
-          </details>
-
+            </details>
+          </form>
         </div>
 
-        <!-- Modal footer -->
-        <div class="modal-footer">
-          <button class="btn-cancel" @click="showAdd = false">
-            <q-icon name="close" size="14px" style="margin-right:4px;vertical-align:middle" />
+        <!-- Footer -->
+        <div class="bg-gray-50 px-6 py-4 flex items-center justify-end space-x-3 border-t-2 border-brand-text flex-shrink-0">
+          <button type="button" @click="closeAddDomain"
+            class="bg-white hover:bg-gray-100 text-brand-text border-2 border-brand-text font-black px-6 py-2.5 shadow-[2px_2px_0px_#1E293B] hover:translate-y-px hover:shadow-[1px_1px_0px_#1E293B] active:translate-y-0.5 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center">
+            <Icon name="x" :size="16" class="mr-2" />
             CANCEL
           </button>
-          <button class="btn-primary" :disabled="savingAdd" @click="submitAdd">
-            <q-icon name="add_circle" size="14px" style="margin-right:6px;vertical-align:middle" />
+          <button type="button" :disabled="savingAdd" @click="submitAdd"
+            class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-6 py-2.5 shadow-[3px_3px_0px_#1E293B] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center disabled:opacity-60">
+            <Icon name="plus-circle" :size="16" class="mr-2" />
             {{ savingAdd ? 'SAVING...' : 'SAVE DOMAIN' }}
           </button>
         </div>
       </div>
     </div>
 
-    <!-- ══════════ EDIT MODAL ══════════ -->
-    <div v-if="showEdit" class="modal-overlay" @click.self="showEdit = false">
-      <div class="modal-card">
-
-        <!-- Modal header -->
-        <div class="modal-head">
-          <span class="modal-head-title">
-            <q-icon name="edit" size="18px" style="margin-right:8px;vertical-align:middle" />
+    <!-- ══════════ EDIT DOMAIN MODAL (exact pattern from form_edit_domain.html) ══════════ -->
+    <div v-if="showEdit" class="modal-overlay" @click.self="closeEditDomain">
+      <div class="bg-white border-4 border-brand-text w-full max-w-2xl max-h-[90vh] flex flex-col">
+        <!-- Header -->
+        <div class="bg-brand-primary px-6 py-4 flex items-center justify-between flex-shrink-0">
+          <h3 class="text-lg font-mono font-black uppercase tracking-tight text-white flex items-center">
+            <Icon name="edit" :size="20" class="mr-2" />
             EDIT DOMAIN
-            <span class="modal-head-sub">— {{ editForm.domain }}</span>
-          </span>
-          <button class="modal-close" @click="showEdit = false">✕</button>
+            <span class="ml-2 text-gray-200 text-base font-mono">- {{ editForm.domain }}</span>
+          </h3>
+          <button @click="closeEditDomain" class="text-white hover:text-gray-200 transition-colors">
+            <Icon name="x" :size="20" />
+          </button>
         </div>
 
-        <!-- Modal body -->
-        <div class="modal-body">
-
+        <!-- Scrollable Body -->
+        <div class="overflow-y-auto flex-1">
           <!-- Error -->
-          <div v-if="editError" class="modal-error">
-            <q-icon name="warning" size="14px" style="margin-right:6px;flex-shrink:0" />
-            {{ editError }}
+          <div v-if="editError" class="mx-6 mt-4 bg-red-50 border-2 border-red-600 p-3 flex items-start">
+            <Icon name="alert-circle" :size="16" class="text-red-600 mr-2 mt-0.5 flex-shrink-0" />
+            <p class="text-sm text-red-700 font-medium">{{ editError }}</p>
           </div>
 
-          <!-- ── BASIC INFORMATION ── -->
-          <div class="info-card">
-            <div class="info-card-title">
-              <q-icon name="info" size="15px" style="margin-right:6px" />
-              BASIC INFORMATION
+          <form class="p-6 space-y-5" @submit.prevent="submitEdit">
+            <!-- Basic Information -->
+            <div class="border-2 border-brand-text p-4 space-y-4">
+              <h4 class="text-sm font-mono font-black uppercase tracking-tight flex items-center">
+                <Icon name="info" :size="16" class="mr-2" />
+                BASIC INFORMATION
+              </h4>
+
+              <div>
+                <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">DOMAIN NAME</label>
+                <input :value="editForm.domain" readonly
+                  class="w-full h-10 px-3 border-2 border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed font-medium transition-colors text-sm" />
+                <p class="text-[10px] text-gray-500 mt-1">Domain name cannot be changed after creation</p>
+              </div>
+
+              <div>
+                <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">DESCRIPTION</label>
+                <input v-model="editForm.description" type="text" placeholder="Optional description for this domain"
+                  class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm" />
+              </div>
+
+              <div class="flex items-center pt-1">
+                <input type="checkbox" id="dom-edit-active" v-model="editForm.active" class="w-5 h-5 border-2 border-brand-text cursor-pointer" />
+                <label for="dom-edit-active" class="ml-2 text-sm font-bold cursor-pointer">Active Domain</label>
+              </div>
             </div>
 
-            <div class="form-group">
-              <label class="form-label">DOMAIN NAME</label>
-              <input :value="editForm.domain" class="form-input form-input-disabled" disabled />
-              <span class="form-hint">Domain name cannot be changed after creation</span>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">DESCRIPTION</label>
-              <input v-model="editForm.description" class="form-input" placeholder="Optional description for this domain" />
-            </div>
-
-            <label class="check-label">
-              <input type="checkbox" v-model="editForm.active" />
-              Active Domain
-            </label>
-          </div>
-
-          <!-- ── ADVANCED SETTINGS (collapsible) ── -->
-          <details class="adv-details" open>
-            <summary class="adv-summary">
-              <span class="adv-summary-left">
-                <q-icon name="settings" size="15px" style="margin-right:6px" />
+            <!-- Advanced Settings -->
+            <details class="border-2 border-brand-text group" open>
+              <summary class="p-3 cursor-pointer font-bold uppercase tracking-tight text-sm flex items-center bg-gray-50 hover:bg-gray-100 transition-colors">
+                <Icon name="settings" :size="16" class="mr-2" />
                 ADVANCED SETTINGS
-              </span>
-              <q-icon name="expand_less" size="18px" class="adv-chevron" />
-            </summary>
+                <Icon name="chevron-down" :size="16" class="ml-auto group-open:rotate-180 transition-transform" />
+              </summary>
+              <div class="p-4 space-y-4 border-t-2 border-brand-text">
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">ALIAS LIMIT</label>
+                    <input v-model.number="editForm.aliases" type="number" min="0" class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm" />
+                    <p class="text-[10px] text-gray-500 mt-1">Maximum number of aliases (0 = unlimited)</p>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">MAILBOX LIMIT</label>
+                    <input v-model.number="editForm.mailboxes" type="number" min="0" class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm" />
+                    <p class="text-[10px] text-gray-500 mt-1">Maximum number of mailboxes (0 = unlimited)</p>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">QUOTA LIMIT (MB)</label>
+                    <input v-model.number="editForm.quotaMB" type="number" min="0" class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm" />
+                    <p class="text-[10px] text-gray-500 mt-1">Maximum quota limit in MB (0 = unlimited)</p>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">PASSWORD EXPIRY (DAYS)</label>
+                    <input v-model.number="editForm.passwordExpiry" type="number" min="0" placeholder="365" class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm" />
+                    <p class="text-[10px] text-gray-500 mt-1">Password expiry in days (empty = never)</p>
+                  </div>
+                </div>
 
-            <div class="adv-body">
-              <div class="form-row2">
-                <div class="form-group">
-                  <label class="form-label">ALIAS LIMIT</label>
-                  <input v-model.number="editForm.aliases" class="form-input" type="number" min="0" />
-                  <span class="form-hint">Maximum number of aliases (0 = unlimited)</span>
+                <div>
+                  <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">TRANSPORT</label>
+                  <div class="relative">
+                    <select v-model="editForm.transport"
+                      class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm appearance-none bg-white cursor-pointer pr-10">
+                      <option value="virtual">virtual</option>
+                      <option v-for="t in transports" :key="t.id" :value="t.transport">{{ t.domain }} → {{ t.transport }}</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-brand-text border-l-2 border-brand-text">
+                      <Icon name="chevron-down" :size="16" />
+                    </div>
+                  </div>
+                  <p class="text-[10px] text-gray-500 mt-1">Select the mail transport for this domain</p>
                 </div>
-                <div class="form-group">
-                  <label class="form-label">MAILBOX LIMIT</label>
-                  <input v-model.number="editForm.mailboxes" class="form-input" type="number" min="0" />
-                  <span class="form-hint">Maximum number of mailboxes (0 = unlimited)</span>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">QUOTA LIMIT (MB)</label>
-                  <input v-model.number="editForm.quotaMB" class="form-input" type="number" min="0" />
-                  <span class="form-hint">Maximum quota limit in MB (0 = unlimited)</span>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">PASSWORD EXPIRY (DAYS)</label>
-                  <input v-model.number="editForm.passwordExpiry" class="form-input" type="number" min="0" placeholder="365" />
-                  <span class="form-hint">Password expiry in days (empty = never)</span>
+
+                <div class="flex items-center pt-2">
+                  <input type="checkbox" id="dom-edit-backupmx" v-model="editForm.backupmx" class="w-5 h-5 border-2 border-brand-text cursor-pointer" />
+                  <label for="dom-edit-backupmx" class="ml-2 text-sm font-bold cursor-pointer">Enable Backup MX</label>
+                  <span class="ml-auto text-[10px] text-gray-500 hidden sm:block">Use this server as a backup mail exchanger</span>
                 </div>
               </div>
-
-              <div class="form-group">
-                <label class="form-label">TRANSPORT</label>
-                <select v-model="editForm.transport" class="form-select-plain">
-                  <option value="virtual">virtual</option>
-                  <option v-for="t in transports" :key="t.id" :value="t.transport">
-                    {{ t.domain }} -&gt; {{ t.transport }}
-                  </option>
-                </select>
-                <span class="form-hint">Select the mail transport for this domain</span>
-              </div>
-
-              <label class="check-label backupmx-row">
-                <input type="checkbox" v-model="editForm.backupmx" />
-                Enable Backup MX
-                <span class="backupmx-hint">Use this server as a backup mail exchanger</span>
-              </label>
-            </div>
-          </details>
-
+            </details>
+          </form>
         </div>
 
-        <!-- Modal footer -->
-        <div class="modal-footer">
-          <button class="btn-cancel" @click="showEdit = false">
-            <q-icon name="close" size="14px" style="margin-right:4px;vertical-align:middle" />
+        <!-- Footer -->
+        <div class="bg-gray-50 px-6 py-4 flex items-center justify-end space-x-3 border-t-2 border-brand-text flex-shrink-0">
+          <button type="button" @click="closeEditDomain"
+            class="bg-white hover:bg-gray-100 text-brand-text border-2 border-brand-text font-black px-6 py-2.5 shadow-[2px_2px_0px_#1E293B] hover:translate-y-px hover:shadow-[1px_1px_0px_#1E293B] active:translate-y-0.5 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center">
+            <Icon name="x" :size="16" class="mr-2" />
             CANCEL
           </button>
-          <button class="btn-primary" :disabled="savingEdit" @click="submitEdit">
-            <q-icon name="save" size="14px" style="margin-right:6px;vertical-align:middle" />
+          <button type="button" :disabled="savingEdit" @click="submitEdit"
+            class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-6 py-2.5 shadow-[3px_3px_0px_#1E293B] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center disabled:opacity-60">
+            <Icon name="save" :size="16" class="mr-2" />
             {{ savingEdit ? 'SAVING...' : 'UPDATE DOMAIN' }}
           </button>
         </div>
@@ -356,29 +370,23 @@
     </div>
 
     <!-- ══════════ DELETE CONFIRM ══════════ -->
-    <div v-if="showDeleteConfirm" class="modal-overlay" @click.self="showDeleteConfirm = false">
-      <div class="modal-card modal-card-sm">
-        <div class="modal-head modal-head-danger">
-          <span>CONFIRM DELETE</span>
-          <button class="modal-close" @click="showDeleteConfirm = false">✕</button>
-        </div>
-        <div class="modal-body">
-          <p class="confirm-text">
-            Are you sure you want to delete domain<br />
-            <strong>{{ deleteTarget?.domain }}</strong>?<br />
-            <span class="confirm-sub">This will delete all mailboxes, aliases, and related data.</span>
-          </p>
-        </div>
-        <div class="modal-footer">
-          <button class="btn-cancel" @click="showDeleteConfirm = false">CANCEL</button>
-          <button class="btn-danger" :disabled="deletingRow" @click="submitDelete">
-            {{ deletingRow ? 'DELETING...' : 'DELETE' }}
-          </button>
-        </div>
-      </div>
-    </div>
+    <BrutalModal v-model="showDeleteConfirm" title="CONFIRM DELETE" size="sm" danger>
+      <p class="confirm-text">
+        Are you sure you want to delete domain<br />
+        <strong>{{ deleteTarget?.domain }}</strong>?<br />
+        <span class="confirm-sub">This will delete all mailboxes, aliases, and related data.</span>
+      </p>
 
-  </q-page>
+      <template #footer>
+        <button class="btn-cancel" @click="showDeleteConfirm = false">CANCEL</button>
+        <button class="btn-danger" :disabled="deletingRow" @click="submitDelete">
+          <Icon name="trash-2" :size="14" style="margin-right:6px;vertical-align:middle" />
+          {{ deletingRow ? 'DELETING...' : 'DELETE' }}
+        </button>
+      </template>
+    </BrutalModal>
+
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -514,6 +522,16 @@ function openAdd() {
   showAdd.value = true
 }
 
+function closeAddDomain() {
+  showAdd.value = false
+  addError.value = ''
+}
+
+function closeEditDomain() {
+  showEdit.value = false
+  editError.value = ''
+}
+
 async function submitAdd() {
   addError.value = ''
   const f = addForm.value
@@ -532,7 +550,7 @@ async function submitAdd() {
       active: f.active,
       password_expiry: f.passwordExpiry || null,
     })
-    showAdd.value = false
+    closeAddDomain()
     toast.success(`Domain ${f.domain.trim().toLowerCase()} created successfully`)
     await load()
   } catch (e: any) {
@@ -585,7 +603,7 @@ async function submitEdit() {
       active: f.active,
       password_expiry: f.passwordExpiry || null,
     })
-    showEdit.value = false
+    closeEditDomain()
     toast.success(`Domain ${f.domain} updated successfully`)
     await load()
   } catch (e: any) {
@@ -637,27 +655,7 @@ async function submitDelete() {
 .dom-title { font-size: 28px; font-weight: 900; color: #1e293b; letter-spacing: -0.5px; line-height: 1; font-family: monospace; text-transform: uppercase; }
 .dom-subtitle { font-size: 10px; color: #94a3b8; letter-spacing: 0.8px; margin-top: 6px; text-transform: uppercase; font-weight: 700; }
 
-.btn-primary {
-  background: #3b82f6; color: #fff; border: 2px solid #1e293b; padding: 20px 32px;
-  font-size: 16px; font-weight: 900; letter-spacing: 1.6px; cursor: pointer;
-  border-radius: 0; transition: all .15s; text-transform: uppercase;
-  box-shadow: 3px 3px 0 #1e293b; display: flex; align-items: center;
-}
-.btn-primary:hover:not(:disabled) {
-  background: #fff; color: #3b82f6;
-  transform: translate(-1px, -1px); box-shadow: 4px 4px 0 #1e293b;
-}
-.btn-primary:active:not(:disabled) { transform: translate(0,0); box-shadow: none; }
-.btn-primary:disabled { opacity: .5; cursor: default; }
-
-.error-banner {
-  background: #fef2f2; border: 1px solid #fca5a5; color: #dc2626;
-  padding: 10px 14px; font-size: 13px; margin-bottom: 18px;
-  display: flex; align-items: center; gap: 6px;
-}
-
-/* ─── Table card ─── */
-.table-card { background: #fff; border: 2px solid #1e293b; }
+/* .btn-primary, .error-banner, .table-card now centralized in global style.css (Tailwind-friendly) */
 
 .table-topbar {
   display: flex; justify-content: space-between; align-items: center;
@@ -681,8 +679,9 @@ async function submitDelete() {
 .data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 .table-head-row { background: #3b82f6; }
 .table-th {
-  color: #fff; font-weight: 600; letter-spacing: 0.4px; padding: 10px 14px;
+  color: #fff; font-weight: 700; letter-spacing: 0.4px; padding: 10px;
   text-align: left; cursor: pointer; white-space: nowrap; user-select: none;
+  font-size: 12px;
 }
 .table-th:hover { background: #2563eb; }
 .sort-arrows { margin-left: 4px; font-size: 9px; opacity: .5; }
@@ -734,40 +733,7 @@ async function submitDelete() {
 .pg-btn:disabled { opacity: .35; cursor: default; }
 .pg-active { background: #3b82f6 !important; color: #fff !important; border-color: #3b82f6 !important; }
 
-/* ─── Modals ─── */
-.modal-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 9000;
-  display: flex; align-items: center; justify-content: center; padding: 20px;
-}
-.modal-card {
-  background: #fff; border: 3px solid #1e293b; width: 100%; max-width: 620px;
-  max-height: 90vh; display: flex; flex-direction: column; border-radius: 0;
-  box-shadow: 4px 4px 0 #1e293b;
-}
-.modal-card-sm { max-width: 400px; }
-
-.modal-head {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 14px 20px; background: #3b82f6; color: #fff; flex-shrink: 0;
-}
-.modal-head-title {
-  font-size: 15px; font-weight: 900; letter-spacing: 0.3px; font-family: monospace;
-  text-transform: uppercase; display: flex; align-items: center;
-}
-.modal-head-sub { font-size: 13px; color: rgba(255,255,255,.7); margin-left: 8px; font-weight: 400; }
-.modal-head-danger { background: #dc2626; }
-.modal-close {
-  background: transparent; border: none; color: #fff; cursor: pointer;
-  font-size: 18px; line-height: 1; padding: 2px 6px; font-weight: 300;
-}
-.modal-close:hover { opacity: .75; }
-
-.modal-body { padding: 20px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 16px; }
-
-.modal-error {
-  background: #fef2f2; border: 2px solid #dc2626; color: #dc2626;
-  padding: 10px 14px; font-size: 13px; display: flex; align-items: flex-start;
-}
+/* Migration note: All modals (Add, Edit, Delete) converted to BrutalModal. Old CSS removed. */
 
 /* ─── Basic info card ─── */
 .info-card {
@@ -820,32 +786,7 @@ async function submitDelete() {
 .backupmx-row { justify-content: flex-start; }
 .backupmx-hint { margin-left: auto; font-size: 10px; color: #94a3b8; }
 
-/* ─── Modal footer ─── */
-.modal-footer {
-  display: flex; justify-content: flex-end; gap: 10px;
-  padding: 14px 20px; border-top: 2px solid #e2e8f0; flex-shrink: 0;
-  background: #f8fafc;
-}
-.btn-cancel {
-  background: #fff; border: 2px solid #1e293b; color: #374151;
-  padding: 8px 20px; font-size: 11px; font-weight: 800; cursor: pointer; border-radius: 0;
-  text-transform: uppercase; letter-spacing: 0.5px;
-  box-shadow: 2px 2px 0 #1e293b; transition: all .12s;
-  display: flex; align-items: center;
-}
-.btn-cancel:hover { background: #f1f5f9; transform: translate(-1px,-1px); box-shadow: 3px 3px 0 #1e293b; }
-.modal-footer .btn-primary { padding: 12px 24px !important; font-size: 14px !important; font-weight: 900 !important; letter-spacing: 1.4px !important; }
-.modal-footer .btn-primary:hover:not(:disabled) { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 #1e293b; }
-.btn-cancel:active { transform: translate(0,0); box-shadow: none; }
-.btn-danger {
-  background: #ef4444; color: #fff; border: 2px solid #1e293b; padding: 8px 20px;
-  font-size: 11px; font-weight: 800; cursor: pointer; border-radius: 0;
-  text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 2px 2px 0 #1e293b;
-  transition: all .12s;
-}
-.btn-danger:hover:not(:disabled) { background: #dc2626; }
-.btn-danger:active:not(:disabled) { transform: translate(0,0); box-shadow: none; }
-.btn-danger:disabled { opacity: .5; cursor: default; }
+/* ─── Modal footer styles now handled by BrutalModal + global .btn-cancel / .btn-danger */
 
 .confirm-text { font-size: 14px; color: #374151; line-height: 1.8; text-align: center; margin: 8px 0; }
 .confirm-sub { font-size: 12px; color: #dc2626; }

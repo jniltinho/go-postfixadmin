@@ -1,18 +1,16 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
-
+  <div class="app-shell">
     <!-- ═══════════════════════════════ HEADER ═══════════════════════════════ -->
-    <q-header class="header-bar">
-      <q-toolbar class="header-toolbar">
-
+    <header class="header-bar">
+      <div class="header-toolbar">
         <!-- Breadcrumb -->
         <div class="breadcrumb">
           <span class="breadcrumb-system">SYSTEM</span>
-          <q-icon name="chevron_right" size="16px" class="breadcrumb-icon" />
+          <Icon name="chevron-right" :size="16" class="breadcrumb-icon" />
           <span class="breadcrumb-page">{{ pageTitle }}</span>
         </div>
 
-        <q-space />
+        <div class="flex-1" />
 
         <!-- Language switcher -->
         <div class="lang-switcher">
@@ -22,7 +20,9 @@
             class="lang-btn"
             :class="{ 'lang-active': activeLang === lang }"
             @click="activeLang = lang"
-          >{{ lang }}</button>
+          >
+            {{ lang }}
+          </button>
         </div>
 
         <!-- User info -->
@@ -32,74 +32,61 @@
             <span class="user-role">{{ auth.user.superadmin ? 'SUPERADMIN' : 'ADMIN' }}</span>
           </div>
           <div class="user-avatar">
-            <q-icon name="shield" size="20px" color="white" />
+            <Icon name="shield" :size="20" color="white" />
           </div>
           <div class="header-divider" />
           <button class="logout-btn" @click="logout">
-            <q-icon name="exit_to_app" size="26px" />
-            Logout
+            <Icon name="log-out" :size="22" />
+            <span>Logout</span>
           </button>
         </div>
+      </div>
+    </header>
 
-      </q-toolbar>
-    </q-header>
-
-    <!-- ═══════════════════════════════ SIDEBAR ═══════════════════════════════ -->
-    <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      :width="240"
-      class="sidebar"
-    >
-      <!-- Logo / branding at top of sidebar -->
+    <!-- ═══════════════════════════════ SIDEBAR (always visible on desktop) ═══════════════════════════════ -->
+    <aside class="sidebar">
+      <!-- Logo / branding -->
       <div class="sidebar-logo">
         <div class="logo-icon">
-          <q-icon name="mail" size="18px" color="white" />
+          <Icon name="mail" :size="18" color="white" />
         </div>
         <span class="logo-text">PostfixAdmin</span>
       </div>
 
-      <q-list class="sidebar-list">
-
-        <q-item
+      <nav class="sidebar-nav">
+        <router-link
           v-for="item in mainNav"
           :key="item.to"
           :to="item.to"
-          exact
           class="nav-item"
           active-class="nav-item--active"
+          exact-active-class="nav-item--active"
         >
-          <q-item-section avatar class="nav-icon-section">
-            <q-icon :name="item.icon" size="18px" />
-          </q-item-section>
-          <q-item-section class="nav-label">{{ item.label }}</q-item-section>
-        </q-item>
+          <Icon :name="item.icon" :size="18" class="nav-icon" />
+          <span class="nav-label">{{ item.label }}</span>
+        </router-link>
 
         <div class="settings-label">SETTINGS</div>
 
-        <q-item
+        <router-link
           v-for="item in settingsNav"
           :key="item.to"
           :to="item.to"
-          exact
           class="nav-item"
           active-class="nav-item--active"
+          exact-active-class="nav-item--active"
         >
-          <q-item-section avatar class="nav-icon-section">
-            <q-icon :name="item.icon" size="18px" />
-          </q-item-section>
-          <q-item-section class="nav-label">{{ item.label }}</q-item-section>
-        </q-item>
-
-      </q-list>
-    </q-drawer>
+          <Icon :name="item.icon" :size="18" class="nav-icon" />
+          <span class="nav-label">{{ item.label }}</span>
+        </router-link>
+      </nav>
+    </aside>
 
     <!-- ═══════════════════════════════ CONTENT ═══════════════════════════════ -->
-    <q-page-container class="page-content">
+    <main class="page-content">
       <router-view />
-    </q-page-container>
-
-  </q-layout>
+    </main>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -109,7 +96,6 @@ import { useAuthStore } from '../stores/auth'
 
 const auth = useAuthStore()
 const route = useRoute()
-const leftDrawerOpen = ref(false)
 const activeLang = ref('EN')
 
 const routeTitles: Record<string, string> = {
@@ -127,20 +113,21 @@ const routeTitles: Record<string, string> = {
 
 const pageTitle = computed(() => routeTitles[route.name as string] ?? 'DASHBOARD')
 
+// Note: icon names are now Lucide (kebab-case)
 const mainNav = [
-  { to: '/dashboard',     icon: 'dashboard',   label: 'Dashboard' },
-  { to: '/mailboxes',     icon: 'mail',        label: 'Mailboxes' },
-  { to: '/aliases',       icon: 'forward',     label: 'Aliases' },
-  { to: '/domains',       icon: 'public',      label: 'My Domains' },
-  { to: '/alias-domains', icon: 'swap_horiz',  label: 'Domain Aliases' },
-  { to: '/logs',          icon: 'history',     label: 'Logs' },
-  { to: '/maillog',       icon: 'mail_outline',label: 'MailLog' },
+  { to: '/dashboard',     icon: 'layout-dashboard', label: 'Dashboard' },
+  { to: '/mailboxes',     icon: 'mail',             label: 'Mailboxes' },
+  { to: '/aliases',       icon: 'forward',          label: 'Aliases' },
+  { to: '/domains',       icon: 'globe',            label: 'My Domains' },
+  { to: '/alias-domains', icon: 'arrow-left-right', label: 'Domain Aliases' },
+  { to: '/logs',          icon: 'history',          label: 'Logs' },
+  { to: '/maillog',       icon: 'mail',             label: 'MailLog' },
 ]
 
 const settingsNav = [
-  { to: '/admins',     icon: 'people',    label: 'Administrators' },
-  { to: '/transports', icon: 'swap_vert', label: 'Transport List' },
-  { to: '/settings',   icon: 'settings',  label: 'Settings' },
+  { to: '/admins',     icon: 'users',    label: 'Administrators' },
+  { to: '/transports', icon: 'arrow-up-down', label: 'Transport List' },
+  { to: '/settings',   icon: 'settings', label: 'Settings' },
 ]
 
 function logout() {
@@ -149,21 +136,35 @@ function logout() {
 </script>
 
 <style scoped>
-/* ─── Page content background ─── */
-.page-content {
+/* ═══════════════════════════════════════════════════════════════════════════
+   MainLayout — Neo-Brutalist (no Quasar)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  grid-template-rows: 56px 1fr;
+  grid-template-areas:
+    "sidebar header"
+    "sidebar content";
+  min-height: 100vh;
   background: #ebf2fe;
 }
 
 /* ─── Header ─── */
 .header-bar {
+  grid-area: header;
+  height: 56px;
   background: #ffffff;
   border-bottom: 3px solid #1e293b;
+  z-index: 100;
 }
 
 .header-toolbar {
-  min-height: 56px;
-  height: 56px;
+  height: 100%;
   padding: 0 32px;
+  display: flex;
+  align-items: center;
 }
 
 /* Breadcrumb */
@@ -175,16 +176,9 @@ function logout() {
   letter-spacing: 1.2px;
   text-transform: uppercase;
 }
-.breadcrumb-system {
-  color: #94a3b8;
-}
-.breadcrumb-icon {
-  color: #94a3b8;
-  margin: 0 2px;
-}
-.breadcrumb-page {
-  color: var(--color-brand-text);
-}
+.breadcrumb-system { color: #94a3b8; }
+.breadcrumb-icon { color: #94a3b8; margin: 0 2px; }
+.breadcrumb-page { color: var(--color-brand-text); }
 
 /* Language switcher */
 .lang-switcher {
@@ -274,25 +268,27 @@ function logout() {
   background: #fef2f2;
 }
 
-/* ─── Sidebar ─── */
-:deep(.q-drawer__content) {
+/* ─── Sidebar (always visible) ─── */
+.sidebar {
+  grid-area: sidebar;
   background: #ffffff;
   border-right: 3px solid #1e293b;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
-  overflow: visible;
+  overflow: hidden;
 }
 
-/* Sidebar logo/branding section */
 .sidebar-logo {
   display: flex;
   align-items: center;
   gap: 10px;
-  height: 59px;
+  height: 56px;
   padding: 0 16px;
   border-bottom: 3px solid #1e293b;
   flex-shrink: 0;
 }
+
 .logo-icon {
   width: 36px;
   height: 36px;
@@ -304,6 +300,7 @@ function logout() {
   justify-content: center;
   flex-shrink: 0;
 }
+
 .logo-text {
   font-size: 20px;
   font-weight: 700;
@@ -312,50 +309,54 @@ function logout() {
   font-family: monospace;
 }
 
-:deep(.q-scrollarea__content) {
-  width: 100%;
-}
-.sidebar-list {
+.sidebar-nav {
   padding-top: 8px;
   flex: 1;
+  overflow-y: auto;
 }
 
 .nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   padding: 8px 16px;
-  border-radius: 0;
   font-size: 16px;
+  font-weight: 700;
   color: #374151;
-  min-height: 40px;
-  cursor: pointer;
-  transition: background .12s, color .12s;
+  text-decoration: none;
+  transition: all .12s;
   border-top: 2px solid transparent;
   border-bottom: 2px solid transparent;
-  border-left: 6px solid transparent;
-  border-right: 0px solid transparent;
+  border-left: 8px solid transparent;
 }
-.nav-item :deep(.q-icon) {
+
+.nav-icon {
   color: #9ca3af;
   transition: color .12s;
+  flex-shrink: 0;
 }
+
 .nav-item:hover {
-  background: rgba(59, 130, 246, .08);
+  background: rgba(59, 130, 246, 0.08);
   color: var(--color-brand-text);
   border-top-color: var(--color-brand-text);
   border-bottom-color: var(--color-brand-text);
   border-left-color: var(--color-brand-text);
 }
-.nav-item:hover :deep(.q-icon) {
+
+.nav-item:hover .nav-icon {
   color: var(--color-brand-text);
 }
+
 .nav-item--active {
+  background: #ebf2fe;
+  color: var(--color-brand-text);
+  border-top-color: var(--color-brand-text);
+  border-bottom-color: var(--color-brand-text);
+  border-left-color: var(--color-brand-text);
   position: relative;
-  background: #ebf2fe !important;
-  color: var(--color-brand-text) !important;
-  border-top-color: var(--color-brand-text) !important;
-  border-bottom-color: var(--color-brand-text) !important;
-  border-left-color: var(--color-brand-text) !important;
-  border-right-width: 0 !important;
 }
+
 .nav-item--active::after {
   content: '';
   position: absolute;
@@ -366,12 +367,11 @@ function logout() {
   background: #ebf2fe;
   z-index: 10;
 }
-.nav-item--active :deep(.q-icon) {
-  color: var(--color-brand-text) !important;
+
+.nav-item--active .nav-icon {
+  color: var(--color-brand-text);
 }
-.nav-icon-section {
-  min-width: 36px;
-}
+
 .nav-label {
   font-weight: 700;
 }
@@ -383,5 +383,12 @@ function logout() {
   color: #94a3b8;
   letter-spacing: 1px;
   text-transform: uppercase;
+}
+
+/* ─── Main content area ─── */
+.page-content {
+  grid-area: content;
+  background: #ebf2fe;
+  overflow: auto;
 }
 </style>
