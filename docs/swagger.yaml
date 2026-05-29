@@ -577,6 +577,222 @@ paths:
       summary: Update API Key
       tags:
       - Settings
+  /user/forwarding:
+    get:
+      description: Returns current forwarding addresses for the authenticated mailbox.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get user forwarding targets
+      tags:
+      - User Portal
+    post:
+      consumes:
+      - application/json
+      description: Configures the email forwarding destinations.
+      parameters:
+      - description: Forwarding config
+        in: body
+        name: request
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update user forwarding targets
+      tags:
+      - User Portal
+  /user/me:
+    get:
+      description: Returns information about the logged-in mailbox user (name and
+        email).
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get user profile info
+      tags:
+      - User Portal
+  /user/password:
+    post:
+      consumes:
+      - application/json
+      description: Allows the user to change their own password.
+      parameters:
+      - description: Password update info
+        in: body
+        name: request
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update mailbox password
+      tags:
+      - User Portal
+  /user/vacation:
+    delete:
+      description: Removes vacation configuration for the mailbox user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Deactivate / remove auto-reply
+      tags:
+      - User Portal
+    get:
+      description: Returns current vacation configuration for the mailbox user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get auto-reply / vacation settings
+      tags:
+      - User Portal
+    post:
+      consumes:
+      - application/json
+      description: Configures the vacation active state, message subject, body, interval
+        and date range.
+      parameters:
+      - description: Vacation configuration data
+        in: body
+        name: request
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Upsert auto-reply / vacation settings
+      tags:
+      - User Portal
 securityDefinitions:
   BearerAuth:
     description: Type "Bearer" followed by a space and JWT token.
