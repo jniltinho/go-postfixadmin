@@ -470,8 +470,8 @@ async function submitDelete() {
 .page-subtitle { font-size: 10px; color: #94a3b8; letter-spacing: 0.8px; margin-top: 6px; text-transform: uppercase; font-weight: 700; }
 
 .btn-primary {
-  background: #3b82f6; color: #fff; border: 2px solid #1e293b; padding: 14px 24px;
-  font-size: 11px; font-weight: 800; letter-spacing: 0.6px; cursor: pointer;
+  background: #3b82f6; color: #fff; border: 2px solid #1e293b; padding: 20px 32px;
+  font-size: 16px; font-weight: 900; letter-spacing: 1.6px; cursor: pointer;
   border-radius: 0; transition: all .15s; text-transform: uppercase;
   box-shadow: 3px 3px 0 #1e293b; display: flex; align-items: center;
 }
