@@ -30,13 +30,13 @@
       @delete="confirmDelete"
     >
       <template #toolbar>
-        <div class="mb-8 flex items-center">
-          <label class="mr-4 text-xs font-black uppercase tracking-widest text-brand-text">FILTER BY DOMAIN:</label>
-          <select v-model="domainFilter" class="h-10 px-4 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors bg-white">
+        <div class="mb-4 flex items-center gap-3">
+          <label class="text-xs font-black uppercase tracking-widest text-brand-text">FILTER BY DOMAIN:</label>
+          <select v-model="domainFilter" class="h-9 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium bg-white">
             <option value="">All Domains</option>
             <option v-for="d in domains" :key="d.domain" :value="d.domain">{{ d.domain }}</option>
           </select>
-          <a v-if="domainFilter" class="ml-4 text-xs font-bold text-red-500 hover:underline cursor-pointer" @click="domainFilter = ''">Clear Filter</a>
+          <a v-if="domainFilter" class="ml-2 text-xs font-bold text-red-500 hover:underline cursor-pointer" @click="domainFilter = ''">Clear Filter</a>
         </div>
       </template>
 
