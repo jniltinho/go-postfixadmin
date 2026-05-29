@@ -121,6 +121,62 @@ definitions:
       token_type:
         type: string
     type: object
+  dto.UpdateForwardingRequest:
+    properties:
+      forwarding:
+        example: |-
+          john@example.com
+          backup@example.com
+        type: string
+    type: object
+  dto.UpdatePasswordRequest:
+    properties:
+      confirm_password:
+        example: NewPass456!
+        type: string
+      current_password:
+        example: OldPass123!
+        type: string
+      new_password:
+        example: NewPass456!
+        type: string
+    type: object
+  dto.UpdateVacationRequest:
+    properties:
+      active:
+        example: true
+        type: boolean
+      activefrom:
+        example: 2026-06-01T09:00
+        type: string
+      activeuntil:
+        example: 2026-06-08T09:00
+        type: string
+      body:
+        example: I am away until Friday.
+        type: string
+      interval_time:
+        example: 86400
+        type: integer
+      subject:
+        example: Out of Office
+        type: string
+    type: object
+  dto.UserErrorResponse:
+    properties:
+      error:
+        example: Current password is incorrect
+        type: string
+      success:
+        example: false
+        type: boolean
+    type: object
+  dto.UserForwardingResponse:
+    properties:
+      goto:
+        example: john@example.com,backup@example.com
+        type: string
+    type: object
   dto.UserInfo:
     properties:
       domains:
@@ -133,6 +189,45 @@ definitions:
         description: '"admin" or "mailbox"'
         type: string
       username:
+        type: string
+    type: object
+  dto.UserProfileResponse:
+    properties:
+      name:
+        example: John Doe
+        type: string
+      username:
+        example: john@example.com
+        type: string
+    type: object
+  dto.UserSuccessResponse:
+    properties:
+      message:
+        example: Operation completed successfully
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  dto.VacationResponse:
+    properties:
+      active:
+        example: true
+        type: boolean
+      activefrom:
+        example: 2026-06-01T09:00
+        type: string
+      activeuntil:
+        example: 2026-06-08T09:00
+        type: string
+      body:
+        example: I am away until Friday.
+        type: string
+      interval_time:
+        example: 86400
+        type: integer
+      subject:
+        example: Out of Office
         type: string
     type: object
   handlers.ApiKeyResponse:
@@ -579,87 +674,79 @@ paths:
       - Settings
   /user/forwarding:
     get:
-      description: Returns current forwarding addresses for the authenticated mailbox.
+      description: Returns the current comma-separated forwarding destinations for
+        the authenticated mailbox.
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.UserForwardingResponse'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.UserErrorResponse'
       security:
       - BearerAuth: []
-      summary: Get user forwarding targets
+      summary: Get forwarding addresses
       tags:
       - User Portal
     post:
       consumes:
       - application/json
-      description: Configures the email forwarding destinations.
+      description: Sets the email forwarding destinations. Send one address per line;
+        leave blank to reset to self-delivery.
       parameters:
-      - description: Forwarding config
+      - description: Forwarding configuration
         in: body
         name: request
         required: true
         schema:
-          additionalProperties: true
-          type: object
+          $ref: '#/definitions/dto.UpdateForwardingRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.UserSuccessResponse'
         "400":
           description: Bad Request
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.UserErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.UserErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.UserErrorResponse'
       security:
       - BearerAuth: []
-      summary: Update user forwarding targets
+      summary: Update forwarding addresses
       tags:
       - User Portal
   /user/me:
     get:
-      description: Returns information about the logged-in mailbox user (name and
-        email).
+      description: Returns the display name and email address of the authenticated
+        mailbox user.
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.UserProfileResponse'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.UserErrorResponse'
         "404":
           description: Not Found
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.UserErrorResponse'
       security:
       - BearerAuth: []
       summary: Get user profile info
@@ -669,84 +756,78 @@ paths:
     post:
       consumes:
       - application/json
-      description: Allows the user to change their own password.
+      description: Allows the authenticated mailbox user to change their own password.
+        The current password must be provided for verification.
       parameters:
-      - description: Password update info
+      - description: Password change payload
         in: body
         name: request
         required: true
         schema:
-          additionalProperties: true
-          type: object
+          $ref: '#/definitions/dto.UpdatePasswordRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.UserSuccessResponse'
         "400":
-          description: Bad Request
+          description: Wrong current password, validation error, or passwords do not
+            match
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.UserErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.UserErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.UserErrorResponse'
       security:
       - BearerAuth: []
-      summary: Update mailbox password
+      summary: Change mailbox password
       tags:
       - User Portal
   /user/vacation:
     delete:
-      description: Removes vacation configuration for the mailbox user.
+      description: Deletes the vacation (out-of-office) configuration for the authenticated
+        mailbox.
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.UserSuccessResponse'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.UserErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.UserErrorResponse'
       security:
       - BearerAuth: []
-      summary: Deactivate / remove auto-reply
+      summary: Remove auto-reply settings
       tags:
       - User Portal
     get:
-      description: Returns current vacation configuration for the mailbox user.
+      description: Returns the current vacation (out-of-office) configuration for
+        the authenticated mailbox. Returns defaults when no vacation is configured.
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.VacationResponse'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.UserErrorResponse'
       security:
       - BearerAuth: []
       summary: Get auto-reply / vacation settings
@@ -755,42 +836,38 @@ paths:
     post:
       consumes:
       - application/json
-      description: Configures the vacation active state, message subject, body, interval
-        and date range.
+      description: Creates or updates the vacation (out-of-office) configuration.
+        Date fields use format "2006-01-02T15:04". interval_time is in seconds (0
+        = send once per sender).
       parameters:
-      - description: Vacation configuration data
+      - description: Vacation configuration
         in: body
         name: request
         required: true
         schema:
-          additionalProperties: true
-          type: object
+          $ref: '#/definitions/dto.UpdateVacationRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.UserSuccessResponse'
         "400":
           description: Bad Request
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.UserErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.UserErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.UserErrorResponse'
       security:
       - BearerAuth: []
-      summary: Upsert auto-reply / vacation settings
+      summary: Save auto-reply / vacation settings
       tags:
       - User Portal
 securityDefinitions:

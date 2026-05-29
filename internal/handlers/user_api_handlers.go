@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"go-postfixadmin/internal/api/dto"
 	"go-postfixadmin/internal/middleware"
 	"go-postfixadmin/internal/models"
 	"go-postfixadmin/internal/repositories"
@@ -16,12 +17,12 @@ import (
 
 // GetUserProfile godoc
 // @Summary      Get user profile info
-// @Description  Returns information about the logged-in mailbox user (name and email).
+// @Description  Returns the display name and email address of the authenticated mailbox user.
 // @Tags         User Portal
 // @Produce      json
-// @Success      200 {object} map[string]interface{}
-// @Failure      401 {object} map[string]interface{}
-// @Failure      404 {object} map[string]interface{}
+// @Success      200  {object}  dto.UserProfileResponse
+// @Failure      401  {object}  dto.UserErrorResponse
+// @Failure      404  {object}  dto.UserErrorResponse
 // @Router       /user/me [get]
 // @Security     BearerAuth
 func (h *Handler) GetUserProfile(c *echo.Context) error {
@@ -35,19 +36,19 @@ func (h *Handler) GetUserProfile(c *echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "mailbox not found")
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"username": mailbox.Username,
-		"name":     mailbox.Name,
+	return c.JSON(http.StatusOK, dto.UserProfileResponse{
+		Username: mailbox.Username,
+		Name:     mailbox.Name,
 	})
 }
 
 // GetUserForwarding godoc
-// @Summary      Get user forwarding targets
-// @Description  Returns current forwarding addresses for the authenticated mailbox.
+// @Summary      Get forwarding addresses
+// @Description  Returns the current comma-separated forwarding destinations for the authenticated mailbox.
 // @Tags         User Portal
 // @Produce      json
-// @Success      200 {object} map[string]interface{}
-// @Failure      401 {object} map[string]interface{}
+// @Success      200  {object}  dto.UserForwardingResponse
+// @Failure      401  {object}  dto.UserErrorResponse
 // @Router       /user/forwarding [get]
 // @Security     BearerAuth
 func (h *Handler) GetUserForwarding(c *echo.Context) error {
@@ -62,22 +63,20 @@ func (h *Handler) GetUserForwarding(c *echo.Context) error {
 		gotoStr = alias.Goto
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"goto": gotoStr,
-	})
+	return c.JSON(http.StatusOK, dto.UserForwardingResponse{Goto: gotoStr})
 }
 
 // UpdateUserForwardingAPI godoc
-// @Summary      Update user forwarding targets
-// @Description  Configures the email forwarding destinations.
+// @Summary      Update forwarding addresses
+// @Description  Sets the email forwarding destinations. Send one address per line; leave blank to reset to self-delivery.
 // @Tags         User Portal
 // @Accept       json
 // @Produce      json
-// @Param        request body map[string]interface{} true "Forwarding config"
-// @Success      200 {object} map[string]interface{}
-// @Failure      400 {object} map[string]interface{}
-// @Failure      401 {object} map[string]interface{}
-// @Failure      500 {object} map[string]interface{}
+// @Param        request  body      dto.UpdateForwardingRequest  true  "Forwarding configuration"
+// @Success      200      {object}  dto.UserSuccessResponse
+// @Failure      400      {object}  dto.UserErrorResponse
+// @Failure      401      {object}  dto.UserErrorResponse
+// @Failure      500      {object}  dto.UserErrorResponse
 // @Router       /user/forwarding [post]
 // @Security     BearerAuth
 func (h *Handler) UpdateUserForwardingAPI(c *echo.Context) error {
@@ -86,9 +85,7 @@ func (h *Handler) UpdateUserForwardingAPI(c *echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "unauthorized")
 	}
 
-	var req struct {
-		Forwarding string `json:"forwarding"`
-	}
+	var req dto.UpdateForwardingRequest
 	if err := c.Bind(&req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid request body")
 	}
@@ -117,23 +114,23 @@ func (h *Handler) UpdateUserForwardingAPI(c *echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to update forwarding")
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"success": true,
-		"message": "Forwarding updated successfully",
+	return c.JSON(http.StatusOK, dto.UserSuccessResponse{
+		Success: true,
+		Message: "Forwarding updated successfully",
 	})
 }
 
 // UpdateUserPasswordAPI godoc
-// @Summary      Update mailbox password
-// @Description  Allows the user to change their own password.
+// @Summary      Change mailbox password
+// @Description  Allows the authenticated mailbox user to change their own password. The current password must be provided for verification.
 // @Tags         User Portal
 // @Accept       json
 // @Produce      json
-// @Param        request body map[string]interface{} true "Password update info"
-// @Success      200 {object} map[string]interface{}
-// @Failure      400 {object} map[string]interface{}
-// @Failure      401 {object} map[string]interface{}
-// @Failure      500 {object} map[string]interface{}
+// @Param        request  body      dto.UpdatePasswordRequest  true  "Password change payload"
+// @Success      200      {object}  dto.UserSuccessResponse
+// @Failure      400      {object}  dto.UserErrorResponse  "Wrong current password, validation error, or passwords do not match"
+// @Failure      401      {object}  dto.UserErrorResponse
+// @Failure      500      {object}  dto.UserErrorResponse
 // @Router       /user/password [post]
 // @Security     BearerAuth
 func (h *Handler) UpdateUserPasswordAPI(c *echo.Context) error {
@@ -142,11 +139,7 @@ func (h *Handler) UpdateUserPasswordAPI(c *echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "unauthorized")
 	}
 
-	var req struct {
-		CurrentPassword string `json:"current_password"`
-		NewPassword     string `json:"new_password"`
-		ConfirmPassword string `json:"confirm_password"`
-	}
+	var req dto.UpdatePasswordRequest
 	if err := c.Bind(&req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid request body")
 	}
@@ -159,40 +152,40 @@ func (h *Handler) UpdateUserPasswordAPI(c *echo.Context) error {
 
 	match, err := utils.CheckPassword(req.CurrentPassword, mailbox.Password)
 	if err != nil || !match {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "error": "Current password is incorrect"})
+		return c.JSON(http.StatusBadRequest, dto.UserErrorResponse{Success: false, Error: "Current password is incorrect"})
 	}
 
 	if validationErr := ValidatePassword(req.NewPassword); validationErr != "" {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "error": validationErr})
+		return c.JSON(http.StatusBadRequest, dto.UserErrorResponse{Success: false, Error: validationErr})
 	}
 
 	if req.NewPassword != req.ConfirmPassword {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "error": "Passwords do not match"})
+		return c.JSON(http.StatusBadRequest, dto.UserErrorResponse{Success: false, Error: "Passwords do not match"})
 	}
 
 	hashedPassword, err := utils.HashPassword(req.NewPassword)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to process the new password"})
+		return c.JSON(http.StatusInternalServerError, dto.UserErrorResponse{Success: false, Error: "Failed to process the new password"})
 	}
 
 	mailbox.Password = hashedPassword
 	if err := repositories.SaveMailbox(h.DB, mailbox, "USER_EDIT_PASSWORD", username, c.RealIP()); err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to update password"})
+		return c.JSON(http.StatusInternalServerError, dto.UserErrorResponse{Success: false, Error: "Failed to update password"})
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"success": true,
-		"message": "Password updated successfully",
+	return c.JSON(http.StatusOK, dto.UserSuccessResponse{
+		Success: true,
+		Message: "Password updated successfully",
 	})
 }
 
 // GetUserVacation godoc
 // @Summary      Get auto-reply / vacation settings
-// @Description  Returns current vacation configuration for the mailbox user.
+// @Description  Returns the current vacation (out-of-office) configuration for the authenticated mailbox. Returns defaults when no vacation is configured.
 // @Tags         User Portal
 // @Produce      json
-// @Success      200 {object} map[string]interface{}
-// @Failure      401 {object} map[string]interface{}
+// @Success      200  {object}  dto.VacationResponse
+// @Failure      401  {object}  dto.UserErrorResponse
 // @Router       /user/vacation [get]
 // @Security     BearerAuth
 func (h *Handler) GetUserVacation(c *echo.Context) error {
@@ -203,37 +196,37 @@ func (h *Handler) GetUserVacation(c *echo.Context) error {
 
 	vacation, err := repositories.GetVacationByEmail(h.DB, claims.Username)
 	if err != nil {
-		return c.JSON(http.StatusOK, map[string]interface{}{
-			"active":        false,
-			"subject":       "Out of Office",
-			"body":          "",
-			"activefrom":    time.Now().Format("2006-01-02T15:04"),
-			"activeuntil":   time.Now().AddDate(0, 0, 7).Format("2006-01-02T15:04"),
-			"interval_time": 0,
+		return c.JSON(http.StatusOK, dto.VacationResponse{
+			Active:       false,
+			Subject:      "Out of Office",
+			Body:         "",
+			ActiveFrom:   time.Now().Format("2006-01-02T15:04"),
+			ActiveUntil:  time.Now().AddDate(0, 0, 7).Format("2006-01-02T15:04"),
+			IntervalTime: 0,
 		})
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"active":        vacation.Active,
-		"subject":       vacation.Subject,
-		"body":          vacation.Body,
-		"activefrom":    vacation.ActiveFrom.Format("2006-01-02T15:04"),
-		"activeuntil":   vacation.ActiveUntil.Format("2006-01-02T15:04"),
-		"interval_time": vacation.IntervalTime,
+	return c.JSON(http.StatusOK, dto.VacationResponse{
+		Active:       vacation.Active,
+		Subject:      vacation.Subject,
+		Body:         vacation.Body,
+		ActiveFrom:   vacation.ActiveFrom.Format("2006-01-02T15:04"),
+		ActiveUntil:  vacation.ActiveUntil.Format("2006-01-02T15:04"),
+		IntervalTime: vacation.IntervalTime,
 	})
 }
 
 // UpdateUserVacationAPI godoc
-// @Summary      Upsert auto-reply / vacation settings
-// @Description  Configures the vacation active state, message subject, body, interval and date range.
+// @Summary      Save auto-reply / vacation settings
+// @Description  Creates or updates the vacation (out-of-office) configuration. Date fields use format "2006-01-02T15:04". interval_time is in seconds (0 = send once per sender).
 // @Tags         User Portal
 // @Accept       json
 // @Produce      json
-// @Param        request body map[string]interface{} true "Vacation configuration data"
-// @Success      200 {object} map[string]interface{}
-// @Failure      400 {object} map[string]interface{}
-// @Failure      401 {object} map[string]interface{}
-// @Failure      500 {object} map[string]interface{}
+// @Param        request  body      dto.UpdateVacationRequest  true  "Vacation configuration"
+// @Success      200      {object}  dto.UserSuccessResponse
+// @Failure      400      {object}  dto.UserErrorResponse
+// @Failure      401      {object}  dto.UserErrorResponse
+// @Failure      500      {object}  dto.UserErrorResponse
 // @Router       /user/vacation [post]
 // @Security     BearerAuth
 func (h *Handler) UpdateUserVacationAPI(c *echo.Context) error {
@@ -242,14 +235,7 @@ func (h *Handler) UpdateUserVacationAPI(c *echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "unauthorized")
 	}
 
-	var req struct {
-		Active       bool   `json:"active"`
-		Subject      string `json:"subject"`
-		Body         string `json:"body"`
-		ActiveFrom   string `json:"activefrom"`
-		ActiveUntil  string `json:"activeuntil"`
-		IntervalTime int    `json:"interval_time"`
-	}
+	var req dto.UpdateVacationRequest
 	if err := c.Bind(&req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid request body")
 	}
@@ -296,20 +282,20 @@ func (h *Handler) UpdateUserVacationAPI(c *echo.Context) error {
 		_ = utils.SyncSingleVacationSieve(h.DB, username, "")
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"success": true,
-		"message": "Auto-reply updated successfully",
+	return c.JSON(http.StatusOK, dto.UserSuccessResponse{
+		Success: true,
+		Message: "Auto-reply updated successfully",
 	})
 }
 
 // DeleteUserVacationAPI godoc
-// @Summary      Deactivate / remove auto-reply
-// @Description  Removes vacation configuration for the mailbox user.
+// @Summary      Remove auto-reply settings
+// @Description  Deletes the vacation (out-of-office) configuration for the authenticated mailbox.
 // @Tags         User Portal
 // @Produce      json
-// @Success      200 {object} map[string]interface{}
-// @Failure      401 {object} map[string]interface{}
-// @Failure      500 {object} map[string]interface{}
+// @Success      200  {object}  dto.UserSuccessResponse
+// @Failure      401  {object}  dto.UserErrorResponse
+// @Failure      500  {object}  dto.UserErrorResponse
 // @Router       /user/vacation [delete]
 // @Security     BearerAuth
 func (h *Handler) DeleteUserVacationAPI(c *echo.Context) error {
@@ -333,8 +319,8 @@ func (h *Handler) DeleteUserVacationAPI(c *echo.Context) error {
 		_ = utils.SyncSingleVacationSieve(h.DB, username, "")
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"success": true,
-		"message": "Auto-reply removed successfully",
+	return c.JSON(http.StatusOK, dto.UserSuccessResponse{
+		Success: true,
+		Message: "Auto-reply removed successfully",
 	})
 }

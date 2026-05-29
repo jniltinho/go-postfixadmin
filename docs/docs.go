@@ -637,27 +637,25 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Returns current forwarding addresses for the authenticated mailbox.",
+                "description": "Returns the current comma-separated forwarding destinations for the authenticated mailbox.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "User Portal"
                 ],
-                "summary": "Get user forwarding targets",
+                "summary": "Get forwarding addresses",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/dto.UserForwardingResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/dto.UserErrorResponse"
                         }
                     }
                 }
@@ -668,7 +666,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Configures the email forwarding destinations.",
+                "description": "Sets the email forwarding destinations. Send one address per line; leave blank to reset to self-delivery.",
                 "consumes": [
                     "application/json"
                 ],
@@ -678,16 +676,15 @@ const docTemplate = `{
                 "tags": [
                     "User Portal"
                 ],
-                "summary": "Update user forwarding targets",
+                "summary": "Update forwarding addresses",
                 "parameters": [
                     {
-                        "description": "Forwarding config",
+                        "description": "Forwarding configuration",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/dto.UpdateForwardingRequest"
                         }
                     }
                 ],
@@ -695,29 +692,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/dto.UserSuccessResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/dto.UserErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/dto.UserErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/dto.UserErrorResponse"
                         }
                     }
                 }
@@ -730,7 +723,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Returns information about the logged-in mailbox user (name and email).",
+                "description": "Returns the display name and email address of the authenticated mailbox user.",
                 "produces": [
                     "application/json"
                 ],
@@ -742,22 +735,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/dto.UserProfileResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/dto.UserErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/dto.UserErrorResponse"
                         }
                     }
                 }
@@ -770,7 +760,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Allows the user to change their own password.",
+                "description": "Allows the authenticated mailbox user to change their own password. The current password must be provided for verification.",
                 "consumes": [
                     "application/json"
                 ],
@@ -780,16 +770,15 @@ const docTemplate = `{
                 "tags": [
                     "User Portal"
                 ],
-                "summary": "Update mailbox password",
+                "summary": "Change mailbox password",
                 "parameters": [
                     {
-                        "description": "Password update info",
+                        "description": "Password change payload",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/dto.UpdatePasswordRequest"
                         }
                     }
                 ],
@@ -797,29 +786,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/dto.UserSuccessResponse"
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Wrong current password, validation error, or passwords do not match",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/dto.UserErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/dto.UserErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/dto.UserErrorResponse"
                         }
                     }
                 }
@@ -832,7 +817,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Returns current vacation configuration for the mailbox user.",
+                "description": "Returns the current vacation (out-of-office) configuration for the authenticated mailbox. Returns defaults when no vacation is configured.",
                 "produces": [
                     "application/json"
                 ],
@@ -844,15 +829,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/dto.VacationResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/dto.UserErrorResponse"
                         }
                     }
                 }
@@ -863,7 +846,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Configures the vacation active state, message subject, body, interval and date range.",
+                "description": "Creates or updates the vacation (out-of-office) configuration. Date fields use format \"2006-01-02T15:04\". interval_time is in seconds (0 = send once per sender).",
                 "consumes": [
                     "application/json"
                 ],
@@ -873,16 +856,15 @@ const docTemplate = `{
                 "tags": [
                     "User Portal"
                 ],
-                "summary": "Upsert auto-reply / vacation settings",
+                "summary": "Save auto-reply / vacation settings",
                 "parameters": [
                     {
-                        "description": "Vacation configuration data",
+                        "description": "Vacation configuration",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/dto.UpdateVacationRequest"
                         }
                     }
                 ],
@@ -890,29 +872,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/dto.UserSuccessResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/dto.UserErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/dto.UserErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/dto.UserErrorResponse"
                         }
                     }
                 }
@@ -923,34 +901,31 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Removes vacation configuration for the mailbox user.",
+                "description": "Deletes the vacation (out-of-office) configuration for the authenticated mailbox.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "User Portal"
                 ],
-                "summary": "Deactivate / remove auto-reply",
+                "summary": "Remove auto-reply settings",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/dto.UserSuccessResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/dto.UserErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/dto.UserErrorResponse"
                         }
                     }
                 }
@@ -1143,6 +1118,83 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.UpdateForwardingRequest": {
+            "type": "object",
+            "properties": {
+                "forwarding": {
+                    "type": "string",
+                    "example": "john@example.com\nbackup@example.com"
+                }
+            }
+        },
+        "dto.UpdatePasswordRequest": {
+            "type": "object",
+            "properties": {
+                "confirm_password": {
+                    "type": "string",
+                    "example": "NewPass456!"
+                },
+                "current_password": {
+                    "type": "string",
+                    "example": "OldPass123!"
+                },
+                "new_password": {
+                    "type": "string",
+                    "example": "NewPass456!"
+                }
+            }
+        },
+        "dto.UpdateVacationRequest": {
+            "type": "object",
+            "properties": {
+                "active": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "activefrom": {
+                    "type": "string",
+                    "example": "2026-06-01T09:00"
+                },
+                "activeuntil": {
+                    "type": "string",
+                    "example": "2026-06-08T09:00"
+                },
+                "body": {
+                    "type": "string",
+                    "example": "I am away until Friday."
+                },
+                "interval_time": {
+                    "type": "integer",
+                    "example": 86400
+                },
+                "subject": {
+                    "type": "string",
+                    "example": "Out of Office"
+                }
+            }
+        },
+        "dto.UserErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "Current password is incorrect"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": false
+                }
+            }
+        },
+        "dto.UserForwardingResponse": {
+            "type": "object",
+            "properties": {
+                "goto": {
+                    "type": "string",
+                    "example": "john@example.com,backup@example.com"
+                }
+            }
+        },
         "dto.UserInfo": {
             "type": "object",
             "properties": {
@@ -1161,6 +1213,61 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.UserProfileResponse": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "example": "John Doe"
+                },
+                "username": {
+                    "type": "string",
+                    "example": "john@example.com"
+                }
+            }
+        },
+        "dto.UserSuccessResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Operation completed successfully"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "dto.VacationResponse": {
+            "type": "object",
+            "properties": {
+                "active": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "activefrom": {
+                    "type": "string",
+                    "example": "2026-06-01T09:00"
+                },
+                "activeuntil": {
+                    "type": "string",
+                    "example": "2026-06-08T09:00"
+                },
+                "body": {
+                    "type": "string",
+                    "example": "I am away until Friday."
+                },
+                "interval_time": {
+                    "type": "integer",
+                    "example": 86400
+                },
+                "subject": {
+                    "type": "string",
+                    "example": "Out of Office"
                 }
             }
         },
