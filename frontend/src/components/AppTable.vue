@@ -3,7 +3,12 @@
     <slot name="toolbar" />
 
     <div class="table-card">
-      <div class="table-topbar">
+      <div v-if="title || hasTitleAction" class="table-topbar table-titlebar">
+        <div class="table-topbar-title">{{ title }}</div>
+        <slot name="title-action" />
+      </div>
+
+      <div class="table-topbar table-controls">
         <div class="controls-left">
           <div class="per-page-wrap">
             <select v-model="rowsPerPage" class="ctrl-select" @change="currentPage = 1">
@@ -94,12 +99,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, useSlots } from 'vue'
 
 interface Column {
   key: string
   label: string
 }
+
+const slots = useSlots()
 
 const props = withDefaults(defineProps<{
   rows: any[]
@@ -110,8 +117,11 @@ const props = withDefaults(defineProps<{
   defaultSortDir?: 'asc' | 'desc'
   loading?: boolean
   showActions?: boolean
+  title?: string
+  initialRowsPerPage?: number
 }>(), {
   showActions: true,
+  initialRowsPerPage: 15,
 })
 
 const emit = defineEmits<{
@@ -120,9 +130,10 @@ const emit = defineEmits<{
 }>()
 
 const keyField = computed(() => props.rowKey ?? props.columns[0]?.key ?? 'id')
+const hasTitleAction = computed(() => Boolean(slots['title-action']))
 
 const search = ref('')
-const rowsPerPage = ref(15)
+const rowsPerPage = ref(props.initialRowsPerPage)
 const currentPage = ref(1)
 const sortKey = ref(props.defaultSortKey ?? props.columns[0]?.key ?? '')
 const sortDir = ref<'asc' | 'desc'>(props.defaultSortDir ?? 'asc')
@@ -163,3 +174,268 @@ const pagedRows = computed(() => {
 
 watch([search, rowsPerPage, () => props.rows], () => { currentPage.value = 1 })
 </script>
+
+<style scoped>
+
+.table-card {
+  background: #fff;
+  border: 2px solid #1e293b;
+  box-shadow: 2px 2px 0 #1e293b;
+  overflow: hidden;
+  padding: 16px 8px 4px;
+}
+
+.table-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0 12px;
+  border-bottom: none;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.table-topbar-title {
+  font-weight: 900;
+  color: #1e293b;
+}
+
+.table-titlebar + .table-controls {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 12px;
+  margin-top: 8px;
+}
+
+.table-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0 0;
+  border-top: none;
+  background: transparent;
+}
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  border: 2px solid #1e293b;
+}
+
+.table-head-row {
+  background: #3b82f6;
+  border-bottom: 2px solid #1e293b;
+}
+
+.table-th {
+  color: #fff;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.4px;
+  padding: 10px;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  font-family: var(--font-sans);
+}
+
+.table-th:hover { background: #2563eb; }
+
+tbody tr {
+  border-bottom: 1px solid #e2e8f0;
+}
+
+tbody tr:last-child {
+  border-bottom: none;
+}
+
+tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+tbody tr:hover {
+  background: #eff6ff;
+}
+
+.table-td {
+  padding: 7px 10px;
+  color: #1e293b;
+  font-size: 12px;
+}
+
+.actions-td {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.td-link {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.table-loading,
+.table-empty {
+  text-align: center;
+  padding: 28px;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.controls-left,
+.controls-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.per-page-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ctrl-label {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ctrl-select,
+.search-input {
+  border: 2px solid #1e293b !important;
+  padding: 4px 8px !important;
+  font-size: 13px !important;
+  color: #1e293b !important;
+  background-color: #ffffff !important;
+  outline: none !important;
+  border-radius: 0 !important;
+  box-sizing: border-box !important;
+  font-weight: 600;
+  transition: border-color 0.15s ease-in-out;
+}
+
+.ctrl-select:focus,
+.search-input:focus {
+  border-color: #3b82f6 !important;
+}
+
+.search-input {
+  width: 200px;
+}
+
+.showing-text {
+  font-size: 12.5px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.pagination {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+
+.pg-btn {
+  height: 28px;
+  padding: 0 10px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #374151;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 0;
+  cursor: pointer;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: all 0.1s ease-in-out;
+}
+
+.pg-btn:hover:not(:disabled) {
+  border-color: #1e293b;
+  color: #1e293b;
+  background: #f8fafc;
+}
+
+.pg-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.pg-active {
+  background: #3b82f6 !important;
+  color: #ffffff !important;
+  border-color: #3b82f6 !important;
+}
+
+.act-btn,
+:slotted(.act-btn) {
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  border: 1px solid #1e293b;
+  letter-spacing: 0.4px;
+  border-radius: 0;
+  display: inline-flex;
+  align-items: center;
+  transition: all .12s;
+  box-shadow: 1px 1px 0 #1e293b;
+  text-transform: uppercase;
+}
+
+.act-btn:hover,
+:slotted(.act-btn:hover) { transform: translate(-0.5px, -0.5px); }
+.act-btn:active,
+:slotted(.act-btn:active) { transform: translate(0,0); box-shadow: none; }
+.act-edit,
+:slotted(.act-edit) { background: oklch(0.546 0.245 262.881); color: #fff; }
+.act-edit:hover,
+:slotted(.act-edit:hover) { background: #fff; color: oklch(0.546 0.245 262.881); }
+.act-del,
+:slotted(.act-del) { background: oklch(0.577 0.245 27.325); color: #fff; }
+.act-del:hover,
+:slotted(.act-del:hover) { background: #fff; color: oklch(0.577 0.245 27.325); }
+
+
+:slotted(.badge-yes) {
+  background: oklch(0.962 0.044 156.743);
+  color: oklch(0.527 0.154 150.069);
+  border: 2px solid oklch(0.527 0.154 150.069);
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-block;
+}
+
+:slotted(.badge-no) {
+  background: #fee2e2;
+  color: #dc2626;
+  border: 2px solid #dc2626;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-block;
+}
+
+:slotted(.act-disabled) { opacity: .4; cursor: not-allowed; pointer-events: none; }
+
+:slotted(.cell-with-icon) {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+:slotted(.row-icon) {
+  color: #3b82f6;
+  flex-shrink: 0;
+}
+
+</style>

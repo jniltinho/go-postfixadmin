@@ -89,101 +89,46 @@
     </div>
 
     <!-- ─── Activity table ─── -->
-    <div class="table-card">
-
-      <!-- Table header bar -->
-      <div class="table-topbar">
-        <div class="table-topbar-title">RECENT ACTIVITY</div>
+    <AppTable
+      title="RECENT ACTIVITY"
+      :rows="allRows"
+      :columns="columns"
+      row-key="_key"
+      :search-fields="['timestamp', 'username', 'domain', 'action', 'data']"
+      default-sort-key="timestamp"
+      default-sort-dir="desc"
+      :initial-rows-per-page="10"
+      :loading="loading"
+      :show-actions="false"
+    >
+      <template #title-action>
         <router-link to="/logs" class="view-logs-link">
           VIEW LOGS
           <Icon name="arrow-right" :size="16" />
         </router-link>
-      </div>
-
-      <!-- Controls row -->
-      <div class="table-topbar" style="border-top: 1px solid #e2e8f0; padding-top: 12px; margin-top: 8px;">
-        <div class="controls-left">
-          <div class="per-page-wrap">
-            <select v-model="rowsPerPage" class="ctrl-select" @change="currentPage = 1">
-              <option :value="10">10</option>
-              <option :value="15">15</option>
-              <option :value="25">25</option>
-              <option :value="50">50</option>
-            </select>
-            <span class="ctrl-label">entries per page</span>
-          </div>
-        </div>
-        <div class="controls-right">
-          <span class="ctrl-label">Search:</span>
-          <input v-model="search" class="search-input" placeholder="Search records..." @input="currentPage = 1" />
-        </div>
-      </div>
-
-      <!-- Table -->
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead>
-            <tr class="table-head-row">
-              <th v-for="col in columns" :key="col.key" class="table-th" @click="sortBy(col.key)">
-                {{ col.label }}
-                <span class="sort-arrows">
-                  <span :class="{ 'sort-active': sortKey === col.key && sortDir === 'asc' }">▲</span>
-                  <span :class="{ 'sort-active': sortKey === col.key && sortDir === 'desc' }">▼</span>
-                </span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="loading">
-              <td :colspan="columns.length" class="table-loading">
-                <div class="spinner mx-auto" />
-              </td>
-            </tr>
-            <tr v-else-if="pagedRows.length === 0">
-              <td :colspan="columns.length" class="table-empty">No records found</td>
-            </tr>
-            <tr v-for="row in pagedRows" :key="row.timestamp + row.username + row.action" class="table-row">
-              <td class="table-td">{{ row.timestamp }}</td>
-              <td class="table-td td-link" style="color: #3b82f6; font-weight: 700;">{{ row.username }}</td>
-              <td class="table-td mono">{{ row.domain }}</td>
-              <td class="table-td" style="font-weight: 900; text-transform: uppercase;">{{ row.action }}</td>
-              <td class="table-td mono" style="word-break: break-all;">{{ row.data || '—' }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Footer -->
-      <div class="table-footer">
-        <div class="showing-text">
-          <template v-if="filteredRows.length === 0">Showing 0 entries</template>
-          <template v-else>
-            Showing {{ (currentPage - 1) * rowsPerPage + 1 }} to
-            {{ Math.min(currentPage * rowsPerPage, filteredRows.length) }} of
-            {{ filteredRows.length }} entries
-          </template>
-        </div>
-        <div class="pagination">
-          <button class="pg-btn" :disabled="currentPage === 1" @click="currentPage = 1">FIRST</button>
-          <button class="pg-btn" :disabled="currentPage === 1" @click="currentPage--">PREVIOUS</button>
-          <button
-            v-for="p in pageButtons" :key="p"
-            class="pg-btn" :class="{ 'pg-active': p === currentPage }"
-            @click="currentPage = p"
-          >{{ p }}</button>
-          <button class="pg-btn" :disabled="currentPage === totalPages" @click="currentPage++">NEXT</button>
-          <button class="pg-btn" :disabled="currentPage === totalPages" @click="currentPage = totalPages">LAST</button>
-        </div>
-      </div>
-    </div>
+      </template>
+      <template #cell-username="{ value }">
+        <span class="td-link">{{ value }}</span>
+      </template>
+      <template #cell-domain="{ value }">
+        <span class="mono">{{ value }}</span>
+      </template>
+      <template #cell-action="{ value }">
+        <span class="activity-action">{{ value }}</span>
+      </template>
+      <template #cell-data="{ value }">
+        <span class="mono activity-data">{{ value || '—' }}</span>
+      </template>
+    </AppTable>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import http from '../../utils/http'
 import { useToastStore } from '../../stores/toast'
 import { useAuthStore } from '../../stores/auth'
+import AppTable from '../../components/AppTable.vue'
 
 const toast = useToastStore()
 const auth = useAuthStore()
@@ -193,14 +138,13 @@ const loading = ref(true)
 const stats = ref({ domains: 0, mailboxes: 0, aliases: 0 })
 const allRows = ref<any[]>([])
 
-const search = ref('')
-const rowsPerPage = ref(10)
-const currentPage = ref(1)
-
-// Old custom activity table logic removed — now using BrutalDataTable (datatables.net-vue3)
-
-// Old manual pagination for recent activity removed (DataTables handles it now)
-watch([search, rowsPerPage], () => { currentPage.value = 1 })
+const columns = [
+  { key: 'timestamp', label: 'DATE/TIME' },
+  { key: 'username',  label: 'ADMINISTRATOR' },
+  { key: 'domain',    label: 'DOMAIN' },
+  { key: 'action',    label: 'ACTION' },
+  { key: 'data',      label: 'DESCRIPTION' },
+]
 
 async function loadDashboardData() {
   loading.value = true
@@ -212,7 +156,8 @@ async function loadDashboardData() {
     stats.value.mailboxes = data?.mailboxes ?? 0
     stats.value.aliases   = data?.aliases   ?? 0
 
-    allRows.value = (data?.recent_logs ?? []).map((log: any) => ({
+    allRows.value = (data?.recent_logs ?? []).map((log: any, idx: number) => ({
+      _key: String(idx),
       timestamp: log.timestamp ? new Date(log.timestamp).toLocaleString('pt-BR') : '-',
       username:  log.username  || '-',
       domain:    log.domain    || '-',
@@ -228,53 +173,6 @@ async function loadDashboardData() {
 
 onMounted(loadDashboardData)
 
-const sortKey = ref('timestamp')
-const sortDir = ref<'asc' | 'desc'>('desc')
-
-const columns = [
-  { key: 'timestamp', label: 'DATE/TIME' },
-  { key: 'username',  label: 'ADMINISTRATOR' },
-  { key: 'domain',    label: 'DOMAIN' },
-  { key: 'action',    label: 'ACTION' },
-  { key: 'data',      label: 'DESCRIPTION' },
-]
-
-function sortBy(key: string) {
-  if (sortKey.value === key) sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc'
-  else { sortKey.value = key; sortDir.value = 'asc' }
-}
-
-const filteredRows = computed(() => {
-  const q = search.value.toLowerCase()
-  let rows = allRows.value
-  if (q) {
-    rows = rows.filter(r =>
-      r.timestamp.toLowerCase().includes(q) ||
-      r.username.toLowerCase().includes(q) ||
-      r.domain.toLowerCase().includes(q) ||
-      r.action.toLowerCase().includes(q) ||
-      r.data.toLowerCase().includes(q)
-    )
-  }
-  return [...rows].sort((a, b) => {
-    const av = String((a as any)[sortKey.value] ?? '')
-    const bv = String((b as any)[sortKey.value] ?? '')
-    return sortDir.value === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av)
-  })
-})
-
-const totalPages = computed(() => Math.max(1, Math.ceil(filteredRows.value.length / rowsPerPage.value)))
-const pageButtons = computed(() => {
-  const total = totalPages.value
-  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
-  const cur = currentPage.value
-  const pages = new Set([1, total, cur, cur - 1, cur + 1].filter(p => p >= 1 && p <= total))
-  return Array.from(pages).sort((a, b) => a - b)
-})
-const pagedRows = computed(() => {
-  const start = (currentPage.value - 1) * rowsPerPage.value
-  return filteredRows.value.slice(start, start + rowsPerPage.value)
-})
 </script>
 
 <style scoped>
@@ -460,9 +358,9 @@ const pagedRows = computed(() => {
 }
 .view-logs-link:hover { text-decoration: underline; }
 
-.table-wrap { overflow-x: auto; }
-.td-link { color: #3b82f6; }
-.td-bold { font-weight: 700; color: #1e293b; }
+.td-link { color: #3b82f6; font-weight: 700; }
+.activity-action { font-weight: 900; text-transform: uppercase; }
+.activity-data { word-break: break-all; }
 
 /* Responsive */
 @media (max-width: 1100px) {
