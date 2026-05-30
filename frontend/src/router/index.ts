@@ -115,7 +115,7 @@ router.beforeEach((to, _from, next) => {
 
 router.afterEach((to) => {
   const title = to.meta.title as string | undefined
-  document.title = title ? `${title} — PostfixAdmin` : 'PostfixAdmin'
+  document.title = title ? `${title} — Go-PostfixAdmin` : 'Go-PostfixAdmin'
 })
 
 export default router
