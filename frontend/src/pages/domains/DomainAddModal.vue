@@ -149,7 +149,7 @@ const emit = defineEmits<{
 const form = ref({
   domain: '', description: '', aliases: 10, mailboxes: 10,
   quotaMB: 2048, passwordExpiry: 365 as number | null,
-  transport: 'virtual', active: true, backupmx: false,
+  transport: props.transports[0]?.transport || 'virtual', active: true, backupmx: false,
 })
 
 watch(() => props.modelValue, (open) => {
@@ -157,7 +157,7 @@ watch(() => props.modelValue, (open) => {
     form.value = {
       domain: '', description: '', aliases: 10, mailboxes: 10,
       quotaMB: 2048, passwordExpiry: 365,
-      transport: 'virtual', active: true, backupmx: false,
+      transport: props.transports[0]?.transport || 'virtual', active: true, backupmx: false,
     }
   }
 })
