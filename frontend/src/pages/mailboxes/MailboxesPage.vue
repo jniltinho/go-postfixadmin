@@ -56,6 +56,7 @@
       v-model="showAdd"
       :domains="domains"
       :saving="savingAdd"
+      :selected-domain="domainFilter || undefined"
       @submit="handleAdd"
     />
 

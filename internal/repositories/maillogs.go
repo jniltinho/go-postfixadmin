@@ -16,13 +16,13 @@ func GetMailLogs(db *gorm.DB, username string, isSuperAdmin bool, search, orderF
 	}
 
 	applyPermission := func(q *gorm.DB) *gorm.DB {
-		if !isSuperAdmin {
-			if len(allowedDomains) == 0 {
-				return q.Where("1 = 0")
-			}
-			return q.Where("domain_to IN ?", allowedDomains)
+		if isSuperAdmin {
+			return q
 		}
-		return q
+		if len(allowedDomains) == 0 {
+			return q.Where(db.Where("m_from = ?", username).Or("m_to = ?", username))
+		}
+		return q.Where(db.Where("m_from = ?", username).Or("m_to = ?", username).Or("domain_from IN ?", allowedDomains).Or("domain_to IN ?", allowedDomains))
 	}
 
 	applySearch := func(q *gorm.DB) *gorm.DB {

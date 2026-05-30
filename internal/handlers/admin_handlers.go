@@ -127,6 +127,10 @@ func (h *Handler) DeleteAdmin(c *echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "error": "Username is required"})
 	}
 
+	if username == loggedInUser {
+		return c.JSON(http.StatusForbidden, map[string]interface{}{"success": false, "error": "You cannot delete your own administrator account"})
+	}
+
 	if err := repositories.DeleteAdmin(h.DB, username, loggedInUser, c.RealIP()); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to delete administrator"})
 	}
@@ -268,11 +272,11 @@ func (h *Handler) ListAdminsV1(c *echo.Context) error {
 			domainCountStr = fmt.Sprintf("%d", count)
 		}
 		response = append(response, dto.AdminResponse{
-			Username:   admin.Username,
-			Active:     admin.Active,
-			Superadmin: admin.Superadmin,
-			Created:    admin.Created,
-			Modified:   admin.Modified,
+			Username:    admin.Username,
+			Active:      admin.Active,
+			Superadmin:  admin.Superadmin,
+			Created:     admin.Created,
+			Modified:    admin.Modified,
 			DomainCount: domainCountStr,
 		})
 	}
@@ -379,7 +383,7 @@ func (h *Handler) GetAdminV1(c *echo.Context) error {
 		return dto.NotFound(c, "admin not found")
 	}
 
-	allDomains, _, _ := repositories.GetActiveDomains(h.DB, claims.Username, true)
+	allDomains, _, _ := repositories.GetActiveDomains(h.DB, claims.Username, claims.Superadmin)
 	domainAdmins, _ := repositories.GetAdminAssignedDomains(h.DB, targetUsername)
 
 	assignedMap := make(map[string]bool)
@@ -505,13 +509,17 @@ func (h *Handler) DeleteAdminV1(c *echo.Context) error {
 		return dto.Unauthorized(c, "not authenticated")
 	}
 
-	if !claims.Superadmin {
-		return dto.Forbidden(c, "only superadmins can delete administrators")
-	}
-
 	targetUsername, _ := url.PathUnescape(c.Param("username"))
 	if targetUsername == "" {
 		return dto.ValidationError(c, "username required")
+	}
+
+	if targetUsername == claims.Username {
+		return dto.Forbidden(c, "you cannot delete your own administrator account")
+	}
+
+	if !claims.Superadmin {
+		return dto.Forbidden(c, "only superadmins can delete administrators")
 	}
 
 	if err := repositories.DeleteAdmin(h.DB, targetUsername, claims.Username, c.RealIP()); err != nil {

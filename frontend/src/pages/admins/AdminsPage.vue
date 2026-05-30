@@ -7,7 +7,7 @@
         <div class="page-title">ADMINISTRATORS</div>
         <div class="page-subtitle">MANAGE SYSTEM ADMINISTRATORS</div>
       </div>
-      <button v-if="isSuperAdmin" class="btn-primary" @click="openAdd">
+      <button class="btn-primary" :disabled="!isSuperAdmin" @click="openAdd">
         <Icon name="user-plus" :size="16" style="margin-right:6px;vertical-align:middle" />
         ADD ADMINISTRATOR
       </button>
@@ -39,14 +39,19 @@
       </template>
       <template #cell-modified="{ value }">{{ formatDate(value) }}</template>
       <template #actions="{ row }">
-        <button class="act-btn act-edit" @click="openEdit(row)">
+        <button
+          class="act-btn act-edit"
+          :class="{ 'act-disabled': !canEditAdmin(row) }"
+          :disabled="!canEditAdmin(row)"
+          @click="openEdit(row)"
+        >
           <Icon name="pencil" :size="12" style="margin-right:4px;vertical-align:middle" />EDIT
         </button>
         <button
           class="act-btn act-del"
-          :class="{ 'act-disabled': !isSuperAdmin }"
-          :disabled="!isSuperAdmin"
-          @click="isSuperAdmin && confirmDelete(row)"
+          :class="{ 'act-disabled': !canDeleteAdmin(row) }"
+          :disabled="!canDeleteAdmin(row)"
+          @click="confirmDelete(row)"
         >
           <Icon name="trash-2" :size="12" style="margin-right:4px;vertical-align:middle" />DELETE
         </button>
@@ -95,6 +100,7 @@ import AdminEditModal from './AdminEditModal.vue'
 const toast = useToastStore()
 const auth = useAuthStore()
 const isSuperAdmin = computed(() => auth.user?.superadmin === true)
+const currentUsername = computed(() => auth.user?.username || '')
 
 interface Admin {
   username: string
@@ -118,6 +124,14 @@ const columns = [
   { key: 'active',       label: 'ACTIVE' },
   { key: 'modified',     label: 'MODIFIED' },
 ]
+
+function canEditAdmin(row: Admin): boolean {
+  return isSuperAdmin.value || row.username === currentUsername.value
+}
+
+function canDeleteAdmin(row: Admin): boolean {
+  return isSuperAdmin.value && row.username !== currentUsername.value
+}
 
 function formatDate(ts: string): string {
   if (!ts) return '—'
@@ -143,9 +157,20 @@ onMounted(load)
 const showAdd = ref(false)
 const savingAdd = ref(false)
 
-function openAdd() { showAdd.value = true }
+function openAdd() {
+  if (!isSuperAdmin.value) {
+    toast.error('Only superadmins can create administrators')
+    return
+  }
+  showAdd.value = true
+}
 
 async function handleAdd(payload: any) {
+  if (!isSuperAdmin.value) {
+    toast.error('Only superadmins can create administrators')
+    showAdd.value = false
+    return
+  }
   if (!payload.username) { toast.error('Username is required'); return }
   if (!payload.password || payload.password.length < 8) { toast.error('Password must be at least 8 characters'); return }
   savingAdd.value = true
@@ -168,6 +193,10 @@ const editDomains = ref<DomainOption[]>([])
 const editUsername = ref('')
 
 async function openEdit(row: Admin) {
+  if (!canEditAdmin(row)) {
+    toast.error('You cannot edit this administrator')
+    return
+  }
   editUsername.value = row.username
   editInitialData.value = { username: row.username, active: row.active, superadmin: row.superadmin }
   editDomains.value = []
@@ -177,7 +206,9 @@ async function openEdit(row: Admin) {
     const res = await http.get(`${API_BASE}/admins/${encodeURIComponent(row.username)}`)
     const d = res.data?.data
     editInitialData.value = { username: row.username, active: d.admin.active, superadmin: d.admin.superadmin }
-    editDomains.value = (d.domains ?? []).map((opt: DomainOption) => ({ ...opt }))
+    editDomains.value = (d.domains ?? [])
+      .filter((opt: DomainOption) => isSuperAdmin.value || opt.assigned)
+      .map((opt: DomainOption) => ({ ...opt }))
   } catch (e: any) {
     toast.error(e?.response?.data?.error?.message || 'Failed to load administrator')
   } finally { loadingEdit.value = false }
@@ -204,10 +235,19 @@ const showDeleteConfirm = ref(false)
 const deletingRow = ref(false)
 const deleteTarget = ref<Admin | null>(null)
 
-function confirmDelete(row: Admin) { deleteTarget.value = row; showDeleteConfirm.value = true }
+function confirmDelete(row: Admin) {
+  if (!canDeleteAdmin(row)) {
+    toast.error(row.username === currentUsername.value
+      ? 'You cannot delete your own administrator account'
+      : 'You cannot delete this administrator')
+    return
+  }
+  deleteTarget.value = row
+  showDeleteConfirm.value = true
+}
 
 async function submitDelete() {
-  if (!deleteTarget.value) return
+  if (!deleteTarget.value || !canDeleteAdmin(deleteTarget.value)) return
   deletingRow.value = true
   try {
     const name = deleteTarget.value.username
@@ -226,4 +266,5 @@ async function submitDelete() {
 .admins-page { background: #ebf2fe; padding: 24px 28px 40px; }
 .badge-super { background: #ede9fe; color: #7c3aed; padding: 4px 8px; font-size: 12px; font-weight: 700; border: 2px solid #7c3aed; }
 .act-disabled { opacity: .4; cursor: not-allowed; pointer-events: none; }
+.btn-primary:disabled { opacity: .55; cursor: not-allowed; transform: none; }
 </style>

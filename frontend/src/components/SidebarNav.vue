@@ -22,22 +22,37 @@
 
       <div class="nav-section-title">SETTINGS</div>
 
-      <router-link
-        v-for="item in settingsNav"
-        :key="item.to"
-        :to="item.to"
-        class="nav-item"
-        active-class="nav-item--active"
-        exact-active-class="nav-item--active"
-      >
-        <Icon :name="item.icon" :size="20" class="nav-icon" />
-        <span class="nav-label">{{ item.label }}</span>
-      </router-link>
+      <template v-for="item in settingsNav" :key="item.to">
+        <div
+          v-if="isSettingsDisabled(item)"
+          class="nav-item nav-item--disabled"
+          aria-disabled="true"
+        >
+          <Icon :name="item.icon" :size="20" class="nav-icon" />
+          <span class="nav-label">{{ item.label }}</span>
+        </div>
+        <router-link
+          v-else
+          :to="item.to"
+          class="nav-item"
+          active-class="nav-item--active"
+          exact-active-class="nav-item--active"
+        >
+          <Icon :name="item.icon" :size="20" class="nav-icon" />
+          <span class="nav-label">{{ item.label }}</span>
+        </router-link>
+      </template>
     </nav>
   </aside>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useAuthStore } from '../stores/auth'
+
+const auth = useAuthStore()
+const isSuperAdmin = computed(() => auth.user?.superadmin === true)
+
 const mainNav = [
   { to: '/dashboard',     icon: 'layout-dashboard', label: 'Dashboard' },
   { to: '/mailboxes',     icon: 'mail',             label: 'Mailboxes' },
@@ -53,6 +68,10 @@ const settingsNav = [
   { to: '/transports', icon: 'arrow-up-down', label: 'Transport List' },
   { to: '/settings',   icon: 'settings',     label: 'Settings' },
 ]
+
+function isSettingsDisabled(item: { to: string }) {
+  return item.to === '/transports' && !isSuperAdmin.value
+}
 </script>
 
 <style scoped>
@@ -126,7 +145,17 @@ const settingsNav = [
   border-right-color: transparent !important;
   color: #1e293b;
 }
+
+.nav-item--disabled,
+.nav-item--disabled:hover {
+  background: transparent;
+  border-color: transparent;
+  color: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.48;
+}
 .nav-item:hover :deep(.nav-icon) { color: var(--color-brand-primary); }
+.nav-item--disabled:hover :deep(.nav-icon) { color: #9ca3af; }
 
 .nav-item--active {
   background: #ebf2fe;

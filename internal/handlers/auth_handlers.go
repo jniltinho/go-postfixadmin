@@ -178,13 +178,38 @@ func (h *Handler) AuthRefresh(c *echo.Context) error {
 		return dto.WriteError(c, dto.ErrCodeInvalidToken, "invalid or expired refresh token")
 	}
 
-	// Re-issue tokens (rotation)
-	newAccess, err := auth.GenerateAccessToken(claims.Username, claims.Superadmin, claims.Domains, claims.Type)
+	// Re-issue tokens (rotation) and refresh authorization data from the database.
+	superadmin := claims.Superadmin
+	domains := claims.Domains
+
+	if claims.Type == "admin" {
+		var admin models.Admin
+		if err := h.DB.Where("username = ? AND active = ?", claims.Username, true).First(&admin).Error; err != nil {
+			clearRefreshCookie(c)
+			return dto.Unauthorized(c, "admin account is inactive or no longer exists")
+		}
+
+		var err error
+		domains, superadmin, err = repositories.GetAllowedDomains(h.DB, admin.Username, admin.Superadmin)
+		if err != nil {
+			return dto.InternalError(c, "failed to refresh admin permissions")
+		}
+	} else if claims.Type == "mailbox" {
+		mailbox, err := repositories.GetMailboxByUsername(h.DB, claims.Username)
+		if err != nil || !mailbox.Active {
+			clearRefreshCookie(c)
+			return dto.Unauthorized(c, "mailbox account is inactive or no longer exists")
+		}
+		superadmin = false
+		domains = []string{mailbox.Domain}
+	}
+
+	newAccess, err := auth.GenerateAccessToken(claims.Username, superadmin, domains, claims.Type)
 	if err != nil {
 		return dto.InternalError(c, "failed to generate access token")
 	}
 
-	newRefresh, err := auth.GenerateRefreshToken(claims.Username, claims.Superadmin, claims.Domains, claims.Type)
+	newRefresh, err := auth.GenerateRefreshToken(claims.Username, superadmin, domains, claims.Type)
 	if err != nil {
 		return dto.InternalError(c, "failed to rotate refresh token")
 	}

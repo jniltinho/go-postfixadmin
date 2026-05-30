@@ -129,7 +129,7 @@
           <Icon name="x" :size="16" class="mr-2" />
           CANCEL
         </button>
-        <button type="button" :disabled="saving || loading" @click="submit"
+        <button type="button" :disabled="saving || loading || pwdMismatch" @click="submit"
           class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-6 py-3 shadow-[3px_3px_0px_#1E293B] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm disabled:opacity-60">
           <Icon name="save" :size="16" class="mr-2" />
           {{ saving ? 'SAVING...' : 'SAVE CHANGES' }}
@@ -196,6 +196,11 @@ function genPassword() {
 }
 
 function submit() {
+  if ((form.value.password || form.value.passwordConfirm) && form.value.password !== form.value.passwordConfirm) {
+    pwdMismatch.value = true
+    return
+  }
+
   const payload: any = {
     active: form.value.active,
     superadmin: form.value.superadmin,

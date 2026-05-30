@@ -16,13 +16,13 @@ func GetLogs(db *gorm.DB, username string, isSuperAdmin bool, filterAdmin, filte
 	}
 
 	applyPermission := func(q *gorm.DB) *gorm.DB {
-		if !isSuperAdmin {
-			if len(allowedDomains) == 0 {
-				return q.Where("1 = 0")
-			}
-			return q.Where("domain IN ?", allowedDomains)
+		if isSuperAdmin {
+			return q
 		}
-		return q
+		if len(allowedDomains) == 0 {
+			return q.Where("username = ?", username)
+		}
+		return q.Where(db.Where("username = ?", username).Or("domain IN ?", allowedDomains))
 	}
 
 	applyFilters := func(q *gorm.DB) *gorm.DB {

@@ -42,7 +42,13 @@
                 <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">
                   DOMAIN <span class="text-red-500">*</span>
                 </label>
+                <template v-if="selectedDomain">
+                  <div class="w-full h-10 px-3 border-2 border-brand-text bg-gray-50 font-mono font-bold text-sm flex items-center">
+                    {{ selectedDomain }}
+                  </div>
+                </template>
                 <select
+                  v-else
                   v-model="form.domain"
                   required
                   class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors bg-white cursor-pointer text-sm"
@@ -103,7 +109,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, computed, watch } from "vue"
 
 interface Domain { domain: string }
 
@@ -111,10 +117,11 @@ const props = defineProps<{
   modelValue: boolean
   domains: Domain[]
   saving: boolean
+  selectedDomain?: string
 }>()
 
 const emit = defineEmits<{
-  'update:modelValue': [val: boolean]
+  "update:modelValue": [val: boolean]
   submit: [payload: {
     local_part: string
     domain: string
@@ -123,16 +130,23 @@ const emit = defineEmits<{
   }]
 }>()
 
-const form = ref({ localPart: '', domain: '', goto: '', active: true })
+const selectedDomain = computed(() => props.selectedDomain?.trim() || "")
+const form = ref({ localPart: "", domain: "", goto: "", active: true })
 
 watch(() => props.modelValue, (open) => {
   if (open) {
     form.value = {
-      localPart: '',
-      domain: props.domains[0]?.domain || '',
-      goto: '',
+      localPart: "",
+      domain: selectedDomain.value || props.domains[0]?.domain || "",
+      goto: "",
       active: true,
     }
+  }
+})
+
+watch(selectedDomain, (domain) => {
+  if (props.modelValue && domain) {
+    form.value.domain = domain
   }
 })
 
@@ -141,7 +155,7 @@ function onLocalPartInput(e: Event) {
 }
 
 function submit() {
-  emit('submit', {
+  emit("submit", {
     local_part: form.value.localPart.toLowerCase().trim(),
     domain: form.value.domain,
     goto: form.value.goto.trim(),

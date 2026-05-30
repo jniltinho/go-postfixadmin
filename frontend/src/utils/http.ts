@@ -1,5 +1,11 @@
 import router from '../router'
 
+type QueryParams = Record<string, string | number | boolean | null | undefined>
+
+export interface HttpConfig extends Omit<RequestInit, 'body' | 'method'> {
+  params?: QueryParams
+}
+
 export interface HttpResponse<T = any> {
   data: T
   status: number
@@ -7,11 +13,18 @@ export interface HttpResponse<T = any> {
   headers: Headers
 }
 
-export class HttpError extends Error {
-  response?: HttpResponse
-  config?: any
+interface RequestContext {
+  method: string
+  url: string
+  data?: unknown
+  config?: HttpConfig
+}
 
-  constructor(message: string, response?: HttpResponse, config?: any) {
+export class HttpError<T = any> extends Error {
+  response?: HttpResponse<T>
+  config?: RequestContext
+
+  constructor(message: string, response?: HttpResponse<T>, config?: RequestContext) {
     super(message)
     this.name = 'HttpError'
     this.response = response
@@ -19,148 +32,163 @@ export class HttpError extends Error {
   }
 }
 
-let isRefreshing = false
-let failedQueue: Array<{ resolve: (token: string) => void; reject: (err: any) => void }> = []
+let refreshPromise: Promise<string> | null = null
 
-function processQueue(error: any, token: string | null = null) {
-  failedQueue.forEach(({ resolve, reject }) => {
-    if (error) {
-      reject(error)
-    } else {
-      resolve(token!)
+function buildUrl(url: string, params?: QueryParams) {
+  if (!params) return url
+
+  const base = url.startsWith('http') ? undefined : window.location.origin
+  const parsedUrl = new URL(url, base)
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== null && value !== undefined) {
+      parsedUrl.searchParams.set(key, String(value))
     }
   })
-  failedQueue = []
+
+  return url.startsWith('/') ? `${parsedUrl.pathname}${parsedUrl.search}` : parsedUrl.toString()
 }
 
-function buildUrl(url: string, params?: Record<string, any>): string {
-  if (!params) return url
-  // Using a dummy base for relative URLs to avoid errors in new URL()
-  const base = url.startsWith('http') ? undefined : window.location.origin
-  const urlObj = new URL(url, base)
-  Object.entries(params).forEach(([key, val]) => {
-    if (val !== undefined && val !== null) {
-      urlObj.searchParams.set(key, String(val))
-    }
-  })
-  if (url.startsWith('/')) {
-    return urlObj.pathname + urlObj.search
+function buildHeaders(headers?: HeadersInit, token = localStorage.getItem('access_token')) {
+  const requestHeaders = new Headers(headers)
+
+  if (token && !requestHeaders.has('Authorization')) {
+    requestHeaders.set('Authorization', `Bearer ${token}`)
   }
-  return urlObj.toString()
+
+  return requestHeaders
+}
+
+function buildRequestInit(method: string, data: unknown, config: HttpConfig = {}, token?: string): RequestInit {
+  const { params: _params, headers: configHeaders, ...fetchConfig } = config
+  const headers = buildHeaders(configHeaders, token)
+  const init: RequestInit = {
+    ...fetchConfig,
+    method,
+    headers
+  }
+
+  if (data === undefined) return init
+
+  if (data instanceof FormData) {
+    init.body = data
+    return init
+  }
+
+  if (!headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json')
+  }
+  init.body = JSON.stringify(data)
+
+  return init
+}
+
+async function parseResponseBody(response: Response) {
+  if (response.status === 204) return null
+
+  const contentType = response.headers.get('Content-Type') || ''
+  const body = contentType.includes('application/json')
+    ? await response.json()
+    : await response.text()
+
+  return body === '' ? null : body
+}
+
+async function toHttpResponse<T>(response: Response): Promise<HttpResponse<T>> {
+  let data: T | null = null
+
+  try {
+    data = await parseResponseBody(response)
+  } catch {
+    data = null
+  }
+
+  return {
+    data: data as T,
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers
+  }
+}
+
+function getErrorMessage(response: HttpResponse) {
+  if (response.data && typeof response.data === 'object' && 'message' in response.data) {
+    return String(response.data.message)
+  }
+
+  return response.statusText || 'HTTP Error'
+}
+
+function isAuthUrl(url: string) {
+  return url.includes('/auth/')
+}
+
+async function refreshAccessToken() {
+  const response = await fetch(`${API_BASE}/auth/refresh`, { method: 'POST' })
+  if (!response.ok) throw new Error('Refresh failed')
+
+  const body = await response.json()
+  const token = body.data?.access_token
+  if (!token) throw new Error('No token returned')
+
+  localStorage.setItem('access_token', token)
+  return token
+}
+
+function logout() {
+  localStorage.removeItem('access_token')
+  localStorage.removeItem('user_info')
+  router.push({ name: 'Login' })
 }
 
 async function request<T = any>(
   method: string,
   url: string,
-  data?: any,
-  config?: { headers?: Record<string, string>; params?: Record<string, any>; [key: string]: any }
+  data?: unknown,
+  config?: HttpConfig,
+  retryOnUnauthorized = true,
+  token?: string
 ): Promise<HttpResponse<T>> {
+  const context = { method, url, data, config }
   const fullUrl = buildUrl(url, config?.params)
-  const token = localStorage.getItem('access_token')
+  const init = buildRequestInit(method, data, config, token)
 
-  const headers = new Headers(config?.headers)
-  if (token && !headers.has('Authorization')) {
-    headers.set('Authorization', `Bearer ${token}`)
-  }
-
-  const options: RequestInit = {
-    method,
-    headers,
-    ...config
-  }
-
-  if (data !== undefined) {
-    if (data instanceof FormData) {
-      options.body = data
-    } else {
-      if (!headers.has('Content-Type')) {
-        headers.set('Content-Type', 'application/json')
-      }
-      options.body = JSON.stringify(data)
-    }
-  }
-
-  let res: Response
+  let response: Response
   try {
-    res = await fetch(fullUrl, options)
-  } catch (err: any) {
-    throw new HttpError(err.message || 'Network Error', undefined, { method, url, data, config })
+    response = await fetch(fullUrl, init)
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Network Error'
+    throw new HttpError(message, undefined, context)
   }
 
-  let responseData: any = null
-  const contentType = res.headers.get('Content-Type') || ''
-  try {
-    if (contentType.includes('application/json')) {
-      responseData = await res.json()
-    } else {
-      responseData = await res.text()
-    }
-  } catch {
-    // If reading body fails, leave as null
-  }
+  const httpResponse = await toHttpResponse<T>(response)
 
-  const httpResponse: HttpResponse<T> = {
-    data: responseData,
-    status: res.status,
-    statusText: res.statusText,
-    headers: res.headers
-  }
-
-  if (res.status === 401 && !url.includes('/auth/')) {
-    if (isRefreshing) {
-      try {
-        const newToken = await new Promise<string>((resolve, reject) => {
-          failedQueue.push({ resolve, reject })
-        })
-        // Retry original request with new token
-        const newHeaders = new Headers(options.headers)
-        newHeaders.set('Authorization', `Bearer ${newToken}`)
-        options.headers = newHeaders
-        return await request<T>(method, url, data, config)
-      } catch (err) {
-        throw new HttpError('Unauthorized after token refresh failed', httpResponse, { method, url, data, config })
-      }
-    }
-
-    isRefreshing = true
+  if (response.status === 401 && retryOnUnauthorized && !isAuthUrl(url)) {
     try {
-      const refreshRes = await fetch('/api/v1/auth/refresh', { method: 'POST' })
-      if (!refreshRes.ok) throw new Error('Refresh failed')
-      const refreshData = await refreshRes.json()
-      const newToken = refreshData.data?.access_token
-      if (!newToken) throw new Error('No token returned')
+      refreshPromise ??= refreshAccessToken().finally(() => {
+        refreshPromise = null
+      })
 
-      localStorage.setItem('access_token', newToken)
-      processQueue(null, newToken)
-
-      // Retry original request
-      const newHeaders = new Headers(options.headers)
-      newHeaders.set('Authorization', `Bearer ${newToken}`)
-      options.headers = newHeaders
-      return await request<T>(method, url, data, config)
-    } catch (refreshError) {
-      processQueue(refreshError, null)
-      localStorage.removeItem('access_token')
-      localStorage.removeItem('user_info')
-      router.push({ name: 'Login' })
-      throw new HttpError('Unauthorized', httpResponse, { method, url, data, config })
-    } finally {
-      isRefreshing = false
+      const newToken = await refreshPromise
+      return request<T>(method, url, data, config, false, newToken)
+    } catch {
+      logout()
+      throw new HttpError('Unauthorized', httpResponse, context)
     }
   }
 
-  if (!res.ok) {
-    throw new HttpError('HTTP Error', httpResponse, { method, url, data, config })
+  if (!response.ok) {
+    throw new HttpError(getErrorMessage(httpResponse), httpResponse, context)
   }
 
   return httpResponse
 }
 
 export const http = {
-  get: <T = any>(url: string, config?: any) => request<T>('GET', url, undefined, config),
-  post: <T = any>(url: string, data?: any, config?: any) => request<T>('POST', url, data, config),
-  put: <T = any>(url: string, data?: any, config?: any) => request<T>('PUT', url, data, config),
-  delete: <T = any>(url: string, config?: any) => request<T>('DELETE', url, undefined, config)
+  get: <T = any>(url: string, config?: HttpConfig) => request<T>('GET', url, undefined, config),
+  post: <T = any>(url: string, data?: unknown, config?: HttpConfig) => request<T>('POST', url, data, config),
+  put: <T = any>(url: string, data?: unknown, config?: HttpConfig) => request<T>('PUT', url, data, config),
+  delete: <T = any>(url: string, config?: HttpConfig) => request<T>('DELETE', url, undefined, config)
 }
 
 export default http

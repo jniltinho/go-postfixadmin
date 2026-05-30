@@ -7,7 +7,7 @@
         <div class="dom-title">DOMAINS</div>
         <div class="dom-subtitle">MANAGE AND MONITOR YOUR REGISTERED EMAIL DOMAINS.</div>
       </div>
-      <button class="btn-add-big" @click="showAdd = true">
+      <button class="btn-add-big" :disabled="!isSuperAdmin" @click="openAdd">
         <Icon name="plus-circle" :size="20" style="margin-right:12px;vertical-align:middle" />
         ADD DOMAIN
       </button>
@@ -22,6 +22,7 @@
       :search-fields="['domain', 'description', 'transport']"
       default-sort-key="domain"
       :loading="loading"
+      :show-actions="true"
       @edit="openEdit"
       @delete="confirmDelete"
     >
@@ -51,6 +52,24 @@
       </template>
       <template #cell-modified="{ value }">{{ formatDate(value) }}</template>
       <template #cell-password_expiry="{ value }"><span class="mono">{{ value ?? 0 }}</span></template>
+      <template #actions="{ row }">
+        <button
+          class="act-btn act-edit"
+          :class="{ 'act-disabled': !isSuperAdmin }"
+          :disabled="!isSuperAdmin"
+          @click="openEdit(row)"
+        >
+          <Icon name="pencil" :size="12" style="margin-right:4px;vertical-align:middle" />EDIT
+        </button>
+        <button
+          class="act-btn act-del"
+          :class="{ 'act-disabled': !isSuperAdmin }"
+          :disabled="!isSuperAdmin"
+          @click="confirmDelete(row)"
+        >
+          <Icon name="trash-2" :size="12" style="margin-right:4px;vertical-align:middle" />DELETE
+        </button>
+      </template>
     </AppTable>
 
     <!-- ══════════ ADD MODAL ══════════ -->
@@ -88,13 +107,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import http from '../../utils/http'
 import { useToastStore } from '../../stores/toast'
+import { useAuthStore } from '../../stores/auth'
 import DomainAddModal from './DomainAddModal.vue'
 import DomainEditModal from './DomainEditModal.vue'
 
 const toast = useToastStore()
+const auth = useAuthStore()
+const isSuperAdmin = computed(() => auth.user?.superadmin === true)
 
 interface Domain {
   domain: string
@@ -144,12 +166,15 @@ function formatDate(ts: string): string {
 async function load() {
   loading.value = true
   try {
-    const [domRes, trRes] = await Promise.all([
-      http.get(`${API_BASE}/domains`),
-      http.get(`${API_BASE}/transports`),
-    ])
+    const domRes = await http.get(`${API_BASE}/domains`)
     allDomains.value = domRes.data?.data ?? []
-    transports.value = (trRes.data?.data ?? []).filter((t: Transport) => t.active)
+
+    if (isSuperAdmin.value) {
+      const trRes = await http.get(`${API_BASE}/transports`)
+      transports.value = (trRes.data?.data ?? []).filter((t: Transport) => t.active)
+    } else {
+      transports.value = []
+    }
   } catch (e: any) {
     toast.error(e?.response?.data?.error?.message || 'Failed to load data')
   } finally { loading.value = false }
@@ -160,7 +185,20 @@ onMounted(load)
 const showAdd = ref(false)
 const savingAdd = ref(false)
 
+function openAdd() {
+  if (!isSuperAdmin.value) {
+    toast.error('Only superadmins can create domains')
+    return
+  }
+  showAdd.value = true
+}
+
 async function handleAdd(payload: any) {
+  if (!isSuperAdmin.value) {
+    toast.error('Only superadmins can create domains')
+    showAdd.value = false
+    return
+  }
   if (!payload.domain.trim()) { toast.error('Domain name is required'); return }
   savingAdd.value = true
   try {
@@ -180,6 +218,10 @@ const editInitialData = ref<any>(null)
 const editDomainName = ref('')
 
 function openEdit(row: Domain) {
+  if (!isSuperAdmin.value) {
+    toast.error('Only superadmins can edit domains')
+    return
+  }
   editDomainName.value = row.domain
   editInitialData.value = {
     domain: row.domain,
@@ -196,6 +238,11 @@ function openEdit(row: Domain) {
 }
 
 async function handleEdit(payload: any) {
+  if (!isSuperAdmin.value) {
+    toast.error('Only superadmins can edit domains')
+    showEdit.value = false
+    return
+  }
   savingEdit.value = true
   try {
     await http.put(`${API_BASE}/domains/${encodeURIComponent(editDomainName.value)}`, payload)
@@ -212,10 +259,17 @@ const showDeleteConfirm = ref(false)
 const deletingRow = ref(false)
 const deleteTarget = ref<Domain | null>(null)
 
-function confirmDelete(row: Domain) { deleteTarget.value = row; showDeleteConfirm.value = true }
+function confirmDelete(row: Domain) {
+  if (!isSuperAdmin.value) {
+    toast.error('Only superadmins can delete domains')
+    return
+  }
+  deleteTarget.value = row
+  showDeleteConfirm.value = true
+}
 
 async function submitDelete() {
-  if (!deleteTarget.value) return
+  if (!deleteTarget.value || !isSuperAdmin.value) return
   deletingRow.value = true
   try {
     const domain = deleteTarget.value.domain
@@ -246,4 +300,6 @@ async function submitDelete() {
   position: absolute; inset: 0; display: flex; align-items: center;
   justify-content: center; font-size: 11px; font-weight: 700; color: #374151; z-index: 10;
 }
+.act-disabled { opacity: .4; cursor: not-allowed; pointer-events: none; }
+.btn-add-big:disabled { opacity: .55; cursor: not-allowed; transform: none; }
 </style>

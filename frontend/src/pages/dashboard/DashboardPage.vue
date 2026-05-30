@@ -59,15 +59,19 @@
       </div>
 
       <!-- New Domain CTA -->
-      <div class="cta-card cta-orange">
+      <div class="cta-card cta-orange" :class="{ 'cta-card--disabled': !isSuperAdmin }">
         <div>
           <h3 class="cta-title">NEW DOMAIN?</h3>
           <p class="cta-sub">CREATE A NEW DOMAIN IN SECONDS.</p>
         </div>
-        <router-link to="/domains" class="cta-btn">
+        <router-link v-if="isSuperAdmin" to="/domains" class="cta-btn">
           ADD DOMAIN
           <Icon name="plus-circle" :size="16" />
         </router-link>
+        <button v-else type="button" class="cta-btn cta-btn--disabled" disabled>
+          ADD DOMAIN
+          <Icon name="plus-circle" :size="16" />
+        </button>
       </div>
 
       <!-- New Email CTA -->
@@ -179,8 +183,11 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import http from '../../utils/http'
 import { useToastStore } from '../../stores/toast'
+import { useAuthStore } from '../../stores/auth'
 
 const toast = useToastStore()
+const auth = useAuthStore()
+const isSuperAdmin = computed(() => auth.user?.superadmin === true)
 const loading = ref(true)
 
 const stats = ref({ domains: 0, mailboxes: 0, aliases: 0 })
@@ -386,6 +393,10 @@ const pagedRows = computed(() => {
   justify-content: space-between;
   box-shadow: 3px 3px 0px #1e293b;
 }
+.cta-card--disabled {
+  opacity: 0.58;
+  cursor: not-allowed;
+}
 .cta-orange { background: #f97316; }
 .cta-blue   { background: #3b82f6; }
 
@@ -425,6 +436,14 @@ const pagedRows = computed(() => {
 .cta-btn:hover {
   transform: translate(-1px, -1px);
   box-shadow: 3px 3px 0px #1e293b;
+}
+.cta-btn--disabled,
+.cta-btn--disabled:hover {
+  background: #e5e7eb;
+  color: #64748b;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 2px 2px 0px #1e293b;
 }
 
 /* ─── Table Controls & Custom Elements ─── */

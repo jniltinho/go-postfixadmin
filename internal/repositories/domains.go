@@ -76,7 +76,6 @@ func UpdateDomain(db *gorm.DB, domain models.Domain, activeChanged bool, actorUs
 	})
 }
 
-
 func GetActiveDomains(db *gorm.DB, username string, isSuperAdmin bool) (domains []models.Domain, isSuper bool, err error) {
 	allowedDomains, isSuper, err := GetAllowedDomains(db, username, isSuperAdmin)
 	if err != nil {
