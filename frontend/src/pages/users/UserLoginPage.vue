@@ -38,11 +38,11 @@
                 <Icon name="mail" :size="18" class="input-icon-left text-[#94a3b8]" />
                 <input
                   v-model="form.username"
-                  type="text"
+                  type="email"
                   :placeholder="t.emailPlaceholder"
                   class="brutal-input"
                   :disabled="loading"
-                  autocomplete="username"
+                  autocomplete="off"
                 />
               </div>
             </div>
@@ -60,7 +60,7 @@
                   :placeholder="t.passwordPlaceholder"
                   class="brutal-input pr-10"
                   :disabled="loading"
-                  autocomplete="current-password"
+                  autocomplete="off"
                 />
                 <button
                   type="button"

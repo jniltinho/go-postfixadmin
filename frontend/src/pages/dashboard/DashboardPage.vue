@@ -97,7 +97,7 @@
       :search-fields="['timestamp', 'username', 'domain', 'action', 'data']"
       default-sort-key="timestamp"
       default-sort-dir="desc"
-      :initial-rows-per-page="10"
+      :initial-rows-per-page="12"
       :loading="loading"
       :show-actions="false"
     >

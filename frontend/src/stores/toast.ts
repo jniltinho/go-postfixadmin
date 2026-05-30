@@ -16,7 +16,7 @@ const defaultOptions: ToastOptions = {
   transition: 'zoom'
 }
 
-function options(duration = 4000): ToastOptions {
+function options(duration = 3000): ToastOptions {
   return {
     ...defaultOptions,
     autoClose: duration > 0 ? duration : false
@@ -26,7 +26,7 @@ function options(duration = 4000): ToastOptions {
 export const useToastStore = defineStore('toast', () => {
   const toasts = ref<Toast[]>([])
 
-  function add(message: string, type: ToastType = 'info', duration = 4000): Id {
+  function add(message: string, type: ToastType = 'info', duration = 3000): Id {
     return notify(message, {
       ...options(duration),
       type

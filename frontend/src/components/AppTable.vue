@@ -12,7 +12,8 @@
         <div class="controls-left">
           <div class="per-page-wrap">
             <select v-model="rowsPerPage" class="ctrl-select" @change="currentPage = 1">
-              <option :value="10">10</option>
+              <option :value="10">10</option>           
+              <option :value="12">12</option>
               <option :value="15">15</option>
               <option :value="25">25</option>
               <option :value="50">50</option>
@@ -121,7 +122,7 @@ const props = withDefaults(defineProps<{
   initialRowsPerPage?: number
 }>(), {
   showActions: true,
-  initialRowsPerPage: 15,
+  initialRowsPerPage: 12,
 })
 
 const emit = defineEmits<{

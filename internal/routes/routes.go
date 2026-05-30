@@ -21,18 +21,22 @@ var AppVersion string = "1.0.0"
 
 // RegisterRoutes registers all the application routes
 func RegisterRoutes(e *echo.Echo, h *handlers.Handler, spaFS fs.FS) {
+	loginLimiter := middleware.LoginRateLimiter()
+	apiLimiter := middleware.APIRateLimiter()
+
 	e.GET("/lang/:code", h.SetLanguage)
 
-	apiV1 := e.Group("/api/v1")
+	apiV1 := e.Group("/api/v1", apiLimiter.Middleware())
 
 	// Public: app version
 	apiV1.GET("/version", func(c *echo.Context) error {
 		return c.JSON(http.StatusOK, map[string]string{"version": AppVersion})
 	})
 
-	// Public auth endpoints
-	apiV1.POST("/auth/login", h.AuthLogin)
-	apiV1.POST("/auth/refresh", h.AuthRefresh)
+	// Public auth endpoints — CSRF check + strict rate limit (5 req/min per IP)
+	authPublic := apiV1.Group("", middleware.CSRFOriginCheck(), loginLimiter.Middleware())
+	authPublic.POST("/auth/login", h.AuthLogin)
+	authPublic.POST("/auth/refresh", h.AuthRefresh)
 
 	// All protected endpoints
 	protected := apiV1.Group("", middleware.JWTAuthMiddleware(h.DB))
