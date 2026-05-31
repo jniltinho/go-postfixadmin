@@ -1,50 +1,24 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
-import { toast as notify, type Id, type ToastOptions } from 'vue3-toastify'
-
-export type ToastType = 'success' | 'error' | 'warning' | 'info'
-
-export interface Toast {
-  id: Id
-  message: string
-  type: ToastType
-}
-
-const defaultOptions: ToastOptions = {
-  position: 'top-right',
-  theme: 'colored',
-  transition: 'zoom'
-}
-
-function options(duration = 3000): ToastOptions {
-  return {
-    ...defaultOptions,
-    autoClose: duration > 0 ? duration : false
-  }
-}
+import { toast as notify, updateGlobalOptions, Zoom } from 'vue3-toastify'
+import type { ToastOptions } from 'vue3-toastify'
 
 export const useToastStore = defineStore('toast', () => {
-  const toasts = ref<Toast[]>([])
+  updateGlobalOptions({
+    position: 'top-right',
+    theme: 'colored',
+    transition: Zoom,
+    autoClose: 3000,
+    newestOnTop: true,
+    pauseOnHover: true,
+    pauseOnFocusLoss: true,
+    closeOnClick: true,
+    closeButton: false,
+  })
 
-  function add(message: string, type: ToastType = 'info', duration = 3000): Id {
-    return notify(message, {
-      ...options(duration),
-      type
-    })
+  return {
+    success: (message: string, extra?: ToastOptions) => notify.success(message, extra),
+    error: (message: string, extra?: ToastOptions) => notify.error(message, extra),
+    info: (message: string, extra?: ToastOptions) => notify.info(message, extra),
+    warning: (message: string, extra?: ToastOptions) => notify.warning(message, extra),
   }
-
-  function remove(id?: Id): void {
-    notify.remove(id)
-  }
-
-  function clear(): void {
-    notify.clearAll()
-  }
-
-  const success = (message: string, duration?: number) => add(message, 'success', duration)
-  const error = (message: string, duration?: number) => add(message, 'error', duration)
-  const warning = (message: string, duration?: number) => add(message, 'warning', duration)
-  const info = (message: string, duration?: number) => add(message, 'info', duration)
-
-  return { toasts, add, remove, clear, success, error, warning, info }
 })

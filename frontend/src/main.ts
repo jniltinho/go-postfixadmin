@@ -2,6 +2,8 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import router from './router'
 import { useAuthStore } from './stores/auth'
+import Vue3Toastify from 'vue3-toastify'
+import 'vue3-toastify/dist/index.css'
 
 import './style.css'
 
@@ -22,6 +24,7 @@ app.use(pinia)
 // Initialize auth from localStorage before router runs so guards see correct state
 useAuthStore(pinia).initFromStorage()
 
+app.use(Vue3Toastify)
 app.use(router)
 
 app.mount('#app')

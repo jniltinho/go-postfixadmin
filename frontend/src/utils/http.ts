@@ -1,7 +1,7 @@
 import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios'
 
+
 const client = axios.create({
-  baseURL: API_BASE,
   timeout: 15000,
   headers: { 'Content-Type': 'application/json' },
   withCredentials: true,
@@ -55,9 +55,9 @@ export type HttpConfig = AxiosRequestConfig
 export type HttpResponse<T = any> = AxiosResponse<T>
 
 export const http = {
-  get:    <T = any>(url: string, config?: HttpConfig) => client.get<T>(url, config),
-  post:   <T = any>(url: string, data?: unknown, config?: HttpConfig) => client.post<T>(url, data, config),
-  put:    <T = any>(url: string, data?: unknown, config?: HttpConfig) => client.put<T>(url, data, config),
+  get: <T = any>(url: string, config?: HttpConfig) => client.get<T>(url, config),
+  post: <T = any>(url: string, data?: unknown, config?: HttpConfig) => client.post<T>(url, data, config),
+  put: <T = any>(url: string, data?: unknown, config?: HttpConfig) => client.put<T>(url, data, config),
   delete: <T = any>(url: string, config?: HttpConfig) => client.delete<T>(url, config),
 }
 

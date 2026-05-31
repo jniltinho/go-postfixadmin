@@ -1,22 +1,4 @@
-<script setup lang="ts">
-import { ToastifyContainer } from 'vue3-toastify'
-import 'vue3-toastify/dist/index.css'
-</script>
-
-<template>
-  <ToastifyContainer
-    position="top-right"
-    theme="colored"
-    transition="zoom"
-    :auto-close="3000"
-    :newest-on-top="true"
-    :pause-on-hover="true"
-    :pause-on-focus-loss="true"
-    :close-on-click="true"
-    role="alert"
-  />
-</template>
-
+<template></template>
 <style>
 /* ─── Neo-brutalist theme tokens ─────────────────────────────────────────── */
 :root {
@@ -59,7 +41,7 @@ import 'vue3-toastify/dist/index.css'
   box-shadow: 4px 4px 0 rgba(30, 41, 59, 0.35);
   padding: 14px 16px;
   font-family: var(--toastify-font-family);
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
 }
 
@@ -79,6 +61,6 @@ import 'vue3-toastify/dist/index.css'
 
 /* ─── Progress bar ───────────────────────────────────────────────────────── */
 .Toastify__progress-bar {
-  height: 3px;
+  height: 6px;
 }
 </style>

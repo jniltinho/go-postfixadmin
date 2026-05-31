@@ -1,8 +1,8 @@
-<script setup lang="ts">
-import ToastContainer from './components/ToastContainer.vue'
-</script>
-
 <template>
+  <AppToast />
   <router-view />
-  <ToastContainer />
 </template>
+
+<script setup lang="ts">
+import AppToast from './components/AppToast.vue'
+</script>
