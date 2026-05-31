@@ -37,7 +37,7 @@ run:
 	./$(BIN) server
 
 frontend:
-	@echo "Building frontend (Vue 3 + Quasar)..."
+	@echo "Building frontend (Vue 3 + Tailwind CSS)..."
 	@if [ ! -d "frontend" ]; then \
 		echo "Error: frontend/ directory not found"; \
 		exit 1; \
