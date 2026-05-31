@@ -52,24 +52,25 @@ Ask the user for:
 │       └── config.default.toml
 ├── frontend/
 │   ├── src/
+│   │   ├── api/
+│   │   │   └── client.ts
 │   │   ├── assets/
 │   │   ├── components/
 │   │   ├── pages/
 │   │   │   ├── LoginPage.vue
 │   │   │   └── DashboardPage.vue
 │   │   ├── router/
-│   │   │   └── index.js
+│   │   │   └── index.ts
 │   │   ├── stores/
-│   │   │   └── auth.js
-│   │   ├── vendor/
-│   │   │   ├── axios.min.js
-│   │   │   └── vue3-toastify.esm.mjs
+│   │   │   └── auth.ts
 │   │   ├── App.vue
-│   │   ├── main.js
+│   │   ├── env.d.ts
+│   │   ├── main.ts
 │   │   └── style.css
 │   ├── index.html
 │   ├── package.json
-│   └── vite.config.js
+│   ├── tsconfig.json
+│   └── vite.config.ts
 ├── main.go
 ├── go.mod
 ├── Makefile
@@ -126,10 +127,13 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+
+	"{MODULE_PATH}/internal/config"
+	"{MODULE_PATH}/internal/database"
 )
 
 var (
-	cfgFile       string
+	cfgFile        string
 	embeddedAssets embed.FS
 )
 
@@ -155,6 +159,28 @@ func init() {
 	rootCmd.AddCommand(serverCmd)
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(versionCmd)
+	rootCmd.AddCommand(migrateCmd)
+}
+
+// migrateCmd runs database auto-migrations without starting the server.
+var migrateCmd = &cobra.Command{
+	Use:   "migrate",
+	Short: "Run database migrations",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		cfg, err := config.Load(cfgFile)
+		if err != nil {
+			return err
+		}
+		db, err := database.Connect(cfg)
+		if err != nil {
+			return err
+		}
+		if err := database.Migrate(db); err != nil {
+			return fmt.Errorf("migration failed: %w", err)
+		}
+		fmt.Println("migrations applied successfully")
+		return nil
+	},
 }
 
 // versionCmd prints the application version.
@@ -389,8 +415,6 @@ import (
 )
 
 // User represents an application user.
-//
-// swagger:model User
 type User struct {
 	ID        uint           `gorm:"primaryKey"         json:"id"`
 	Username  string         `gorm:"uniqueIndex;size:64" json:"username"`
@@ -415,6 +439,7 @@ import (
 	"net/http"
 	"time"
 
+	echojwt "github.com/labstack/echo-jwt/v5"
 	"github.com/labstack/echo/v5"
 	emw "github.com/labstack/echo/v5/middleware"
 )
@@ -422,8 +447,8 @@ import (
 // Register attaches all global middleware to the Echo instance.
 func Register(e *echo.Echo, debug bool) {
 	e.Use(emw.Recover())
+	e.Use(emw.RequestLogger())
 	e.Use(emw.RequestID())
-	e.Use(emw.Logger())
 	e.Use(emw.Secure())
 	e.Use(emw.TimeoutWithConfig(emw.TimeoutConfig{
 		Timeout: 30 * time.Second,
@@ -437,6 +462,13 @@ func Register(e *echo.Echo, debug bool) {
 			AllowCredentials: true,
 		}))
 	}
+}
+
+// JWT returns Echo JWT middleware configured with the given secret.
+func JWT(secret string) echo.MiddlewareFunc {
+	return echojwt.WithConfig(echojwt.Config{
+		SigningKey: []byte(secret),
+	})
 }
 
 // RateLimiter returns a basic IP-based rate limiter middleware.
@@ -461,7 +493,9 @@ package handlers
 
 import (
 	"net/http"
+	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v5"
 	"gorm.io/gorm"
 
@@ -479,17 +513,49 @@ func New(cfg *config.Config, db *gorm.DB) *Handler {
 	return &Handler{cfg: cfg, db: db}
 }
 
-// Health returns the application health status.
-//
-// @Summary     Health check
-// @Tags        system
-// @Produce     json
-// @Success     200 {object} map[string]string
-// @Router      /api/v1/health [get]
 func (h *Handler) Health(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]string{
 		"status":  "ok",
 		"version": "0.1.0",
+	})
+}
+
+// AuthLogin validates credentials and issues a signed JWT.
+func (h *Handler) AuthLogin(c echo.Context) error {
+	var req struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
+	if err := c.Bind(&req); err != nil {
+		return apiError(c, http.StatusBadRequest, "bad_request", "invalid request body")
+	}
+	if req.Username == "" || req.Password == "" {
+		return apiError(c, http.StatusUnauthorized, "unauthorized", "invalid credentials")
+	}
+
+	// TODO: validate credentials against DB
+	// var user models.User
+	// if err := h.db.Where("username = ? AND active = true", req.Username).First(&user).Error; err != nil {
+	//     return apiError(c, http.StatusUnauthorized, "unauthorized", "invalid credentials")
+	// }
+	// if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
+	//     return apiError(c, http.StatusUnauthorized, "unauthorized", "invalid credentials")
+	// }
+
+	claims := jwt.MapClaims{
+		"sub": req.Username,
+		"exp": time.Now().Add(24 * time.Hour).Unix(),
+		"iat": time.Now().Unix(),
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	signed, err := token.SignedString([]byte(h.cfg.Server.JWTSecret))
+	if err != nil {
+		return apiError(c, http.StatusInternalServerError, "internal_error", "could not sign token")
+	}
+
+	return apiOK(c, map[string]any{
+		"access_token": signed,
+		"user":         map[string]string{"username": req.Username},
 	})
 }
 
@@ -554,7 +620,7 @@ func New(cfg *config.Config, db *gorm.DB, assets embed.FS) *Server {
 	mw.Register(e, cfg.App.Debug)
 
 	h := handlers.New(cfg, db)
-	registerRoutes(e, h, assets)
+	registerRoutes(e, h, cfg.Server.JWTSecret, assets)
 
 	return &Server{echo: e, cfg: cfg, assets: assets}
 }
@@ -611,9 +677,13 @@ import (
 )
 
 // registerRoutes wires all routes to the Echo instance.
-func registerRoutes(e *echo.Echo, h *handlers.Handler, assets embed.FS) {
-	// --- API v1 ---
+func registerRoutes(e *echo.Echo, h *handlers.Handler, jwtSecret string, assets embed.FS) {
+	// --- Public routes ---
+	e.POST("/api/v1/auth/login", h.AuthLogin)
+
+	// --- Protected API v1 ---
 	api := e.Group("/api/v1")
+	api.Use(mw.JWT(jwtSecret))
 	api.Use(mw.RateLimiter())
 
 	api.GET("/health", h.Health)
@@ -709,6 +779,8 @@ Run after creating the files:
 ```bash
 go mod init {MODULE_PATH}
 go get github.com/labstack/echo/v5@latest
+go get github.com/labstack/echo-jwt/v5@latest
+go get github.com/golang-jwt/jwt/v5@latest
 go get github.com/spf13/cobra@latest
 go get github.com/spf13/viper@latest
 go get gorm.io/gorm@latest
@@ -1016,40 +1088,26 @@ MIT
     "vue": "^3.5.0",
     "vue-router": "^4.4.0",
     "pinia": "^2.2.0",
+    "axios": "^1.7.0",
+    "vue3-toastify": "^0.2.0",
     "@lucide/vue": "^1.0.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.0",
     "@tailwindcss/vite": "^4.0.0",
     "tailwindcss": "^4.0.0",
+    "typescript": "^5.0.0",
+    "vue-tsc": "^2.0.0",
     "vite": "^6.0.0"
   }
 }
 ```
 
-**Note**: After creating `package.json`, vendor axios and vue3-toastify locally:
-
-```bash
-cd frontend
-npm install
-# Download tarballs for vendoring
-npm pack axios@1.x           # produces axios-1.x.x.tgz
-npm pack vue3-toastify@0.x   # produces vue3-toastify-0.x.x.tgz
-mkdir -p vendor
-mv *.tgz vendor/
-```
-
-Then add to `package.json` dependencies:
-```json
-"axios": "file:./vendor/axios-1.x.x.tgz",
-"vue3-toastify": "file:./vendor/vue3-toastify-0.x.x.tgz"
-```
-
 ---
 
-### `frontend/vite.config.js`
+### `frontend/vite.config.ts`
 
-```js
+```ts
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import tailwindcss from '@tailwindcss/vite'
@@ -1057,6 +1115,9 @@ import { resolve } from 'path'
 
 export default defineConfig({
   plugins: [vue(), tailwindcss()],
+  define: {
+    API_BASE: JSON.stringify('/api/v1'),
+  },
   resolve: {
     alias: { '@': resolve(__dirname, 'src') }
   },
@@ -1076,6 +1137,38 @@ export default defineConfig({
 
 ---
 
+### `frontend/tsconfig.json`
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "preserve",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}
+```
+
+---
+
 ### `frontend/index.html`
 
 ```html
@@ -1089,7 +1182,7 @@ export default defineConfig({
 </head>
 <body>
   <div id="app"></div>
-  <script type="module" src="/src/main.js"></script>
+  <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
 ```
@@ -1223,16 +1316,26 @@ body {
 
 ---
 
-### `frontend/src/main.js`
+### `frontend/src/env.d.ts`
 
-```js
+```ts
+/// <reference types="vite/client" />
+
+declare const API_BASE: string
+```
+
+---
+
+### `frontend/src/main.ts`
+
+```ts
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import Vue3Toastify, { toast } from 'vue3-toastify'
 import 'vue3-toastify/dist/index.css'
 
 import App from './App.vue'
-import router from './router/index.js'
+import router from './router/index'
 import './style.css'
 
 const app = createApp(App)
@@ -1267,19 +1370,19 @@ app.mount('#app')
   <router-view />
 </template>
 
-<script setup>
+<script setup lang="ts">
 </script>
 ```
 
 ---
 
-### `frontend/src/router/index.js`
+### `frontend/src/router/index.ts`
 
-```js
-import { createRouter, createWebHistory } from 'vue-router'
-import { useAuthStore } from '@/stores/auth.js'
+```ts
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 
-const routes = [
+const routes: RouteRecordRaw[] = [
   {
     path: '/login',
     name: 'login',
@@ -1318,20 +1421,24 @@ export default router
 
 ---
 
-### `frontend/src/stores/auth.js`
+### `frontend/src/stores/auth.ts`
 
-```js
+```ts
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import api from '@/api/client.js'
+import api from '@/api/client'
+
+interface AuthUser {
+  username: string
+}
 
 export const useAuthStore = defineStore('auth', () => {
-  const token    = ref(localStorage.getItem('access_token') || '')
-  const user     = ref(null)
+  const token = ref<string>(localStorage.getItem('access_token') || '')
+  const user  = ref<AuthUser | null>(null)
 
   const isLoggedIn = computed(() => !!token.value)
 
-  async function login(username, password) {
+  async function login(username: string, password: string) {
     const res = await api.post('/auth/login', { username, password })
     token.value = res.data.data.access_token
     user.value  = res.data.data.user
@@ -1346,7 +1453,6 @@ export const useAuthStore = defineStore('auth', () => {
     delete api.defaults.headers.common['Authorization']
   }
 
-  // Restore token on page load
   if (token.value) {
     api.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
   }
@@ -1357,26 +1463,26 @@ export const useAuthStore = defineStore('auth', () => {
 
 ---
 
-### `frontend/src/api/client.js`
+### `frontend/src/api/client.ts`
 
-```js
+```ts
 import axios from 'axios'
 
+declare const API_BASE: string
+
 const api = axios.create({
-  baseURL: '/api/v1',
+  baseURL: API_BASE,
   timeout: 15000,
   headers: { 'Content-Type': 'application/json' },
   withCredentials: true,
 })
 
-// Request: attach token if present
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('access_token')
   if (token) config.headers.Authorization = `Bearer ${token}`
   return config
 })
 
-// Response: handle 401 → redirect to login
 api.interceptors.response.use(
   (res) => res,
   async (err) => {
@@ -1430,11 +1536,11 @@ export default api
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Lock } from '@lucide/vue'
-import { useAuthStore } from '@/stores/auth.js'
+import { useAuthStore } from '@/stores/auth'
 import { toast } from 'vue3-toastify'
 
 const router = useRouter()
@@ -1508,7 +1614,7 @@ async function handleLogin() {
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 </script>
 ```
 
@@ -1581,6 +1687,8 @@ Create each file with the standard template:
 # Go dependencies
 go mod init {MODULE_PATH}
 go get github.com/labstack/echo/v5@latest
+go get github.com/labstack/echo-jwt/v5@latest
+go get github.com/golang-jwt/jwt/v5@latest
 go get github.com/spf13/cobra@latest
 go get github.com/spf13/viper@latest
 go get gorm.io/gorm@latest
