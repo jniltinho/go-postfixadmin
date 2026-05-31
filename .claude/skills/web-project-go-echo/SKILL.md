@@ -1,6 +1,6 @@
 ---
 name: web-project-go-echo
-description: Scaffold a production-ready Go web project using Echo v5, GORM (SQLite dev / MariaDB prod), Cobra CLI, embedded Vue 3 SPA (Tailwind CSS v4, Pinia, Lucide, vue3-toastify), neo-brutalist design system, 3-stage Dockerfile, and optimized Makefile. Use when the user asks to create a new Go + Vue web project or API server.
+description: Scaffold a production-ready Go web project using Echo v5, GORM (SQLite dev / MariaDB prod), Cobra CLI, embedded Vue 3 SPA (Tailwind CSS v4 + tailwindcss-primeui + PrimeVue, Pinia, Lucide, vue3-toastify), thin-border + soft-shadow design system, 3-stage Dockerfile, and optimized Makefile. Use when the user asks to create a new Go + Vue web project or API server.
 ---
 
 # web-project-go-echo
@@ -1114,7 +1114,11 @@ MIT
     "pinia": "^2.2.0",
     "axios": "^1.7.0",
     "vue3-toastify": "^0.2.0",
-    "@lucide/vue": "^1.0.0"
+    "@lucide/vue": "^1.0.0",
+    "primevue": "^4.0.0",
+    "@primevue/themes": "^4.0.0",
+    "primeicons": "^7.0.0",
+    "tailwindcss-primeui": "^0.5.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.0",
@@ -1217,6 +1221,7 @@ export default defineConfig({
 
 ```css
 @import "tailwindcss";
+@import "tailwindcss-primeui";
 
 /* ── Brand tokens ──────────────────────────────────────────────────────────── */
 @theme {
@@ -1248,7 +1253,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── Neo-brutalist primitives ──────────────────────────────────────────────── */
+/* ── Neo-brutalist primitives (thin border · soft shadow · no radius) ──────── */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -1259,80 +1264,89 @@ body {
   letter-spacing: 0.5px;
   text-transform: uppercase;
   cursor: pointer;
-  border: 2px solid var(--color-brand-text);
-  box-shadow: 2px 2px 0 var(--color-brand-text);
-  transition: all 0.1s;
+  border: 1px solid currentColor;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+  transition: all 0.15s ease;
   border-radius: 0;
 }
-.btn:hover   { transform: translate(-1px,-1px); box-shadow: 3px 3px 0 var(--color-brand-text); }
-.btn:active  { transform: translate(1px,1px);   box-shadow: 1px 1px 0 var(--color-brand-text); }
+.btn:hover  { box-shadow: 0 3px 10px rgba(0,0,0,0.14); transform: translateY(-1px); }
+.btn:active { transform: translateY(0); box-shadow: 0 1px 3px rgba(0,0,0,0.10); }
 
-.btn-primary { background: var(--color-brand-primary);   color: #fff; }
-.btn-danger  { background: #ef4444;                       color: #fff; }
-.btn-ghost   { background: #fff; color: var(--color-brand-text); }
+.btn-primary { background: var(--color-brand-primary); color: #fff; border-color: var(--color-brand-primary); }
+.btn-danger  { background: #ef4444; color: #fff; border-color: #ef4444; }
+.btn-ghost   { background: #fff; color: var(--color-brand-text); border-color: #cbd5e1; }
 
 .card {
   background: #fff;
-  border: 2px solid var(--color-brand-text);
-  box-shadow: 3px 3px 0 var(--color-brand-text);
+  border: 1px solid #e2e8f0;
+  border-radius: 0;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
 
 .input {
   width: 100%;
   padding: 8px 12px;
-  border: 2px solid var(--color-brand-text);
+  border: 1px solid #cbd5e1;
   border-radius: 0;
   font-size: 14px;
   outline: none;
   background: #fff;
-  transition: box-shadow 0.1s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
-.input:focus { box-shadow: 0 0 0 3px rgba(59,130,246,0.25); }
+.input:focus { border-color: var(--color-brand-primary); box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
 
 .modal-overlay {
   position: fixed; inset: 0;
-  background: rgba(15,23,42,0.6);
+  background: rgba(15,23,42,0.5);
   display: flex; align-items: center; justify-content: center;
   z-index: 9999; padding: 16px;
 }
 .modal-card {
   background: #fff;
-  border: 2px solid var(--color-brand-text);
+  border: 1px solid #e2e8f0;
+  border-radius: 0;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
   width: 100%; max-width: 520px; max-height: 90vh; overflow: auto;
 }
 .modal-head {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 12px 16px;
-  border-bottom: 2px solid var(--color-brand-text);
+  padding: 14px 18px;
+  border-bottom: 1px solid #e2e8f0;
   background: #f8fafc;
-  font-weight: 900; font-size: 13px; letter-spacing: 0.5px;
+  border-radius: 0;
+  font-weight: 900; font-size: 12px;
+  letter-spacing: 0.5px; text-transform: uppercase;
 }
-.modal-body   { padding: 16px; }
+.modal-body   { padding: 18px; }
 .modal-footer {
-  padding: 12px 16px;
-  border-top: 2px solid #e2e8f0;
+  padding: 12px 18px;
+  border-top: 1px solid #e2e8f0;
   display: flex; gap: 10px; justify-content: flex-end;
   background: #fafafa;
+  border-radius: 0;
 }
 
 .page-header {
   display: flex; align-items: flex-start; justify-content: space-between;
-  margin-bottom: 16px; flex-wrap: wrap; gap: 12px;
+  margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
 }
 .page-title {
-  font-size: 18px; font-weight: 900;
+  font-size: 16px; font-weight: 900;
   letter-spacing: 1px; text-transform: uppercase;
+  color: var(--color-brand-text);
 }
 
 .error-banner {
-  background: #fef2f2; border: 2px solid #ef4444; color: #b91c1c;
-  padding: 10px 14px; font-size: 13px; font-weight: 600;
+  background: #fef2f2; border: 1px solid #fca5a5; color: #b91c1c;
+  border-radius: 0;
+  padding: 10px 14px; font-size: 12px; font-weight: 700;
+  letter-spacing: 0.3px;
   margin-bottom: 16px; display: flex; align-items: center; gap: 6px;
 }
 
 .spinner {
   width: 22px; height: 22px;
-  border: 3px solid #e2e8f0; border-top-color: var(--color-brand-primary);
+  border: 2px solid #e2e8f0; border-top-color: var(--color-brand-primary);
   border-radius: 50%; animation: spin 0.7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -1369,14 +1383,15 @@ app.use(router)
 app.use(Vue3Toastify, {
   autoClose:   3000,
   position:    'top-right',
-  transition:  'zoom',
+  transition:  'slide',
   theme:       'light',
   toastStyle:  {
-    border:     '2px solid #1E293B',
-    boxShadow:  '3px 3px 0 #1E293B',
-    borderRadius: '0',
-    fontWeight: '600',
-    fontSize:   '13px',
+    border:        '1px solid #e2e8f0',
+    boxShadow:     '0 4px 12px rgba(0,0,0,0.10)',
+    borderRadius:  '0',
+    fontWeight:    '700',
+    fontSize:      '12px',
+    letterSpacing: '0.3px',
   },
 })
 
@@ -1593,8 +1608,6 @@ async function handleLogin() {
 .login-page {
   min-height: 100vh;
   background: var(--color-brand-bg);
-  background-image: radial-gradient(circle, #c7d2e0 1.2px, transparent 1.2px);
-  background-size: 22px 22px;
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -1602,12 +1615,12 @@ async function handleLogin() {
 }
 .login-wrap   { width: 100%; max-width: 420px; padding: 0 16px 40px; }
 .login-brand  { display: flex; flex-direction: column; align-items: center; margin-bottom: 24px; }
-.brand-icon   { width: 52px; height: 52px; background: var(--color-brand-primary); display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
-.brand-title  { font-size: 26px; font-weight: 900; color: var(--color-brand-text); margin: 0 0 4px; letter-spacing: -0.5px; }
-.brand-sub    { font-size: 13px; color: #64748b; margin: 0; }
-.card-heading { font-size: 12px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; margin: 0 0 18px; }
+.brand-icon   { width: 52px; height: 52px; background: var(--color-brand-primary); border-radius: 0; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(59,130,246,0.20); }
+.brand-title  { font-size: 24px; font-weight: 900; color: var(--color-brand-text); margin: 0 0 4px; letter-spacing: -0.5px; }
+.brand-sub    { font-size: 12px; color: #64748b; margin: 0; font-weight: 600; letter-spacing: 0.3px; }
+.card-heading { font-size: 11px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; color: var(--color-brand-text); margin: 0 0 18px; }
 .field-wrap   { margin-bottom: 14px; }
-.field-label  { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 5px; }
+.field-label  { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: #475569; margin-bottom: 5px; }
 </style>
 ```
 
@@ -1720,9 +1733,12 @@ go get gorm.io/driver/sqlite@latest
 go get gorm.io/driver/mysql@latest
 go mod tidy
 
-# Frontend
+# Frontend — scaffold then add UI packages
+npm create vue@latest -- --bare --ts --router --pinia frontend
 cd frontend
-npm install
+npm i tailwindcss @tailwindcss/vite @lucide/vue
+npm i tailwindcss-primeui primevue @primevue/themes primeicons
+npm i axios vue3-toastify
 npm run build
 cd ..
 
@@ -1744,8 +1760,8 @@ git add .
 git commit -m "feat: initial project scaffold
 
 - Echo v5 + GORM (SQLite dev / MariaDB prod) + Cobra CLI
-- Vue 3 + Tailwind CSS v4 + Pinia + Lucide + vue3-toastify
-- Neo-brutalist design system
+- Vue 3 + Tailwind CSS v4 + tailwindcss-primeui + PrimeVue + Pinia + Lucide + vue3-toastify
+- Thin-border + soft-shadow design system
 - 3-stage Dockerfile + optimized Makefile (upx)
 - SPA embedded in Go binary via //go:embed
 - specs/ folder structure
@@ -1759,7 +1775,9 @@ Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
 
 - **Go version**: 1.26 (adjust `go.mod` `go` directive accordingly)
 - **Echo v5**: uses `github.com/labstack/echo/v5` — middleware import path is `github.com/labstack/echo/v5/middleware`
-- **vue3-toastify**: neo-brutalist config — `position="top-right"`, `transition="zoom"`, square borders, hard shadow
+- **Frontend scaffold**: use `npm create vue@latest -- --bare --ts --router --pinia frontend` then install tailwindcss + primeui packages; overwrite generated files with the templates in Step 20
+- **vue3-toastify**: soft config — `position="top-right"`, `transition="slide"`, rounded borders (`8px`), subtle `box-shadow`
+- **tailwindcss-primeui**: bridges PrimeVue theming with Tailwind utility classes; import order must be `tailwindcss` first, then `tailwindcss-primeui`
 - **SPA fallback**: registered last in `internal/server/routes.go`; serves static files with correct MIME + Cache-Control; falls back to `index.html` for Vue Router history mode paths
 - **upx**: must be installed on the build machine (`apt install upx` / `apk add upx`)
 - **SQLite**: requires `CGO_ENABLED=1` and `gcc` at build time
