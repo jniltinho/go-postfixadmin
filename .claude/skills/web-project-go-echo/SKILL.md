@@ -34,10 +34,12 @@ Ask the user for:
 │   │   └── middleware.go
 │   └── models/
 │       └── models.go
-├── server/
-│   ├── server.go
-│   ├── routes.go
-│   └── render.go
+├── internal/
+│   ├── ...
+│   └── server/
+│       ├── server.go
+│       ├── routes.go
+│       └── render.go
 ├── specs/
 │   └── example-feature/
 │       ├── FEATURES.md
@@ -105,7 +107,7 @@ import (
 	"{MODULE_PATH}/cmd"
 )
 
-//go:embed web/dist web/files
+//go:embed all:web/dist web/files
 var embeddedFiles embed.FS
 
 func main() {
@@ -228,7 +230,7 @@ import (
 
 	"{MODULE_PATH}/internal/config"
 	"{MODULE_PATH}/internal/database"
-	"{MODULE_PATH}/server"
+	"{MODULE_PATH}/internal/server"
 )
 
 // serverCmd starts the HTTP server.
@@ -581,7 +583,7 @@ func apiOK(c echo.Context, data any) error {
 
 ---
 
-## Step 10 — `server/server.go`
+## Step 10 — `internal/server/server.go`
 
 ```go
 // Package server sets up and runs the Echo HTTP server for {PROJECT_NAME}.
@@ -591,6 +593,8 @@ import (
 	"context"
 	"embed"
 	"fmt"
+	"io/fs"
+	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
@@ -606,23 +610,28 @@ import (
 
 // Server wraps the Echo instance with application dependencies.
 type Server struct {
-	echo   *echo.Echo
-	cfg    *config.Config
-	assets embed.FS
+	echo *echo.Echo
+	cfg  *config.Config
 }
 
 // New creates and configures a new Server instance.
-func New(cfg *config.Config, db *gorm.DB, assets embed.FS) *Server {
+func New(cfg *config.Config, db *gorm.DB, embeddedFiles embed.FS) *Server {
 	e := echo.New()
 	e.HideBanner = true
 	e.HidePort = true
 
 	mw.Register(e, cfg.App.Debug)
 
-	h := handlers.New(cfg, db)
-	registerRoutes(e, h, cfg.Server.JWTSecret, assets)
+	spaFS, err := fs.Sub(embeddedFiles, "web/dist")
+	if err != nil {
+		slog.Warn("web/dist not found — SPA will not be served. Run 'make build' first.")
+		spaFS = nil
+	}
 
-	return &Server{echo: e, cfg: cfg, assets: assets}
+	h := handlers.New(cfg, db)
+	registerRoutes(e, h, cfg.Server.JWTSecret, spaFS)
+
+	return &Server{echo: e, cfg: cfg}
 }
 
 // Start listens on the configured address and shuts down gracefully on SIGINT/SIGTERM.
@@ -659,15 +668,15 @@ func (s *Server) Start() error {
 
 ---
 
-## Step 11 — `server/routes.go`
+## Step 11 — `internal/server/routes.go`
 
 ```go
 package server
 
 import (
-	"embed"
 	"io/fs"
-	"net/http"
+	"mime"
+	"path/filepath"
 	"strings"
 
 	"github.com/labstack/echo/v5"
@@ -677,7 +686,7 @@ import (
 )
 
 // registerRoutes wires all routes to the Echo instance.
-func registerRoutes(e *echo.Echo, h *handlers.Handler, jwtSecret string, assets embed.FS) {
+func registerRoutes(e *echo.Echo, h *handlers.Handler, jwtSecret string, spaFS fs.FS) {
 	// --- Public routes ---
 	e.POST("/api/v1/auth/login", h.AuthLogin)
 
@@ -689,42 +698,57 @@ func registerRoutes(e *echo.Echo, h *handlers.Handler, jwtSecret string, assets 
 	api.GET("/health", h.Health)
 
 	// --- SPA fallback (must be last) ---
-	e.GET("/*", spaHandler(assets, "web/dist"))
+	if spaFS != nil {
+		e.GET("/*", spaHandler(spaFS))
+	}
 }
 
 // spaHandler serves the embedded Vue 3 SPA.
-// Static assets are served directly; unknown GET paths without a file extension
-// fall back to index.html so Vue Router can handle history mode.
-func spaHandler(embedded embed.FS, distRoot string) echo.HandlerFunc {
-	distFS, err := fs.Sub(embedded, distRoot)
-	if err != nil {
-		panic("spaHandler: cannot sub FS for " + distRoot + ": " + err.Error())
-	}
-	fileServer := http.FileServer(http.FS(distFS))
+// Static files are served with correct MIME type and cache headers.
+// All other GET paths fall back to index.html for Vue Router history mode.
+func spaHandler(spaFS fs.FS) echo.HandlerFunc {
+	return func(c *echo.Context) error {
+		urlPath := c.Request().URL.Path
+		ext := strings.ToLower(filepath.Ext(urlPath))
 
-	return func(c echo.Context) error {
-		path := strings.TrimPrefix(c.Request().URL.Path, "/")
-
-		if f, err := distFS.Open(path); err == nil {
-			f.Close()
-			return echo.WrapHandler(http.StripPrefix("/", fileServer))(c)
-		}
-
-		if c.Request().Method == http.MethodGet && !strings.Contains(path, ".") {
-			if index, err := distFS.Open("index.html"); err == nil {
-				defer index.Close()
-				return c.Stream(http.StatusOK, "text/html; charset=utf-8", index)
+		if ext != "" {
+			fsPath := strings.TrimPrefix(urlPath, "/")
+			data, err := fs.ReadFile(spaFS, fsPath)
+			if err != nil {
+				return echo.ErrNotFound
 			}
+			ct := mime.TypeByExtension(ext)
+			if ct == "" {
+				ct = "application/octet-stream"
+			}
+			if ext == ".js" || ext == ".mjs" {
+				ct = "application/javascript; charset=utf-8"
+			}
+			if strings.HasPrefix(urlPath, "/assets/") {
+				c.Response().Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+			} else {
+				c.Response().Header().Set("Cache-Control", "public, max-age=3600")
+			}
+			c.Response().Header().Set("Content-Type", ct)
+			_, _ = c.Response().Write(data)
+			return nil
 		}
 
-		return echo.WrapHandler(fileServer)(c)
+		indexHTML, err := fs.ReadFile(spaFS, "index.html")
+		if err != nil {
+			return echo.ErrNotFound
+		}
+		c.Response().Header().Set("Content-Type", "text/html; charset=utf-8")
+		c.Response().Header().Set("Cache-Control", "no-cache")
+		_, _ = c.Response().Write(indexHTML)
+		return nil
 	}
 }
 ```
 
 ---
 
-## Step 12 — `server/render.go`
+## Step 12 — `internal/server/render.go`
 
 ```go
 // Package server — render.go handles server-side template rendering if needed.
@@ -1736,7 +1760,7 @@ Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
 - **Go version**: 1.26 (adjust `go.mod` `go` directive accordingly)
 - **Echo v5**: uses `github.com/labstack/echo/v5` — middleware import path is `github.com/labstack/echo/v5/middleware`
 - **vue3-toastify**: neo-brutalist config — `position="top-right"`, `transition="zoom"`, square borders, hard shadow
-- **SPA fallback**: registered last in `server/routes.go`; never returns `index.html` for paths with file extensions
+- **SPA fallback**: registered last in `internal/server/routes.go`; serves static files with correct MIME + Cache-Control; falls back to `index.html` for Vue Router history mode paths
 - **upx**: must be installed on the build machine (`apt install upx` / `apk add upx`)
 - **SQLite**: requires `CGO_ENABLED=1` and `gcc` at build time
 - **Production DB**: set `database.driver = "mysql"` and a full DSN in `config.toml`

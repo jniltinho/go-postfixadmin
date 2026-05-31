@@ -1,11 +1,12 @@
 import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios'
-import router from '../router'
 
 const client = axios.create({
+  baseURL: API_BASE,
+  timeout: 15000,
   headers: { 'Content-Type': 'application/json' },
+  withCredentials: true,
 })
 
-// Attach JWT token to every request
 client.interceptors.request.use(config => {
   const token = localStorage.getItem('access_token')
   if (token) config.headers.Authorization = `Bearer ${token}`
@@ -25,17 +26,17 @@ async function refreshAccessToken(): Promise<string> {
 function logout() {
   localStorage.removeItem('access_token')
   localStorage.removeItem('user_info')
-  router.push({ name: 'Login' })
+  window.location.href = '/login'
 }
 
-// Auto-retry on 401 with token refresh
+// Auto-retry on 401 with token refresh; logout if refresh also fails
 client.interceptors.response.use(
   res => res,
-  async error => {
-    const original = error.config
-    const isAuthUrl = (original?.url ?? '').includes('/auth/')
+  async (err) => {
+    const original = err.config
+    const url: string = original?.url ?? ''
 
-    if (error.response?.status === 401 && !original._retry && !isAuthUrl) {
+    if (err.response?.status === 401 && !original._retry && !url.includes('/auth/')) {
       original._retry = true
       try {
         refreshPromise ??= refreshAccessToken().finally(() => { refreshPromise = null })
@@ -46,7 +47,7 @@ client.interceptors.response.use(
         logout()
       }
     }
-    return Promise.reject(error)
+    return Promise.reject(err)
   }
 )
 
