@@ -8,6 +8,7 @@ import (
 
 	"go-postfixadmin/internal/auth"
 	"go-postfixadmin/internal/models"
+	"go-postfixadmin/internal/rbac"
 
 	"github.com/labstack/echo/v5"
 	"gorm.io/gorm"
@@ -21,9 +22,15 @@ const (
 	JWTClaimsKey contextKey = "jwt_claims"
 )
 
-// JWTAuthMiddleware returns an Echo middleware that validates a JWT Bearer token or DB ApiKey.
-// On success, it stores the parsed claims in the request context so that
-// GetUsername, GetIsSuperAdmin and future helpers can read them transparently.
+// JWTAuthMiddleware returns an Echo middleware that validates a JWT Bearer token
+// or a database API key supplied via the Authorization or X-API-Key header.
+//
+// On success it stores the parsed claims in both the standard request context and
+// Echo's fast context store so that [GetJWTClaims], [GetUsername], and
+// [GetIsSuperAdmin] can retrieve them without a database lookup.
+//
+// API key authentication resolves RBAC permissions from the database so that the
+// resulting claims are equivalent to those produced by a normal JWT login.
 func JWTAuthMiddleware(db *gorm.DB) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c *echo.Context) error {
@@ -48,50 +55,22 @@ func JWTAuthMiddleware(db *gorm.DB) echo.MiddlewareFunc {
 			}
 
 			var claims *auth.Claims
-			var err error
 
-			// 1. Try to validate as a JWT first
-			claims, err = auth.ValidateToken(tokenString)
-			if err != nil {
-				// 2. Fall back to validating as a database API Key / BearerAuth
-				var apiKey models.AdminApiKey
-				dbErr := db.Where("token = ? AND active = ?", tokenString, true).First(&apiKey).Error
-				if dbErr == nil {
-					// Check if expired
-					if apiKey.ExpiresAt == nil || apiKey.ExpiresAt.After(time.Now()) {
-						// Retrieve Admin to get Superadmin status and confirm active
-						var admin models.Admin
-						adminErr := db.Where("username = ? AND active = ?", apiKey.Username, true).First(&admin).Error
-						if adminErr == nil {
-							// Determine which domains this admin can manage
-							var domains []string
-							if !admin.Superadmin {
-								// Load domains assigned to this domain admin
-								db.Model(&models.DomainAdmin{}).
-									Where("username = ? AND active = ?", admin.Username, true).
-									Pluck("domain", &domains)
-							}
+			// 1. Try JWT validation first.
+			claims, _ = auth.ValidateToken(tokenString)
 
-							claims = &auth.Claims{
-								Username:   admin.Username,
-								Superadmin: admin.Superadmin,
-								Domains:    domains,
-								Type:       "admin",
-							}
-						}
-					}
-				}
+			// 2. Fall back to database API key lookup.
+			if claims == nil {
+				claims = resolveAPIKeyClaims(db, tokenString)
 			}
 
 			if claims == nil {
 				return echo.NewHTTPError(http.StatusUnauthorized, "invalid or expired token")
 			}
 
-			// Store claims in context for downstream handlers and unified getters.
+			// Store claims in both context layers for transparent retrieval.
 			ctx := context.WithValue(c.Request().Context(), JWTClaimsKey, claims)
 			c.SetRequest(c.Request().WithContext(ctx))
-
-			// Also expose via Echo's context store for convenience (echo-specific).
 			c.Set(string(JWTClaimsKey), claims)
 
 			return next(c)
@@ -99,10 +78,52 @@ func JWTAuthMiddleware(db *gorm.DB) echo.MiddlewareFunc {
 	}
 }
 
-// GetJWTClaims retrieves validated JWT claims from the Echo context (if present).
-// Returns nil if no valid JWT was processed by JWTAuthMiddleware.
+// resolveAPIKeyClaims looks up a raw API key token in the database, verifies
+// the associated admin account is active, and builds Claims with resolved RBAC
+// permissions. Returns nil when the token is unknown, expired, or the admin is
+// inactive.
+func resolveAPIKeyClaims(db *gorm.DB, tokenString string) *auth.Claims {
+	var apiKey models.AdminApiKey
+	if err := db.Where("token = ? AND active = ?", tokenString, true).First(&apiKey).Error; err != nil {
+		return nil
+	}
+
+	if apiKey.ExpiresAt != nil && !apiKey.ExpiresAt.After(time.Now()) {
+		return nil
+	}
+
+	var admin models.Admin
+	if err := db.Where("username = ? AND active = ?", apiKey.Username, true).First(&admin).Error; err != nil {
+		return nil
+	}
+
+	var domains []string
+	if !admin.Superadmin {
+		db.Model(&models.DomainAdmin{}).
+			Where("username = ? AND active = ?", admin.Username, true).
+			Pluck("domain", &domains)
+	}
+
+	perms, roles, err := rbac.ResolvePermissions(db, admin.Username, admin.Superadmin)
+	if err != nil {
+		perms = []string{}
+		roles = []string{}
+	}
+
+	return &auth.Claims{
+		Username:    admin.Username,
+		Superadmin:  admin.Superadmin,
+		Domains:     domains,
+		Type:        "admin",
+		Permissions: perms,
+		Roles:       roles,
+	}
+}
+
+// GetJWTClaims retrieves validated JWT claims from the Echo context.
+// Returns nil if JWTAuthMiddleware has not processed the request.
 func GetJWTClaims(c *echo.Context) *auth.Claims {
-	// First try Echo's fast context store (set by our middleware).
+	// Try Echo's fast context store first (set by JWTAuthMiddleware).
 	if v := c.Get(string(JWTClaimsKey)); v != nil {
 		if claims, ok := v.(*auth.Claims); ok {
 			return claims
@@ -116,8 +137,8 @@ func GetJWTClaims(c *echo.Context) *auth.Claims {
 	return nil
 }
 
-// getIdentityFromJWT is an internal helper used by the dual-mode getters.
-// It returns username, isSuperAdmin, and whether a valid JWT identity was found.
+// getIdentityFromJWT is an internal helper used by the dual-mode session getters.
+// Returns username, isSuperAdmin, and whether a valid JWT identity was found.
 func getIdentityFromJWT(c *echo.Context) (username string, isSuperAdmin bool, found bool) {
 	claims := GetJWTClaims(c)
 	if claims == nil {

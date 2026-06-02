@@ -23,16 +23,8 @@
       <div class="nav-section-title">SETTINGS</div>
 
       <template v-for="item in settingsNav" :key="item.to">
-        <div
-          v-if="isSettingsDisabled(item)"
-          class="nav-item nav-item--disabled"
-          aria-disabled="true"
-        >
-          <Icon :name="item.icon" :size="20" class="nav-icon" />
-          <span class="nav-label">{{ item.label }}</span>
-        </div>
         <router-link
-          v-else
+          v-if="!isSettingsDisabled(item)"
           :to="item.to"
           class="nav-item"
           active-class="nav-item--active"
@@ -47,11 +39,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
 import { useAuthStore } from '../stores/auth'
 
 const auth = useAuthStore()
-const isSuperAdmin = computed(() => auth.user?.superadmin === true)
 
 const mainNav = [
   { to: '/dashboard',     icon: 'layout-dashboard', label: 'Dashboard' },
@@ -64,13 +54,15 @@ const mainNav = [
 ]
 
 const settingsNav = [
-  { to: '/admins',     icon: 'users',        label: 'Administrators' },
-  { to: '/transports', icon: 'arrow-up-down', label: 'Transport List' },
-  { to: '/settings',   icon: 'settings',     label: 'Settings' },
+  { to: '/admins',     icon: 'users',        label: 'Administrators',  perm: 'admins:read' },
+  { to: '/roles',      icon: 'shield',       label: 'Roles',           perm: 'admins:write' },
+  { to: '/transports', icon: 'arrow-up-down', label: 'Transport List', perm: 'transports:read' },
+  { to: '/apikeys',    icon: 'key',          label: 'API Keys',        perm: 'apikeys:read' },
 ]
 
-function isSettingsDisabled(item: { to: string }) {
-  return item.to === '/transports' && !isSuperAdmin.value
+function isSettingsDisabled(item: { to: string; perm: string | null }) {
+  if (!item.perm) return false
+  return !auth.hasPermission(item.perm)
 }
 </script>
 

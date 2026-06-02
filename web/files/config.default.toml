@@ -53,6 +53,12 @@ delivery      = "lmtp:unix:private/dovecot-lmtp" # Rewrite target for local deli
 [features]
 fetchmail = false
 
+[rbac]
+# Role-based access control. Set enabled=true after running "migrate rbac"
+# and assigning roles to existing admins. When false, all permission checks
+# are no-ops and the system behaves exactly as before RBAC was introduced.
+enabled = false
+
 [smtp]
 server  = "localhost"
 port    = 25

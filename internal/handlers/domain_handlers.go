@@ -306,9 +306,7 @@ func (h *Handler) CreateDomainV1(c *echo.Context) error {
 	if claims == nil {
 		return dto.Unauthorized(c, "not authenticated")
 	}
-	if !claims.Superadmin {
-		return dto.Forbidden(c, "only superadmins can create domains")
-	}
+	// Access is enforced by RequirePermission("domains:write") middleware.
 
 	var req dto.CreateDomainRequest
 	if err := c.Bind(&req); err != nil {
@@ -439,11 +437,20 @@ func (h *Handler) UpdateDomainV1(c *echo.Context) error {
 	if claims == nil {
 		return dto.Unauthorized(c, "not authenticated")
 	}
-	if !claims.Superadmin {
-		return dto.Forbidden(c, "only superadmins can update domains")
-	}
 
 	domainName := c.Param("domain")
+
+	// Non-superadmins may only update domains within their assigned scope.
+	if !claims.Superadmin {
+		allowed, _, err := repositories.GetAllowedDomains(h.DB, claims.Username, false)
+		if err != nil {
+			return dto.InternalError(c, "failed to check domain permissions")
+		}
+		if !containsDomain(allowed, domainName) {
+			return dto.Forbidden(c, "access denied: domain not in your scope")
+		}
+	}
+
 	domain, err := repositories.GetDomainByName(h.DB, domainName)
 	if err != nil {
 		return dto.NotFound(c, "domain not found")
@@ -508,11 +515,19 @@ func (h *Handler) DeleteDomainV1(c *echo.Context) error {
 	if claims == nil {
 		return dto.Unauthorized(c, "not authenticated")
 	}
-	if !claims.Superadmin {
-		return dto.Forbidden(c, "only superadmins can delete domains")
-	}
 
 	domainName := c.Param("domain")
+
+	// Non-superadmins may only delete domains within their assigned scope.
+	if !claims.Superadmin {
+		allowed, _, err := repositories.GetAllowedDomains(h.DB, claims.Username, false)
+		if err != nil {
+			return dto.InternalError(c, "failed to check domain permissions")
+		}
+		if !containsDomain(allowed, domainName) {
+			return dto.Forbidden(c, "access denied: domain not in your scope")
+		}
+	}
 	if _, err := repositories.GetDomainByName(h.DB, domainName); err != nil {
 		return dto.NotFound(c, "domain not found")
 	}

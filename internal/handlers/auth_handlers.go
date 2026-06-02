@@ -9,6 +9,7 @@ import (
 	"go-postfixadmin/internal/auth"
 	"go-postfixadmin/internal/middleware"
 	"go-postfixadmin/internal/models"
+	"go-postfixadmin/internal/rbac"
 	"go-postfixadmin/internal/repositories"
 	"go-postfixadmin/internal/utils"
 
@@ -45,6 +46,28 @@ func getIPLimiter(ip string) *rate.Limiter {
 	lim := rate.NewLimiter(rate.Every(time.Minute/5), 5)
 	ipLimiters[ip] = lim
 	return lim
+}
+
+// resolveAdminTokenParams builds the TokenParams for an admin by resolving their
+// RBAC permissions from the database. On resolver failure it logs a warning and
+// falls back to empty permissions so the login still succeeds (RBAC middleware
+// is a no-op when rbac.enabled=false).
+func (h *Handler) resolveAdminTokenParams(admin models.Admin, domains []string, isSuper bool) auth.TokenParams {
+	perms, roles, err := rbac.ResolvePermissions(h.DB, admin.Username, isSuper)
+	if err != nil {
+		// Non-fatal: RBAC tables may not yet exist in environments that haven't
+		// run "migrate rbac". The middleware no-ops when rbac.enabled=false.
+		perms = []string{}
+		roles = []string{}
+	}
+	return auth.TokenParams{
+		Username:    admin.Username,
+		Superadmin:  isSuper,
+		Domains:     domains,
+		Type:        "admin",
+		Permissions: perms,
+		Roles:       roles,
+	}
 }
 
 // AuthLogin godoc
@@ -86,22 +109,22 @@ func (h *Handler) AuthLogin(c *echo.Context) error {
 		return dto.WriteError(c, dto.ErrCodeInternal, "database unavailable")
 	}
 
-	// Try admin first (more privileged)
+	// Try admin first (more privileged).
 	var admin models.Admin
 	err := h.DB.Where("username = ? AND active = ?", username, true).First(&admin).Error
 	if err == nil {
 		match, checkErr := utils.CheckPassword(password, admin.Password)
 		if checkErr == nil && match {
-			// Success - admin
 			domains, isSuper, _ := repositories.GetAllowedDomains(h.DB, admin.Username, admin.Superadmin)
+			params := h.resolveAdminTokenParams(admin, domains, isSuper)
 
-			accessToken, err := auth.GenerateAccessToken(admin.Username, isSuper, domains, "admin")
+			accessToken, err := auth.GenerateAccessToken(params)
 			if err != nil {
-				return c.JSON(http.StatusInternalServerError, map[string]any{"error": "failed to generate token"})
+				return dto.InternalError(c, "failed to generate token")
 			}
-			refreshToken, err := auth.GenerateRefreshToken(admin.Username, isSuper, domains, "admin")
+			refreshToken, err := auth.GenerateRefreshToken(params)
 			if err != nil {
-				return c.JSON(http.StatusInternalServerError, map[string]any{"error": "failed to generate refresh token"})
+				return dto.InternalError(c, "failed to generate refresh token")
 			}
 
 			setRefreshCookie(c, refreshToken)
@@ -120,21 +143,26 @@ func (h *Handler) AuthLogin(c *echo.Context) error {
 		}
 	}
 
-	// Try mailbox user
+	// Try mailbox user.
 	mailbox, err := repositories.GetMailboxByUsername(h.DB, username)
 	if err == nil && mailbox.Active {
 		match, checkErr := utils.CheckPassword(password, mailbox.Password)
 		if checkErr == nil && match {
-			// Success - mailbox user
 			domains := []string{mailbox.Domain}
-
-			accessToken, err := auth.GenerateAccessToken(mailbox.Username, false, domains, "mailbox")
-			if err != nil {
-				return c.JSON(http.StatusInternalServerError, map[string]any{"error": "failed to generate token"})
+			params := auth.TokenParams{
+				Username:   mailbox.Username,
+				Superadmin: false,
+				Domains:    domains,
+				Type:       "mailbox",
 			}
-			refreshToken, err := auth.GenerateRefreshToken(mailbox.Username, false, domains, "mailbox")
+
+			accessToken, err := auth.GenerateAccessToken(params)
 			if err != nil {
-				return c.JSON(http.StatusInternalServerError, map[string]any{"error": "failed to generate refresh token"})
+				return dto.InternalError(c, "failed to generate token")
+			}
+			refreshToken, err := auth.GenerateRefreshToken(params)
+			if err != nil {
+				return dto.InternalError(c, "failed to generate refresh token")
 			}
 
 			setRefreshCookie(c, refreshToken)
@@ -153,7 +181,7 @@ func (h *Handler) AuthLogin(c *echo.Context) error {
 		}
 	}
 
-	// Invalid credentials (same message for both paths to avoid enumeration)
+	// Same message for both paths to avoid username enumeration.
 	return dto.WriteError(c, dto.ErrCodeInvalidCredentials, "invalid credentials")
 }
 
@@ -178,9 +206,8 @@ func (h *Handler) AuthRefresh(c *echo.Context) error {
 		return dto.WriteError(c, dto.ErrCodeInvalidToken, "invalid or expired refresh token")
 	}
 
-	// Re-issue tokens (rotation) and refresh authorization data from the database.
-	superadmin := claims.Superadmin
-	domains := claims.Domains
+	var params auth.TokenParams
+	params.Type = claims.Type
 
 	if claims.Type == "admin" {
 		var admin models.Admin
@@ -189,27 +216,32 @@ func (h *Handler) AuthRefresh(c *echo.Context) error {
 			return dto.Unauthorized(c, "admin account is inactive or no longer exists")
 		}
 
-		var err error
-		domains, superadmin, err = repositories.GetAllowedDomains(h.DB, admin.Username, admin.Superadmin)
+		domains, superadmin, err := repositories.GetAllowedDomains(h.DB, admin.Username, admin.Superadmin)
 		if err != nil {
 			return dto.InternalError(c, "failed to refresh admin permissions")
 		}
-	} else if claims.Type == "mailbox" {
+		params = h.resolveAdminTokenParams(admin, domains, superadmin)
+	} else {
+		// mailbox user
 		mailbox, err := repositories.GetMailboxByUsername(h.DB, claims.Username)
 		if err != nil || !mailbox.Active {
 			clearRefreshCookie(c)
 			return dto.Unauthorized(c, "mailbox account is inactive or no longer exists")
 		}
-		superadmin = false
-		domains = []string{mailbox.Domain}
+		params = auth.TokenParams{
+			Username:   mailbox.Username,
+			Superadmin: false,
+			Domains:    []string{mailbox.Domain},
+			Type:       "mailbox",
+		}
 	}
 
-	newAccess, err := auth.GenerateAccessToken(claims.Username, superadmin, domains, claims.Type)
+	newAccess, err := auth.GenerateAccessToken(params)
 	if err != nil {
 		return dto.InternalError(c, "failed to generate access token")
 	}
 
-	newRefresh, err := auth.GenerateRefreshToken(claims.Username, superadmin, domains, claims.Type)
+	newRefresh, err := auth.GenerateRefreshToken(params)
 	if err != nil {
 		return dto.InternalError(c, "failed to rotate refresh token")
 	}

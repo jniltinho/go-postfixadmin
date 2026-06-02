@@ -7,7 +7,7 @@
         <div class="dom-title">DOMAINS</div>
         <div class="dom-subtitle">MANAGE AND MONITOR YOUR REGISTERED EMAIL DOMAINS.</div>
       </div>
-      <button class="btn-add-big" :disabled="!isSuperAdmin" @click="openAdd">
+      <button v-if="canAddDomain" class="btn-add-big" @click="openAdd">
         <Icon name="plus-circle" :size="20" style="margin-right:12px;vertical-align:middle" />
         ADD DOMAIN
       </button>
@@ -53,20 +53,10 @@
       <template #cell-modified="{ value }">{{ formatDate(value) }}</template>
       <template #cell-password_expiry="{ value }"><span class="mono">{{ value ?? 0 }}</span></template>
       <template #actions="{ row }">
-        <button
-          class="act-btn act-edit"
-          :class="{ 'act-disabled': !isSuperAdmin }"
-          :disabled="!isSuperAdmin"
-          @click="openEdit(row)"
-        >
+        <button v-if="canWrite" class="act-btn act-edit" @click="openEdit(row)">
           <Icon name="pencil" :size="12" style="margin-right:4px;vertical-align:middle" />EDIT
         </button>
-        <button
-          class="act-btn act-del"
-          :class="{ 'act-disabled': !isSuperAdmin }"
-          :disabled="!isSuperAdmin"
-          @click="confirmDelete(row)"
-        >
+        <button v-if="canDelete" class="act-btn act-del" @click="confirmDelete(row)">
           <Icon name="trash-2" :size="12" style="margin-right:4px;vertical-align:middle" />DELETE
         </button>
       </template>
@@ -86,6 +76,8 @@
       :initial-data="editInitialData"
       :transports="transports"
       :saving="savingEdit"
+      :can-view-advanced="canViewAdvanced"
+      :can-edit-advanced="canEditAdvanced"
       @submit="handleEdit"
     />
 
@@ -116,7 +108,12 @@ import DomainEditModal from './DomainEditModal.vue'
 
 const toast = useToastStore()
 const auth = useAuthStore()
-const isSuperAdmin = computed(() => auth.user?.superadmin === true)
+const isSuperAdmin     = computed(() => auth.user?.superadmin === true)
+const canWrite         = computed(() => auth.hasPermission('domains:write'))
+const canDelete        = computed(() => auth.hasPermission('domains:delete'))
+const canAddDomain     = computed(() => auth.hasPermission('domain_add:write'))
+const canEditAdvanced  = computed(() => auth.hasPermission('domain_adset:write'))
+const canViewAdvanced  = computed(() => auth.hasPermission('domain_adset:read') || auth.hasPermission('domain_adset:write'))
 
 interface Domain {
   domain: string
@@ -186,19 +183,14 @@ const showAdd = ref(false)
 const savingAdd = ref(false)
 
 function openAdd() {
-  if (!isSuperAdmin.value) {
-    toast.error('Only superadmins can create domains')
+  if (!canWrite.value) {
+    toast.error('You do not have permission to create domains')
     return
   }
   showAdd.value = true
 }
 
 async function handleAdd(payload: any) {
-  if (!isSuperAdmin.value) {
-    toast.error('Only superadmins can create domains')
-    showAdd.value = false
-    return
-  }
   if (!payload.domain.trim()) { toast.error('Domain name is required'); return }
   savingAdd.value = true
   try {
@@ -218,10 +210,6 @@ const editInitialData = ref<any>(null)
 const editDomainName = ref('')
 
 function openEdit(row: Domain) {
-  if (!isSuperAdmin.value) {
-    toast.error('Only superadmins can edit domains')
-    return
-  }
   editDomainName.value = row.domain
   editInitialData.value = {
     domain: row.domain,
@@ -238,11 +226,6 @@ function openEdit(row: Domain) {
 }
 
 async function handleEdit(payload: any) {
-  if (!isSuperAdmin.value) {
-    toast.error('Only superadmins can edit domains')
-    showEdit.value = false
-    return
-  }
   savingEdit.value = true
   try {
     await http.put(`${API_BASE}/domains/${encodeURIComponent(editDomainName.value)}`, payload)
@@ -260,16 +243,12 @@ const deletingRow = ref(false)
 const deleteTarget = ref<Domain | null>(null)
 
 function confirmDelete(row: Domain) {
-  if (!isSuperAdmin.value) {
-    toast.error('Only superadmins can delete domains')
-    return
-  }
   deleteTarget.value = row
   showDeleteConfirm.value = true
 }
 
 async function submitDelete() {
-  if (!deleteTarget.value || !isSuperAdmin.value) return
+  if (!deleteTarget.value) return
   deletingRow.value = true
   try {
     const domain = deleteTarget.value.domain

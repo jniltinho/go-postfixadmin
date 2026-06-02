@@ -461,9 +461,18 @@ func (h *Handler) UpdateAdminV1(c *echo.Context) error {
 
 	if isSuper {
 		if req.Active != nil {
+			// Prevent an admin from deactivating their own account.
+			if !*req.Active && targetUsername == claims.Username {
+				return dto.Forbidden(c, "you cannot deactivate your own administrator account")
+			}
 			updates["active"] = *req.Active
 		}
 		if req.Superadmin != nil {
+			// Prevent an admin from removing their own superadmin flag, which
+			// would lock them out of all privileged operations.
+			if !*req.Superadmin && targetUsername == claims.Username {
+				return dto.Forbidden(c, "you cannot remove your own superadmin flag")
+			}
 			updates["superadmin"] = *req.Superadmin
 		}
 	}

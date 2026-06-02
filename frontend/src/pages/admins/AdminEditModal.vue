@@ -95,6 +95,9 @@
               </div>
             </details>
 
+            <!-- RBAC Role Assignment (superadmin only) -->
+            <RoleAssignment v-if="isSuperAdmin" :username="form.username" />
+
             <!-- Assigned Domains -->
             <div class="border-2 border-brand-text p-4 space-y-4" :class="{ 'opacity-50 pointer-events-none': form.superadmin || !isSuperAdmin }">
               <h4 class="text-sm font-mono font-black uppercase tracking-tight flex items-center">
@@ -142,6 +145,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { calcStrength, generatePassword as fillPassword } from '../../utils/password'
+import RoleAssignment from '../../components/RoleAssignment.vue'
 
 interface DomainOption { domain: string; assigned: boolean }
 

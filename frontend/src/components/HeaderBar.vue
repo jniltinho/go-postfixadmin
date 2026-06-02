@@ -58,7 +58,8 @@ const routeTitles: Record<string, string> = {
   MailLog:     'MAILLOG',
   Admins:      'ADMINISTRATORS',
   Transports:  'TRANSPORT LIST',
-  Settings:    'SETTINGS',
+  APIKeys:     'API KEYS',
+  Roles:       'ROLE MANAGEMENT',
 }
 
 const pageTitle = computed(() => routeTitles[route.name as string] ?? 'DASHBOARD')

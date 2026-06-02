@@ -12,10 +12,7 @@ const routes = [
     component: () => import('../layouts/MainLayout.vue'),
     meta: { requiresAuth: true },
     children: [
-      {
-        path: '',
-        redirect: '/dashboard'
-      },
+      { path: '', redirect: '/dashboard' },
       {
         path: 'dashboard',
         name: 'Dashboard',
@@ -62,20 +59,26 @@ const routes = [
         path: 'admins',
         name: 'Admins',
         component: () => import('../pages/admins/AdminsPage.vue'),
-        meta: { title: 'Administrators' }
+        meta: { title: 'Administrators', requirePermission: 'admins:read' }
       },
       {
         path: 'transports',
         name: 'Transports',
         component: () => import('../pages/transports/TransportsPage.vue'),
-        meta: { title: 'Transport List' }
+        meta: { title: 'Transport List', requirePermission: 'transports:read' }
       },
       {
-        path: 'settings',
-        name: 'Settings',
-        component: () => import('../pages/SettingsPage.vue'),
-        meta: { title: 'Settings' }
-      }
+        path: 'apikeys',
+        name: 'APIKeys',
+        component: () => import('../pages/APIKeysPage.vue'),
+        meta: { title: 'API Keys', requirePermission: 'apikeys:read' }
+      },
+      {
+        path: 'roles',
+        name: 'Roles',
+        component: () => import('../pages/rbac/RoleManagementPage.vue'),
+        meta: { title: 'Role Management', requirePermission: 'admins:write' }
+      },
     ]
   },
   {
@@ -96,21 +99,32 @@ const router = createRouter({
   routes
 })
 
-// Navigation guard
 router.beforeEach((to, _from, next) => {
   const auth = useAuthStore()
 
   if (to.meta.requiresUserAuth && (!auth.isAuthenticated || auth.user?.type !== 'mailbox')) {
-    next({ name: 'UserLogin' })
-  } else if (to.meta.requiresAuth && (!auth.isAuthenticated || auth.user?.type !== 'admin')) {
-    next({ name: 'Login' })
-  } else if (to.name === 'Login' && auth.isAuthenticated && auth.user?.type === 'admin') {
-    next({ name: 'Dashboard' })
-  } else if (to.name === 'UserLogin' && auth.isAuthenticated && auth.user?.type === 'mailbox') {
-    next({ name: 'UserDashboard' })
-  } else {
-    next()
+    return next({ name: 'UserLogin' })
   }
+
+  if (to.meta.requiresAuth && (!auth.isAuthenticated || auth.user?.type !== 'admin')) {
+    return next({ name: 'Login' })
+  }
+
+  // Permission-based guard: redirect to dashboard with a toast if access is denied.
+  const requiredPerm = to.meta.requirePermission as string | undefined
+  if (requiredPerm && !auth.hasPermission(requiredPerm)) {
+    return next({ name: 'Dashboard' })
+  }
+
+  if (to.name === 'Login' && auth.isAuthenticated && auth.user?.type === 'admin') {
+    return next({ name: 'Dashboard' })
+  }
+
+  if (to.name === 'UserLogin' && auth.isAuthenticated && auth.user?.type === 'mailbox') {
+    return next({ name: 'UserDashboard' })
+  }
+
+  next()
 })
 
 router.afterEach((to) => {

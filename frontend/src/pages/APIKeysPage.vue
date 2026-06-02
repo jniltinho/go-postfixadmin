@@ -4,8 +4,8 @@
     <!-- ─── Header ─── -->
     <div class="page-header">
       <div>
-        <div class="page-title">SYSTEM SETTINGS</div>
-        <div class="page-subtitle">MANAGE YOUR ACCOUNT, INTEGRATIONS AND API KEYS</div>
+        <div class="page-title">API KEYS</div>
+        <div class="page-subtitle">MANAGE YOUR PERSONAL ACCESS TOKENS</div>
       </div>
       <button class="btn-primary" @click="openAdd">
         <Icon name="plus-circle" :size="16" style="margin-right:6px;vertical-align:middle" />

@@ -1,3 +1,4 @@
+// Package database handles connection setup and schema migration for go-postfixadmin.
 package database
 
 import (
@@ -23,7 +24,9 @@ func viperOrEnv(key, env, fallback string) string {
 	return fallback
 }
 
-// ConnectDB initializes the database connection
+// ConnectDB initializes the database connection using the configured driver
+// (mysql or postgres). DSN and driver may be supplied directly or resolved from
+// viper / environment variables.
 func ConnectDB(dsn string, driver string) (*gorm.DB, error) {
 	var db *gorm.DB
 	var err error
@@ -66,7 +69,8 @@ func ConnectDB(dsn string, driver string) (*gorm.DB, error) {
 	return db, err
 }
 
-// MigrateDB migrates the database schema using GORM AutoMigrate
+// MigrateDB runs GORM AutoMigrate for the core PostfixAdmin schema.
+// Call MigrateRBAC separately (or via "migrate rbac" CLI) to add the RBAC tables.
 func MigrateDB(db *gorm.DB) error {
 	return db.AutoMigrate(
 		&models.Admin{},
@@ -89,5 +93,18 @@ func MigrateDB(db *gorm.DB) error {
 		&models.Maillog{},
 		&models.TransportList{},
 		&models.AdminApiKey{},
+	)
+}
+
+// MigrateRBAC creates the four RBAC tables (rbac_roles, rbac_permissions,
+// rbac_role_permissions, rbac_admin_roles) via GORM AutoMigrate.
+// This is intentionally separate from MigrateDB to allow opt-in deployment.
+// After migration, callers should also invoke [rbac.Seed] to populate the
+// built-in system roles and permission catalog.
+func MigrateRBAC(db *gorm.DB) error {
+	return db.AutoMigrate(
+		&models.RBACRole{},
+		&models.RBACPermission{},
+		&models.RBACAdminRole{},
 	)
 }

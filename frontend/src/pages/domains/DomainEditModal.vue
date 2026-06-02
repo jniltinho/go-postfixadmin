@@ -42,37 +42,40 @@
             </div>
           </div>
 
-          <!-- Advanced Settings -->
-          <details class="border-2 border-brand-text group" open>
+          <!-- Advanced Settings: visible if domain_adset:read or domain_adset:write; editable only with domain_adset:write -->
+          <details v-if="canViewAdvanced" class="border-2 border-brand-text group" open>
             <summary class="p-3 cursor-pointer font-bold uppercase tracking-tight text-sm flex items-center bg-gray-50 hover:bg-gray-100 transition-colors">
               <Icon name="settings" :size="16" class="mr-2" />
               ADVANCED SETTINGS
               <Icon name="chevron-down" :size="16" class="ml-auto group-open:rotate-180 transition-transform" />
             </summary>
-            <div class="p-4 space-y-4 border-t-2 border-brand-text">
+            <div class="p-4 space-y-4 border-t-2 border-brand-text" :class="{ 'opacity-60 pointer-events-none': !canEditAdvanced }">
+              <div v-if="!canEditAdvanced" class="bg-amber-50 border border-amber-300 p-2 text-xs font-bold text-amber-700 flex items-center gap-2">
+                <Icon name="lock" :size="13" /> Read-only — you do not have permission to edit advanced settings.
+              </div>
               <div class="grid grid-cols-2 gap-4">
                 <div>
                   <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">ALIAS LIMIT</label>
-                  <input v-model.number="form.aliases" type="number" min="0"
-                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm" />
+                  <input v-model.number="form.aliases" type="number" min="0" :disabled="!canEditAdvanced"
+                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm disabled:bg-gray-100 disabled:cursor-not-allowed" />
                   <p class="text-[10px] text-gray-500 mt-1">Maximum number of aliases (0 = unlimited)</p>
                 </div>
                 <div>
                   <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">MAILBOX LIMIT</label>
-                  <input v-model.number="form.mailboxes" type="number" min="0"
-                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm" />
+                  <input v-model.number="form.mailboxes" type="number" min="0" :disabled="!canEditAdvanced"
+                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm disabled:bg-gray-100 disabled:cursor-not-allowed" />
                   <p class="text-[10px] text-gray-500 mt-1">Maximum number of mailboxes (0 = unlimited)</p>
                 </div>
                 <div>
                   <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">QUOTA LIMIT (MB)</label>
-                  <input v-model.number="form.quotaMB" type="number" min="0"
-                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm" />
+                  <input v-model.number="form.quotaMB" type="number" min="0" :disabled="!canEditAdvanced"
+                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm disabled:bg-gray-100 disabled:cursor-not-allowed" />
                   <p class="text-[10px] text-gray-500 mt-1">Maximum quota limit in MB (0 = unlimited)</p>
                 </div>
                 <div>
                   <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">PASSWORD EXPIRY (DAYS)</label>
-                  <input v-model.number="form.passwordExpiry" type="number" min="0" placeholder="365"
-                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm" />
+                  <input v-model.number="form.passwordExpiry" type="number" min="0" placeholder="365" :disabled="!canEditAdvanced"
+                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm disabled:bg-gray-100 disabled:cursor-not-allowed" />
                   <p class="text-[10px] text-gray-500 mt-1">Password expiry in days (empty = never)</p>
                 </div>
               </div>
@@ -80,8 +83,9 @@
               <div>
                 <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">TRANSPORT</label>
                 <div class="relative">
-                  <select v-model="form.transport"
-                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm appearance-none bg-white cursor-pointer pr-10">
+                  <select v-model="form.transport" :disabled="!canEditAdvanced"
+                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm appearance-none bg-white pr-10 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    :class="canEditAdvanced ? 'cursor-pointer' : 'cursor-not-allowed'">
                     <option value="virtual">virtual</option>
                     <option v-for="t in transports" :key="t.id" :value="t.transport">{{ t.domain }} → {{ t.transport }}</option>
                   </select>
@@ -93,8 +97,8 @@
               </div>
 
               <div class="flex items-center pt-2">
-                <input type="checkbox" id="dom-edit-backupmx" v-model="form.backupmx" class="w-5 h-5 border-2 border-brand-text cursor-pointer" />
-                <label for="dom-edit-backupmx" class="ml-2 text-sm font-bold cursor-pointer">Enable Backup MX</label>
+                <input type="checkbox" id="dom-edit-backupmx" v-model="form.backupmx" :disabled="!canEditAdvanced" class="w-5 h-5 border-2 border-brand-text" :class="canEditAdvanced ? 'cursor-pointer' : 'cursor-not-allowed'" />
+                <label for="dom-edit-backupmx" class="ml-2 text-sm font-bold" :class="canEditAdvanced ? 'cursor-pointer' : 'cursor-not-allowed'">Enable Backup MX</label>
                 <span class="ml-auto text-[10px] text-gray-500 hidden sm:block">Use this server as a backup mail exchanger</span>
               </div>
             </div>
@@ -141,6 +145,8 @@ const props = defineProps<{
   initialData: DomainEditForm | null
   transports: Transport[]
   saving: boolean
+  canViewAdvanced: boolean
+  canEditAdvanced: boolean
 }>()
 
 const emit = defineEmits<{
