@@ -70,6 +70,86 @@ func (h *Handler) resolveAdminTokenParams(admin models.Admin, domains []string, 
 	}
 }
 
+// UserPortalLogin godoc
+// @Summary      User portal login
+// @Description  Authenticates a mailbox user only. Rejects admin credentials. Returns JWT access token in body and sets httpOnly refresh cookie.
+// @Tags         Authentication
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.LoginRequest true "Credentials"
+// @Success      200 {object} dto.LoginResponse "Success"
+// @Failure      400 {object} dto.APIResponse "Bad Request"
+// @Failure      401 {object} dto.APIResponse "Invalid credentials"
+// @Failure      429 {object} dto.APIResponse "Too many requests"
+// @Router       /auth/user-login [post]
+func (h *Handler) UserPortalLogin(c *echo.Context) error {
+	ip := c.RealIP()
+	limiter := getIPLimiter(ip)
+	if !limiter.Allow() {
+		return dto.TooManyRequests(c, "too many login attempts, please try again later")
+	}
+
+	var req struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
+	if err := c.Bind(&req); err != nil {
+		return dto.BadRequest(c, "invalid request body")
+	}
+
+	username := strings.TrimSpace(req.Username)
+	password := req.Password
+
+	if username == "" || password == "" {
+		return dto.ValidationError(c, "username and password are required")
+	}
+
+	if h.DB == nil {
+		return dto.WriteError(c, dto.ErrCodeInternal, "database unavailable")
+	}
+
+	mailbox, err := repositories.GetMailboxByUsername(h.DB, username)
+	if err != nil || !mailbox.Active {
+		return dto.WriteError(c, dto.ErrCodeInvalidCredentials, "invalid credentials")
+	}
+
+	match, checkErr := utils.CheckPassword(password, mailbox.Password)
+	if checkErr != nil || !match {
+		return dto.WriteError(c, dto.ErrCodeInvalidCredentials, "invalid credentials")
+	}
+
+	domains := []string{mailbox.Domain}
+	params := auth.TokenParams{
+		Username:   mailbox.Username,
+		Superadmin: false,
+		Domains:    domains,
+		Type:       "mailbox",
+	}
+
+	accessToken, err := auth.GenerateAccessToken(params)
+	if err != nil {
+		return dto.InternalError(c, "failed to generate token")
+	}
+	refreshToken, err := auth.GenerateRefreshToken(params)
+	if err != nil {
+		return dto.InternalError(c, "failed to generate refresh token")
+	}
+
+	setRefreshCookie(c, refreshToken)
+
+	return dto.WriteSuccess(c, dto.LoginResponse{
+		AccessToken: accessToken,
+		TokenType:   "Bearer",
+		ExpiresIn:   int(auth.GetAccessTTL().Seconds()),
+		User: dto.UserInfo{
+			Username:   mailbox.Username,
+			Type:       "mailbox",
+			Superadmin: false,
+			Domains:    domains,
+		},
+	})
+}
+
 // AuthLogin godoc
 // @Summary      Login
 // @Description  Authenticates as Admin or Mailbox user. Returns JWT access token in body and sets httpOnly refresh cookie.

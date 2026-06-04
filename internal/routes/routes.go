@@ -45,6 +45,7 @@ func RegisterRoutes(e *echo.Echo, h *handlers.Handler, spaFS fs.FS) {
 	// Public auth endpoints — CSRF check + strict rate limit (5 req/min per IP)
 	authPublic := apiV1.Group("", middleware.CSRFOriginCheck(), loginLimiter.Middleware())
 	authPublic.POST("/auth/login", h.AuthLogin)
+	authPublic.POST("/auth/user-login", h.UserPortalLogin)
 	authPublic.POST("/auth/refresh", h.AuthRefresh)
 
 	// All protected endpoints require a valid JWT or API key.

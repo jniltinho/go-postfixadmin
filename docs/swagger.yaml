@@ -88,6 +88,13 @@ definitions:
       modified:
         type: string
     type: object
+  dto.AssignRoleRequest:
+    properties:
+      domain:
+        type: string
+      role_id:
+        type: integer
+    type: object
   dto.CreateAdminRequest:
     properties:
       active:
@@ -177,6 +184,17 @@ definitions:
         type: boolean
       smtp_active:
         type: boolean
+    type: object
+  dto.CreateRoleRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      permission_ids:
+        items:
+          type: integer
+        type: array
     type: object
   dto.CreateTransportRequest:
     properties:
@@ -348,6 +366,51 @@ definitions:
         example: 5000
         type: integer
     type: object
+  dto.RBACAdminRoleResponse:
+    properties:
+      created:
+        type: string
+      domain:
+        type: string
+      id:
+        type: integer
+      role:
+        $ref: '#/definitions/dto.RBACRoleResponse'
+      role_id:
+        type: integer
+      username:
+        type: string
+    type: object
+  dto.RBACPermissionResponse:
+    properties:
+      action:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      resource:
+        type: string
+    type: object
+  dto.RBACRoleResponse:
+    properties:
+      created:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      modified:
+        type: string
+      name:
+        type: string
+      permissions:
+        items:
+          $ref: '#/definitions/dto.RBACPermissionResponse'
+        type: array
+      system:
+        type: boolean
+    type: object
   dto.RefreshResponse:
     properties:
       access_token:
@@ -468,6 +531,15 @@ definitions:
       new_password:
         example: NewPass456!
         type: string
+    type: object
+  dto.UpdateRoleRequest:
+    properties:
+      description:
+        type: string
+      permission_ids:
+        items:
+          type: integer
+        type: array
     type: object
   dto.UpdateTransportRequest:
     properties:
@@ -1302,6 +1374,41 @@ paths:
       summary: Refresh token
       tags:
       - Authentication
+  /auth/user-login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a mailbox user only. Rejects admin credentials. Returns
+        JWT access token in body and sets httpOnly refresh cookie.
+      parameters:
+      - description: Credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/dto.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "429":
+          description: Too many requests
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      summary: User portal login
+      tags:
+      - Authentication
   /dashboard:
     get:
       description: Returns aggregate counts and recent activity for the authenticated
@@ -1804,6 +1911,362 @@ paths:
       summary: List mail logs
       tags:
       - Logs
+  /rbac/admins/{username}/roles:
+    get:
+      description: Returns all RBAC role assignments for the given admin username.
+      parameters:
+      - description: Admin username
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.RBACAdminRoleResponse'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: List admin roles
+      tags:
+      - RBAC
+    post:
+      consumes:
+      - application/json
+      description: Assigns a role to the given admin, optionally scoped to a specific
+        domain. An empty domain means global scope (all domains the admin manages).
+      parameters:
+      - description: Admin username
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: Assignment data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AssignRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.RBACAdminRoleResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "409":
+          description: Duplicate assignment
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Assign role to admin
+      tags:
+      - RBAC
+  /rbac/admins/{username}/roles/{assignmentId}:
+    delete:
+      description: Removes a specific role assignment from the given admin. Superadmins
+        cannot remove the superadmin role from themselves.
+      parameters:
+      - description: Admin username
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: Assignment ID (from list endpoint)
+        in: path
+        name: assignmentId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Remove role from admin
+      tags:
+      - RBAC
+  /rbac/permissions:
+    get:
+      description: Returns the full permission catalog sorted by name.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.RBACPermissionResponse'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: List RBAC permissions
+      tags:
+      - RBAC
+  /rbac/roles:
+    get:
+      description: Returns all roles (system and custom) with their assigned permissions.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.RBACRoleResponse'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: List RBAC roles
+      tags:
+      - RBAC
+    post:
+      consumes:
+      - application/json
+      description: Creates a new custom role. System roles are managed by the seeder
+        and cannot be created here.
+      parameters:
+      - description: Role data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.RBACRoleResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "409":
+          description: Name already in use
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Create RBAC role
+      tags:
+      - RBAC
+  /rbac/roles/{id}:
+    delete:
+      description: Permanently deletes a custom role and all its admin assignments.
+        System roles cannot be deleted.
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Superadmin required or system role
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete RBAC role
+      tags:
+      - RBAC
+    get:
+      description: Returns a single role with its full permission list.
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.RBACRoleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Get RBAC role
+      tags:
+      - RBAC
+    put:
+      consumes:
+      - application/json
+      description: Updates the description and permission set of a custom role. System
+        roles cannot be modified.
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Fields to update
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.RBACRoleResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Superadmin required or system role
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Update RBAC role
+      tags:
+      - RBAC
   /settings/apikeys:
     get:
       description: Retrieves all API keys for the current authenticated administrator.

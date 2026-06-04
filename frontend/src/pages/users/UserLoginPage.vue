@@ -192,12 +192,8 @@ async function handleLogin() {
 
   loading.value = true
   try {
-    await auth.login(form.value.username.trim(), form.value.password)
-    if (auth.user?.type === 'mailbox') {
-      router.push('/users/dashboard')
-    } else {
-      router.push('/dashboard')
-    }
+    await auth.userLogin(form.value.username.trim(), form.value.password)
+    router.push('/users/dashboard')
   } catch (e: any) {
     toast.error(e?.response?.data?.error?.message || e.message || 'Login failed')
   } finally {
