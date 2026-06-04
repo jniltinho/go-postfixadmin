@@ -1,17 +1,8 @@
 # Development
 
-## What This Document Covers
+Local development, build, CLI reference, and Makefile targets for Go-PostfixAdmin.
 
-This file covers local development prerequisites, build options, and the most useful Makefile commands.
-
-Related documents:
-
-- [Project README](README.md)
-- [Features](FEATURES.md)
-- [Quick setup summary (MariaDB/MySQL)](DOCUMENTS/setup/SETUP_MAILSERVER_MARIADB.md)
-- [Quick setup summary (PostgreSQL)](DOCUMENTS/setup/SETUP_MAILSERVER_POSTGRESQL.md)
-- [Complete setup guide](DOCUMENTS/setup/README.md)
-- [Transport TCP server setup](DOCUMENTS/setup/SETUP_TRANSPORT.md)
+Related: [Project README](README.md) • [Features](FEATURES.md) • [Complete setup](DOCUMENTS/setup/README.md) • [Transport setup](DOCUMENTS/setup/SETUP_TRANSPORT.md)
 
 ## Development Tools
 
@@ -130,29 +121,31 @@ The Swagger UI is served at `http://localhost:8080/swagger/` when `server.swagge
 
 ## Useful Makefile Commands
 
-| Command | Description |
-| :--- | :--- |
-| `make build` | Build Vue 3 frontend + compile Go binary |
-| `make build-prod` | Build frontend + compile binary + UPX compression |
-| `make build-docker` | Build the optimized Docker image |
-| `make frontend` | Build only the Vue 3 frontend → `web/dist/` |
-| `make swagger` | Regenerate Swagger docs from handler annotations |
-| `make run` | Compile and start the server locally |
-| `make clean` | Remove generated binary and `web/dist/` |
-| `make tidy` | Clean and organize Go dependencies |
-| `make deps` | Download Go module dependencies |
-| `make deb` | Build the Debian (.deb) package |
-| `make rpm` | Build the RPM (.rpm) package |
-| `make install-upx` | Install UPX binary compressor |
+```bash
+make help          # Show available targets
+make build         # Frontend (Vue 3) + Go binary (with embed)
+make build-prod    # Same + UPX compression (for releases)
+make frontend      # Only build Vue 3 → web/dist/
+make swagger       # Regenerate OpenAPI docs (then `make build` to embed)
+make run           # Build + start server
+make clean         # Remove bin/ and web/dist/
+make deps / tidy   # Go module maintenance
+make deb / rpm     # Build Debian/RPM packages (with embedded config + services)
+make build-docker  # Multi-stage Docker image (Alpine + UPX)
+make install-upx   # Install UPX (used by build-prod)
+```
 
-## CLI Flags
+Run `make help` for the current list. Note: `frontend` step requires Node 18+ and runs `npm install && npm run build` from `frontend/`.
 
-Below are the available flags when running the `./postfixadmin` binary:
+## CLI Overview
+
+Run `./bin/postfixadmin --help` (or the installed binary) for the latest. Current output (as of this workspace):
 
 ```text
-A command line interface for the Go-PostfixAdmin application.
+A command line interface for Go-Postfixadmin application.
 
 Usage:
+  postfixadmin [flags]
   postfixadmin [command]
 
 Available Commands:
@@ -164,10 +157,11 @@ Available Commands:
   importsql    Import SQL file to database
   mailbox      Mailbox management utilities
   migrate      Run database migration
-  readlog      Parse mail.log and store FILTER entries in the maillog table
+  rbac         RBAC role management utilities
+  readlog      Read mail.log and import FILTER entries into the maillog table
   server       Start the administration server
   transport    Transport management utilities
-  version      Display version information
+  version      Print version information
 
 Flags:
       --config string      config file (default is ./config.toml)
@@ -176,9 +170,12 @@ Flags:
       --debug              Enable debug output
       --generate-config    Generate a default config.toml file in the current directory
   -h, --help               help for postfixadmin
+      --vacation           Sync vacation auto-replies to Dovecot Sieve scripts (for crontab)
 
 Use "postfixadmin [command] --help" for more information about a command.
 ```
+
+See subcommand help (e.g. `postfixadmin admin --help`, `postfixadmin mailbox --help`, `postfixadmin migrate --help`) for details on each area. The `version` command prints build info.
 
 ## Administration Commands (CLI)
 

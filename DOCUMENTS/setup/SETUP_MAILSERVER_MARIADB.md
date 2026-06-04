@@ -1,16 +1,10 @@
-# Installation Guide: Email Server (Ubuntu) + Go-PostfixAdmin with MariaDB
+# Quick Mail Server Setup (Ubuntu + MariaDB + Go-PostfixAdmin)
 
-Quick mail server setup for **Postfix + Dovecot + Go-PostfixAdmin + MariaDB**.
+Short operational guide for a working **Postfix + Dovecot + MariaDB + Go-PostfixAdmin** mail server.
 
-## What This Document Covers
+For the complete detailed walkthrough (including Dovecot Sieve vacation, rsyslog, quota warnings, etc.) use [DOCUMENTS/setup/README.md](README.md) in this folder.
 
-This is the short operational setup for a working mail server. For the full walkthrough, use [README.md](README.md).
-
-Related documents:
-
-- [Project README](../../README.md)
-- [Features](../../FEATURES.md)
-- [Complete setup guide](README.md)
+Related: [main README](../../README.md) • [FEATURES.md](../../FEATURES.md) • [PostgreSQL quick](SETUP_MAILSERVER_POSTGRESQL.md)
 
 ---
 

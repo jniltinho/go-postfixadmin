@@ -13,7 +13,7 @@ VERSION    := $(shell git describe --tags --abbrev=0 2>/dev/null || echo "dev")
 BUILD_TIME := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 GIT_COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 
-LDFLAGS    := -ldflags "-s -w -X $(PREFIX).Version=$(VERSION) -X $(PREFIX).BuildDate=$(BUILD_TIME) -X $(PREFIX).GitCommit=$(GIT_COMMIT)"
+LDFLAGS    := -trimpath -ldflags "-s -w -X $(PREFIX).Version=$(VERSION) -X $(PREFIX).BuildDate=$(BUILD_TIME) -X $(PREFIX).GitCommit=$(GIT_COMMIT)"
 DEB_VERSION := $(shell echo $(VERSION) | sed 's/^v//')
 RPM_VERSION := $(shell echo $(DEB_VERSION) | tr '-' '_')
 
@@ -153,13 +153,16 @@ install-upx:
 
 help:
 	@echo "Makefile commands:"
-	@echo "  build            - Full build: Frontend + Go binary"
-	@echo "  build-prod       - Frontend + Go binary + UPX compression"
-	@echo "  frontend         - Build only the Vue 3 + Quasar frontend -> web/dist"
-	@echo "  swagger          - Generate Swagger documentation (swag init)"
-	@echo "  clean            - Clean binary and web/dist"
-	@echo "  run              - Run the server binary"
+	@echo "  build            - Full build: Frontend (Vue 3) + Go binary (embedded)"
+	@echo "  build-prod       - Full build + UPX compression (for releases)"
+	@echo "  frontend         - Build only Vue 3 SPA -> web/dist/"
+	@echo "  swagger          - Regenerate Swagger/OpenAPI from annotations"
+	@echo "  clean            - Remove bin/postfixadmin and web/dist/"
+	@echo "  run              - Build (if needed) and start server"
+	@echo "  deps / tidy      - Go module download / cleanup"
+	@echo "  deb / rpm        - Build Debian / RPM packages (include services + config)"
+	@echo "  build-docker     - Multi-stage Docker image (tagged jniltinho/go-postfixadmin:latest)"
 	@echo "  install-upx      - Install UPX compressor"
 	@echo ""
-	@echo "Swagger UI: http://localhost:8080/swagger/index.html"
-	@echo "Tip: Run 'make swagger' then 'make build' to embed updated docs."
+	@echo "Swagger UI: http://localhost:8080/swagger/ (when server.swagger_enable=true)"
+	@echo "Tip: 'make swagger && make build' to embed updated docs. See DEVELOPMENT.md for full list."

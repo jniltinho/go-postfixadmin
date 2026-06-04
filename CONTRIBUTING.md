@@ -1,17 +1,10 @@
 # Contributing to Go-PostfixAdmin
 
-Thank you for contributing to Go-PostfixAdmin.
+Thanks for contributing.
 
-This guide covers the contribution workflow, project conventions, and the places where implementation and documentation changes usually need to stay aligned.
+This covers workflow, conventions, and keeping code + docs in sync.
 
-Related documents:
-
-- [Project README](README.md)
-- [Development guide](DEVELOPMENT.md)
-- [Features](FEATURES.md)
-- [Quick setup summary (MariaDB/MySQL)](DOCUMENTS/setup/SETUP_MAILSERVER_MARIADB.md)
-- [Quick setup summary (PostgreSQL)](DOCUMENTS/setup/SETUP_MAILSERVER_POSTGRESQL.md)
-- [Complete setup guide](DOCUMENTS/setup/README.md)
+Related: [README.md](README.md) • [DEVELOPMENT.md](DEVELOPMENT.md) • [FEATURES.md](FEATURES.md) • [setup guides](DOCUMENTS/setup/README.md)
 
 ## 🚀 How Can I Contribute?
 
@@ -30,8 +23,9 @@ Have an idea to make Go-PostfixAdmin better?
 ### Pull Requests
 1. **Fork the repository** and create your branch from `main`.
 2. **Setup your environment**:
-   - Install Go (v1.26+). Run `make install-tailwind` to install the Tailwind CSS standalone binary.
-   - Run `make deps` to install Go dependencies.
+   - Install Go 1.26+ and Node.js 18+ (for the `frontend/` Vue 3 + Vite build).
+   - `make deps` (Go modules) and `cd frontend && npm install`.
+   - Run `make build` at least once to produce the embedded SPA.
 3. **Make your changes**:
    - Follow clean code principles: concise, self-documenting, no over-engineering.
    - If adding a new feature, ensure it is documented in the appropriate file.
@@ -67,30 +61,39 @@ Typical locations:
 
 ---
 
-## 🏗 Project Structure
+## 🏗 Project Structure (current)
 
 ```
 .
-├── cmd/                  # Cobra CLI entry points (root, server, version, migrate, importsql, config-generator)
-│   ├── admin/            # Admin CLI logic: listing admins/domains/aliases, cleanup, quota report
-│   └── mailbox/          # Mailbox CLI logic: list, add, import CSV
+├── cmd/                  # Cobra CLI (root + subcommands: server, admin, mailbox, domain, transport, migrate, rbac, backup-mysql, readlog, ...)
 ├── internal/
-│   ├── database/         # Database connection logic and GORM instance management
-│   ├── handlers/         # HTTP route handlers
-│   ├── i18n/             # Internationalization (gotext wrapper)
-│   ├── middleware/       # HTTP middleware (auth, logging, etc.)
-│   ├── models/           # GORM database models
-│   ├── repositories/     # Database access helpers and query-oriented data operations
-│   ├── routes/           # Route definitions
-│   ├── server/           # HTTP server setup and render helpers
-│   └── utils/            # Shared utilities (mailer, quota, vacation helpers)
-├── locales/              # GNU Gettext .po translation files
+│   ├── api/              # API response helpers
+│   ├── auth/             # JWT / session auth
+│   ├── database/         # GORM + migrations (MigrateDB, MigrateRBAC)
+│   ├── handlers/         # HTTP handlers (auth, domains, mailboxes, user portal, logs, settings, ...)
+│   ├── middleware/       # Auth, RBAC, logging
+│   ├── models/           # GORM models (incl. RBAC, TOTPExceptionAddress, ...)
+│   ├── rbac/             # Roles, permissions, seeding
+│   ├── repositories/     # Data access
+│   ├── routes/           # Echo route registration
+│   ├── server/           # Server start + SPA embedding (web/dist)
+│   ├── utils/            # Mailer (welcome + vacation), i18n, quota, etc.
+│   └── i18n/             # gotext wrapper
+├── frontend/             # Vue 3 + TS + Vite + Pinia + Tailwind v4 source (npm run build → web/dist)
 ├── web/
-│   ├── static/           # Static assets (CSS, JS, images)
-│   └── templates/        # HTML templates (Go html/template)
-├── config.toml.example   # Example configuration file
-└── Makefile              # Build and development commands
+│   ├── dist/             # Built SPA (embedded at runtime via //go:embed)
+│   ├── files/            # e.g. config.default.toml
+│   ├── static/           # Legacy assets (old jQuery UI, still present)
+│   └── templates/        # Legacy Go html/template admin UI (still present)
+├── locales/              # .po files (en, pt_BR, es)
+├── cmd/... (subpackages for CLI groups)
+├── DOCUMENTS/            # Setup guides, screenshots, diagrams, dovecot-vacation source, quota tools
+├── config.toml.example
+├── Dockerfile + docker-compose.yml + Makefile
+└── main.go               # Embeds web/dist + locales + web/files; starts cmd
 ```
+
+The primary user interface is the **embedded Vue 3 SPA** (built from `frontend/`). Legacy templates/static are retained for compatibility or specific tools.
 
 ---
 
@@ -179,16 +182,12 @@ If you change this policy, update both the backend validation and the frontend p
 The project uses [gotext](https://github.com/leonelquinteros/gotext) with GNU Gettext `.po` files.
 
 To add a new language:
-1. Create a new directory in `locales/` (e.g., `locales/fr/`).
+1. Create a new directory in `locales/` (e.g. `locales/fr/`).
 2. Copy `locales/en/default.po` to `locales/fr/default.po`.
 3. Translate the `msgstr` values (keep `msgid` keys unchanged).
-4. Add a language switcher link in:
-   - `web/templates/layout.html`
-   - `web/templates/login.html`
-   - `web/templates/users/layout.html`
-   - `web/templates/users/login.html`
-5. Register the new language code in `SetLanguage` (`internal/handlers/handlers.go`) and `Render` (`internal/server/render.go`).
-6. Add translations for welcome email subject/body in `internal/utils/mailer.go` (the `SendWelcomeEmail` function uses `i18n.Translate`).
+4. Add language handling in the Vue SPA (see `frontend/src/` for current language store/UI switcher) and ensure backend `internal/i18n` + handlers serve the right `.po`.
+5. Register / extend language support in `internal/i18n` and places that call gotext.
+6. Add welcome email translations in `internal/utils/mailer.go` (`SendWelcomeEmail` uses i18n).
 
 ---
 

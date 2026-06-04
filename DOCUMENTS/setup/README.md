@@ -1,16 +1,11 @@
-# Installation Guide: Email Server (Ubuntu) + Go-PostfixAdmin
+# Installation Guide: Email Server (Ubuntu) + Go-PostfixAdmin (MariaDB)
 
-This guide walks through a full email server setup on Ubuntu using **Postfix**, **Dovecot**, **MariaDB**, and **Go-PostfixAdmin**.
+Complete step-by-step guide to a production mail server on Ubuntu: Postfix + Dovecot + MariaDB + Go-PostfixAdmin (web UI + API + CLI).
 
-## What This Document Covers
-
-This is the complete setup guide. Use it when you need the full installation flow, from OS packages to service validation.
-
-Related documents:
-
-- [Project README](../../README.md)
-- [Features](../../FEATURES.md)
-- [Quick setup summary](SETUP_MAILSERVER_MARIADB.md)
+For a shorter summary see [SETUP_MAILSERVER_MARIADB.md](SETUP_MAILSERVER_MARIADB.md).  
+For PostgreSQL variant see [SETUP_MAILSERVER_POSTGRESQL.md](SETUP_MAILSERVER_POSTGRESQL.md).  
+For Docker quick test: `docker compose up` (see root [docker-compose.yml](../../docker-compose.yml) and [DEVELOPMENT.md](../../DEVELOPMENT.md)).  
+Main project docs: [README.md](../../README.md) and [FEATURES.md](../../FEATURES.md).
 
 ---
 
@@ -70,14 +65,15 @@ Go-PostfixAdmin will manage the database structure (tables, domains, accounts, a
 
    You can clone the original repository or directly download the latest compiled executable from the Releases page.
    
-   *Download binary and Repository:*
+   *Download binary (recommended: use .deb or .rpm packages for production — see quick setup summaries):*
    ```bash
    sudo mkdir -p /opt/go-postfixadmin
    cd /opt/go-postfixadmin
-   # Download the latest release:
-   TAG=$(curl -s https://api.github.com/repos/jniltinho/go-postfixadmin/releases/latest|grep tag_name|cut -d '"' -f4|tr -d v)
-   sudo curl -L -o postfixadmin_${TAG}_linux_amd64.tar.gz "https://github.com/jniltinho/go-postfixadmin/releases/download/v${TAG}/postfixadmin_${TAG}_linux_amd64.tar.gz"
-   sudo tar -xzvf postfixadmin_*.tar.gz
+   # Or download the latest tarball:
+   TAG=$(curl -s https://api.github.com/repos/jniltinho/go-postfixadmin/releases/latest | grep tag_name | cut -d '"' -f4 | tr -d v)
+   curl -L -o postfixadmin_${TAG}_linux_amd64.tar.gz "https://github.com/jniltinho/go-postfixadmin/releases/download/v${TAG}/postfixadmin_${TAG}_linux_amd64.tar.gz"
+   tar -xzvf postfixadmin_*.tar.gz
+   # The binary ends up as ./postfixadmin (or in the extracted tree)
    ```
    
 2. **Generate Initial SSL Certificates (Certbot):**
@@ -98,7 +94,8 @@ Go-PostfixAdmin will manage the database structure (tables, domains, accounts, a
 
    *Or copying the example:*
    ```bash
-   cp download/config.toml.example /opt/go-postfixadmin/config.toml
+   cp config.toml.example /opt/go-postfixadmin/config.toml
+   # (or from the extracted release / from the repo)
    ```
 
    Then edit the generated (`config*.toml`) or copied file and add the database and session settings required for your environment:

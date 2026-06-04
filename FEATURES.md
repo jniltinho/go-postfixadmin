@@ -1,12 +1,8 @@
 # Features
 
-## What This Document Covers
+Go-PostfixAdmin exposes a full set of capabilities for Postfix + Dovecot mail server administration via web UI, REST API (`/api/v1`), and CLI. 
 
-This file lists product capabilities by area. For installation and deployment details, use the setup guides:
-
-- [Project README](README.md)
-- [Quick mail server setup](DOCUMENTS/setup/SETUP_MAILSERVER_MARIADB.md)
-- [Complete setup guide](DOCUMENTS/setup/README.md)
+For installation see the [setup guides](DOCUMENTS/setup/README.md) and [quick MariaDB summary](DOCUMENTS/setup/SETUP_MAILSERVER_MARIADB.md). For development and build, see [DEVELOPMENT.md](DEVELOPMENT.md). Overview and quick start: [README.md](README.md).
 
 ## Core
 
@@ -48,11 +44,11 @@ All endpoints return a structured `APIResponse` envelope with `success`, `data`,
 
 ## Access Control
 
-- Superadmin and domain admin separation
-- User self-service portal for password, forwarding, and vacation management
-- JWT access tokens (short-lived, configurable via `jwt_access_ttl`)
-- httpOnly refresh cookies (long-lived, configurable via `jwt_refresh_ttl`)
-- API Keys with optional expiry dates
+- Superadmin and domain-admin separation via RBAC (enable with `rbac.enabled = true` after running `postfixadmin migrate rbac`)
+- `rbac` CLI subcommand for assigning roles (`rbac assign`, `rbac seed-existing`)
+- User self-service portal for password, forwarding, and vacation management (no admin rights needed)
+- JWT access tokens (short-lived, `jwt_access_ttl`) + httpOnly refresh cookies (`jwt_refresh_ttl`)
+- Persistent API keys (with optional expiry) under `/api/v1/settings/apikeys`
 
 ## Passwords
 
@@ -114,18 +110,18 @@ All endpoints return a structured `APIResponse` envelope with `success`, `data`,
 
 ## UI / DX
 
-- Vue 3 SPA frontend with Vite, Pinia, Vue Router, and Tailwind CSS v4
-- Frontend embedded in the Go binary (single deployable artifact)
-- Interactive Swagger UI embedded in the binary at `/swagger/` (enable via `server.swagger_enable = true`)
-- Docker, Docker Compose, Makefile, and native build support
-- Debian (`.deb`) and RPM (`.rpm`) package build targets with automatic configuration embedding (`make deb` and `make rpm`)
-- Fully automated CI/CD pipeline to generate `.tar.gz`, `.deb` and `.rpm` packages via GitHub Actions Releases
+- Vue 3 SPA (Vite, Pinia, Vue Router, Tailwind CSS v4) with frontend fully embedded in the Go binary via `//go:embed` — single deployable artifact
+- Interactive Swagger UI at `/swagger/` (toggle with `server.swagger_enable = true`)
+- Docker, Docker Compose, Makefile, native build, plus `.deb` / `.rpm` packaging (`make deb`, `make rpm`) with config embedding
+- Fully automated releases via GitHub Actions (`.tar.gz`, `.deb`, `.rpm`)
 
 ## Configuration Highlights
 
-- MariaDB and PostgreSQL support
-- `database.debug = true` for verbose GORM SQL logging
-- SSL-ready server configuration
-- JWT secret and token TTL configurable in `config.toml`
-- Vacation, alias, quota, transport, and fetchmail feature flags
-- Swagger UI toggled via `server.swagger_enable`
+Key sections in `config.toml` (or env / CLI overrides):
+
+- `[database]` — MariaDB/MySQL or PostgreSQL (driver, host, etc.); `debug = true` for verbose GORM SQL
+- `[server]` — port, `ssl_enable`, cert/key paths, `swagger_enable`, JWT TTLs (`jwt_access_ttl`, `jwt_refresh_ttl`), `cleanup_maildir`
+- `[quota]`, `[vacation]`, `[alias]`, `[transport]`, `[features]` (e.g. `fetchmail`), `[rbac]` (`enabled = true` after `migrate rbac`), `[smtp]` (for welcome emails), `[backup]`
+- SSL-ready, session secret, API key support
+
+See `config.toml.example` and the setup guides for full details.

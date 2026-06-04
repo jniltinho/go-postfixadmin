@@ -1,16 +1,10 @@
 # Installation Guide: Email Server (Ubuntu) + Go-PostfixAdmin with PostgreSQL
 
-This guide walks through a full email server setup on Ubuntu using **Postfix**, **Dovecot**, **PostgreSQL**, and **Go-PostfixAdmin**.
+Full email server setup on Ubuntu using **Postfix + Dovecot + PostgreSQL + Go-PostfixAdmin**.
 
-## What This Document Covers
+See the MariaDB-focused complete guide and quick summary for most overlapping steps (Postfix/Dovecot config is similar; only DB driver + packages + SQL maps differ).
 
-This is the complete setup guide. Use it when you need the full installation flow, from OS packages to service validation, specifically using PostgreSQL as the database backend.
-
-Related documents:
-
-- [Project README](../../README.md)
-- [Features](../../FEATURES.md)
-- [Quick setup summary (MariaDB/MySQL)](README.md)
+Related: [main README](../../README.md) • [MariaDB quick](README.md) • [Full MariaDB guide](README.md) (adapt the DB sections).
 
 ---
 

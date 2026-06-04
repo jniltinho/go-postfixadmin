@@ -1,6 +1,10 @@
 # Transport TCP Server Setup
 
-The `postfixadmin transport server` command starts a TCP server that Postfix queries for transport routing decisions. It replaces the classic Perl `transport.pl` lookup script.
+The `postfixadmin transport server` command starts a TCP server (default `127.0.0.1:12221`) that Postfix queries via `transport_maps = tcp:...` for per-domain / per-user routing.
+
+It replaces older Perl lookup scripts and is included in `.deb`/`.rpm` packages + the example `postfixadmin-transport.service`.
+
+See also: [DEVELOPMENT.md](../../DEVELOPMENT.md) (CLI section), root [README.md](../../README.md), and `[transport]` in `config.toml.example`.
 
 ## How It Works
 
@@ -26,15 +30,11 @@ transport_maps = tcp:127.0.0.1:12221
 
 ## 2. config.toml
 
-Add or adjust the `[transport]` section in `/opt/go-postfixadmin/config.toml`:
+Add or adjust the `[transport]` section in `/opt/go-postfixadmin/config.toml` (see current `config.toml.example`):
 
 ```toml
 [transport]
-enabled  = true
-options  = ["virtual", "local", "relay"]
-default  = "virtual"
-
-# Transport TCP server
+# Transport TCP server (postfixadmin transport server)
 # Postfix main.cf: transport_maps = tcp:127.0.0.1:12221
 host          = "127.0.0.1:12221"
 cache         = "10m"
