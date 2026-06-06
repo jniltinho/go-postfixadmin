@@ -53,6 +53,7 @@ DOCUMENTS/DOVECOT_VACATION/vacation/vacation
 DOCUMENTS/tools/filter/filter
 DOCUMENTS/tools/filter/filter2
 
-
-
+# AI / coding agent tooling (graphify, opencode, claude-mem outputs, etc.)
+.opencode/
+graphify-out/
 
