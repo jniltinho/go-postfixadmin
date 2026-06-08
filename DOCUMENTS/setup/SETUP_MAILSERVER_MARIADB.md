@@ -13,12 +13,13 @@ Related: [main README](../../README.md) • [FEATURES.md](../../FEATURES.md) •
 1. [Installation](#1-installation)
 2. [MySQL Database](#2-mysql-database)
 3. [Initial Setup via CLI](#3-initial-setup-via-cli)
-4. [Postfix — main.cf](#4-postfix--maincf)
-5. [Postfix SQL Files](#5-postfix-sql-files)
-6. [Dovecot](#6-dovecot)
-7. [User and Emails Directory](#7-create-user-and-emails-directory)
-8. [Restart Services](#8-restart-everything)
-9. [Points of Attention](#points-of-attention)
+4. [RBAC — Role-Based Access Control](#4-rbac--role-based-access-control)
+5. [Postfix — main.cf](#5-postfix--maincf)
+6. [Postfix SQL Files](#6-postfix-sql-files)
+7. [Dovecot](#7-dovecot)
+8. [User and Emails Directory](#8-create-user-and-emails-directory)
+9. [Restart Services](#9-restart-everything)
+10. [Points of Attention](#points-of-attention)
 
 ---
 
@@ -83,7 +84,7 @@ cd /opt/go-postfixadmin
 ## The Go-PostfixAdmin binary creates tables automatically based on config.toml
 ```
 
-Example `config.toml` database section:
+Example `config.toml` (key sections):
 
 ```toml
 [database]
@@ -94,6 +95,23 @@ pass   = "your_password"
 name   = "postfix"
 driver = "mysql"
 debug  = false
+
+[server]
+port           = 443
+ssl_enable     = true
+ssl_cert       = "/etc/letsencrypt/live/mail.example.com/fullchain.pem"
+ssl_key        = "/etc/letsencrypt/live/mail.example.com/privkey.pem"
+session_secret = "your_super_secret_session_key_here"  # openssl rand -hex 32
+swagger_enable = false  # Set to true to expose /swagger/* in production
+
+# JWT tokens for the SPA frontend
+jwt_access_ttl  = "15m"   # short-lived access token
+jwt_refresh_ttl = "168h"  # 7-day refresh token (httpOnly cookie)
+
+[rbac]
+# Enable after running "migrate rbac" and assigning roles to existing admins.
+# When false, all permission checks are no-ops (backward compatible).
+enabled = false
 ```
 
 Password policy enforced by the backend:
@@ -149,7 +167,75 @@ Required for local mail delivery. Register the `local` domain pointing to Doveco
 
 ---
 
-## 4. Postfix — `/etc/postfix/main.cf`
+## 4. RBAC — Role-Based Access Control
+
+RBAC is **optional** and off by default. When enabled it enforces fine-grained permissions on every API endpoint and hides or locks UI elements based on the admin's role.
+
+### 4.1 Create the RBAC tables and seed built-in roles
+
+```bash
+cd /opt/go-postfixadmin
+./postfixadmin migrate rbac
+```
+
+This creates the four RBAC tables (`rbac_roles`, `rbac_permissions`, `rbac_role_permissions`, `rbac_admin_roles`) and seeds six built-in system roles:
+
+| Role | What it can do |
+|------|----------------|
+| `superadmin` | Full access to everything |
+| `domain_admin` | Full CRUD on assigned domains, mailboxes, and aliases |
+| `mailbox_admin` | Manage mailboxes and aliases within assigned domains |
+| `alias_admin` | Manage aliases and alias domains within assigned domains |
+| `viewer` | Read-only access to all resources |
+| `report_viewer` | Dashboard statistics and log viewers only |
+
+### 4.2 Migrate existing admins (upgrade from pre-RBAC)
+
+If you already have admins in the database, run one of the following to automatically assign the `domain_admin` role to every active non-superadmin that has `domain_admins` entries but no RBAC role yet:
+
+**Via CLI (recommended):**
+```bash
+./postfixadmin rbac seed-existing
+```
+
+**Via SQL:**
+```bash
+mariadb -u postfix -p postfix < /opt/go-postfixadmin/DOCUMENTS/rbac_migrate_existing_admins.sql
+```
+
+### 4.3 Assign roles manually
+
+```bash
+# Global assignment (applies to all domains the admin manages)
+./postfixadmin rbac assign alice@example.com domain_admin
+
+# Domain-scoped assignment
+./postfixadmin rbac assign bob@example.com mailbox_admin example.com
+
+# Read-only access
+./postfixadmin rbac assign auditor@example.com viewer
+```
+
+### 4.4 Enable RBAC enforcement
+
+Edit `/opt/go-postfixadmin/config.toml`:
+
+```toml
+[rbac]
+enabled = true
+```
+
+Then restart the service:
+
+```bash
+sudo systemctl restart postfixadmin
+```
+
+> **Note:** Superadmins always bypass all permission checks regardless of `rbac.enabled`. Role management (create/edit/assign roles) is available in the web UI under **Settings → Roles** for users with the `settings:write` permission.
+
+---
+
+## 5. Postfix — `/etc/postfix/main.cf`
 
 ```ini
 # Domain and hostname
@@ -188,7 +274,7 @@ smtpd_tls_auth_only = yes
 
 ---
 
-## 5. Postfix SQL Files
+## 6. Postfix SQL Files
 
 Create the files below in `/etc/postfix/sql/` and then protect them:
 
@@ -268,7 +354,7 @@ query    = SELECT maildir FROM mailbox,alias_domain
 
 ---
 
-## 6. Dovecot
+## 7. Dovecot
 
 Instead of making changes across multiple fragmented files, you can configure everything mainly using two files.
 
@@ -393,7 +479,7 @@ sudo chown root:dovecot /etc/dovecot/dovecot-sql.conf
 
 ---
 
-## 7. Create user and emails directory
+## 8. Create user and emails directory
 
 ```bash
 groupadd -g 1001 vmail
@@ -403,7 +489,7 @@ chown -R vmail:vmail /var/vmail
 
 ---
 
-## 8. Restart everything
+## 9. Restart everything
 
 ```bash
 systemctl restart postfix dovecot rsyslog
@@ -422,3 +508,6 @@ systemctl restart postfix dovecot rsyslog
 | **TLS** | Always use `smtpd_tls_auth_only = yes` to prevent credential transmission without encryption |
 | **Database debug logging** | Set `database.debug = true` in `config.toml` to enable verbose GORM SQL logs during troubleshooting |
 | **Password policy** | Password changes and creations are validated by the backend with the same 8+ chars / upper / lower / number / special rule |
+| **RBAC** | Run `migrate rbac` before setting `rbac.enabled = true`. Use `rbac seed-existing` to migrate pre-RBAC admins. Superadmins bypass all checks regardless of the flag |
+| **JWT secrets** | Set a strong unique `session_secret` (or `jwt_secret`) in production. Changing it invalidates all existing tokens |
+| **Swagger UI** | `swagger_enable = false` in production to avoid exposing the API schema publicly |

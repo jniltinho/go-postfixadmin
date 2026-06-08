@@ -94,17 +94,23 @@ Go-PostfixAdmin will manage the database structure (tables, domains, accounts, a
    name   = "postfix"
    driver = "postgres"  # mysql or postgres
    debug  = false    # Set to true to enable verbose GORM SQL logs during troubleshooting
-   
+
    [server]
    # Web Server Configuration. For SSL use port 443
-   port = 443
+   port           = 443
    cleanup_maildir = false # Clean up orphaned maildirs when deleting a mailbox
-   # (Optional) SSL Settings for standalone secure server
+   # SSL Settings for standalone secure server
    ssl_enable = true
-   ssl_cert = "/etc/letsencrypt/live/mail.example.com/fullchain.pem"
-   ssl_key = "/etc/letsencrypt/live/mail.example.com/privkey.pem"
-   # Secret Session Key (Generate a 64-character hex string via: openssl rand -hex 32)
+   ssl_cert   = "/etc/letsencrypt/live/mail.example.com/fullchain.pem"
+   ssl_key    = "/etc/letsencrypt/live/mail.example.com/privkey.pem"
+   # Secret session key — generate with: openssl rand -hex 32
    session_secret = "your_super_secret_session_key_here"
+   # Set to true only during development or in private networks
+   swagger_enable = false
+
+   # JWT tokens for the SPA frontend
+   jwt_access_ttl  = "15m"   # short-lived access token
+   jwt_refresh_ttl = "168h"  # 7-day refresh token (httpOnly cookie)
 
    [quota]
    enabled      = false
@@ -120,12 +126,22 @@ Go-PostfixAdmin will manage the database structure (tables, domains, accounts, a
    alias_domain = true
 
    [transport]
-   enabled  = true
-   options  = ["virtual", "local", "relay"]
-   default  = "virtual"
+   # TCP transport server — add to Postfix main.cf:
+   #   transport_maps = tcp:127.0.0.1:12221
+   host          = "127.0.0.1:12221"
+   cache         = "10m"
+   hostname      = "mail.example.com"
+   localdelivery = "smtp:mail.example.com"
+   delivery      = "lmtp:unix:private/dovecot-lmtp"
 
    [features]
    fetchmail = false
+
+   [rbac]
+   # Role-based access control. Enable after running "migrate rbac" and
+   # assigning roles to existing admins. When false, all permission checks
+   # are no-ops and the system behaves exactly as before RBAC was introduced.
+   enabled = false
 
    [smtp]
    server  = "localhost"
@@ -201,7 +217,78 @@ sudo systemctl enable --now postfixadmin.service
 
 ---
 
-## 5. Configure Postfix
+## 5. RBAC — Role-Based Access Control
+
+RBAC is **optional** and disabled by default (`rbac.enabled = false`). When enabled it enforces fine-grained permissions on every API endpoint and controls UI visibility based on each admin's assigned roles. The system is fully backward-compatible: existing superadmin and domain admin workflows continue to work unchanged.
+
+### 5.1 Create the RBAC tables and seed built-in roles
+
+Run the dedicated migration **after** `migrate` has already created the main tables:
+
+```bash
+cd /opt/go-postfixadmin
+./postfixadmin migrate rbac
+```
+
+This creates four tables (`rbac_roles`, `rbac_permissions`, `rbac_role_permissions`, `rbac_admin_roles`) and seeds six built-in system roles with their default permission sets:
+
+| Role | Permissions |
+|------|-------------|
+| `superadmin` | Wildcard — full access to all resources and actions |
+| `domain_admin` | Full CRUD on assigned domains, mailboxes, aliases, and alias domains; can view (not edit) advanced domain settings; cannot create new domains |
+| `mailbox_admin` | Manage mailboxes and aliases within assigned domains |
+| `alias_admin` | Manage aliases and alias domains within assigned domains |
+| `viewer` | Read-only access to all resources within assigned scope |
+| `report_viewer` | Dashboard statistics and log viewer only |
+
+System roles cannot be deleted or have their permissions changed via the API. Custom roles can be created freely through the web UI or REST API.
+
+### 5.2 Migrate existing admins (first-time RBAC enablement)
+
+Existing admins (created before RBAC was enabled) have no role assignments. Use the CLI to automatically grant the `domain_admin` role to every active non-superadmin that has `domain_admins` entries:
+
+```bash
+cd /opt/go-postfixadmin
+./postfixadmin rbac seed-existing
+```
+
+This operation is idempotent — safe to run multiple times. For PostgreSQL there is no SQL script equivalent included; use the CLI command above.
+
+### 5.3 Assign roles manually
+
+```bash
+# Global assignment (applies across all domains the admin manages)
+./postfixadmin rbac assign alice@example.com domain_admin
+
+# Domain-scoped assignment (permissions apply only to example.com)
+./postfixadmin rbac assign bob@example.com mailbox_admin example.com
+
+# Read-only auditor
+./postfixadmin rbac assign auditor@example.com viewer
+```
+
+Role assignments can also be managed via the web UI under **Settings → Roles** (requires the `settings:write` permission) or via the REST API (`POST /api/v1/rbac/admins/:username/roles`).
+
+### 5.4 Enable RBAC enforcement
+
+Edit `/opt/go-postfixadmin/config.toml`:
+
+```toml
+[rbac]
+enabled = true
+```
+
+Restart the service to apply:
+
+```bash
+sudo systemctl restart postfixadmin
+```
+
+> **Important:** Superadmin accounts always bypass all permission checks regardless of `rbac.enabled`. Non-superadmin admins that have `domain_admins` entries but no RBAC role assignments automatically receive the `domain_admin` permission set as a backward-compatibility fallback — so enabling RBAC will not lock out existing admins.
+
+---
+
+## 6. Configure Postfix
 
 ### General Configuration (`/etc/postfix/main.cf`)
 
@@ -268,7 +355,7 @@ submission inet n       -       y       -       -       smtpd
 
 ---
 
-## 6. SQL Maps for Postfix
+## 7. SQL Maps for Postfix
 
 Create the SQL query files in the directory below and ensure proper permissions:
 
@@ -341,7 +428,7 @@ sudo chown root:postfix /etc/postfix/sql/*.cf
 
 ---
 
-## 7. Configure Dovecot
+## 8. Configure Dovecot
 
 Instead of making changes across multiple fragmented files, you can configure everything mainly using two files. 
 
@@ -482,7 +569,7 @@ sudo chown root:dovecot /etc/dovecot/dovecot-sql.conf
 
 ---
 
-## 8. Create the User and Email Directory
+## 9. Create the User and Email Directory
 
 Create the `vmail` (Virtual Mail) system user, which will own all mailbox files:
 
@@ -494,7 +581,7 @@ sudo chown -R vmail:vmail /var/vmail
 
 ---
 
-## 9. Configure System Logging (rsyslog)
+## 10. Configure System Logging (rsyslog)
 
 To properly capture logs from Postfix (especially if running chrooted) and Dovecot, you need to configure `rsyslog`.
 
@@ -541,7 +628,7 @@ sudo systemctl restart rsyslog
 
 ---
 
-## 10. Restart and Validate Services
+## 11. Restart and Validate Services
 
 After making all configurations, restart the services to apply changes:
 
@@ -563,7 +650,7 @@ sudo tail -f /var/log/mail.log
 
 ---
 
-## 11. Vacation / Auto-Reply with Dovecot Sieve
+## 12. Vacation / Auto-Reply with Dovecot Sieve
 
 Go-PostfixAdmin allows users to configure vacation auto-replies through the web UI. The actual delivery of these replies is handled by **Dovecot Sieve** — a mail filtering language built into Dovecot.
 
@@ -580,7 +667,7 @@ Cron (*/10 min)
       inactive or out of range  → remove .dovecot.sieve
 ```
 
-### 11.1 Enable Sieve in Dovecot
+### 12.1 Enable Sieve in Dovecot
 
 Install the Dovecot Sieve plugin:
 
@@ -627,7 +714,7 @@ Restart Dovecot to apply:
 sudo systemctl restart dovecot
 ```
 
-### 11.2 Install the `dovecot-vacation` Binary
+### 12.2 Install the `dovecot-vacation` Binary
 
 The `dovecot-vacation` binary is part of this project. Build and install it:
 
@@ -646,7 +733,7 @@ sudo chown vmail:vmail /opt/go-postfixadmin/dovecot-vacation
 sudo chmod 750 /opt/go-postfixadmin/dovecot-vacation
 ```
 
-### 11.3 Configuration (`config.toml`)
+### 12.3 Configuration (`config.toml`)
 
 The binary shares the same `config.toml` as Go-PostfixAdmin. Make sure the following keys are present:
 
@@ -667,7 +754,7 @@ mail_base = "/var/vmail"  # Maildir base path (default: /var/vmail)
 enabled = true
 ```
 
-### 11.4 Schedule via Cron
+### 12.4 Schedule via Cron
 
 Add the cron entry to run the sync every 10 minutes as the `vmail` user:
 
@@ -683,7 +770,7 @@ Add the line:
 
 > **Note:** The binary must be able to read and write files inside `/var/vmail`. Running it as `vmail` is the safest approach.
 
-### 11.5 Generated Sieve Script
+### 12.5 Generated Sieve Script
 
 For each mailbox with an active vacation, `dovecot-vacation` writes a `.dovecot.sieve` file like this:
 
@@ -701,7 +788,7 @@ Em caso de urgência, por favor contate José Nilton.";
 - If `interval_time` is `0` (reply once), `:days` defaults to `1`
 - The script is automatically compiled with `sievec` after being written
 
-### 11.6 Verify
+### 12.6 Verify
 
 Check if Sieve is active for a specific user:
 
