@@ -12,19 +12,22 @@ import App from './App.vue'
 import { Icon, ConfirmDialog } from './components/ui'
 import AppTable from './components/AppTable.vue'
 
-const app = createApp(App)
+async function bootstrap() {
+  const app = createApp(App)
 
-app.component('Icon', Icon)
-app.component('AppTable', AppTable)
-app.component('ConfirmDialog', ConfirmDialog)
+  app.component('Icon', Icon)
+  app.component('AppTable', AppTable)
+  app.component('ConfirmDialog', ConfirmDialog)
 
-const pinia = createPinia()
-app.use(pinia)
+  const pinia = createPinia()
+  app.use(pinia)
 
-// Initialize auth from localStorage before router runs so guards see correct state
-useAuthStore(pinia).initFromStorage()
+  await useAuthStore(pinia).initAuth()
 
-app.use(Vue3Toastify)
-app.use(router)
+  app.use(Vue3Toastify)
+  app.use(router)
 
-app.mount('#app')
+  app.mount('#app')
+}
+
+bootstrap()

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import http from '../utils/http'
+import { apiClient } from '../utils/client'
 import router from '../router'
 
 interface User {
@@ -18,6 +18,38 @@ function decodeJWT(token: string): Record<string, any> | null {
     return JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')))
   } catch {
     return null
+  }
+}
+
+function isTokenExpired(token: string, skewSec = 30): boolean {
+  const decoded = decodeJWT(token)
+  if (!decoded?.exp) return true
+  return decoded.exp * 1000 <= Date.now() + skewSec * 1000
+}
+
+function userFromJWT(decoded: Record<string, any>): User {
+  return {
+    username: decoded.username ?? decoded.sub ?? '',
+    type: (decoded.type as User['type']) ?? 'admin',
+    superadmin: decoded.superadmin ?? false,
+    domains: decoded.domains ?? [],
+    permissions: decoded.permissions ?? [],
+    roles: decoded.roles ?? [],
+  }
+}
+
+function persistSession(token: string, user: User) {
+  localStorage.setItem('access_token', token)
+  localStorage.setItem('user_info', JSON.stringify(user))
+}
+
+function storedUserType(): User['type'] | undefined {
+  try {
+    const saved = localStorage.getItem('user_info')
+    if (!saved) return undefined
+    return JSON.parse(saved).type as User['type']
+  } catch {
+    return undefined
   }
 }
 
@@ -51,77 +83,81 @@ export const useAuthStore = defineStore('auth', {
   },
 
   actions: {
+    applySession(token: string, user: User) {
+      this.accessToken = token
+      this.user = user
+      this.isAuthenticated = true
+      persistSession(token, user)
+    },
+
     async userLogin(username: string, password: string) {
-      const { data } = await http.post(`${API_BASE}/auth/user-login`, { username, password })
+      const { data } = await apiClient.post(`${API_BASE}/auth/user-login`, { username, password })
 
       const token = data.data.access_token
       const decoded = decodeJWT(token)
+      if (!decoded) throw new Error('invalid token')
 
-      this.accessToken = token
-      this.user = {
+      this.applySession(token, {
         ...data.data.user,
-        permissions: decoded?.permissions ?? [],
-        roles:       decoded?.roles ?? [],
-      }
-      this.isAuthenticated = true
-
-      localStorage.setItem('access_token', token)
-      localStorage.setItem('user_info', JSON.stringify(this.user))
+        permissions: decoded.permissions ?? [],
+        roles: decoded.roles ?? [],
+      })
     },
 
     async login(username: string, password: string) {
-      const { data } = await http.post(`${API_BASE}/auth/login`, { username, password })
+      const { data } = await apiClient.post(`${API_BASE}/auth/login`, { username, password })
 
       const token = data.data.access_token
       const decoded = decodeJWT(token)
+      if (!decoded) throw new Error('invalid token')
 
-      this.accessToken = token
-      this.user = {
+      this.applySession(token, {
         ...data.data.user,
-        permissions: decoded?.permissions ?? [],
-        roles:       decoded?.roles ?? [],
-      }
-      this.isAuthenticated = true
-
-      localStorage.setItem('access_token', token)
-      localStorage.setItem('user_info', JSON.stringify(this.user))
+        permissions: decoded.permissions ?? [],
+        roles: decoded.roles ?? [],
+      })
     },
 
     async refresh(): Promise<boolean> {
       try {
-        const { data } = await http.post(`${API_BASE}/auth/refresh`)
+        const { data } = await apiClient.post(`${API_BASE}/auth/refresh`)
         const newToken = data.data?.access_token
         if (!newToken) return false
 
         const decoded = decodeJWT(newToken)
-        this.accessToken = newToken
-        this.isAuthenticated = true
+        if (!decoded) return false
 
-        if (this.user) {
-          this.user.permissions = decoded?.permissions ?? []
-          this.user.roles       = decoded?.roles ?? []
-        }
+        const user = this.user
+          ? {
+              ...this.user,
+              permissions: decoded.permissions ?? [],
+              roles: decoded.roles ?? [],
+            }
+          : userFromJWT(decoded)
 
-        localStorage.setItem('access_token', newToken)
+        this.applySession(newToken, user)
         return true
       } catch {
-        this.forceLogout()
         return false
       }
     },
 
     logout() {
-      http.post(`${API_BASE}/auth/logout`).catch(() => {})
+      apiClient.post(`${API_BASE}/auth/logout`).catch(() => {})
       this.forceLogout()
     },
 
     forceLogout() {
+      const userType = this.user?.type ?? storedUserType()
+
       this.accessToken = null
       this.user = null
       this.isAuthenticated = false
       localStorage.removeItem('access_token')
       localStorage.removeItem('user_info')
-      router.push({ name: 'Login' })
+
+      const routeName = userType === 'mailbox' ? 'UserLogin' : 'Login'
+      router.push({ name: routeName })
     },
 
     initFromStorage() {
@@ -135,16 +171,30 @@ export const useAuthStore = defineStore('auth', {
       if (saved) {
         try {
           const parsed = JSON.parse(saved)
-          // Backfill permissions/roles from the stored JWT if the saved user_info
-          // predates the RBAC fields.
           if (!parsed.permissions || !parsed.roles) {
             const decoded = decodeJWT(token)
             parsed.permissions = decoded?.permissions ?? []
-            parsed.roles       = decoded?.roles ?? []
+            parsed.roles = decoded?.roles ?? []
           }
           this.user = parsed
         } catch { /* ignore corrupted storage */ }
       }
+    },
+
+    async initAuth() {
+      this.initFromStorage()
+
+      const token = this.accessToken
+      if (!token) {
+        const ok = await this.refresh()
+        if (!ok) return
+        return
+      }
+
+      if (!isTokenExpired(token)) return
+
+      const ok = await this.refresh()
+      if (!ok) this.forceLogout()
     },
   },
 })
