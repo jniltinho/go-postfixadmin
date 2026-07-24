@@ -85,6 +85,41 @@ O `internal/server.StartServer` atual sobe **um** Echo, **uma** porta, **um** `w
 - Sem estado global compartilhado além do processo e do pool GORM (só o admin usa banco).
 - Config `enabled=false` num bloco → aquele listener nem abre.
 
+### D7 — Organização das pastas de frontend (DECIDIDO: separado, nunca junto)
+A UI atual do go-postfixadmin (`frontend/`, estilo neo-brutalism → `web/dist`) **permanece intocada**. O painel ZimbraAdmin é um frontend **totalmente separado** — pasta, dependências, build e embed próprios — para os dois não se misturarem nem um quebrar o outro. Nada de skin/rota dentro do `frontend/` existente.
+
+**Layout escolhido — diretório irmão `frontend-admin/`:**
+
+```
+frontend/                 # UI atual (neo-brutalism) — NÃO tocar
+  src/  package.json  vite.config.ts   → outDir ../web/dist        (embed atual)
+
+frontend-admin/           # NOVO — painel ZimbraAdmin (Vue 3), isolado
+  src/
+    App.vue  main.ts
+    layouts/            AdminShell.vue (top bar + tree + content pane)
+    views/              Home, Domains, Accounts, Aliases, Admins, Login
+    components/         NavTree, Toolbar, ListView, Toast
+    skins/              zimbra-admin.css (tokens harmony, 3px, tipografia)
+    stores/  router/  api/
+  package.json          # deps próprias (node_modules isolado)
+  vite.config.ts        # base: '/admin/'   ·   outDir: '../web/admin-dist'
+
+web/
+  dist/                 # build da UI atual        (embed: all:web/dist)
+  admin-dist/           # build do painel admin    (embed: all:web/admin-dist)  ← NOVO
+```
+
+**Integração no Go:**
+- `main.go`: acrescentar `web/admin-dist` ao `//go:embed` (`all:web/dist all:web/admin-dist web/files all:locales`).
+- Listener admin `:7071` faz `fs.Sub(embeddedFiles, "web/admin-dist")` e serve em base `/admin/` (ou `/zimbraAdmin/`); o listener atual continua servindo `web/dist`.
+- Build: `make build` roda os dois frontends (`frontend → web/dist`, `frontend-admin → web/admin-dist`) e depois `go build`. `make frontend-admin` isolado para dev.
+
+**Por que diretório irmão e não monorepo/workspace:** as duas UIs não compartilham design system (neo-brutalism × ZimbraAdmin harmony) nem componentes; um workspace pnpm com pacotes compartilhados seria over-engineering agora. Irmão = isolamento total (node_modules, lint, tsconfig, build) com o menor setup. Se surgir código realmente comum, extrai-se um pacote depois.
+
+- Alternativa (rejeitada): subpasta/skin dentro de `frontend/` — mistura deps, rotas e estilos; risco de um quebrar o outro (exatamente o que o dono vetou).
+- Alternativa (rejeitada): repo separado só para o admin — contraria o binário único (a SPA precisa ser embutida no host).
+
 ## Risks / Trade-offs
 
 - [Acoplar dois repos num binário] → manter go-snappymail como módulo/SPA versionada; contrato estável (SPA + rotas), não código espalhado.

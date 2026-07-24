@@ -14,8 +14,9 @@
 - [ ] 2.3 Confirmar JWT/RBAC exigindo papel admin nas rotas do painel; 403 sem papel
 - [ ] 2.4 Migração/seed de dev (MariaDB Docker `:3306` ou PostgreSQL; ConnectDB não tem SQLite)
 
-## 3. Skin/layout ZimbraAdmin (Vue 3)
+## 3. Skin/layout ZimbraAdmin (Vue 3) — em `frontend-admin/` SEPARADO
 
+- [ ] 3.0 Scaffold `frontend-admin/` (diretório irmão): Vue 3 + Vite `base:'/admin/'` `outDir:'../web/admin-dist'`, package.json/node_modules/tsconfig próprios; adicionar `web/admin-dist` ao `//go:embed` e ao `make build` (não tocar `frontend/`)
 - [ ] 3.1 Tokens de tema `zimbra` do admin (paleta harmony, cantos 3px, tipografia)
 - [ ] 3.2 Top bar (marca textual, busca, `admin@… ▾`, refresh)
 - [ ] 3.3 Árvore de navegação (Home/Monitor/Manage/Configure/Tools/Search)

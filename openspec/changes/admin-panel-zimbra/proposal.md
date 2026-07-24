@@ -48,9 +48,11 @@ O ecossistema "Zimbra em Go" recria o Zimbra em Go + Vue 3, leve e rápido. O we
 ## Impact
 
 - **go-postfixadmin** (repo do backend/admin):
-  - `frontend/src/` — nova skin/layout ZimbraAdmin (pages, layout, componentes de árvore/toolbar/list, tokens de tema).
-  - `internal/handlers/` + `internal/routes/` — endpoint de overview/runtime; revisão do binding telas↔endpoints; modo/porta `:7071` (http/https) no `internal/server`.
-  - `config.toml` — bloco do painel admin (porta 7071, tls opcional, driver de banco).
+  - **`frontend-admin/` (NOVO diretório irmão)** — painel ZimbraAdmin em Vue 3, **totalmente separado** do `frontend/` atual (deps, build e embed próprios; ver design D7). O `frontend/` (neo-brutalism) **não é alterado**.
+  - `web/admin-dist/` (NOVO) — saída de build do painel admin, embutida via `//go:embed` ao lado de `web/dist`.
+  - `main.go` — adicionar `web/admin-dist` ao embed; `Makefile` — build dos dois frontends.
+  - `internal/handlers/` + `internal/routes/` — endpoint `GET /api/v1/admin/overview`; binding telas↔endpoints `/api/v1/*`; listener/porta `:7071` (http/https) no `internal/server` (multi-listener).
+  - `config.toml` — bloco `[admin]` (porta 7071, tls opcional) + `[webmail]`; driver de banco em `[database]`.
   - `openspec/` — esta change (fonte de verdade do roadmap admin).
 - **go-snappymail** (este ecossistema): `AGENTS.md` + `docs/dev-environment.md` já referenciam a fase admin; `docs/architecture.md` recebe o diagrama do ecossistema.
 - Banco: GORM sobre MariaDB (lab Docker `:3306`) ou PostgreSQL; sem novo schema além do já existente do go-postfixadmin + tabela/consulta de agregados para a Home.
