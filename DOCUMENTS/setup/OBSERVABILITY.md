@@ -25,6 +25,30 @@ trace_sample_ratio = 0.1
 
 Supply `OBSERVABILITY_AUTHORIZATION` through your deployment's secret/environment mechanism. Use the authorization value from OpenObserve ingestion settings, typically `Basic <base64(email:password)>`. Restart the server after changes. URLs must include the complete ingestion path; no suffix is appended. The organization is part of the URL. Signal destinations may use different hosts, but share this authorization value.
 
+Generate the header as follows. Encode `email:password` without a trailing newline; keep the `Basic ` prefix outside the encoded value:
+
+```bash
+# Fictional credentials: replace with your OpenObserve ingestion credentials.
+export OBSERVABILITY_AUTHORIZATION="Basic $(printf '%s' 'telemetry@example.com:example-password' | base64 | tr -d '\r\n')"
+```
+
+Start the server from the same shell after configuring the enabled signals and endpoints:
+
+```bash
+./bin/postfixadmin server
+```
+
+For Docker Compose, pass the variable into the application service (exporting it on the host alone does not inject it into a container):
+
+```yaml
+services:
+  app:
+    environment:
+      OBSERVABILITY_AUTHORIZATION: ${OBSERVABILITY_AUTHORIZATION:?Set OpenObserve authorization}
+```
+
+Recreate the application container with `docker compose up -d app`. If using an environment file, store the complete `Basic <encoded-value>` string, restrict the file to mode `0600`, and keep it out of Git. Base64 is an encoding, not encryption; use HTTPS outside the isolated test network. The Docker test fixture generates its own header automatically.
+
 For logs-only mode, disable traces, metrics and database tracing. For traces-only mode, disable logs and metrics; database tracing remains optional and requires traces. For metrics-only mode, disable logs, traces and database tracing. Disabled signal endpoints are ignored. Setting `enabled = false` stops all export on restart. Setting the global switch to true while all signals are false is a configuration error.
 
 ## Configuration reference

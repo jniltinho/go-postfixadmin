@@ -109,3 +109,12 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 ## OpenTelemetry / OpenObserve
 
 Optional application log, HTTP/database trace and metric export to OpenObserve is available. All export and database tracing switches default to disabled. See [configuration and deployment](DOCUMENTS/setup/OBSERVABILITY.md) and [isolated Docker validation](tests/observability/README.md).
+
+Set the OpenObserve authorization header using your ingestion email/password (the credentials below are fictional):
+
+```bash
+# Fictional credentials: replace with your OpenObserve ingestion credentials.
+export OBSERVABILITY_AUTHORIZATION="Basic $(printf '%s' 'telemetry@example.com:example-password' | base64 | tr -d '\r\n')"
+```
+
+Then enable the desired signals and set their endpoints as described in the configuration guide. For Docker, pass this variable into the app service and recreate the container.
