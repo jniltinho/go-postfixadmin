@@ -31,7 +31,7 @@ func (h *Handler) GetUserProfile(c *echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "unauthorized")
 	}
 
-	mailbox, err := repositories.GetMailboxByUsername(h.DB, claims.Username)
+	mailbox, err := repositories.GetMailboxByUsername(h.requestDB(c), claims.Username)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "mailbox not found")
 	}
@@ -57,7 +57,7 @@ func (h *Handler) GetUserForwarding(c *echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "unauthorized")
 	}
 
-	alias, err := repositories.GetAliasByAddress(h.DB, claims.Username)
+	alias, err := repositories.GetAliasByAddress(h.requestDB(c), claims.Username)
 	gotoStr := claims.Username
 	if err == nil {
 		gotoStr = alias.Goto
@@ -110,7 +110,7 @@ func (h *Handler) UpdateUserForwardingAPI(c *echo.Context) error {
 	}
 	gotoStr := strings.Join(addresses, ",")
 
-	if err := repositories.UpdateUserForwarding(h.DB, username, gotoStr, domain, username, c.RealIP()); err != nil {
+	if err := repositories.UpdateUserForwarding(h.requestDB(c), username, gotoStr, domain, username, c.RealIP()); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to update forwarding")
 	}
 
@@ -145,7 +145,7 @@ func (h *Handler) UpdateUserPasswordAPI(c *echo.Context) error {
 	}
 
 	username := claims.Username
-	mailbox, err := repositories.GetMailboxByUsername(h.DB, username)
+	mailbox, err := repositories.GetMailboxByUsername(h.requestDB(c), username)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "mailbox not found")
 	}
@@ -169,7 +169,7 @@ func (h *Handler) UpdateUserPasswordAPI(c *echo.Context) error {
 	}
 
 	mailbox.Password = hashedPassword
-	if err := repositories.SaveMailbox(h.DB, mailbox, "USER_EDIT_PASSWORD", username, c.RealIP()); err != nil {
+	if err := repositories.SaveMailbox(h.requestDB(c), mailbox, "USER_EDIT_PASSWORD", username, c.RealIP()); err != nil {
 		return c.JSON(http.StatusInternalServerError, dto.UserErrorResponse{Success: false, Error: "Failed to update password"})
 	}
 
@@ -194,7 +194,7 @@ func (h *Handler) GetUserVacation(c *echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "unauthorized")
 	}
 
-	vacation, err := repositories.GetVacationByEmail(h.DB, claims.Username)
+	vacation, err := repositories.GetVacationByEmail(h.requestDB(c), claims.Username)
 	if err != nil {
 		return c.JSON(http.StatusOK, dto.VacationResponse{
 			Active:       false,
@@ -274,12 +274,12 @@ func (h *Handler) UpdateUserVacationAPI(c *echo.Context) error {
 		Modified:     time.Now(),
 	}
 
-	if err := repositories.UpsertVacation(h.DB, vacation, username, c.RealIP()); err != nil {
+	if err := repositories.UpsertVacation(h.requestDB(c), vacation, username, c.RealIP()); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to update auto-reply")
 	}
 
 	if viper.GetBool("vacation.enabled") {
-		_ = utils.SyncSingleVacationSieve(h.DB, username, "")
+		_ = utils.SyncSingleVacationSieve(h.requestDB(c), username, "")
 	}
 
 	return c.JSON(http.StatusOK, dto.UserSuccessResponse{
@@ -311,12 +311,12 @@ func (h *Handler) DeleteUserVacationAPI(c *echo.Context) error {
 		domain = parts[1]
 	}
 
-	if err := repositories.DeleteVacation(h.DB, username, domain, username, c.RealIP()); err != nil {
+	if err := repositories.DeleteVacation(h.requestDB(c), username, domain, username, c.RealIP()); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to delete vacation settings")
 	}
 
 	if viper.GetBool("vacation.enabled") {
-		_ = utils.SyncSingleVacationSieve(h.DB, username, "")
+		_ = utils.SyncSingleVacationSieve(h.requestDB(c), username, "")
 	}
 
 	return c.JSON(http.StatusOK, dto.UserSuccessResponse{

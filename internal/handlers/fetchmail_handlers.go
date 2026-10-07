@@ -16,7 +16,7 @@ import (
 // AddFetchmailGET renders the form to create a new fetchmail entry
 func (h *Handler) AddFetchmailGET(c *echo.Context) error {
 	username := middleware.GetUsername(c, middleware.SessionName)
-	mailboxes, isSuper, err := repositories.GetAllMailboxes(h.DB, username, middleware.GetIsSuperAdmin(c), "")
+	mailboxes, isSuper, err := repositories.GetAllMailboxes(h.requestDB(c), username, middleware.GetIsSuperAdmin(c), "")
 	if err != nil {
 		slog.Error("Failed to fetch mailboxes", "error", err)
 	}
@@ -107,7 +107,7 @@ func (h *Handler) AddFetchmailPOST(c *echo.Context) error {
 	}
 
 	// Save to database
-	if err := repositories.CreateFetchmail(h.DB, newFetchmail); err != nil {
+	if err := repositories.CreateFetchmail(h.requestDB(c), newFetchmail); err != nil {
 		slog.Error("Failed to create fetchmail entry", "error", err, "username", username)
 		return renderFetchmailFormWithError(c, h, "Falha ao salvar registro no banco de dados. Tente novamente.")
 	}
@@ -121,7 +121,7 @@ func (h *Handler) AddFetchmailPOST(c *echo.Context) error {
 // Helper to re-render form with error state
 func renderFetchmailFormWithError(c *echo.Context, h *Handler, errorMsg string) error {
 	username := middleware.GetUsername(c, middleware.SessionName)
-	mailboxes, isSuper, _ := repositories.GetAllMailboxes(h.DB, username, middleware.GetIsSuperAdmin(c), "")
+	mailboxes, isSuper, _ := repositories.GetAllMailboxes(h.requestDB(c), username, middleware.GetIsSuperAdmin(c), "")
 
 	pollTime, _ := strconv.Atoi(c.FormValue("poll_time"))
 	srcPort, _ := strconv.Atoi(c.FormValue("src_port"))

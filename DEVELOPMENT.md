@@ -397,3 +397,7 @@ Crontab example (poll every 5 minutes):
 ```
 
 The `maillog` table stores timestamp, sender, recipient, sender domain, recipient domain, host IP, hostname, HELO string, and message size.
+
+## Observability development
+
+OpenObserve export is opt-in and disabled by default. See [all TOML/environment settings](DOCUMENTS/setup/OBSERVABILITY.md). Run `go test -race -tags integration ./internal/observability ./internal/server` for local fake OTLP receiver tests, and use the [Docker validation environment](tests/observability/README.md) for real ingestion and browser checks. No Swagger regeneration is required for observability-only changes.

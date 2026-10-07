@@ -17,6 +17,7 @@ ExecStart=/opt/go-postfixadmin/postfixadmin server
 # Reiniciar automaticamente em caso de falha
 Restart=always
 RestartSec=5s
+TimeoutStopSec=30s
 
 # O app carregará nativamente as configurações do arquivo /opt/go-postfixadmin/config.toml
 # Devido a integração com o Viper (Go)

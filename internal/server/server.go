@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"go-postfixadmin/internal/handlers"
+	"go-postfixadmin/internal/observability"
 	"go-postfixadmin/internal/routes"
 
 	"github.com/gorilla/sessions"
@@ -31,9 +32,33 @@ func StartServer(embeddedFiles embed.FS, port int, db *gorm.DB, ssl bool, certFi
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
+	cfg, err := observability.LoadConfig(viper.GetViper())
+	if err != nil {
+		return err
+	}
+	local := slog.Default()
+	telemetry, err := observability.New(ctx, cfg, AppVersion, local)
+	if err != nil {
+		return err
+	}
+	slog.SetDefault(telemetry.Logger())
+	defer func() {
+		_ = telemetry.Shutdown()
+		slog.SetDefault(local)
+	}()
+
+	if err := telemetry.InstallDatabase(db); err != nil {
+		return err
+	}
+
 	e := echo.New()
-	e.Use(echoMiddleware.Recover())
-	e.Use(echoMiddleware.RequestLogger())
+	if cfg.Enabled {
+		telemetry.Install(e)
+		e.Use(echoMiddleware.Recover())
+	} else {
+		e.Use(echoMiddleware.Recover())
+		e.Use(echoMiddleware.RequestLogger())
+	}
 
 	secret := viper.GetString("server.session_secret")
 	if secret == "" {
@@ -70,23 +95,15 @@ func StartServer(embeddedFiles embed.FS, port int, db *gorm.DB, ssl bool, certFi
 		ReadHeaderTimeout: 10 * time.Second,
 	}
 
-	go func() {
-		<-ctx.Done()
-		slog.Info("Shutting down server…")
-		shutCtx, shutCancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer shutCancel()
-		_ = srv.Shutdown(shutCtx)
-	}()
-
 	slog.Info("Starting server", "address", addr)
 	if ssl {
 		if certFile == "" || keyFile == "" {
 			return fmt.Errorf("SSL enabled but cert or key file not provided")
 		}
 		slog.Info("SSL enabled", "cert", certFile, "key", keyFile)
-		err = srv.ListenAndServeTLS(certFile, keyFile)
+		err = serveHTTP(ctx, srv, func() error { return srv.ListenAndServeTLS(certFile, keyFile) }, local)
 	} else {
-		err = srv.ListenAndServe()
+		err = serveHTTP(ctx, srv, srv.ListenAndServe, local)
 	}
 	if err == http.ErrServerClosed {
 		return nil

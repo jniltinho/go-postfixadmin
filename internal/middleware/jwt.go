@@ -61,7 +61,7 @@ func JWTAuthMiddleware(db *gorm.DB) echo.MiddlewareFunc {
 
 			// 2. Fall back to database API key lookup.
 			if claims == nil {
-				claims = resolveAPIKeyClaims(db, tokenString)
+				claims = resolveAPIKeyClaims(c.Request().Context(), db, tokenString)
 			}
 
 			if claims == nil {
@@ -82,7 +82,11 @@ func JWTAuthMiddleware(db *gorm.DB) echo.MiddlewareFunc {
 // the associated admin account is active, and builds Claims with resolved RBAC
 // permissions. Returns nil when the token is unknown, expired, or the admin is
 // inactive.
-func resolveAPIKeyClaims(db *gorm.DB, tokenString string) *auth.Claims {
+func resolveAPIKeyClaims(ctx context.Context, db *gorm.DB, tokenString string) *auth.Claims {
+	if db == nil {
+		return nil
+	}
+	db = db.WithContext(ctx)
 	var apiKey models.AdminApiKey
 	if err := db.Where("token = ? AND active = ?", tokenString, true).First(&apiKey).Error; err != nil {
 		return nil

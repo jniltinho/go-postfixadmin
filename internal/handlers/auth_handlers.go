@@ -52,8 +52,8 @@ func getIPLimiter(ip string) *rate.Limiter {
 // RBAC permissions from the database. On resolver failure it logs a warning and
 // falls back to empty permissions so the login still succeeds (RBAC middleware
 // is a no-op when rbac.enabled=false).
-func (h *Handler) resolveAdminTokenParams(admin models.Admin, domains []string, isSuper bool) auth.TokenParams {
-	perms, roles, err := rbac.ResolvePermissions(h.DB, admin.Username, isSuper)
+func (h *Handler) resolveAdminTokenParams(c *echo.Context, admin models.Admin, domains []string, isSuper bool) auth.TokenParams {
+	perms, roles, err := rbac.ResolvePermissions(h.requestDB(c), admin.Username, isSuper)
 	if err != nil {
 		// Non-fatal: RBAC tables may not yet exist in environments that haven't
 		// run "migrate rbac". The middleware no-ops when rbac.enabled=false.
@@ -108,7 +108,7 @@ func (h *Handler) UserPortalLogin(c *echo.Context) error {
 		return dto.WriteError(c, dto.ErrCodeInternal, "database unavailable")
 	}
 
-	mailbox, err := repositories.GetMailboxByUsername(h.DB, username)
+	mailbox, err := repositories.GetMailboxByUsername(h.requestDB(c), username)
 	if err != nil || !mailbox.Active {
 		return dto.WriteError(c, dto.ErrCodeInvalidCredentials, "invalid credentials")
 	}
@@ -191,12 +191,12 @@ func (h *Handler) AuthLogin(c *echo.Context) error {
 
 	// Try admin first (more privileged).
 	var admin models.Admin
-	err := h.DB.Where("username = ? AND active = ?", username, true).First(&admin).Error
+	err := h.requestDB(c).Where("username = ? AND active = ?", username, true).First(&admin).Error
 	if err == nil {
 		match, checkErr := utils.CheckPassword(password, admin.Password)
 		if checkErr == nil && match {
-			domains, isSuper, _ := repositories.GetAllowedDomains(h.DB, admin.Username, admin.Superadmin)
-			params := h.resolveAdminTokenParams(admin, domains, isSuper)
+			domains, isSuper, _ := repositories.GetAllowedDomains(h.requestDB(c), admin.Username, admin.Superadmin)
+			params := h.resolveAdminTokenParams(c, admin, domains, isSuper)
 
 			accessToken, err := auth.GenerateAccessToken(params)
 			if err != nil {
@@ -224,7 +224,7 @@ func (h *Handler) AuthLogin(c *echo.Context) error {
 	}
 
 	// Try mailbox user.
-	mailbox, err := repositories.GetMailboxByUsername(h.DB, username)
+	mailbox, err := repositories.GetMailboxByUsername(h.requestDB(c), username)
 	if err == nil && mailbox.Active {
 		match, checkErr := utils.CheckPassword(password, mailbox.Password)
 		if checkErr == nil && match {
@@ -291,19 +291,19 @@ func (h *Handler) AuthRefresh(c *echo.Context) error {
 
 	if claims.Type == "admin" {
 		var admin models.Admin
-		if err := h.DB.Where("username = ? AND active = ?", claims.Username, true).First(&admin).Error; err != nil {
+		if err := h.requestDB(c).Where("username = ? AND active = ?", claims.Username, true).First(&admin).Error; err != nil {
 			clearRefreshCookie(c)
 			return dto.Unauthorized(c, "admin account is inactive or no longer exists")
 		}
 
-		domains, superadmin, err := repositories.GetAllowedDomains(h.DB, admin.Username, admin.Superadmin)
+		domains, superadmin, err := repositories.GetAllowedDomains(h.requestDB(c), admin.Username, admin.Superadmin)
 		if err != nil {
 			return dto.InternalError(c, "failed to refresh admin permissions")
 		}
-		params = h.resolveAdminTokenParams(admin, domains, superadmin)
+		params = h.resolveAdminTokenParams(c, admin, domains, superadmin)
 	} else {
 		// mailbox user
-		mailbox, err := repositories.GetMailboxByUsername(h.DB, claims.Username)
+		mailbox, err := repositories.GetMailboxByUsername(h.requestDB(c), claims.Username)
 		if err != nil || !mailbox.Active {
 			clearRefreshCookie(c)
 			return dto.Unauthorized(c, "mailbox account is inactive or no longer exists")

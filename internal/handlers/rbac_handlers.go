@@ -76,7 +76,7 @@ func (h *Handler) ListRBACRoles(c *echo.Context) error {
 		return err
 	}
 
-	roles, err := repositories.ListRoles(h.DB)
+	roles, err := repositories.ListRoles(h.requestDB(c))
 	if err != nil {
 		return dto.InternalError(c, "failed to list roles")
 	}
@@ -111,7 +111,7 @@ func (h *Handler) GetRBACRole(c *echo.Context) error {
 		return dto.BadRequest(c, "invalid role id")
 	}
 
-	role, err := repositories.GetRoleByID(h.DB, id)
+	role, err := repositories.GetRoleByID(h.requestDB(c), id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return dto.NotFound(c, "role not found")
@@ -150,7 +150,7 @@ func (h *Handler) CreateRBACRole(c *echo.Context) error {
 		return dto.ValidationError(c, "name is required")
 	}
 
-	role, err := repositories.CreateRole(h.DB, models.RBACRole{
+	role, err := repositories.CreateRole(h.requestDB(c), models.RBACRole{
 		Name:        req.Name,
 		Description: req.Description,
 	})
@@ -161,15 +161,15 @@ func (h *Handler) CreateRBACRole(c *echo.Context) error {
 	// Assign permissions if provided.
 	if len(req.PermissionIDs) > 0 {
 		var perms []models.RBACPermission
-		if err := h.DB.Where("id IN ?", req.PermissionIDs).Find(&perms).Error; err == nil {
-			_ = h.DB.Model(&role).Association("Permissions").Replace(perms)
+		if err := h.requestDB(c).Where("id IN ?", req.PermissionIDs).Find(&perms).Error; err == nil {
+			_ = h.requestDB(c).Model(&role).Association("Permissions").Replace(perms)
 		}
 		// Reload to include associations in the response.
-		_ = h.DB.Preload("Permissions").First(&role, role.ID)
+		_ = h.requestDB(c).Preload("Permissions").First(&role, role.ID)
 	}
 
 	claims := middleware.GetJWTClaims(c)
-	_ = utils.LogAction(h.DB, claims.Username, c.RealIP(), "", "rbac_create_role", req.Name)
+	_ = utils.LogAction(h.requestDB(c), claims.Username, c.RealIP(), "", "rbac_create_role", req.Name)
 
 	return dto.WriteSuccessWithStatus(c, http.StatusCreated, toRoleResponse(role))
 }
@@ -210,7 +210,7 @@ func (h *Handler) UpdateRBACRole(c *echo.Context) error {
 		desc = *req.Description
 	}
 
-	role, err := repositories.UpdateRole(h.DB, id, desc, req.PermissionIDs)
+	role, err := repositories.UpdateRole(h.requestDB(c), id, desc, req.PermissionIDs)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return dto.NotFound(c, "role not found")
@@ -219,7 +219,7 @@ func (h *Handler) UpdateRBACRole(c *echo.Context) error {
 	}
 
 	claims := middleware.GetJWTClaims(c)
-	_ = utils.LogAction(h.DB, claims.Username, c.RealIP(), "", "rbac_update_role", strconv.Itoa(id))
+	_ = utils.LogAction(h.requestDB(c), claims.Username, c.RealIP(), "", "rbac_update_role", strconv.Itoa(id))
 
 	return dto.WriteSuccess(c, toRoleResponse(role))
 }
@@ -247,7 +247,7 @@ func (h *Handler) DeleteRBACRole(c *echo.Context) error {
 		return dto.BadRequest(c, "invalid role id")
 	}
 
-	if err := repositories.DeleteRole(h.DB, id); err != nil {
+	if err := repositories.DeleteRole(h.requestDB(c), id); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return dto.NotFound(c, "role not found")
 		}
@@ -255,7 +255,7 @@ func (h *Handler) DeleteRBACRole(c *echo.Context) error {
 	}
 
 	claims := middleware.GetJWTClaims(c)
-	_ = utils.LogAction(h.DB, claims.Username, c.RealIP(), "", "rbac_delete_role", strconv.Itoa(id))
+	_ = utils.LogAction(h.requestDB(c), claims.Username, c.RealIP(), "", "rbac_delete_role", strconv.Itoa(id))
 
 	return dto.WriteSuccess(c, map[string]bool{"deleted": true})
 }
@@ -278,7 +278,7 @@ func (h *Handler) ListRBACPermissions(c *echo.Context) error {
 		return err
 	}
 
-	perms, err := repositories.ListPermissions(h.DB)
+	perms, err := repositories.ListPermissions(h.requestDB(c))
 	if err != nil {
 		return dto.InternalError(c, "failed to list permissions")
 	}
@@ -314,7 +314,7 @@ func (h *Handler) ListAdminRoles(c *echo.Context) error {
 		return dto.ValidationError(c, "username required")
 	}
 
-	assignments, err := repositories.ListAdminRoles(h.DB, username)
+	assignments, err := repositories.ListAdminRoles(h.requestDB(c), username)
 	if err != nil {
 		return dto.InternalError(c, "failed to list admin roles")
 	}
@@ -367,13 +367,13 @@ func (h *Handler) AssignAdminRole(c *echo.Context) error {
 		return dto.ValidationError(c, "role_id is required")
 	}
 
-	ar, err := repositories.AssignRole(h.DB, username, req.RoleID, req.Domain)
+	ar, err := repositories.AssignRole(h.requestDB(c), username, req.RoleID, req.Domain)
 	if err != nil {
 		return dto.WriteError(c, dto.ErrCodeConflict, "role already assigned to this admin for the given domain")
 	}
 
 	claims := middleware.GetJWTClaims(c)
-	_ = utils.LogAction(h.DB, claims.Username, c.RealIP(), req.Domain, "rbac_assign_role",
+	_ = utils.LogAction(h.requestDB(c), claims.Username, c.RealIP(), req.Domain, "rbac_assign_role",
 		username+" role="+strconv.Itoa(req.RoleID))
 
 	return dto.WriteSuccessWithStatus(c, http.StatusCreated, dto.RBACAdminRoleResponse{
@@ -423,7 +423,7 @@ func (h *Handler) RemoveAdminRole(c *echo.Context) error {
 	// Prevent a superadmin from removing the superadmin role assignment from
 	// themselves — this would silently downgrade their own access.
 	if username == claims.Username {
-		ar, lookupErr := repositories.ListAdminRoles(h.DB, username)
+		ar, lookupErr := repositories.ListAdminRoles(h.requestDB(c), username)
 		if lookupErr == nil {
 			for _, a := range ar {
 				if a.ID == assignmentID && a.Role.Name == rbac.RoleSuperadmin {
@@ -433,14 +433,14 @@ func (h *Handler) RemoveAdminRole(c *echo.Context) error {
 		}
 	}
 
-	if err := repositories.RemoveAdminRole(h.DB, username, assignmentID); err != nil {
+	if err := repositories.RemoveAdminRole(h.requestDB(c), username, assignmentID); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return dto.NotFound(c, "assignment not found")
 		}
 		return dto.InternalError(c, "failed to remove role assignment")
 	}
 
-	_ = utils.LogAction(h.DB, claims.Username, c.RealIP(), "", "rbac_remove_role",
+	_ = utils.LogAction(h.requestDB(c), claims.Username, c.RealIP(), "", "rbac_remove_role",
 		username+" assignment="+strconv.Itoa(assignmentID))
 
 	return dto.WriteSuccess(c, map[string]bool{"deleted": true})

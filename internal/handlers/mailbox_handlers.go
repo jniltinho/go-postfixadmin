@@ -29,7 +29,7 @@ func (h *Handler) ListMailboxes(c *echo.Context) error {
 
 	if h.DB != nil {
 		var err error
-		mailboxes, _, err = repositories.GetAllMailboxes(h.DB, SessionUser, isSuperAdmin, domainFilter)
+		mailboxes, _, err = repositories.GetAllMailboxes(h.requestDB(c), SessionUser, isSuperAdmin, domainFilter)
 		if err != nil {
 			if err.Error() == "access denied to this domain" {
 				return c.Render(http.StatusForbidden, "mailboxes/mailboxes.html", map[string]interface{}{
@@ -44,14 +44,14 @@ func (h *Handler) ListMailboxes(c *echo.Context) error {
 
 	var domains []models.Domain
 	if h.DB != nil {
-		domains, _, _ = repositories.GetActiveDomains(h.DB, SessionUser, isSuperAdmin)
+		domains, _, _ = repositories.GetActiveDomains(h.requestDB(c), SessionUser, isSuperAdmin)
 	}
 
 	domainLimitReached := false
 	if h.DB != nil && domainFilter != "" {
-		if domainRecord, err := repositories.GetDomainByName(h.DB, domainFilter); err == nil {
+		if domainRecord, err := repositories.GetDomainByName(h.requestDB(c), domainFilter); err == nil {
 			if domainRecord.Mailboxes > 0 {
-				if count, err := repositories.CountDomainMailboxes(h.DB, domainFilter); err == nil {
+				if count, err := repositories.CountDomainMailboxes(h.requestDB(c), domainFilter); err == nil {
 					domainLimitReached = count >= int64(domainRecord.Mailboxes)
 				}
 			}
@@ -78,7 +78,7 @@ func (h *Handler) AddMailboxAPI(c *echo.Context) error {
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
 	SessionUser := middleware.GetUsername(c, middleware.SessionName)
 
-	allowedDomains, _, err := repositories.GetAllowedDomains(h.DB, SessionUser, isSuperAdmin)
+	allowedDomains, _, err := repositories.GetAllowedDomains(h.requestDB(c), SessionUser, isSuperAdmin)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "Permission check failed"})
 	}
@@ -130,16 +130,16 @@ func (h *Handler) AddMailboxAPI(c *echo.Context) error {
 
 	username := fmt.Sprintf("%s@%s", localPart, domain)
 
-	if _, err := repositories.GetMailboxByUsername(h.DB, username); err == nil {
+	if _, err := repositories.GetMailboxByUsername(h.requestDB(c), username); err == nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "Mailbox already exists"})
 	}
 
-	domainRecord, err := repositories.GetDomainByName(h.DB, domain)
+	domainRecord, err := repositories.GetDomainByName(h.requestDB(c), domain)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": T(c, "Domain not found")})
 	}
 	if domainRecord.Mailboxes > 0 {
-		count, err := repositories.CountDomainMailboxes(h.DB, domain)
+		count, err := repositories.CountDomainMailboxes(h.requestDB(c), domain)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": T(c, "Failed to check mailbox limit")})
 		}
@@ -174,7 +174,7 @@ func (h *Handler) AddMailboxAPI(c *echo.Context) error {
 		PasswordExpiry: time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
 	}
 
-	if err := repositories.CreateMailbox(h.DB, newMailbox, SessionUser, c.RealIP()); err != nil {
+	if err := repositories.CreateMailbox(h.requestDB(c), newMailbox, SessionUser, c.RealIP()); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "Failed to create mailbox: " + err.Error()})
 	}
 
@@ -198,12 +198,12 @@ func (h *Handler) GetMailboxAPI(c *echo.Context) error {
 	SessionUser := middleware.GetUsername(c, middleware.SessionName)
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
 
-	mailbox, err := repositories.GetMailboxByUsername(h.DB, username)
+	mailbox, err := repositories.GetMailboxByUsername(h.requestDB(c), username)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, map[string]interface{}{"error": "Mailbox not found"})
 	}
 
-	allowedDomains, _, err := repositories.GetAllowedDomains(h.DB, SessionUser, isSuperAdmin)
+	allowedDomains, _, err := repositories.GetAllowedDomains(h.requestDB(c), SessionUser, isSuperAdmin)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "Permission check failed"})
 	}
@@ -238,12 +238,12 @@ func (h *Handler) EditMailboxAPI(c *echo.Context) error {
 	SessionUser := middleware.GetUsername(c, middleware.SessionName)
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
 
-	mailbox, err := repositories.GetMailboxByUsername(h.DB, username)
+	mailbox, err := repositories.GetMailboxByUsername(h.requestDB(c), username)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, map[string]interface{}{"error": "Mailbox not found"})
 	}
 
-	allowedDomains, _, err := repositories.GetAllowedDomains(h.DB, SessionUser, isSuperAdmin)
+	allowedDomains, _, err := repositories.GetAllowedDomains(h.requestDB(c), SessionUser, isSuperAdmin)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "Permission check failed"})
 	}
@@ -298,7 +298,7 @@ func (h *Handler) EditMailboxAPI(c *echo.Context) error {
 	mailbox.Modified = time.Now()
 	mailbox.TokenValidity = time.Now().Add(3 * time.Hour)
 
-	if err := repositories.SaveMailbox(h.DB, mailbox, "edit_mailbox", SessionUser, c.RealIP()); err != nil {
+	if err := repositories.SaveMailbox(h.requestDB(c), mailbox, "edit_mailbox", SessionUser, c.RealIP()); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "Failed to update mailbox: " + err.Error()})
 	}
 
@@ -310,14 +310,14 @@ func (h *Handler) EditMailboxAPI(c *echo.Context) error {
 func (h *Handler) DeleteMailbox(c *echo.Context) error {
 	username, _ := url.PathUnescape(c.Param("username"))
 
-	mailbox, err := repositories.GetMailboxByUsername(h.DB, username)
+	mailbox, err := repositories.GetMailboxByUsername(h.requestDB(c), username)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, map[string]interface{}{"success": false, "error": "Mailbox not found"})
 	}
 
 	SessionUser := middleware.GetUsername(c, middleware.SessionName)
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
-	allowedDomains, _, err := repositories.GetAllowedDomains(h.DB, SessionUser, isSuperAdmin)
+	allowedDomains, _, err := repositories.GetAllowedDomains(h.requestDB(c), SessionUser, isSuperAdmin)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "Permission check failed"})
 	}
@@ -334,13 +334,13 @@ func (h *Handler) DeleteMailbox(c *echo.Context) error {
 		}
 	}
 
-	if err := repositories.DeleteMailbox(h.DB, mailbox, SessionUser, c.RealIP()); err != nil {
+	if err := repositories.DeleteMailbox(h.requestDB(c), mailbox, SessionUser, c.RealIP()); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to delete mailbox: " + err.Error()})
 	}
 
 	if viper.GetBool("server.cleanup_maildir") {
 		baseDir := "/var/vmail"
-		if cleanupErr := utils.CleanupOrphanedMaildir(h.DB, baseDir, mailbox.Domain, mailbox.LocalPart); cleanupErr != nil {
+		if cleanupErr := utils.CleanupOrphanedMaildir(h.requestDB(c), baseDir, mailbox.Domain, mailbox.LocalPart); cleanupErr != nil {
 			fmt.Printf("Warning: Failed to clean up orphaned directory for %s: %v\n", username, cleanupErr)
 		}
 	}
@@ -374,7 +374,7 @@ func (h *Handler) ListMailboxesV1(c *echo.Context) error {
 
 	domainFilter := c.QueryParam("domain")
 
-	mailboxes, _, err := repositories.GetAllMailboxes(h.DB, claims.Username, claims.Superadmin, domainFilter)
+	mailboxes, _, err := repositories.GetAllMailboxes(h.requestDB(c), claims.Username, claims.Superadmin, domainFilter)
 	if err != nil {
 		if err.Error() == "access denied to this domain" {
 			return dto.Forbidden(c, "access denied to this domain")
@@ -435,7 +435,7 @@ func (h *Handler) CreateMailboxV1(c *echo.Context) error {
 	}
 
 	// Permission check using claims
-	allowedDomains, _, err := repositories.GetAllowedDomains(h.DB, claims.Username, claims.Superadmin)
+	allowedDomains, _, err := repositories.GetAllowedDomains(h.requestDB(c), claims.Username, claims.Superadmin)
 	if err != nil {
 		return dto.InternalError(c, "permission check failed")
 	}
@@ -455,7 +455,7 @@ func (h *Handler) CreateMailboxV1(c *echo.Context) error {
 	username := localPart + "@" + domain
 
 	// Check if already exists
-	if _, err := repositories.GetMailboxByUsername(h.DB, username); err == nil {
+	if _, err := repositories.GetMailboxByUsername(h.requestDB(c), username); err == nil {
 		return dto.WriteError(c, dto.ErrCodeConflict, "mailbox already exists")
 	}
 
@@ -491,7 +491,7 @@ func (h *Handler) CreateMailboxV1(c *echo.Context) error {
 		PasswordExpiry: now,
 	}
 
-	if err := repositories.CreateMailbox(h.DB, mailbox, claims.Username, c.RealIP()); err != nil {
+	if err := repositories.CreateMailbox(h.requestDB(c), mailbox, claims.Username, c.RealIP()); err != nil {
 		return dto.InternalError(c, "failed to create mailbox")
 	}
 
@@ -531,13 +531,13 @@ func (h *Handler) GetMailboxV1(c *echo.Context) error {
 
 	username, _ := url.PathUnescape(c.Param("username"))
 
-	mailbox, err := repositories.GetMailboxByUsername(h.DB, username)
+	mailbox, err := repositories.GetMailboxByUsername(h.requestDB(c), username)
 	if err != nil {
 		return dto.NotFound(c, "mailbox not found")
 	}
 
 	// Scoping check
-	allowedDomains, _, err := repositories.GetAllowedDomains(h.DB, claims.Username, claims.Superadmin)
+	allowedDomains, _, err := repositories.GetAllowedDomains(h.requestDB(c), claims.Username, claims.Superadmin)
 	if err != nil {
 		return dto.InternalError(c, "permission check failed")
 	}
@@ -596,13 +596,13 @@ func (h *Handler) UpdateMailboxV1(c *echo.Context) error {
 
 	username, _ := url.PathUnescape(c.Param("username"))
 
-	mailbox, err := repositories.GetMailboxByUsername(h.DB, username)
+	mailbox, err := repositories.GetMailboxByUsername(h.requestDB(c), username)
 	if err != nil {
 		return dto.NotFound(c, "mailbox not found")
 	}
 
 	// Scoping
-	allowedDomains, _, err := repositories.GetAllowedDomains(h.DB, claims.Username, claims.Superadmin)
+	allowedDomains, _, err := repositories.GetAllowedDomains(h.requestDB(c), claims.Username, claims.Superadmin)
 	if err != nil {
 		return dto.InternalError(c, "permission check failed")
 	}
@@ -659,7 +659,7 @@ func (h *Handler) UpdateMailboxV1(c *echo.Context) error {
 	mailbox.Modified = time.Now()
 	mailbox.TokenValidity = time.Now().Add(3 * time.Hour)
 
-	if err := repositories.SaveMailbox(h.DB, mailbox, "edit_mailbox", claims.Username, c.RealIP()); err != nil {
+	if err := repositories.SaveMailbox(h.requestDB(c), mailbox, "edit_mailbox", claims.Username, c.RealIP()); err != nil {
 		return dto.InternalError(c, "failed to update mailbox")
 	}
 
@@ -687,13 +687,13 @@ func (h *Handler) DeleteMailboxV1(c *echo.Context) error {
 
 	username, _ := url.PathUnescape(c.Param("username"))
 
-	mailbox, err := repositories.GetMailboxByUsername(h.DB, username)
+	mailbox, err := repositories.GetMailboxByUsername(h.requestDB(c), username)
 	if err != nil {
 		return dto.NotFound(c, "mailbox not found")
 	}
 
 	// Scoping
-	allowedDomains, _, err := repositories.GetAllowedDomains(h.DB, claims.Username, claims.Superadmin)
+	allowedDomains, _, err := repositories.GetAllowedDomains(h.requestDB(c), claims.Username, claims.Superadmin)
 	if err != nil {
 		return dto.InternalError(c, "permission check failed")
 	}
@@ -710,13 +710,13 @@ func (h *Handler) DeleteMailboxV1(c *echo.Context) error {
 		}
 	}
 
-	if err := repositories.DeleteMailbox(h.DB, mailbox, claims.Username, c.RealIP()); err != nil {
+	if err := repositories.DeleteMailbox(h.requestDB(c), mailbox, claims.Username, c.RealIP()); err != nil {
 		return dto.InternalError(c, "failed to delete mailbox")
 	}
 
 	if viper.GetBool("server.cleanup_maildir") {
 		baseDir := "/var/vmail"
-		_ = utils.CleanupOrphanedMaildir(h.DB, baseDir, mailbox.Domain, mailbox.LocalPart)
+		_ = utils.CleanupOrphanedMaildir(h.requestDB(c), baseDir, mailbox.Domain, mailbox.LocalPart)
 	}
 
 	return dto.WriteSuccess(c, map[string]string{"deleted": username})

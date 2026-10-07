@@ -794,3 +794,7 @@ sudo -u vmail /opt/go-postfixadmin/dovecot-vacation
 ```
 
 ---
+
+## OpenTelemetry / OpenObserve
+
+Application log and HTTP trace export is disabled by default. Configure independent ingestion URLs and enable the global and desired signal switches. Follow [OpenObserve configuration](OBSERVABILITY.md) for authentication, all environment variables, TLS, sampling, and shutdown budgets. The shipped HTTP systemd unit allows 30 seconds for shutdown; adjust that budget when increasing telemetry shutdown_timeout.

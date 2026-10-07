@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"go-postfixadmin/internal/database"
+	"go-postfixadmin/internal/observability"
 	"go-postfixadmin/internal/utils"
 
 	"github.com/spf13/cobra"
@@ -69,6 +70,7 @@ func initConfig() {
 	}
 
 	viper.AutomaticEnv()
+	observability.BindConfig(viper.GetViper())
 
 	if err := viper.ReadInConfig(); err == nil {
 		// Successfully read config

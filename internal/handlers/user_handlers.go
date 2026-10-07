@@ -24,7 +24,7 @@ func (h *Handler) UserLogin(c *echo.Context) error {
 			return c.Render(http.StatusServiceUnavailable, "users/login.html", map[string]interface{}{"errorKey": "Login_ErrDbUnavailable"})
 		}
 
-		mailbox, err := repositories.GetMailboxByUsername(h.DB, username)
+		mailbox, err := repositories.GetMailboxByUsername(h.requestDB(c), username)
 		if err != nil || !mailbox.Active {
 			return c.Render(http.StatusUnauthorized, "users/login.html", map[string]interface{}{"errorKey": "Login_ErrInvalidCredentials"})
 		}
@@ -60,12 +60,12 @@ func (h *Handler) UserDashboard(c *echo.Context) error {
 }
 
 func (h *Handler) renderUserDashboard(c *echo.Context, username, message, errorMsg string) error {
-	mailbox, err := repositories.GetMailboxByUsername(h.DB, username)
+	mailbox, err := repositories.GetMailboxByUsername(h.requestDB(c), username)
 	if err != nil {
 		return c.Redirect(http.StatusFound, "/users/login")
 	}
 
-	alias, _ := repositories.GetAliasByAddress(h.DB, username)
+	alias, _ := repositories.GetAliasByAddress(h.requestDB(c), username)
 
 	data := map[string]interface{}{
 		"SessionUser": username,
@@ -75,7 +75,7 @@ func (h *Handler) renderUserDashboard(c *echo.Context, username, message, errorM
 		"Error":       errorMsg,
 	}
 
-	vacation, err := repositories.GetVacationByEmail(h.DB, username)
+	vacation, err := repositories.GetVacationByEmail(h.requestDB(c), username)
 	if err == nil {
 		data["Vacation"] = map[string]interface{}{
 			"Subject":      vacation.Subject,
@@ -102,7 +102,7 @@ func (h *Handler) UpdateUserPassword(c *echo.Context) error {
 	newPassword := c.FormValue("new_password")
 	confirmPassword := c.FormValue("confirm_password")
 
-	mailbox, err := repositories.GetMailboxByUsername(h.DB, username)
+	mailbox, err := repositories.GetMailboxByUsername(h.requestDB(c), username)
 	if err != nil {
 		SetFlash(c, "error", "Login required")
 		return c.JSON(http.StatusUnauthorized, map[string]interface{}{"success": false, "error": GetFlash(c, "error")})
@@ -131,7 +131,7 @@ func (h *Handler) UpdateUserPassword(c *echo.Context) error {
 	}
 
 	mailbox.Password = hashedPassword
-	if err := repositories.SaveMailbox(h.DB, mailbox, "USER_EDIT_PASSWORD", username, c.RealIP()); err != nil {
+	if err := repositories.SaveMailbox(h.requestDB(c), mailbox, "USER_EDIT_PASSWORD", username, c.RealIP()); err != nil {
 		SetFlash(c, "error", "Failed to update the password")
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": GetFlash(c, "error")})
 	}
@@ -174,7 +174,7 @@ func (h *Handler) UpdateUserForwarding(c *echo.Context) error {
 	}
 	gotoStr := strings.Join(addresses, ",")
 
-	if err := repositories.UpdateUserForwarding(h.DB, username, gotoStr, domain, username, c.RealIP()); err != nil {
+	if err := repositories.UpdateUserForwarding(h.requestDB(c), username, gotoStr, domain, username, c.RealIP()); err != nil {
 		SetFlash(c, "error", "Failed to update forwarding")
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": GetFlash(c, "error")})
 	}
@@ -249,7 +249,7 @@ func (h *Handler) UpdateUserVacation(c *echo.Context) error {
 
 	isJSON := strings.Contains(c.Request().Header.Get("Accept"), "application/json")
 
-	if err := repositories.UpsertVacation(h.DB, vacation, username, c.RealIP()); err != nil {
+	if err := repositories.UpsertVacation(h.requestDB(c), vacation, username, c.RealIP()); err != nil {
 		msg := T(c, "Vacation_JsFailed")
 		if isJSON {
 			return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": msg})
@@ -259,7 +259,7 @@ func (h *Handler) UpdateUserVacation(c *echo.Context) error {
 	}
 
 	if viper.GetBool("vacation.enabled") {
-		_ = utils.SyncSingleVacationSieve(h.DB, username, "")
+		_ = utils.SyncSingleVacationSieve(h.requestDB(c), username, "")
 	}
 
 	msg := T(c, "Vacation_JsSaved")
@@ -283,13 +283,13 @@ func (h *Handler) DeleteUserVacation(c *echo.Context) error {
 		domain = parts[1]
 	}
 
-	if err := repositories.DeleteVacation(h.DB, username, domain, username, c.RealIP()); err != nil {
+	if err := repositories.DeleteVacation(h.requestDB(c), username, domain, username, c.RealIP()); err != nil {
 		SetFlash(c, "error", "Failed to remove auto-reply")
 		return c.Redirect(http.StatusFound, "/users/vacation")
 	}
 
 	if viper.GetBool("vacation.enabled") {
-		_ = utils.SyncSingleVacationSieve(h.DB, username, "")
+		_ = utils.SyncSingleVacationSieve(h.requestDB(c), username, "")
 	}
 
 	SetFlash(c, "message", "Auto-reply removed successfully")

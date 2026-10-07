@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"net/http"
 	"strings"
 	"time"
@@ -17,6 +18,17 @@ import (
 // Handler é o controlador principal da aplicação
 type Handler struct {
 	DB *gorm.DB
+}
+
+func (h *Handler) requestDB(c *echo.Context) *gorm.DB {
+	if h.DB == nil {
+		return nil
+	}
+	ctx := c.Request().Context()
+	if c.Request().Method != http.MethodGet && c.Request().Method != http.MethodHead {
+		ctx = context.WithoutCancel(ctx)
+	}
+	return h.DB.WithContext(ctx)
 }
 
 // getLang returns the user's preferred language from cookie or Accept-Language header.
@@ -54,7 +66,7 @@ func (h *Handler) Login(c *echo.Context) error {
 			return c.Render(http.StatusServiceUnavailable, "auth/login.html", map[string]interface{}{"errorKey": "Login_ErrDbUnavailable"})
 		}
 
-		if err := h.DB.Where("username = ? AND active = ?", username, true).First(&admin).Error; err != nil {
+		if err := h.requestDB(c).Where("username = ? AND active = ?", username, true).First(&admin).Error; err != nil {
 			return c.Render(http.StatusUnauthorized, "auth/login.html", map[string]interface{}{"errorKey": "Login_ErrInvalidCredentials"})
 		}
 

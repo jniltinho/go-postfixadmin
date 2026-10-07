@@ -47,7 +47,7 @@ func (h *Handler) MailLogData(c *echo.Context) error {
 	}
 
 	logs, totalRecords, filteredRecords, err := repositories.GetMailLogs(
-		h.DB, username, isSuperAdmin,
+		h.requestDB(c), username, isSuperAdmin,
 		searchValue, orderField, orderDir, start, length,
 	)
 	if err != nil {
@@ -131,7 +131,7 @@ func (h *Handler) MailLogV1(c *echo.Context) error {
 	}
 
 	logs, total, filtered, err := repositories.GetMailLogs(
-		h.DB, claims.Username, claims.Superadmin,
+		h.requestDB(c), claims.Username, claims.Superadmin,
 		search, orderField, orderDir, start, perPage,
 	)
 	if err != nil {
@@ -161,4 +161,3 @@ func (h *Handler) MailLogV1(c *echo.Context) error {
 		PerPage:  perPage,
 	})
 }
-

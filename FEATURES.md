@@ -125,3 +125,7 @@ Key sections in `config.toml` (or env / CLI overrides):
 - SSL-ready, session secret, API key support
 
 See `config.toml.example` and the setup guides for full details.
+
+## Application observability
+
+Optional OpenTelemetry HTTP/database traces, metrics and correlated slog application logs can be sent to configurable OpenObserve OTLP/HTTP URLs. Separate global/log/trace/metric/database tracing switches default to false; local logging remains available. See [setup and limits](DOCUMENTS/setup/OBSERVABILITY.md).

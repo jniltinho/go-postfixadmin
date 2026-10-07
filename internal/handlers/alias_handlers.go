@@ -21,7 +21,7 @@ func (h *Handler) ListAliases(c *echo.Context) error {
 	username := middleware.GetUsername(c, middleware.SessionName)
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
 
-	aliases, isSuper, err := repositories.GetAllAliases(h.DB, username, isSuperAdmin, domainFilter)
+	aliases, isSuper, err := repositories.GetAllAliases(h.requestDB(c), username, isSuperAdmin, domainFilter)
 	if err != nil {
 		status := http.StatusInternalServerError
 		if err.Error() == "access denied to this domain" {
@@ -32,13 +32,13 @@ func (h *Handler) ListAliases(c *echo.Context) error {
 		})
 	}
 
-	domains, _, _ := repositories.GetActiveDomains(h.DB, username, isSuper)
+	domains, _, _ := repositories.GetActiveDomains(h.requestDB(c), username, isSuper)
 
 	domainLimitReached := false
 	if h.DB != nil && domainFilter != "" {
-		if domainRecord, err := repositories.GetDomainByName(h.DB, domainFilter); err == nil {
+		if domainRecord, err := repositories.GetDomainByName(h.requestDB(c), domainFilter); err == nil {
 			if domainRecord.Aliases > 0 {
-				if count, err := repositories.CountDomainAliases(h.DB, domainFilter); err == nil {
+				if count, err := repositories.CountDomainAliases(h.requestDB(c), domainFilter); err == nil {
 					domainLimitReached = count >= int64(domainRecord.Aliases)
 				}
 			}
@@ -65,7 +65,7 @@ func (h *Handler) AddAliasAPI(c *echo.Context) error {
 	active := c.FormValue("active") == "true"
 
 	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
-	allowedDomains, isSuperAdmin, err := repositories.GetAllowedDomains(h.DB, loggedInUser, middleware.GetIsSuperAdmin(c))
+	allowedDomains, isSuperAdmin, err := repositories.GetAllowedDomains(h.requestDB(c), loggedInUser, middleware.GetIsSuperAdmin(c))
 	if err != nil {
 		return c.JSON(http.StatusForbidden, map[string]interface{}{"success": false, "error": "Permission check failed"})
 	}
@@ -106,19 +106,19 @@ func (h *Handler) AddAliasAPI(c *echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "error": "At least one valid recipient is required"})
 	}
 
-	if _, err := repositories.GetAliasByAddress(h.DB, address); err == nil {
+	if _, err := repositories.GetAliasByAddress(h.requestDB(c), address); err == nil {
 		return c.JSON(http.StatusConflict, map[string]interface{}{"success": false, "error": "Alias already exists"})
 	}
-	if _, err := repositories.GetMailboxByUsername(h.DB, address); err == nil {
+	if _, err := repositories.GetMailboxByUsername(h.requestDB(c), address); err == nil {
 		return c.JSON(http.StatusConflict, map[string]interface{}{"success": false, "error": "A mailbox already exists with this address"})
 	}
 
-	domainRecord, err := repositories.GetDomainByName(h.DB, domain)
+	domainRecord, err := repositories.GetDomainByName(h.requestDB(c), domain)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "error": T(c, "Domain not found")})
 	}
 	if domainRecord.Aliases > 0 {
-		count, err := repositories.CountDomainAliases(h.DB, domain)
+		count, err := repositories.CountDomainAliases(h.requestDB(c), domain)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": T(c, "Failed to check alias limit")})
 		}
@@ -139,7 +139,7 @@ func (h *Handler) AddAliasAPI(c *echo.Context) error {
 		Modified: now,
 		Active:   active,
 	}
-	if err := repositories.CreateAlias(h.DB, newAlias, loggedInUser, c.RealIP()); err != nil {
+	if err := repositories.CreateAlias(h.requestDB(c), newAlias, loggedInUser, c.RealIP()); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to create alias"})
 	}
 
@@ -151,13 +151,13 @@ func (h *Handler) AddAliasAPI(c *echo.Context) error {
 func (h *Handler) GetAliasAPI(c *echo.Context) error {
 	address, _ := url.PathUnescape(c.Param("address"))
 
-	alias, err := repositories.GetAliasByAddress(h.DB, address)
+	alias, err := repositories.GetAliasByAddress(h.requestDB(c), address)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, map[string]interface{}{"error": "Alias not found"})
 	}
 
 	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
-	allowedDomains, isSuperAdmin, err := repositories.GetAllowedDomains(h.DB, loggedInUser, middleware.GetIsSuperAdmin(c))
+	allowedDomains, isSuperAdmin, err := repositories.GetAllowedDomains(h.requestDB(c), loggedInUser, middleware.GetIsSuperAdmin(c))
 	if err != nil {
 		return c.JSON(http.StatusForbidden, map[string]interface{}{"error": "Permission check failed"})
 	}
@@ -182,13 +182,13 @@ func (h *Handler) GetAliasAPI(c *echo.Context) error {
 func (h *Handler) EditAliasAPI(c *echo.Context) error {
 	address, _ := url.PathUnescape(c.Param("address"))
 
-	alias, err := repositories.GetAliasByAddress(h.DB, address)
+	alias, err := repositories.GetAliasByAddress(h.requestDB(c), address)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, map[string]interface{}{"success": false, "error": "Alias not found"})
 	}
 
 	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
-	allowedDomains, isSuperAdmin, err := repositories.GetAllowedDomains(h.DB, loggedInUser, middleware.GetIsSuperAdmin(c))
+	allowedDomains, isSuperAdmin, err := repositories.GetAllowedDomains(h.requestDB(c), loggedInUser, middleware.GetIsSuperAdmin(c))
 	if err != nil {
 		return c.JSON(http.StatusForbidden, map[string]interface{}{"success": false, "error": "Permission check failed"})
 	}
@@ -224,7 +224,7 @@ func (h *Handler) EditAliasAPI(c *echo.Context) error {
 	alias.Goto = strings.Join(recipients, ",")
 	alias.Active = c.FormValue("active") == "true"
 
-	if err := repositories.SaveAlias(h.DB, alias, loggedInUser, c.RealIP()); err != nil {
+	if err := repositories.SaveAlias(h.requestDB(c), alias, loggedInUser, c.RealIP()); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to update alias"})
 	}
 
@@ -244,12 +244,12 @@ func (h *Handler) DeleteAlias(c *echo.Context) error {
 	}
 
 	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
-	allowedDomains, isSuperAdmin, err := repositories.GetAllowedDomains(h.DB, loggedInUser, middleware.GetIsSuperAdmin(c))
+	allowedDomains, isSuperAdmin, err := repositories.GetAllowedDomains(h.requestDB(c), loggedInUser, middleware.GetIsSuperAdmin(c))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "Permission check failed"})
 	}
 
-	alias, err := repositories.GetAliasByAddress(h.DB, address)
+	alias, err := repositories.GetAliasByAddress(h.requestDB(c), address)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, map[string]interface{}{"error": "Alias not found"})
 	}
@@ -268,14 +268,14 @@ func (h *Handler) DeleteAlias(c *echo.Context) error {
 	}
 
 	var count int64
-	if _, err := repositories.GetMailboxByUsername(h.DB, address); err == nil {
+	if _, err := repositories.GetMailboxByUsername(h.requestDB(c), address); err == nil {
 		count = 1
 	}
 	if count > 0 {
 		return c.JSON(http.StatusForbidden, map[string]interface{}{"error": "Cannot delete a mailbox alias via this interface. Delete the mailbox instead."})
 	}
 
-	if err := repositories.DeleteAlias(h.DB, address, loggedInUser, c.RealIP()); err != nil {
+	if err := repositories.DeleteAlias(h.requestDB(c), address, loggedInUser, c.RealIP()); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "Failed to delete alias: " + err.Error()})
 	}
 
@@ -307,7 +307,7 @@ func (h *Handler) ListAliasesV1(c *echo.Context) error {
 
 	domainFilter := c.QueryParam("domain")
 
-	aliases, _, err := repositories.GetAllAliases(h.DB, claims.Username, claims.Superadmin, domainFilter)
+	aliases, _, err := repositories.GetAllAliases(h.requestDB(c), claims.Username, claims.Superadmin, domainFilter)
 	if err != nil {
 		if err.Error() == "access denied to this domain" {
 			return dto.Forbidden(c, "access denied to this domain")
@@ -365,7 +365,7 @@ func (h *Handler) CreateAliasV1(c *echo.Context) error {
 	}
 
 	// Permission scoping
-	allowedDomains, _, err := repositories.GetAllowedDomains(h.DB, claims.Username, claims.Superadmin)
+	allowedDomains, _, err := repositories.GetAllowedDomains(h.requestDB(c), claims.Username, claims.Superadmin)
 	if err != nil {
 		return dto.InternalError(c, "permission check failed")
 	}
@@ -395,19 +395,19 @@ func (h *Handler) CreateAliasV1(c *echo.Context) error {
 		return dto.ValidationError(c, "at least one valid recipient is required")
 	}
 
-	if _, err := repositories.GetAliasByAddress(h.DB, address); err == nil {
+	if _, err := repositories.GetAliasByAddress(h.requestDB(c), address); err == nil {
 		return dto.WriteError(c, dto.ErrCodeConflict, "alias already exists")
 	}
-	if _, err := repositories.GetMailboxByUsername(h.DB, address); err == nil {
+	if _, err := repositories.GetMailboxByUsername(h.requestDB(c), address); err == nil {
 		return dto.WriteError(c, dto.ErrCodeConflict, "a mailbox already exists with this address")
 	}
 
-	domainRecord, err := repositories.GetDomainByName(h.DB, domain)
+	domainRecord, err := repositories.GetDomainByName(h.requestDB(c), domain)
 	if err != nil {
 		return dto.ValidationError(c, "domain not found")
 	}
 	if domainRecord.Aliases > 0 {
-		count, err := repositories.CountDomainAliases(h.DB, domain)
+		count, err := repositories.CountDomainAliases(h.requestDB(c), domain)
 		if err != nil {
 			return dto.InternalError(c, "failed to check alias limit")
 		}
@@ -426,7 +426,7 @@ func (h *Handler) CreateAliasV1(c *echo.Context) error {
 		Active:   req.Active,
 	}
 
-	if err := repositories.CreateAlias(h.DB, newAlias, claims.Username, c.RealIP()); err != nil {
+	if err := repositories.CreateAlias(h.requestDB(c), newAlias, claims.Username, c.RealIP()); err != nil {
 		return dto.InternalError(c, "failed to create alias")
 	}
 
@@ -454,13 +454,13 @@ func (h *Handler) GetAliasV1(c *echo.Context) error {
 
 	address, _ := url.PathUnescape(c.Param("address"))
 
-	alias, err := repositories.GetAliasByAddress(h.DB, address)
+	alias, err := repositories.GetAliasByAddress(h.requestDB(c), address)
 	if err != nil {
 		return dto.NotFound(c, "alias not found")
 	}
 
 	// Scoping
-	allowedDomains, _, err := repositories.GetAllowedDomains(h.DB, claims.Username, claims.Superadmin)
+	allowedDomains, _, err := repositories.GetAllowedDomains(h.requestDB(c), claims.Username, claims.Superadmin)
 	if err != nil {
 		return dto.InternalError(c, "permission check failed")
 	}
@@ -506,13 +506,13 @@ func (h *Handler) UpdateAliasV1(c *echo.Context) error {
 
 	address, _ := url.PathUnescape(c.Param("address"))
 
-	alias, err := repositories.GetAliasByAddress(h.DB, address)
+	alias, err := repositories.GetAliasByAddress(h.requestDB(c), address)
 	if err != nil {
 		return dto.NotFound(c, "alias not found")
 	}
 
 	// Scoping
-	allowedDomains, _, err := repositories.GetAllowedDomains(h.DB, claims.Username, claims.Superadmin)
+	allowedDomains, _, err := repositories.GetAllowedDomains(h.requestDB(c), claims.Username, claims.Superadmin)
 	if err != nil {
 		return dto.InternalError(c, "permission check failed")
 	}
@@ -553,7 +553,7 @@ func (h *Handler) UpdateAliasV1(c *echo.Context) error {
 		alias.Active = *req.Active
 	}
 
-	if err := repositories.SaveAlias(h.DB, alias, claims.Username, c.RealIP()); err != nil {
+	if err := repositories.SaveAlias(h.requestDB(c), alias, claims.Username, c.RealIP()); err != nil {
 		return dto.InternalError(c, "failed to update alias")
 	}
 
@@ -581,13 +581,13 @@ func (h *Handler) DeleteAliasV1(c *echo.Context) error {
 
 	address, _ := url.PathUnescape(c.Param("address"))
 
-	alias, err := repositories.GetAliasByAddress(h.DB, address)
+	alias, err := repositories.GetAliasByAddress(h.requestDB(c), address)
 	if err != nil {
 		return dto.NotFound(c, "alias not found")
 	}
 
 	// Scoping
-	allowedDomains, _, err := repositories.GetAllowedDomains(h.DB, claims.Username, claims.Superadmin)
+	allowedDomains, _, err := repositories.GetAllowedDomains(h.requestDB(c), claims.Username, claims.Superadmin)
 	if err != nil {
 		return dto.InternalError(c, "permission check failed")
 	}
@@ -605,11 +605,11 @@ func (h *Handler) DeleteAliasV1(c *echo.Context) error {
 	}
 
 	// Prevent deleting mailbox aliases
-	if _, err := repositories.GetMailboxByUsername(h.DB, address); err == nil {
+	if _, err := repositories.GetMailboxByUsername(h.requestDB(c), address); err == nil {
 		return dto.Forbidden(c, "cannot delete a mailbox alias. Delete the mailbox instead.")
 	}
 
-	if err := repositories.DeleteAlias(h.DB, address, claims.Username, c.RealIP()); err != nil {
+	if err := repositories.DeleteAlias(h.requestDB(c), address, claims.Username, c.RealIP()); err != nil {
 		return dto.InternalError(c, "failed to delete alias")
 	}
 

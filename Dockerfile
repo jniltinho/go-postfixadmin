@@ -1,9 +1,9 @@
 # Stage 1: Build Vue 3 frontend
 FROM node:22-alpine AS frontend-builder
 WORKDIR /app/frontend
-COPY frontend/package.json frontend/package-lock.json ./
+COPY frontend/package*.json ./
 COPY frontend/vendor ./vendor
-RUN npm ci
+RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
 COPY frontend/ .
 RUN npm run build
 
@@ -26,6 +26,11 @@ RUN BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) && \
     -X go-postfixadmin/cmd.GitCommit=${GIT_COMMIT}" && \
     upx --best --lzma bin/postfixadmin
 
+
+FROM go-builder AS test-runner
+RUN apk add --no-cache gcc musl-dev
+ENV CGO_ENABLED=1
+CMD ["go", "test", "-race", "-tags", "integration", "./..."]
 
 # Stage 3: Final minimal image
 FROM alpine:3.21

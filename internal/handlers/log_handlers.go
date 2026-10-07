@@ -46,7 +46,7 @@ func (h *Handler) LogsData(c *echo.Context) error {
 	}
 
 	logs, totalRecords, filteredRecords, err := repositories.GetLogs(
-		h.DB, username, isSuperAdmin,
+		h.requestDB(c), username, isSuperAdmin,
 		c.QueryParam("filter_admin"),
 		c.QueryParam("filter_domain"),
 		c.QueryParam("filter_action"),
@@ -133,7 +133,7 @@ func (h *Handler) LogsV1(c *echo.Context) error {
 	}
 
 	logs, total, filtered, err := repositories.GetLogs(
-		h.DB, claims.Username, claims.Superadmin,
+		h.requestDB(c), claims.Username, claims.Superadmin,
 		filterAdmin, filterDomain, filterAction,
 		search, orderField, orderDir, start, perPage,
 	)
@@ -160,4 +160,3 @@ func (h *Handler) LogsV1(c *echo.Context) error {
 		PerPage:  perPage,
 	})
 }
-

@@ -23,7 +23,7 @@ func (h *Handler) ListTransports(c *echo.Context) error {
 		return c.Redirect(http.StatusFound, "/dashboard")
 	}
 
-	transports, err := repositories.GetAllTransports(h.DB)
+	transports, err := repositories.GetAllTransports(h.requestDB(c))
 	if err != nil {
 		return c.Render(http.StatusInternalServerError, "transports/list.html", map[string]interface{}{
 			"Error": "Failed to fetch transports",
@@ -61,7 +61,7 @@ func (h *Handler) AddTransportAPI(c *echo.Context) error {
 		Active:    active,
 	}
 
-	if err := repositories.CreateTransport(h.DB, newTransport, loggedInUser, c.RealIP()); err != nil {
+	if err := repositories.CreateTransport(h.requestDB(c), newTransport, loggedInUser, c.RealIP()); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to create transport"})
 	}
 
@@ -80,7 +80,7 @@ func (h *Handler) GetTransportAPI(c *echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "Invalid ID"})
 	}
 
-	transport, err := repositories.GetTransportByID(h.DB, id)
+	transport, err := repositories.GetTransportByID(h.requestDB(c), id)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, map[string]interface{}{"error": "Transport not found"})
 	}
@@ -117,7 +117,7 @@ func (h *Handler) EditTransportAPI(c *echo.Context) error {
 		"modified":  time.Now(),
 	}
 
-	if err := repositories.UpdateTransport(h.DB, id, updates, loggedInUser, c.RealIP()); err != nil {
+	if err := repositories.UpdateTransport(h.requestDB(c), id, updates, loggedInUser, c.RealIP()); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to update transport"})
 	}
 
@@ -137,7 +137,7 @@ func (h *Handler) DeleteTransport(c *echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "error": "Invalid ID"})
 	}
 
-	if err := repositories.DeleteTransport(h.DB, id, loggedInUser, c.RealIP()); err != nil {
+	if err := repositories.DeleteTransport(h.requestDB(c), id, loggedInUser, c.RealIP()); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to delete transport"})
 	}
 
@@ -170,7 +170,7 @@ func (h *Handler) ListTransportsV1(c *echo.Context) error {
 		return dto.Forbidden(c, "only superadmins can manage transports")
 	}
 
-	transports, err := repositories.GetAllTransports(h.DB)
+	transports, err := repositories.GetAllTransports(h.requestDB(c))
 	if err != nil {
 		return dto.InternalError(c, "failed to fetch transports")
 	}
@@ -230,7 +230,7 @@ func (h *Handler) CreateTransportV1(c *echo.Context) error {
 		Active:    req.Active,
 	}
 
-	if err := repositories.CreateTransport(h.DB, newTransport, claims.Username, c.RealIP()); err != nil {
+	if err := repositories.CreateTransport(h.requestDB(c), newTransport, claims.Username, c.RealIP()); err != nil {
 		return dto.InternalError(c, "failed to create transport")
 	}
 
@@ -266,7 +266,7 @@ func (h *Handler) GetTransportV1(c *echo.Context) error {
 		return dto.ValidationError(c, "invalid ID")
 	}
 
-	transport, err := repositories.GetTransportByID(h.DB, id)
+	transport, err := repositories.GetTransportByID(h.requestDB(c), id)
 	if err != nil {
 		return dto.NotFound(c, "transport not found")
 	}
@@ -324,7 +324,7 @@ func (h *Handler) UpdateTransportV1(c *echo.Context) error {
 		updates["active"] = *req.Active
 	}
 
-	if err := repositories.UpdateTransport(h.DB, id, updates, claims.Username, c.RealIP()); err != nil {
+	if err := repositories.UpdateTransport(h.requestDB(c), id, updates, claims.Username, c.RealIP()); err != nil {
 		return dto.InternalError(c, "failed to update transport")
 	}
 
@@ -359,7 +359,7 @@ func (h *Handler) DeleteTransportV1(c *echo.Context) error {
 		return dto.ValidationError(c, "invalid ID")
 	}
 
-	if err := repositories.DeleteTransport(h.DB, id, claims.Username, c.RealIP()); err != nil {
+	if err := repositories.DeleteTransport(h.requestDB(c), id, claims.Username, c.RealIP()); err != nil {
 		return dto.InternalError(c, "failed to delete transport")
 	}
 

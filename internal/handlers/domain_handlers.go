@@ -27,7 +27,7 @@ func (h *Handler) ListDomains(c *echo.Context) error {
 	username := middleware.GetUsername(c, middleware.SessionName)
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
 
-	domains, err := repositories.GetAllDomains(h.DB, username, isSuperAdmin)
+	domains, err := repositories.GetAllDomains(h.requestDB(c), username, isSuperAdmin)
 	if err != nil {
 		return c.Render(http.StatusInternalServerError, "domains/domains.html", map[string]interface{}{
 			"Error": "Failed to check permissions: " + err.Error(),
@@ -36,8 +36,8 @@ func (h *Handler) ListDomains(c *echo.Context) error {
 
 	var displayDomains []DomainDisplay
 	for _, d := range domains {
-		aliasCount, _ := repositories.CountDomainAliases(h.DB, d.Domain)
-		mailboxCount, _ := repositories.CountDomainMailboxes(h.DB, d.Domain)
+		aliasCount, _ := repositories.CountDomainAliases(h.requestDB(c), d.Domain)
+		mailboxCount, _ := repositories.CountDomainMailboxes(h.requestDB(c), d.Domain)
 		displayDomains = append(displayDomains, DomainDisplay{
 			Domain:       d,
 			AliasCount:   aliasCount,
@@ -45,7 +45,7 @@ func (h *Handler) ListDomains(c *echo.Context) error {
 		})
 	}
 
-	transports, _ := repositories.GetAllTransports(h.DB)
+	transports, _ := repositories.GetAllTransports(h.requestDB(c))
 
 	return c.Render(http.StatusOK, "domains/domains.html", map[string]interface{}{
 		"Domains":      displayDomains,
@@ -110,7 +110,7 @@ func (h *Handler) AddDomainAPI(c *echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "Invalid domain format. Please enter a valid domain name (e.g., example.com)"})
 	}
 
-	if _, err := repositories.GetDomainByName(h.DB, domainName); err == nil {
+	if _, err := repositories.GetDomainByName(h.requestDB(c), domainName); err == nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "Domain already exists"})
 	}
 
@@ -128,7 +128,7 @@ func (h *Handler) AddDomainAPI(c *echo.Context) error {
 		Active:         active,
 		PasswordExpiry: passwordExpiry,
 	}
-	if err := repositories.CreateDomain(h.DB, newDomain, username, c.RealIP()); err != nil {
+	if err := repositories.CreateDomain(h.requestDB(c), newDomain, username, c.RealIP()); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "Failed to create domain: " + err.Error()})
 	}
 
@@ -142,7 +142,7 @@ func (h *Handler) GetDomainAPI(c *echo.Context) error {
 		return c.JSON(http.StatusForbidden, map[string]interface{}{"error": "Access denied"})
 	}
 
-	domain, err := repositories.GetDomainByName(h.DB, c.Param("domain"))
+	domain, err := repositories.GetDomainByName(h.requestDB(c), c.Param("domain"))
 	if err != nil {
 		return c.JSON(http.StatusNotFound, map[string]interface{}{"error": "Domain not found"})
 	}
@@ -157,7 +157,7 @@ func (h *Handler) EditDomainAPI(c *echo.Context) error {
 		return c.JSON(http.StatusForbidden, map[string]interface{}{"error": "Access denied"})
 	}
 
-	domain, err := repositories.GetDomainByName(h.DB, c.Param("domain"))
+	domain, err := repositories.GetDomainByName(h.requestDB(c), c.Param("domain"))
 	if err != nil {
 		return c.JSON(http.StatusNotFound, map[string]interface{}{"error": "Domain not found"})
 	}
@@ -208,7 +208,7 @@ func (h *Handler) EditDomainAPI(c *echo.Context) error {
 	domain.Active = active
 	domain.PasswordExpiry = passwordExpiry
 
-	if err := repositories.UpdateDomain(h.DB, domain, activeChanged, username, c.RealIP()); err != nil {
+	if err := repositories.UpdateDomain(h.requestDB(c), domain, activeChanged, username, c.RealIP()); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "Failed to update domain: " + err.Error()})
 	}
 
@@ -224,11 +224,11 @@ func (h *Handler) DeleteDomain(c *echo.Context) error {
 	}
 
 	domainName := c.Param("domain")
-	if _, err := repositories.GetDomainByName(h.DB, domainName); err != nil {
+	if _, err := repositories.GetDomainByName(h.requestDB(c), domainName); err != nil {
 		return c.JSON(http.StatusNotFound, map[string]interface{}{"success": false, "error": "Domain not found"})
 	}
 
-	if err := repositories.DeleteDomain(h.DB, domainName, username, c.RealIP()); err != nil {
+	if err := repositories.DeleteDomain(h.requestDB(c), domainName, username, c.RealIP()); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to delete domain: " + err.Error()})
 	}
 
@@ -257,15 +257,15 @@ func (h *Handler) ListDomainsV1(c *echo.Context) error {
 	}
 
 	// Use the claims for scoping (superadmin + domains list)
-	domains, err := repositories.GetAllDomains(h.DB, claims.Username, claims.Superadmin)
+	domains, err := repositories.GetAllDomains(h.requestDB(c), claims.Username, claims.Superadmin)
 	if err != nil {
 		return dto.InternalError(c, "failed to fetch domains")
 	}
 
 	var response []dto.DomainResponse
 	for _, d := range domains {
-		aliasCount, _ := repositories.CountDomainAliases(h.DB, d.Domain)
-		mailboxCount, _ := repositories.CountDomainMailboxes(h.DB, d.Domain)
+		aliasCount, _ := repositories.CountDomainAliases(h.requestDB(c), d.Domain)
+		mailboxCount, _ := repositories.CountDomainMailboxes(h.requestDB(c), d.Domain)
 
 		response = append(response, dto.DomainResponse{
 			Domain:         d.Domain,
@@ -323,7 +323,7 @@ func (h *Handler) CreateDomainV1(c *echo.Context) error {
 		return dto.ValidationError(c, "invalid domain format")
 	}
 
-	if _, err := repositories.GetDomainByName(h.DB, domainName); err == nil {
+	if _, err := repositories.GetDomainByName(h.requestDB(c), domainName); err == nil {
 		return dto.WriteError(c, dto.ErrCodeConflict, "domain already exists")
 	}
 
@@ -352,7 +352,7 @@ func (h *Handler) CreateDomainV1(c *echo.Context) error {
 		newDomain.Mailboxes = 10
 	}
 
-	if err := repositories.CreateDomain(h.DB, newDomain, claims.Username, c.RealIP()); err != nil {
+	if err := repositories.CreateDomain(h.requestDB(c), newDomain, claims.Username, c.RealIP()); err != nil {
 		return dto.InternalError(c, "failed to create domain")
 	}
 
@@ -380,7 +380,7 @@ func (h *Handler) GetDomainV1(c *echo.Context) error {
 	domainName := c.Param("domain")
 
 	// Check scoping
-	allowed, isSuper, err := repositories.GetAllowedDomains(h.DB, claims.Username, claims.Superadmin)
+	allowed, isSuper, err := repositories.GetAllowedDomains(h.requestDB(c), claims.Username, claims.Superadmin)
 	if err != nil {
 		return dto.InternalError(c, "failed to check permissions")
 	}
@@ -388,13 +388,13 @@ func (h *Handler) GetDomainV1(c *echo.Context) error {
 		return dto.Forbidden(c, "access denied to this domain")
 	}
 
-	domain, err := repositories.GetDomainByName(h.DB, domainName)
+	domain, err := repositories.GetDomainByName(h.requestDB(c), domainName)
 	if err != nil {
 		return dto.NotFound(c, "domain not found")
 	}
 
-	aliasCount, _ := repositories.CountDomainAliases(h.DB, domain.Domain)
-	mailboxCount, _ := repositories.CountDomainMailboxes(h.DB, domain.Domain)
+	aliasCount, _ := repositories.CountDomainAliases(h.requestDB(c), domain.Domain)
+	mailboxCount, _ := repositories.CountDomainMailboxes(h.requestDB(c), domain.Domain)
 
 	resp := dto.DomainResponse{
 		Domain:         domain.Domain,
@@ -442,7 +442,7 @@ func (h *Handler) UpdateDomainV1(c *echo.Context) error {
 
 	// Non-superadmins may only update domains within their assigned scope.
 	if !claims.Superadmin {
-		allowed, _, err := repositories.GetAllowedDomains(h.DB, claims.Username, false)
+		allowed, _, err := repositories.GetAllowedDomains(h.requestDB(c), claims.Username, false)
 		if err != nil {
 			return dto.InternalError(c, "failed to check domain permissions")
 		}
@@ -451,7 +451,7 @@ func (h *Handler) UpdateDomainV1(c *echo.Context) error {
 		}
 	}
 
-	domain, err := repositories.GetDomainByName(h.DB, domainName)
+	domain, err := repositories.GetDomainByName(h.requestDB(c), domainName)
 	if err != nil {
 		return dto.NotFound(c, "domain not found")
 	}
@@ -491,7 +491,7 @@ func (h *Handler) UpdateDomainV1(c *echo.Context) error {
 
 	domain.Modified = time.Now()
 
-	if err := repositories.UpdateDomain(h.DB, domain, activeChanged, claims.Username, c.RealIP()); err != nil {
+	if err := repositories.UpdateDomain(h.requestDB(c), domain, activeChanged, claims.Username, c.RealIP()); err != nil {
 		return dto.InternalError(c, "failed to update domain")
 	}
 
@@ -520,7 +520,7 @@ func (h *Handler) DeleteDomainV1(c *echo.Context) error {
 
 	// Non-superadmins may only delete domains within their assigned scope.
 	if !claims.Superadmin {
-		allowed, _, err := repositories.GetAllowedDomains(h.DB, claims.Username, false)
+		allowed, _, err := repositories.GetAllowedDomains(h.requestDB(c), claims.Username, false)
 		if err != nil {
 			return dto.InternalError(c, "failed to check domain permissions")
 		}
@@ -528,11 +528,11 @@ func (h *Handler) DeleteDomainV1(c *echo.Context) error {
 			return dto.Forbidden(c, "access denied: domain not in your scope")
 		}
 	}
-	if _, err := repositories.GetDomainByName(h.DB, domainName); err != nil {
+	if _, err := repositories.GetDomainByName(h.requestDB(c), domainName); err != nil {
 		return dto.NotFound(c, "domain not found")
 	}
 
-	if err := repositories.DeleteDomain(h.DB, domainName, claims.Username, c.RealIP()); err != nil {
+	if err := repositories.DeleteDomain(h.requestDB(c), domainName, claims.Username, c.RealIP()); err != nil {
 		return dto.InternalError(c, "failed to delete domain")
 	}
 

@@ -1,0 +1,116 @@
+name: postfixadmin-observability
+
+services:
+  db:
+    image: mariadb:10.11
+    environment:
+      MARIADB_ROOT_PASSWORD: ${TEST_DB_PASSWORD:?Run tests/observability/setup.py first}
+      MARIADB_DATABASE: postfix
+      MARIADB_USER: postfix
+      MARIADB_PASSWORD: ${TEST_DB_PASSWORD:?Run tests/observability/setup.py first}
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  openobserve:
+    image: public.ecr.aws/zinclabs/openobserve@sha256:d4a878fac1f6c56003764f7f2a1625668917388f167e222c8c810de3f54c56ba
+    environment:
+      ZO_ROOT_USER_EMAIL: ${TEST_OBSERVE_EMAIL:?Run tests/observability/setup.py first}
+      ZO_ROOT_USER_PASSWORD: ${TEST_OBSERVE_PASSWORD:?Run tests/observability/setup.py first}
+      ZO_DATA_DIR: /data
+      ZO_TELEMETRY: "false"
+    ports:
+      - "127.0.0.1:${OBSERVE_PORT:-15080}:5080"
+    volumes:
+      - observe-data:/data
+    stop_grace_period: 30s
+
+  app:
+    build: .
+    image: go-postfixadmin:observability-test
+    depends_on:
+      db:
+        condition: service_healthy
+      openobserve:
+        condition: service_started
+    environment:
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_DRIVER: mysql
+      DB_URL: postfix:${TEST_DB_PASSWORD}@tcp(db:3306)/postfix?charset=utf8mb4&parseTime=True&loc=Local&multiStatements=true
+      ADMIN_EMAIL: ${TEST_ADMIN_EMAIL:?Run tests/observability/setup.py first}
+      ADMIN_PASSWORD: ${TEST_ADMIN_PASSWORD:?Run tests/observability/setup.py first}
+      OBSERVABILITY_ENABLED: ${TEST_TELEMETRY_ENABLED:-true}
+      OBSERVABILITY_TRACES_ENABLED: ${TEST_TRACES_ENABLED:-true}
+      OBSERVABILITY_LOGS_ENABLED: ${TEST_LOGS_ENABLED:-true}
+      OBSERVABILITY_METRICS_ENABLED: ${TEST_METRICS_ENABLED:-true}
+      OBSERVABILITY_DATABASE_TRACES_ENABLED: ${TEST_DB_TRACES_ENABLED:-true}
+      OBSERVABILITY_METRICS_EXPORT_INTERVAL: "5s"
+      OBSERVABILITY_METRICS_ENDPOINT: http://openobserve:5080/api/default/v1/metrics
+      OBSERVABILITY_ALLOW_INSECURE_HTTP: "true"
+      OBSERVABILITY_ENVIRONMENT: docker-test
+      OBSERVABILITY_TRACES_ENDPOINT: http://openobserve:5080/api/default/v1/traces
+      OBSERVABILITY_LOGS_ENDPOINT: http://openobserve:5080/api/default/v1/logs
+      OBSERVABILITY_AUTHORIZATION: ${TEST_OBSERVE_AUTHORIZATION:?Run tests/observability/setup.py first}
+      OBSERVABILITY_LOGS_STREAM: postfixadmin
+      OBSERVABILITY_TRACE_SAMPLE_RATIO: "1"
+    volumes:
+      - ./tests/observability/runtime/config.toml:/app/config.toml:ro
+    ports:
+      - "127.0.0.1:${APP_PORT:-18080}:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/api/v1/version"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    stop_grace_period: 30s
+    networks:
+      default:
+        aliases:
+          - postfixadmin.test
+
+  smoke:
+    image: python:3.13-alpine
+    profiles: [test]
+    depends_on:
+      app:
+        condition: service_healthy
+    environment:
+      APP_URL: http://app:8080
+      OBSERVE_URL: http://openobserve:5080
+      TEST_ADMIN_EMAIL: ${TEST_ADMIN_EMAIL}
+      TEST_ADMIN_PASSWORD: ${TEST_ADMIN_PASSWORD}
+      TEST_OBSERVE_AUTHORIZATION: ${TEST_OBSERVE_AUTHORIZATION}
+    volumes:
+      - ./tests/observability:/tests:ro
+    command: ["python", "/tests/smoke.py"]
+
+  go-tests:
+    build:
+      context: .
+      target: test-runner
+    profiles: [test]
+
+  browser:
+    build:
+      context: tests/observability
+      dockerfile: Dockerfile.browser
+    profiles: [browser]
+    environment:
+      AGENT_BROWSER_SESSION: postfixadmin-observability
+      TEST_ADMIN_EMAIL: ${TEST_ADMIN_EMAIL}
+      TEST_ADMIN_PASSWORD: ${TEST_ADMIN_PASSWORD}
+      TEST_OBSERVE_EMAIL: ${TEST_OBSERVE_EMAIL}
+      TEST_OBSERVE_PASSWORD: ${TEST_OBSERVE_PASSWORD}
+    volumes:
+      - ./tests/observability/runtime:/artifacts
+    command: ["sleep", "infinity"]
+    shm_size: 1gb
+
+volumes:
+  db-data:
+  observe-data:

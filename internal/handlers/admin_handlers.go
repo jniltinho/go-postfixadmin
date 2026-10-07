@@ -23,12 +23,12 @@ type AdminData struct {
 // ListAdmins displays the list of administrators
 func (h *Handler) ListAdmins(c *echo.Context) error {
 	username := middleware.GetUsername(c, middleware.SessionName)
-	isSuper, err := repositories.IsSuperAdmin(h.DB, username)
+	isSuper, err := repositories.IsSuperAdmin(h.requestDB(c), username)
 	if err != nil {
 		return c.Render(http.StatusInternalServerError, "dashboard.html", map[string]interface{}{"Error": "Permission check failed"})
 	}
 
-	admins, err := repositories.GetAllAdmins(h.DB, username, isSuper)
+	admins, err := repositories.GetAllAdmins(h.requestDB(c), username, isSuper)
 	if err != nil {
 		return c.Render(http.StatusInternalServerError, "admins/admins.html", map[string]interface{}{
 			"error": "Failed to fetch administrators",
@@ -41,7 +41,7 @@ func (h *Handler) ListAdmins(c *echo.Context) error {
 		if admin.Superadmin {
 			domainCountStr = "ALL"
 		} else {
-			count, _ := repositories.CountAdminDomains(h.DB, admin.Username)
+			count, _ := repositories.CountAdminDomains(h.requestDB(c), admin.Username)
 			domainCountStr = fmt.Sprintf("%d", count)
 		}
 		adminList = append(adminList, AdminData{Admin: admin, DomainCount: domainCountStr})
@@ -49,7 +49,7 @@ func (h *Handler) ListAdmins(c *echo.Context) error {
 
 	var domains []models.Domain
 	if isSuper {
-		domains, _, _ = repositories.GetActiveDomains(h.DB, username, true)
+		domains, _, _ = repositories.GetActiveDomains(h.requestDB(c), username, true)
 	}
 
 	return c.Render(http.StatusOK, "admins/admins.html", map[string]interface{}{
@@ -65,7 +65,7 @@ func (h *Handler) ListAdmins(c *echo.Context) error {
 // AddAdminAPI processes the creation of a new administrator via JSON API
 func (h *Handler) AddAdminAPI(c *echo.Context) error {
 	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
-	isSuper, err := repositories.IsSuperAdmin(h.DB, loggedInUser)
+	isSuper, err := repositories.IsSuperAdmin(h.requestDB(c), loggedInUser)
 	if err != nil || !isSuper {
 		return c.JSON(http.StatusForbidden, map[string]interface{}{"success": false, "error": "Access denied"})
 	}
@@ -87,7 +87,7 @@ func (h *Handler) AddAdminAPI(c *echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "error": "Passwords do not match"})
 	}
 
-	if _, err := repositories.GetAdminByUsername(h.DB, username); err == nil {
+	if _, err := repositories.GetAdminByUsername(h.requestDB(c), username); err == nil {
 		return c.JSON(http.StatusConflict, map[string]interface{}{"success": false, "error": "Admin already exists"})
 	}
 
@@ -106,7 +106,7 @@ func (h *Handler) AddAdminAPI(c *echo.Context) error {
 		TokenValidity: time.Now().Add(3 * time.Hour),
 	}
 
-	if err := repositories.CreateAdmin(h.DB, newAdmin, domains, loggedInUser, c.RealIP()); err != nil {
+	if err := repositories.CreateAdmin(h.requestDB(c), newAdmin, domains, loggedInUser, c.RealIP()); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to create administrator"})
 	}
 
@@ -117,7 +117,7 @@ func (h *Handler) AddAdminAPI(c *echo.Context) error {
 // DeleteAdmin handles the deletion of an administrator
 func (h *Handler) DeleteAdmin(c *echo.Context) error {
 	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
-	isSuper, err := repositories.IsSuperAdmin(h.DB, loggedInUser)
+	isSuper, err := repositories.IsSuperAdmin(h.requestDB(c), loggedInUser)
 	if err != nil || !isSuper {
 		return c.JSON(http.StatusForbidden, map[string]interface{}{"error": "Access denied"})
 	}
@@ -131,7 +131,7 @@ func (h *Handler) DeleteAdmin(c *echo.Context) error {
 		return c.JSON(http.StatusForbidden, map[string]interface{}{"success": false, "error": "You cannot delete your own administrator account"})
 	}
 
-	if err := repositories.DeleteAdmin(h.DB, username, loggedInUser, c.RealIP()); err != nil {
+	if err := repositories.DeleteAdmin(h.requestDB(c), username, loggedInUser, c.RealIP()); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to delete administrator"})
 	}
 
@@ -142,7 +142,7 @@ func (h *Handler) DeleteAdmin(c *echo.Context) error {
 // GetAdminAPI fetches a single administrator details for the edit modal
 func (h *Handler) GetAdminAPI(c *echo.Context) error {
 	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
-	isSuper, err := repositories.IsSuperAdmin(h.DB, loggedInUser)
+	isSuper, err := repositories.IsSuperAdmin(h.requestDB(c), loggedInUser)
 	if err != nil {
 		return c.JSON(http.StatusForbidden, map[string]interface{}{"error": "Permission check failed"})
 	}
@@ -155,13 +155,13 @@ func (h *Handler) GetAdminAPI(c *echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "Username required"})
 	}
 
-	admin, err := repositories.GetAdminByUsername(h.DB, targetUsername)
+	admin, err := repositories.GetAdminByUsername(h.requestDB(c), targetUsername)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, map[string]interface{}{"error": "Admin not found"})
 	}
 
-	allDomains, _, _ := repositories.GetActiveDomains(h.DB, loggedInUser, true)
-	domainAdmins, _ := repositories.GetAdminAssignedDomains(h.DB, targetUsername)
+	allDomains, _, _ := repositories.GetActiveDomains(h.requestDB(c), loggedInUser, true)
+	domainAdmins, _ := repositories.GetAdminAssignedDomains(h.requestDB(c), targetUsername)
 
 	assignedMap := make(map[string]bool)
 	for _, da := range domainAdmins {
@@ -186,7 +186,7 @@ func (h *Handler) GetAdminAPI(c *echo.Context) error {
 // EditAdminAPI processes the update of an administrator via JSON API
 func (h *Handler) EditAdminAPI(c *echo.Context) error {
 	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
-	isSuper, err := repositories.IsSuperAdmin(h.DB, loggedInUser)
+	isSuper, err := repositories.IsSuperAdmin(h.requestDB(c), loggedInUser)
 	if err != nil {
 		return c.JSON(http.StatusForbidden, map[string]interface{}{"success": false, "error": "Permission check failed"})
 	}
@@ -229,7 +229,7 @@ func (h *Handler) EditAdminAPI(c *echo.Context) error {
 		updates["password"] = crypted
 	}
 
-	if err := repositories.UpdateAdmin(h.DB, targetUsername, updates, domains, isSuper, loggedInUser, c.RealIP()); err != nil {
+	if err := repositories.UpdateAdmin(h.requestDB(c), targetUsername, updates, domains, isSuper, loggedInUser, c.RealIP()); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to update admin"})
 	}
 
@@ -257,7 +257,7 @@ func (h *Handler) ListAdminsV1(c *echo.Context) error {
 		return dto.Unauthorized(c, "not authenticated")
 	}
 
-	admins, err := repositories.GetAllAdmins(h.DB, claims.Username, claims.Superadmin)
+	admins, err := repositories.GetAllAdmins(h.requestDB(c), claims.Username, claims.Superadmin)
 	if err != nil {
 		return dto.InternalError(c, "failed to fetch administrators")
 	}
@@ -268,7 +268,7 @@ func (h *Handler) ListAdminsV1(c *echo.Context) error {
 		if admin.Superadmin {
 			domainCountStr = "ALL"
 		} else {
-			count, _ := repositories.CountAdminDomains(h.DB, admin.Username)
+			count, _ := repositories.CountAdminDomains(h.requestDB(c), admin.Username)
 			domainCountStr = fmt.Sprintf("%d", count)
 		}
 		response = append(response, dto.AdminResponse{
@@ -323,7 +323,7 @@ func (h *Handler) CreateAdminV1(c *echo.Context) error {
 		return dto.ValidationError(c, validationErr)
 	}
 
-	if _, err := repositories.GetAdminByUsername(h.DB, req.Username); err == nil {
+	if _, err := repositories.GetAdminByUsername(h.requestDB(c), req.Username); err == nil {
 		return dto.WriteError(c, dto.ErrCodeConflict, "admin already exists")
 	}
 
@@ -342,7 +342,7 @@ func (h *Handler) CreateAdminV1(c *echo.Context) error {
 		TokenValidity: time.Now().Add(3 * time.Hour),
 	}
 
-	if err := repositories.CreateAdmin(h.DB, newAdmin, req.Domains, claims.Username, c.RealIP()); err != nil {
+	if err := repositories.CreateAdmin(h.requestDB(c), newAdmin, req.Domains, claims.Username, c.RealIP()); err != nil {
 		return dto.InternalError(c, "failed to create administrator")
 	}
 
@@ -378,13 +378,13 @@ func (h *Handler) GetAdminV1(c *echo.Context) error {
 		return dto.Forbidden(c, "access denied")
 	}
 
-	admin, err := repositories.GetAdminByUsername(h.DB, targetUsername)
+	admin, err := repositories.GetAdminByUsername(h.requestDB(c), targetUsername)
 	if err != nil {
 		return dto.NotFound(c, "admin not found")
 	}
 
-	allDomains, _, _ := repositories.GetActiveDomains(h.DB, claims.Username, claims.Superadmin)
-	domainAdmins, _ := repositories.GetAdminAssignedDomains(h.DB, targetUsername)
+	allDomains, _, _ := repositories.GetActiveDomains(h.requestDB(c), claims.Username, claims.Superadmin)
+	domainAdmins, _ := repositories.GetAdminAssignedDomains(h.requestDB(c), targetUsername)
 
 	assignedMap := make(map[string]bool)
 	for _, da := range domainAdmins {
@@ -395,7 +395,7 @@ func (h *Handler) GetAdminV1(c *echo.Context) error {
 	if admin.Superadmin {
 		domainCountStr = "ALL"
 	} else {
-		count, _ := repositories.CountAdminDomains(h.DB, targetUsername)
+		count, _ := repositories.CountAdminDomains(h.requestDB(c), targetUsername)
 		domainCountStr = fmt.Sprintf("%d", count)
 	}
 
@@ -492,7 +492,7 @@ func (h *Handler) UpdateAdminV1(c *echo.Context) error {
 	}
 
 	domains := req.Domains
-	if err := repositories.UpdateAdmin(h.DB, targetUsername, updates, domains, isSuper, claims.Username, c.RealIP()); err != nil {
+	if err := repositories.UpdateAdmin(h.requestDB(c), targetUsername, updates, domains, isSuper, claims.Username, c.RealIP()); err != nil {
 		return dto.InternalError(c, "failed to update admin")
 	}
 
@@ -531,7 +531,7 @@ func (h *Handler) DeleteAdminV1(c *echo.Context) error {
 		return dto.Forbidden(c, "only superadmins can delete administrators")
 	}
 
-	if err := repositories.DeleteAdmin(h.DB, targetUsername, claims.Username, c.RealIP()); err != nil {
+	if err := repositories.DeleteAdmin(h.requestDB(c), targetUsername, claims.Username, c.RealIP()); err != nil {
 		return dto.InternalError(c, "failed to delete administrator")
 	}
 

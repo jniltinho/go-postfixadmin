@@ -105,3 +105,7 @@ Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
 ## License
 
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+
+## OpenTelemetry / OpenObserve
+
+Optional application log, HTTP/database trace and metric export to OpenObserve is available. All export and database tracing switches default to disabled. See [configuration and deployment](DOCUMENTS/setup/OBSERVABILITY.md) and [isolated Docker validation](tests/observability/README.md).

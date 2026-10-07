@@ -87,3 +87,26 @@ smtp_pass   = ""
 email_from = "backup@example.com"
 email_to   = ["admin@example.com"]
 email_cc   = []
+
+[observability]
+enabled = false
+service_name = "go-postfixadmin"
+environment = "production"
+traces_enabled = false
+logs_enabled = false
+metrics_enabled = false
+database_traces_enabled = false
+trust_incoming_trace_context = false
+traces_endpoint = ""
+logs_endpoint = ""
+metrics_endpoint = ""
+metrics_export_interval = "30s"
+# traces_endpoint = "https://observe.example.com/api/default/v1/traces"
+# logs_endpoint = "https://observe.example.com/api/default/v1/logs"
+# metrics_endpoint = "https://observe.example.com/api/default/v1/metrics"
+authorization = "" # Prefer OBSERVABILITY_AUTHORIZATION via environment
+logs_stream = "postfixadmin"
+trace_sample_ratio = 0.1
+export_timeout = "5s"
+shutdown_timeout = "10s"
+allow_insecure_http = false

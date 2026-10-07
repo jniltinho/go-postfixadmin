@@ -28,6 +28,8 @@ go.work.sum
 
 # env file
 .env
+.env.observability
+tests/observability/runtime/
 config.toml
 config_*.toml
 

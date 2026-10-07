@@ -16,14 +16,14 @@ func (h *Handler) Dashboard(c *echo.Context) error {
 	username := middleware.GetUsername(c, middleware.SessionName)
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
 
-	domainCount, mailboxCount, aliasCount, err := repositories.GetDashboardCounts(h.DB, username, isSuperAdmin)
+	domainCount, mailboxCount, aliasCount, err := repositories.GetDashboardCounts(h.requestDB(c), username, isSuperAdmin)
 	if err != nil {
 		return c.Render(http.StatusInternalServerError, "dashboard/dashboard.html", map[string]interface{}{
 			"Error": "Failed to check permissions: " + err.Error(),
 		})
 	}
 
-	logs, _ := repositories.GetRecentLogs(h.DB, username, isSuperAdmin, time.Now().AddDate(0, -1, 0))
+	logs, _ := repositories.GetRecentLogs(h.requestDB(c), username, isSuperAdmin, time.Now().AddDate(0, -1, 0))
 
 	return c.Render(http.StatusOK, "dashboard/dashboard.html", map[string]interface{}{
 		"DomainCount":  domainCount,
@@ -51,12 +51,12 @@ func (h *Handler) DashboardStatsV1(c *echo.Context) error {
 		return dto.Unauthorized(c, "not authenticated")
 	}
 
-	domainCount, mailboxCount, aliasCount, err := repositories.GetDashboardCounts(h.DB, claims.Username, claims.Superadmin)
+	domainCount, mailboxCount, aliasCount, err := repositories.GetDashboardCounts(h.requestDB(c), claims.Username, claims.Superadmin)
 	if err != nil {
 		return dto.InternalError(c, "failed to fetch dashboard counts")
 	}
 
-	recentLogs, _ := repositories.GetRecentLogs(h.DB, claims.Username, claims.Superadmin, time.Now().AddDate(0, -1, 0))
+	recentLogs, _ := repositories.GetRecentLogs(h.requestDB(c), claims.Username, claims.Superadmin, time.Now().AddDate(0, -1, 0))
 
 	logEntries := make([]dto.LogEntryResponse, 0, len(recentLogs))
 	for _, l := range recentLogs {

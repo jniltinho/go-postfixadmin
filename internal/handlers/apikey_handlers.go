@@ -68,7 +68,7 @@ func (h *Handler) ListApiKeys(c *echo.Context) error {
 	}
 
 	var keys []models.AdminApiKey
-	err := h.DB.Where("username = ?", claims.Username).Order("id desc").Find(&keys).Error
+	err := h.requestDB(c).Where("username = ?", claims.Username).Order("id desc").Find(&keys).Error
 	if err != nil {
 		return dto.InternalError(c, "failed to list api keys")
 	}
@@ -136,7 +136,7 @@ func (h *Handler) CreateApiKey(c *echo.Context) error {
 		Created:   time.Now(),
 	}
 
-	if err := h.DB.Create(&apiKey).Error; err != nil {
+	if err := h.requestDB(c).Create(&apiKey).Error; err != nil {
 		return dto.InternalError(c, "failed to store api key")
 	}
 
@@ -179,7 +179,7 @@ func (h *Handler) UpdateApiKey(c *echo.Context) error {
 	}
 
 	var key models.AdminApiKey
-	if err := h.DB.First(&key, id).Error; err != nil {
+	if err := h.requestDB(c).First(&key, id).Error; err != nil {
 		return dto.NotFound(c, "api key not found")
 	}
 
@@ -205,7 +205,7 @@ func (h *Handler) UpdateApiKey(c *echo.Context) error {
 	}
 
 	if len(updates) > 0 {
-		if err := h.DB.Model(&key).Updates(updates).Error; err != nil {
+		if err := h.requestDB(c).Model(&key).Updates(updates).Error; err != nil {
 			return dto.InternalError(c, "failed to update api key")
 		}
 	}
@@ -239,7 +239,7 @@ func (h *Handler) DeleteApiKey(c *echo.Context) error {
 	}
 
 	var key models.AdminApiKey
-	if err := h.DB.First(&key, id).Error; err != nil {
+	if err := h.requestDB(c).First(&key, id).Error; err != nil {
 		return dto.NotFound(c, "api key not found")
 	}
 
@@ -248,7 +248,7 @@ func (h *Handler) DeleteApiKey(c *echo.Context) error {
 		return dto.Forbidden(c, "unauthorized access to this api key")
 	}
 
-	if err := h.DB.Delete(&key).Error; err != nil {
+	if err := h.requestDB(c).Delete(&key).Error; err != nil {
 		return dto.InternalError(c, "failed to delete api key")
 	}
 

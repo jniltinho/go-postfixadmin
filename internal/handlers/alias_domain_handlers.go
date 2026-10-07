@@ -18,14 +18,14 @@ func (h *Handler) ListAliasDomains(c *echo.Context) error {
 	username := middleware.GetUsername(c, middleware.SessionName)
 	isSuperAdmin := middleware.GetIsSuperAdmin(c)
 
-	aliasDomains, isSuper, err := repositories.GetAliasDomains(h.DB, username, isSuperAdmin)
+	aliasDomains, isSuper, err := repositories.GetAliasDomains(h.requestDB(c), username, isSuperAdmin)
 	if err != nil {
 		return c.Render(http.StatusInternalServerError, "alias_domains/alias_domains.html", map[string]interface{}{
 			"Error": "Failed to check permissions: " + err.Error(),
 		})
 	}
 
-	domains, _, err := repositories.GetActiveDomains(h.DB, username, isSuper)
+	domains, _, err := repositories.GetActiveDomains(h.requestDB(c), username, isSuper)
 	if err != nil {
 		return c.Render(http.StatusInternalServerError, "alias_domains/alias_domains.html", map[string]interface{}{
 			"AliasDomains": aliasDomains,
@@ -50,7 +50,7 @@ func (h *Handler) AddAliasDomainAPI(c *echo.Context) error {
 	active := c.FormValue("active") == "true"
 
 	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
-	allowedDomains, isSuperAdmin, err := repositories.GetAllowedDomains(h.DB, loggedInUser, middleware.GetIsSuperAdmin(c))
+	allowedDomains, isSuperAdmin, err := repositories.GetAllowedDomains(h.requestDB(c), loggedInUser, middleware.GetIsSuperAdmin(c))
 	if err != nil {
 		return c.JSON(http.StatusForbidden, map[string]interface{}{"success": false, "error": "Permission check failed"})
 	}
@@ -78,10 +78,10 @@ func (h *Handler) AddAliasDomainAPI(c *echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "error": "O domínio de origem e destino não podem ser iguais"})
 	}
 
-	if _, err := repositories.GetAliasDomainByName(h.DB, aliasDomain); err == nil {
+	if _, err := repositories.GetAliasDomainByName(h.requestDB(c), aliasDomain); err == nil {
 		return c.JSON(http.StatusConflict, map[string]interface{}{"success": false, "error": "Alias Domain already exists"})
 	}
-	if _, err := repositories.GetDomainByName(h.DB, targetDomain); err != nil {
+	if _, err := repositories.GetDomainByName(h.requestDB(c), targetDomain); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "error": "Target Domain does not exist"})
 	}
 
@@ -93,7 +93,7 @@ func (h *Handler) AddAliasDomainAPI(c *echo.Context) error {
 		Modified:     now,
 		Active:       active,
 	}
-	if err := repositories.CreateAliasDomain(h.DB, newAliasDomain, loggedInUser, c.RealIP()); err != nil {
+	if err := repositories.CreateAliasDomain(h.requestDB(c), newAliasDomain, loggedInUser, c.RealIP()); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to create alias domain"})
 	}
 
@@ -112,13 +112,13 @@ func (h *Handler) DeleteAliasDomain(c *echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "Alias Domain required"})
 	}
 
-	aliasDomain, err := repositories.GetAliasDomainByName(h.DB, aliasDomainName)
+	aliasDomain, err := repositories.GetAliasDomainByName(h.requestDB(c), aliasDomainName)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, map[string]interface{}{"error": "Alias Domain not found"})
 	}
 
 	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
-	allowedDomains, isSuperAdmin, err := repositories.GetAllowedDomains(h.DB, loggedInUser, middleware.GetIsSuperAdmin(c))
+	allowedDomains, isSuperAdmin, err := repositories.GetAllowedDomains(h.requestDB(c), loggedInUser, middleware.GetIsSuperAdmin(c))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "Permission check failed"})
 	}
@@ -135,7 +135,7 @@ func (h *Handler) DeleteAliasDomain(c *echo.Context) error {
 		}
 	}
 
-	if err := repositories.DeleteAliasDomain(h.DB, aliasDomainName, loggedInUser, c.RealIP()); err != nil {
+	if err := repositories.DeleteAliasDomain(h.requestDB(c), aliasDomainName, loggedInUser, c.RealIP()); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "Failed to delete alias domain"})
 	}
 
@@ -150,13 +150,13 @@ func (h *Handler) GetAliasDomainAPI(c *echo.Context) error {
 		aliasDomainName = decoded
 	}
 
-	aliasDomain, err := repositories.GetAliasDomainByName(h.DB, aliasDomainName)
+	aliasDomain, err := repositories.GetAliasDomainByName(h.requestDB(c), aliasDomainName)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, map[string]interface{}{"error": "Alias Domain not found"})
 	}
 
 	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
-	allowedDomains, isSuperAdmin, err := repositories.GetAllowedDomains(h.DB, loggedInUser, middleware.GetIsSuperAdmin(c))
+	allowedDomains, isSuperAdmin, err := repositories.GetAllowedDomains(h.requestDB(c), loggedInUser, middleware.GetIsSuperAdmin(c))
 	if err != nil {
 		return c.JSON(http.StatusForbidden, map[string]interface{}{"error": "Permission check failed"})
 	}
@@ -173,7 +173,7 @@ func (h *Handler) GetAliasDomainAPI(c *echo.Context) error {
 		}
 	}
 
-	domains, _, _ := repositories.GetActiveDomains(h.DB, loggedInUser, isSuperAdmin)
+	domains, _, _ := repositories.GetActiveDomains(h.requestDB(c), loggedInUser, isSuperAdmin)
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"alias_domain": aliasDomain,
@@ -188,13 +188,13 @@ func (h *Handler) EditAliasDomainAPI(c *echo.Context) error {
 		aliasDomainName = decoded
 	}
 
-	aliasDomain, err := repositories.GetAliasDomainByName(h.DB, aliasDomainName)
+	aliasDomain, err := repositories.GetAliasDomainByName(h.requestDB(c), aliasDomainName)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, map[string]interface{}{"success": false, "error": "Alias Domain not found"})
 	}
 
 	loggedInUser := middleware.GetUsername(c, middleware.SessionName)
-	allowedDomains, isSuperAdmin, err := repositories.GetAllowedDomains(h.DB, loggedInUser, middleware.GetIsSuperAdmin(c))
+	allowedDomains, isSuperAdmin, err := repositories.GetAllowedDomains(h.requestDB(c), loggedInUser, middleware.GetIsSuperAdmin(c))
 	if err != nil {
 		return c.JSON(http.StatusForbidden, map[string]interface{}{"success": false, "error": "Permission check failed"})
 	}
@@ -234,7 +234,7 @@ func (h *Handler) EditAliasDomainAPI(c *echo.Context) error {
 				return c.JSON(http.StatusForbidden, map[string]interface{}{"success": false, "error": "Access denied to new target domain"})
 			}
 		}
-		if _, err := repositories.GetDomainByName(h.DB, targetDomain); err != nil {
+		if _, err := repositories.GetDomainByName(h.requestDB(c), targetDomain); err != nil {
 			return c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "error": "Target Domain does not exist"})
 		}
 	}
@@ -242,7 +242,7 @@ func (h *Handler) EditAliasDomainAPI(c *echo.Context) error {
 	aliasDomain.TargetDomain = targetDomain
 	aliasDomain.Active = active
 
-	if err := repositories.SaveAliasDomain(h.DB, aliasDomain, loggedInUser, c.RealIP()); err != nil {
+	if err := repositories.SaveAliasDomain(h.requestDB(c), aliasDomain, loggedInUser, c.RealIP()); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"success": false, "error": "Failed to update alias domain"})
 	}
 
@@ -270,7 +270,7 @@ func (h *Handler) ListAliasDomainsV1(c *echo.Context) error {
 		return dto.Unauthorized(c, "not authenticated")
 	}
 
-	aliasDomains, _, err := repositories.GetAliasDomains(h.DB, claims.Username, claims.Superadmin)
+	aliasDomains, _, err := repositories.GetAliasDomains(h.requestDB(c), claims.Username, claims.Superadmin)
 	if err != nil {
 		return dto.InternalError(c, "failed to fetch alias domains")
 	}
@@ -323,7 +323,7 @@ func (h *Handler) CreateAliasDomainV1(c *echo.Context) error {
 	}
 
 	// Permission check
-	allowedDomains, _, err := repositories.GetAllowedDomains(h.DB, claims.Username, claims.Superadmin)
+	allowedDomains, _, err := repositories.GetAllowedDomains(h.requestDB(c), claims.Username, claims.Superadmin)
 	if err != nil {
 		return dto.InternalError(c, "permission check failed")
 	}
@@ -340,10 +340,10 @@ func (h *Handler) CreateAliasDomainV1(c *echo.Context) error {
 		}
 	}
 
-	if _, err := repositories.GetAliasDomainByName(h.DB, req.AliasDomain); err == nil {
+	if _, err := repositories.GetAliasDomainByName(h.requestDB(c), req.AliasDomain); err == nil {
 		return dto.WriteError(c, dto.ErrCodeConflict, "alias domain already exists")
 	}
-	if _, err := repositories.GetDomainByName(h.DB, req.TargetDomain); err != nil {
+	if _, err := repositories.GetDomainByName(h.requestDB(c), req.TargetDomain); err != nil {
 		return dto.ValidationError(c, "target domain does not exist")
 	}
 
@@ -356,7 +356,7 @@ func (h *Handler) CreateAliasDomainV1(c *echo.Context) error {
 		Active:       req.Active,
 	}
 
-	if err := repositories.CreateAliasDomain(h.DB, newAD, claims.Username, c.RealIP()); err != nil {
+	if err := repositories.CreateAliasDomain(h.requestDB(c), newAD, claims.Username, c.RealIP()); err != nil {
 		return dto.InternalError(c, "failed to create alias domain")
 	}
 
@@ -384,13 +384,13 @@ func (h *Handler) GetAliasDomainV1(c *echo.Context) error {
 
 	name, _ := url.PathUnescape(c.Param("alias_domain"))
 
-	aliasDomain, err := repositories.GetAliasDomainByName(h.DB, name)
+	aliasDomain, err := repositories.GetAliasDomainByName(h.requestDB(c), name)
 	if err != nil {
 		return dto.NotFound(c, "alias domain not found")
 	}
 
 	// Scoping
-	allowedDomains, _, err := repositories.GetAllowedDomains(h.DB, claims.Username, claims.Superadmin)
+	allowedDomains, _, err := repositories.GetAllowedDomains(h.requestDB(c), claims.Username, claims.Superadmin)
 	if err != nil {
 		return dto.InternalError(c, "permission check failed")
 	}
@@ -434,13 +434,13 @@ func (h *Handler) UpdateAliasDomainV1(c *echo.Context) error {
 
 	name, _ := url.PathUnescape(c.Param("alias_domain"))
 
-	aliasDomain, err := repositories.GetAliasDomainByName(h.DB, name)
+	aliasDomain, err := repositories.GetAliasDomainByName(h.requestDB(c), name)
 	if err != nil {
 		return dto.NotFound(c, "alias domain not found")
 	}
 
 	// Scoping
-	allowedDomains, _, err := repositories.GetAllowedDomains(h.DB, claims.Username, claims.Superadmin)
+	allowedDomains, _, err := repositories.GetAllowedDomains(h.requestDB(c), claims.Username, claims.Superadmin)
 	if err != nil {
 		return dto.InternalError(c, "permission check failed")
 	}
@@ -478,7 +478,7 @@ func (h *Handler) UpdateAliasDomainV1(c *echo.Context) error {
 				return dto.Forbidden(c, "access denied to new target domain")
 			}
 		}
-		if _, err := repositories.GetDomainByName(h.DB, *req.TargetDomain); err != nil {
+		if _, err := repositories.GetDomainByName(h.requestDB(c), *req.TargetDomain); err != nil {
 			return dto.ValidationError(c, "target domain does not exist")
 		}
 		aliasDomain.TargetDomain = *req.TargetDomain
@@ -488,7 +488,7 @@ func (h *Handler) UpdateAliasDomainV1(c *echo.Context) error {
 		aliasDomain.Active = *req.Active
 	}
 
-	if err := repositories.SaveAliasDomain(h.DB, aliasDomain, claims.Username, c.RealIP()); err != nil {
+	if err := repositories.SaveAliasDomain(h.requestDB(c), aliasDomain, claims.Username, c.RealIP()); err != nil {
 		return dto.InternalError(c, "failed to update alias domain")
 	}
 
@@ -516,13 +516,13 @@ func (h *Handler) DeleteAliasDomainV1(c *echo.Context) error {
 
 	name, _ := url.PathUnescape(c.Param("alias_domain"))
 
-	aliasDomain, err := repositories.GetAliasDomainByName(h.DB, name)
+	aliasDomain, err := repositories.GetAliasDomainByName(h.requestDB(c), name)
 	if err != nil {
 		return dto.NotFound(c, "alias domain not found")
 	}
 
 	// Scoping
-	allowedDomains, _, err := repositories.GetAllowedDomains(h.DB, claims.Username, claims.Superadmin)
+	allowedDomains, _, err := repositories.GetAllowedDomains(h.requestDB(c), claims.Username, claims.Superadmin)
 	if err != nil {
 		return dto.InternalError(c, "permission check failed")
 	}
@@ -539,7 +539,7 @@ func (h *Handler) DeleteAliasDomainV1(c *echo.Context) error {
 		}
 	}
 
-	if err := repositories.DeleteAliasDomain(h.DB, name, claims.Username, c.RealIP()); err != nil {
+	if err := repositories.DeleteAliasDomain(h.requestDB(c), name, claims.Username, c.RealIP()); err != nil {
 		return dto.InternalError(c, "failed to delete alias domain")
 	}
 
