@@ -50,19 +50,19 @@ Pre-built binaries, .deb and .rpm packages are published on every release: [GitH
 
 | Login | Dashboard |
 |-------|-----------|
-| ![Login](DOCUMENTS/screenshots/admin-login.png) | ![Dashboard](DOCUMENTS/screenshots/admin-welcome.png) |
+| ![Login](DOCUMENTS/screenshots/admin-login.png) | ![Dashboard](DOCUMENTS/screenshots/dashboard.png) |
 
-| Domains | Mailboxes & Forwards |
-|---------|----------------------|
-| ![Domains](DOCUMENTS/screenshots/admin-domain-list.png) | ![Mailboxes](DOCUMENTS/screenshots/mailboxes-and-forwards-for-domain.png) |
+| Domains | Mailboxes |
+|---------|-----------|
+| ![Domains](DOCUMENTS/screenshots/domains.png) | ![Mailboxes](DOCUMENTS/screenshots/mailboxes.png) |
 
-| Create Alias | Admins |
-|--------------|--------|
-| ![Alias](DOCUMENTS/screenshots/create-new-alias.png) | ![Admins](DOCUMENTS/screenshots/admin-list.png) |
+| Aliases | Administrators |
+|---------|----------------|
+| ![Aliases](DOCUMENTS/screenshots/aliases.png) | ![Admins](DOCUMENTS/screenshots/admins.png) |
 
-| User Portal – Vacation | User Portal – Forwarding |
-|------------------------|------------------------|
-| ![Vacation](DOCUMENTS/screenshots/users-enable-vacation-autoresponse.png) | ![Forwarding](DOCUMENTS/screenshots/users-edit-mail-forward.png) |
+| User Portal – Dashboard | User Portal – Vacation |
+|-------------------------|------------------------|
+| ![User dashboard](DOCUMENTS/screenshots/user-dashboard.png) | ![Vacation](DOCUMENTS/screenshots/user-vacation.png) |
 
 More screenshots in [DOCUMENTS/screenshots](DOCUMENTS/screenshots).
 

@@ -4,7 +4,7 @@
       <div class="logo-icon">
         <Icon name="mail" :size="20" color="white" />
       </div>
-      <h1 class="logo-text">PostfixAdmin</h1>
+      <h1 class="logo-text">Go-PostfixAdmin</h1>
     </div>
 
     <nav class="sidebar-nav">
@@ -98,7 +98,8 @@ function isSettingsDisabled(item: { to: string; perm: string | null }) {
 }
 
 .logo-text {
-  font-size: 20px;
+  font-size: 17px;
+  white-space: nowrap;
   font-weight: 700;
   font-family: monospace;
   color: var(--color-brand-text);
