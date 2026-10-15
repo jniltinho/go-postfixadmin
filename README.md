@@ -2,81 +2,127 @@
 
 [![Go Version](https://img.shields.io/github/go-mod/go-version/jniltinho/go-postfixadmin)](https://go.dev/)
 [![License](https://img.shields.io/github/license/jniltinho/go-postfixadmin)](./LICENSE)
-[![Release](https://img.shields.io/github/v/release/jniltinho/go-postfixadmin)](https://github.com/jniltinho/go-postfixadmin/releases)
+[![Release](https://img.shields.io/github/v/release/jniltinho/go-postfixadmin?color=blue)](https://github.com/jniltinho/go-postfixadmin/releases)
 [![Stars](https://img.shields.io/github/stars/jniltinho/go-postfixadmin?style=social)](https://github.com/jniltinho/go-postfixadmin/stargazers)
 [![Docker Pulls](https://img.shields.io/docker/pulls/jniltinho/go-postfixadmin)](https://hub.docker.com/r/jniltinho/go-postfixadmin)
 
-**Modern, self-contained web UI and REST API for Postfix + Dovecot mail servers.**
+<p align="center">
+  <img src="DOCUMENTS/screenshots/dashboard.png" alt="Go-PostfixAdmin dashboard" width="900">
+</p>
 
-A single Go binary with the entire Vue 3 frontend embedded. Manage domains, mailboxes, aliases, admins, user self-service (passwords, forwards, vacation), audit logs, and Postfix transports — with JWT auth, RBAC, and first-class CLI tools.
+<p align="center">
+  <b>A modern, single-binary web panel and REST API for Postfix + Dovecot mail servers.</b><br>
+  Domains, mailboxes, aliases, admins, RBAC and a self-service user portal — no PHP, no web server, no extra runtime.
+</p>
 
-## Quick Start
+<p align="center">
+  <a href="#-quick-start">Quick Start</a> ·
+  <a href="#-screenshots">Screenshots</a> ·
+  <a href="#-features">Features</a> ·
+  <a href="FEATURES.md">Full feature list</a> ·
+  <a href="DOCUMENTS/setup/README.md">Setup guide</a>
+</p>
 
-### Build & run locally
+---
+
+## ✨ Why Go-PostfixAdmin?
+
+- **One file to deploy** — the Vue 3 UI, Swagger docs and translations are embedded in a single static Go binary. Copy it, point it at your database, run it. Also shipped as Docker image, `.deb` and `.rpm`.
+- **Fast and lightweight** — no PHP-FPM, Apache/Nginx or Node runtime in production — just one Go process.
+- **API-first** — every action in the UI is available through a documented REST API (`/api/v1`) with JWT and long-lived API keys, ready for automation and provisioning scripts.
+- **Built for teams** — superadmins, domain admins and fine-grained RBAC roles decide who can see and change what.
+- **Users help themselves** — a separate portal lets mailbox owners change their password, set forwarding and configure vacation auto-replies.
+- **Familiar data model** — PostfixAdmin-style tables (`domain`, `mailbox`, `alias`, …) and `$2y$` bcrypt hashes, on MariaDB/MySQL or PostgreSQL.
+- **Scriptable CLI** — bulk CSV import/export, domain/mailbox/transport management, MySQL backups, quota reports and a Postfix `transport_maps` TCP server.
+
+## 🚀 Quick Start
+
+### Docker Compose (fastest)
 
 ```bash
 git clone https://github.com/jniltinho/go-postfixadmin.git
 cd go-postfixadmin
-
-make build                 # builds Vue 3 frontend + embeds into Go binary
-./bin/postfixadmin --generate-config
-
-# Prepare your database first (see setup guides below)
-./bin/postfixadmin migrate
-./bin/postfixadmin migrate rbac   # for RBAC roles/permissions
-
-./bin/postfixadmin server
+docker compose up -d
 ```
 
-The admin UI is at `http://localhost:8080`.
-
-Swagger UI (when `server.swagger_enable = true`): `http://localhost:8080/swagger/`.
+Open `http://localhost:8080` — the stack includes MariaDB and creates the first admin automatically (`admin@example.com` / `adminpassword` — change it in [docker-compose.yml](docker-compose.yml)).
 
 ### Docker
 
 ```bash
-make build-docker
-
 docker run -p 8080:8080 \
   -e DB_URL="postfix:pass@tcp(your-db:3306)/postfix?charset=utf8mb4&parseTime=True" \
   jniltinho/go-postfixadmin:latest
 ```
 
-For a ready-to-use stack with MariaDB + auto admin creation, use the included [docker-compose.yml](docker-compose.yml).
+### Binary / .deb / .rpm
 
-Pre-built binaries, .deb and .rpm packages are published on every release: [GitHub Releases](https://github.com/jniltinho/go-postfixadmin/releases).
+Download from [GitHub Releases](https://github.com/jniltinho/go-postfixadmin/releases), then:
 
-## Screenshots
+```bash
+./postfixadmin --generate-config      # writes config.toml — set your database
+./postfixadmin migrate                # create / update the schema
+./postfixadmin migrate rbac           # optional: RBAC roles and permissions
+./postfixadmin admin --add-superadmin admin@example.com:'S3cure!Pass'
+./postfixadmin server                 # http://localhost:8080
+```
 
-| Login | Dashboard |
-|-------|-----------|
-| ![Login](DOCUMENTS/screenshots/admin-login.png) | ![Dashboard](DOCUMENTS/screenshots/dashboard.png) |
+Swagger UI is available at `/swagger/` when `server.swagger_enable = true`.
 
-| Domains | Mailboxes |
-|---------|-----------|
+### Build from source
+
+```bash
+make build        # builds the Vue 3 frontend and embeds it into bin/postfixadmin
+make run
+```
+
+See [DEVELOPMENT.md](DEVELOPMENT.md) for the full developer workflow.
+
+## 📸 Screenshots
+
+### Administration
+
+| Domains | Email accounts |
+|---------|----------------|
 | ![Domains](DOCUMENTS/screenshots/domains.png) | ![Mailboxes](DOCUMENTS/screenshots/mailboxes.png) |
 
-| Aliases | Administrators |
+| Add email account | Add domain |
+|-------------------|------------|
+| ![Add email account](DOCUMENTS/screenshots/create-mailbox.png) | ![Add domain](DOCUMENTS/screenshots/create-domain.png) |
+
+| Aliases | Domain aliases |
 |---------|----------------|
-| ![Aliases](DOCUMENTS/screenshots/aliases.png) | ![Admins](DOCUMENTS/screenshots/admins.png) |
+| ![Aliases](DOCUMENTS/screenshots/aliases.png) | ![Domain aliases](DOCUMENTS/screenshots/alias-domains.png) |
 
-| User Portal – Dashboard | User Portal – Vacation |
-|-------------------------|------------------------|
-| ![User dashboard](DOCUMENTS/screenshots/user-dashboard.png) | ![Vacation](DOCUMENTS/screenshots/user-vacation.png) |
+| Administrators | RBAC roles |
+|----------------|------------|
+| ![Administrators](DOCUMENTS/screenshots/admins.png) | ![Roles](DOCUMENTS/screenshots/roles.png) |
 
-More screenshots in [DOCUMENTS/screenshots](DOCUMENTS/screenshots).
+| Mail delivery log | Audit log |
+|-------------------|-----------|
+| ![Mail log](DOCUMENTS/screenshots/maillog.png) | ![Audit log](DOCUMENTS/screenshots/logs.png) |
 
-## Key Features
+### User self-service portal
 
-- **Embedded SPA** — Vue 3 + Tailwind v4 frontend compiled into the Go binary (single deployable artifact, no CDN or separate static hosting)
-- **Full mail management** — domains, mailboxes (with quota), aliases, alias domains, transports
-- **User self-service portal** — end users manage their own password, forwarding and vacation auto-reply (Dovecot Sieve)
-- **Production API** — versioned REST API (`/api/v1`) with JWT (short-lived access + httpOnly refresh), persistent API keys, and interactive Swagger docs
-- **RBAC** — superadmin vs domain-admin separation + fine-grained permissions
-- **CLI & automation** — CSV import/export, bulk mailbox creation, backup helper, quota reports, log viewers, `transport server` for Postfix `transport_maps`
-- **Observability** — admin action logs + mail log ingestion (`readlog`)
-- **i18n** — English, Português (pt_BR), Español — fully translated UI and messages
-- **Dual database** — MariaDB/MySQL and PostgreSQL (GORM)
+| Forwarding & password | Vacation auto-reply |
+|-----------------------|---------------------|
+| ![User portal](DOCUMENTS/screenshots/user-dashboard.png) | ![Vacation](DOCUMENTS/screenshots/user-vacation.png) |
+
+### REST API
+
+![Swagger UI](DOCUMENTS/screenshots/swagger.png)
+
+More screenshots (login pages, transports, API keys, create admin/alias…) in [DOCUMENTS/screenshots](DOCUMENTS/screenshots).
+
+## 🧩 Features
+
+- **Mail management** — domains (limits, quotas, backup MX), mailboxes with quota, aliases with multiple recipients, alias domains, per-domain Postfix transports
+- **User portal** — password change, forwarding, vacation auto-reply via Dovecot Sieve
+- **Security** — JWT (short-lived access token + httpOnly refresh cookie), CSRF origin check, login rate limiting, strong password policy with built-in generator, persistent API keys with expiry
+- **Access control** — superadmin / domain-admin separation plus optional fine-grained RBAC roles
+- **Operations** — admin audit log, mail delivery log ingestion (`readlog`), quota reports, MySQL/MariaDB backups, optional OpenTelemetry export to OpenObserve
+- **i18n** — English, Português (pt_BR) and Español
+- **Databases** — MariaDB/MySQL and PostgreSQL
 
 Complete capability list: [FEATURES.md](FEATURES.md)
 
@@ -92,7 +138,7 @@ Complete capability list: [FEATURES.md](FEATURES.md)
 
 ## Tech Stack
 
-**Backend**: Go 1.26, Echo v5, GORM, Cobra, Viper, Zerolog, Swaggo (OpenAPI)
+**Backend**: Go 1.26, Echo v5, GORM, Cobra, Viper, log/slog, Swaggo (OpenAPI)
 
 **Frontend (embedded)**: Vue 3 + TS + Vite, Pinia, Vue Router, Tailwind CSS v4, Lucide icons
 
@@ -100,9 +146,15 @@ Complete capability list: [FEATURES.md](FEATURES.md)
 
 ## Contributing
 
+If Go-PostfixAdmin is useful to you, please ⭐ the repository — it helps other admins find it.
+
+
 Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
 
 ## License
+
+Go-PostfixAdmin is an independent project, inspired by and not affiliated with [PostfixAdmin](https://github.com/postfixadmin/postfixadmin).
+
 
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
 
