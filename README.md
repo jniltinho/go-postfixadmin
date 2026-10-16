@@ -5,7 +5,6 @@
 [![Release](https://img.shields.io/github/v/release/jniltinho/go-postfixadmin?color=blue)](https://github.com/jniltinho/go-postfixadmin/releases)
 [![Downloads](https://img.shields.io/github/downloads/jniltinho/go-postfixadmin/total?color=blue)](https://github.com/jniltinho/go-postfixadmin/releases)
 [![Stars](https://img.shields.io/github/stars/jniltinho/go-postfixadmin?style=social)](https://github.com/jniltinho/go-postfixadmin/stargazers)
-[![Docker Pulls](https://img.shields.io/docker/pulls/jniltinho/go-postfixadmin)](https://hub.docker.com/r/jniltinho/go-postfixadmin)
 
 <p align="center">
   <img src="DOCUMENTS/screenshots/dashboard.png" alt="Go-PostfixAdmin dashboard" width="900">
