@@ -3,6 +3,7 @@
 [![Go Version](https://img.shields.io/github/go-mod/go-version/jniltinho/go-postfixadmin)](https://go.dev/)
 [![License](https://img.shields.io/github/license/jniltinho/go-postfixadmin)](./LICENSE)
 [![Release](https://img.shields.io/github/v/release/jniltinho/go-postfixadmin?color=blue)](https://github.com/jniltinho/go-postfixadmin/releases)
+[![Downloads](https://img.shields.io/github/downloads/jniltinho/go-postfixadmin/total?color=blue)](https://github.com/jniltinho/go-postfixadmin/releases)
 [![Stars](https://img.shields.io/github/stars/jniltinho/go-postfixadmin?style=social)](https://github.com/jniltinho/go-postfixadmin/stargazers)
 [![Docker Pulls](https://img.shields.io/docker/pulls/jniltinho/go-postfixadmin)](https://hub.docker.com/r/jniltinho/go-postfixadmin)
 
@@ -13,6 +14,10 @@
 <p align="center">
   <b>A modern, single-binary web panel and REST API for Postfix + Dovecot mail servers.</b><br>
   Domains, mailboxes, aliases, admins, RBAC and a self-service user portal — no PHP, no web server, no extra runtime.
+</p>
+
+<p align="center">
+  <b><a href="https://github.com/jniltinho/go-postfixadmin/releases/latest">⬇ Download the latest release</a></b>
 </p>
 
 <p align="center">
