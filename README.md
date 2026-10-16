@@ -4,6 +4,7 @@
 [![License](https://img.shields.io/github/license/jniltinho/go-postfixadmin)](./LICENSE)
 [![Release](https://img.shields.io/github/v/release/jniltinho/go-postfixadmin?color=blue)](https://github.com/jniltinho/go-postfixadmin/releases)
 [![Downloads](https://img.shields.io/github/downloads/jniltinho/go-postfixadmin/total?color=blue)](https://github.com/jniltinho/go-postfixadmin/releases)
+[![Release Build](https://github.com/jniltinho/go-postfixadmin/actions/workflows/release.yml/badge.svg)](https://github.com/jniltinho/go-postfixadmin/actions/workflows/release.yml)
 [![Stars](https://img.shields.io/github/stars/jniltinho/go-postfixadmin?style=social)](https://github.com/jniltinho/go-postfixadmin/stargazers)
 
 <p align="center">
