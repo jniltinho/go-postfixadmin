@@ -125,7 +125,7 @@ const pageTitle = computed(() =>
   align-items: center;
   justify-content: center;
   background: var(--color-action);
-  box-shadow: 1px 1px 0 var(--color-shadow);
+  box-shadow: var(--shadow-1);
 }
 .header-divider {
   width: 0.25rem;

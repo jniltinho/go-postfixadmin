@@ -2,6 +2,27 @@ import { computed } from 'vue'
 import { useLangStore, type Lang } from '../../stores/lang'
 
 const en = {
+  tabConfig: 'CONFIGURATION',
+  editable: 'EDITABLE',
+  readOnlyTitle: 'READ-ONLY',
+  configFile: 'File',
+  notWritable: 'The panel cannot write config.toml (file or directory permissions), so every value is read-only.',
+  configHint:
+    'Changes apply at once, except keys marked restart. The previous file is kept as config.toml.bak and the change is audited.',
+  readOnlyHint: 'Critical settings (database, security, delivery, access) are changed in config.toml on the server.',
+  restartTag: 'restart',
+  secretSet: 'set (hidden)',
+  secretUnset: 'not set',
+  envOverride: 'set by {env}',
+  yes: 'yes',
+  no: 'no',
+  save: 'SAVE CHANGES',
+  saving: 'SAVING…',
+  saved: 'Saved: {keys}.',
+  savedRestart: 'Saved: {keys}. Restart the service to apply the keys marked restart.',
+  saveError: 'Not saved: {msg}',
+  configLoadError: 'Could not load the configuration.',
+  durationHint: 'e.g. 30m, 1h',
   language: 'LANGUAGE',
   languageAria: 'Language',
   languageAuto: 'Automatic (browser: {lang})',
@@ -71,10 +92,37 @@ const en = {
   forbidden: 'Only superadmins can open the terminal.',
   busy: 'Too many open terminals (at most 4 per admin).',
   internal: 'The panel could not open the terminal.',
+  off: 'The web terminal was disabled in Settings.',
+  terminalOnTitle: 'ENABLE THE WEB TERMINAL?',
+  terminalOnText:
+    "Superadmins will be able to open an SSH shell on {target} from the browser. Signing in still needs the server's SSH password or key, and the host key must be confirmed. You can disable it here at any time.",
+  terminalOnOk: 'ENABLE TERMINAL',
 }
 type Dict = typeof en
 
 const pt: Dict = {
+  tabConfig: 'CONFIGURAÇÃO',
+  editable: 'EDITÁVEIS',
+  readOnlyTitle: 'SOMENTE LEITURA',
+  configFile: 'Arquivo',
+  notWritable:
+    'O painel não consegue gravar o config.toml (permissões do arquivo ou do diretório), então todos os valores estão somente leitura.',
+  configHint:
+    'As mudanças valem na hora, exceto as chaves marcadas com reinício. O arquivo anterior fica salvo como config.toml.bak e a alteração vai para a auditoria.',
+  readOnlyHint: 'Configurações críticas (banco, segurança, entrega, acesso) são alteradas no config.toml no servidor.',
+  restartTag: 'reinício',
+  secretSet: 'definido (oculto)',
+  secretUnset: 'não definido',
+  envOverride: 'definido por {env}',
+  yes: 'sim',
+  no: 'não',
+  save: 'SALVAR ALTERAÇÕES',
+  saving: 'SALVANDO…',
+  saved: 'Salvo: {keys}.',
+  savedRestart: 'Salvo: {keys}. Reinicie o serviço para aplicar as chaves marcadas com reinício.',
+  saveError: 'Não salvo: {msg}',
+  configLoadError: 'Não foi possível carregar a configuração.',
+  durationHint: 'ex.: 30m, 1h',
   language: 'IDIOMA',
   languageAria: 'Idioma',
   languageAuto: 'Automático (navegador: {lang})',
@@ -145,9 +193,37 @@ const pt: Dict = {
   forbidden: 'Só superadmins podem abrir o terminal.',
   busy: 'Terminais abertos demais (no máximo 4 por admin).',
   internal: 'O painel não conseguiu abrir o terminal.',
+  off: 'O terminal web foi desativado em Configurações.',
+  terminalOnTitle: 'ATIVAR O TERMINAL WEB?',
+  terminalOnText:
+    'Superadmins poderão abrir um shell SSH em {target} pelo navegador. Para entrar ainda é preciso a senha ou chave SSH do servidor, e a chave do host precisa ser confirmada. Você pode desativar aqui a qualquer momento.',
+  terminalOnOk: 'ATIVAR TERMINAL',
 }
 
 const es: Dict = {
+  tabConfig: 'CONFIGURACIÓN',
+  editable: 'EDITABLES',
+  readOnlyTitle: 'SOLO LECTURA',
+  configFile: 'Archivo',
+  notWritable:
+    'El panel no puede escribir config.toml (permisos del archivo o del directorio), así que todos los valores son de solo lectura.',
+  configHint:
+    'Los cambios se aplican al momento, salvo las claves marcadas con reinicio. El archivo anterior queda como config.toml.bak y el cambio se audita.',
+  readOnlyHint:
+    'Los ajustes críticos (base de datos, seguridad, entrega, acceso) se cambian en config.toml en el servidor.',
+  restartTag: 'reinicio',
+  secretSet: 'definido (oculto)',
+  secretUnset: 'no definido',
+  envOverride: 'definido por {env}',
+  yes: 'sí',
+  no: 'no',
+  save: 'GUARDAR CAMBIOS',
+  saving: 'GUARDANDO…',
+  saved: 'Guardado: {keys}.',
+  savedRestart: 'Guardado: {keys}. Reinicie el servicio para aplicar las claves marcadas con reinicio.',
+  saveError: 'No guardado: {msg}',
+  configLoadError: 'No se pudo cargar la configuración.',
+  durationHint: 'p. ej. 30m, 1h',
   language: 'IDIOMA',
   languageAria: 'Idioma',
   languageAuto: 'Automático (navegador: {lang})',
@@ -219,6 +295,47 @@ const es: Dict = {
   forbidden: 'Solo los superadmins pueden abrir la terminal.',
   busy: 'Demasiadas terminales abiertas (como máximo 4 por admin).',
   internal: 'El panel no pudo abrir la terminal.',
+  off: 'La terminal web fue desactivada en Configuración.',
+  terminalOnTitle: '¿ACTIVAR LA TERMINAL WEB?',
+  terminalOnText:
+    'Los superadmins podrán abrir un shell SSH en {target} desde el navegador. Para entrar se sigue necesitando la contraseña o clave SSH del servidor, y la clave del host debe confirmarse. Puede desactivarla aquí en cualquier momento.',
+  terminalOnOk: 'ACTIVAR TERMINAL',
+}
+
+// descriptions of the editable config.toml keys
+export const fieldDescs: Record<Lang, Record<string, string>> = {
+  EN: {
+    'ui.default_theme': 'Theme for browsers without a saved choice.',
+    'vacation.enabled': 'Vacation auto-replies (Dovecot Sieve) in the user portal.',
+    'smtp.server': 'SMTP server for welcome e-mails.',
+    'smtp.port': 'SMTP port (25, 465 or 587).',
+    'smtp.type': 'Connection: plain, tls or starttls.',
+    'server.swagger_enable': 'Swagger UI on /swagger/.',
+    'terminal.idle_timeout': 'Close the SSH terminal after this time without typing.',
+    'terminal.enabled': 'Web SSH terminal in Settings › Terminal (superadmins). Disabling closes open sessions.',
+  },
+  PT: {
+    'ui.default_theme': 'Tema para navegadores sem escolha salva.',
+    'vacation.enabled': 'Respostas automáticas de férias (Dovecot Sieve) no portal do usuário.',
+    'smtp.server': 'Servidor SMTP para os e-mails de boas-vindas.',
+    'smtp.port': 'Porta SMTP (25, 465 ou 587).',
+    'smtp.type': 'Conexão: plain, tls ou starttls.',
+    'server.swagger_enable': 'Swagger UI em /swagger/.',
+    'terminal.idle_timeout': 'Fecha o terminal SSH após esse tempo sem digitar.',
+    'terminal.enabled':
+      'Terminal SSH web em Configurações › Terminal (superadmins). Desativar encerra as sessões abertas.',
+  },
+  ES: {
+    'ui.default_theme': 'Tema para navegadores sin una elección guardada.',
+    'vacation.enabled': 'Respuestas automáticas de vacaciones (Dovecot Sieve) en el portal de usuario.',
+    'smtp.server': 'Servidor SMTP para los correos de bienvenida.',
+    'smtp.port': 'Puerto SMTP (25, 465 o 587).',
+    'smtp.type': 'Conexión: plain, tls o starttls.',
+    'server.swagger_enable': 'Swagger UI en /swagger/.',
+    'terminal.idle_timeout': 'Cierra la terminal SSH tras este tiempo sin escribir.',
+    'terminal.enabled':
+      'Terminal SSH web en Configuración › Terminal (superadmins). Desactivarla cierra las sesiones abiertas.',
+  },
 }
 
 export const dicts: Record<Lang, Dict> = { EN: en, PT: pt, ES: es }

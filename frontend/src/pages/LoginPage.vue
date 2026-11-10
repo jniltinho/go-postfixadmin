@@ -233,7 +233,7 @@ onMounted(async () => {
   height: 4rem;
   background: var(--color-action);
   border: 2px solid var(--color-line);
-  box-shadow: 2px 2px 0px var(--color-shadow);
+  box-shadow: var(--shadow-2);
   margin-bottom: 1rem;
   transition: transform 0.2s;
   cursor: pointer;
@@ -269,7 +269,7 @@ onMounted(async () => {
 }
 
 .neo-shadow {
-  box-shadow: 4px 4px 0px var(--color-shadow);
+  box-shadow: var(--shadow-4);
 }
 
 .card-heading-neo {
@@ -365,7 +365,7 @@ onMounted(async () => {
   letter-spacing: 0.0625rem;
   cursor: pointer;
   border-radius: 0;
-  box-shadow: 3px 3px 0px var(--color-shadow);
+  box-shadow: var(--shadow-3);
   transition: all 0.15s;
   display: flex;
   align-items: center;

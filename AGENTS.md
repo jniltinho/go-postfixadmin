@@ -142,8 +142,9 @@ Generated config: `./bin/postfixadmin --generate-config` → `config.toml` (also
 - **Build the SPA from `frontend/`. Never edit `web/dist/`** — it is generated and re-embedded.
 - Tailwind v4 utilities, Lucide icons, Pinia stores under `frontend/src/stores`, vue-router under `frontend/src/router`.
 - Design aesthetic: **neo-brutalism** (2px/4px borders, high contrast, sharp `neo-shadow`) is the Default theme; 19 more themes (incl. Windows XP) live in `frontend/src/themes/`.
-- **Colors only through theme roles** (`bg-surface`, `text-fg`, `border-line`, `var(--color-action)`, terminal `--term-*`). No hex values or Tailwind palette classes outside `frontend/src/themes/` — `npm run test` fails on them. See CONTRIBUTING.md § Themes.
-- **Sizes in `rem`** (borders/shadow offsets stay `px`): the root font scales 16px → 24px from FullHD to 4K.
+- **Colors only through theme roles** (`bg-surface`, `text-fg`, `border-line`, `var(--color-action)`). No hex values or Tailwind palette classes outside `frontend/src/themes/` — `npm run test` fails on them. See CONTRIBUTING.md § Themes.
+- **Sizes in `rem`** (borders stay `px`): the root font scales 16px → 24px from FullHD to 4K.
+- **Shadows/corners via roles**: `var(--shadow-N)` / `shadow-(--shadow-N)` and `var(--radius)` / `var(--radius-sm)` (`frontend/src/themes/shape.css`); never literal offset shadows.
 - Frontend checks: `npm run check` (vp check) and `npm run test` (vp test run); visual matrix: `tests/visual/capture.sh`.
 
 ### Database / migrations

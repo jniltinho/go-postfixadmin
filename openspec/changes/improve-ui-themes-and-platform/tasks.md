@@ -66,7 +66,7 @@
 
 - [x] 9.1 `terminal_host_key` model in `MigrateDB`; `[terminal]` config (enabled/host/port/idle_timeout) in both templates and Viper defaults.
 - [x] 9.2 Handlers: info, host-key reset, WebSocket (same-origin, token in first message, superadmin + `settings:write`, 4 per admin, frame/ping/idle limits, `xterm-256color` PTY, pinned host key, audit log); unit tests for permissions, origin, pinning, algorithms; route tests (404 disabled, 403 cross-origin/non-superadmin).
-- [x] 9.3 Terminal tab with xterm.js + fit, key file upload, fingerprint confirmation, forget key, theme-driven `--term-*` palette, kept mounted across tabs.
+- [x] 9.3 Terminal tab with xterm.js + fit, key file upload, fingerprint confirmation, forget key, classic xterm palette (black console, as in ad-manager) in every theme, kept mounted across tabs.
 - [x] 9.4 End-to-end against a throwaway sshd container: fingerprint matches `ssh-keygen -lf`, `TERM=xterm-256color`, `tput colors` = 256, live theme switch, changed host key refused and logged.
 
 ## 10. Translations and language
@@ -74,6 +74,15 @@
 - [x] 10a.1 `stores/lang.ts` (saved choice > browser > EN, Automatic, backend `lang` cookie) shared by login pages, admin UI and portal.
 - [x] 10a.2 `pages/settings/i18n.ts` with EN/PT/ES for Settings, Terminal, dialogs, breadcrumb and menu entry; theme name words translated; tests for complete dictionaries and placeholders.
 - [x] 10a.3 Remove the PT/EN/ES buttons from the admin header and both login pages; Language card in Settings › Appearance; portal select.
+
+## 12. Follow-ups after the first deploy
+
+- [x] 12.1 Menu: the selected item keeps its tab opening into the content; hover is a tint and left bar only (no box closed by the sidebar edge).
+- [x] 12.2 Theme shape roles in `themes/shape.css`: subtle rounded corners (`--radius`, `--radius-sm`), soft shadows (`--shadow-1…7`, hard offsets kept for Default and High contrast) and lighter lines in the theme's hue (`--color-line-base` kept for form controls, 1px card frames) for every theme except Default; Windows 98 almost square.
+- [x] 12.6 Services table with fixed columns and uniform badges; Configuration tab as two slim cards that fit FullHD/QHD without page or card scroll (scroll inside a card only on small screens); save result as a toast.
+- [x] 12.3 Settings › Services also shows `rspamd.service`.
+- [x] 12.4 Settings › Configuration: `GET/PUT /api/v1/system/config`, schema of editable/read-only/secret keys, line-preserving TOML editor (`utils.SetTOMLValue`, tested), validation, `.bak`, atomic write, audit; tab in PT/EN/ES at AAA; route tests (secrets hidden, 403, read-only/invalid refused, file updated in place).
+- [x] 12.5 `terminal.enabled` editable in Settings › Configuration (confirmation to enable; open sessions closed within 15 s when disabled); host/port stay read-only.
 
 ## 11. Final validation
 

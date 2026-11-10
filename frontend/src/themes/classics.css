@@ -18,6 +18,7 @@
   --color-fg-muted: #404040;
   --color-fg-subtle: #404040;
   --color-line: #7f9db9;
+  --color-line-base: #7f9db9;
   --color-line-soft: #ebeadb;
   --color-field-line: #d6d2c2;
   --color-strong-fill: #0846c8;
@@ -63,6 +64,7 @@
   --color-fg-muted: #404040;
   --color-fg-subtle: #404040;
   --color-line: #000000;
+  --color-line-base: #000000;
   --color-line-soft: #a8a8a8;
   --color-field-line: #808080;
   --color-strong-fill: #000080;

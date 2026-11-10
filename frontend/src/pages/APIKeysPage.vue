@@ -132,7 +132,7 @@
           <button
             type="button"
             @click="showAdd = false"
-            class="bg-surface hover:bg-surface-2 text-fg border-2 border-line font-black px-6 py-3 shadow-[2px_2px_0px_var(--color-shadow)] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_var(--color-shadow)] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm"
+            class="bg-surface hover:bg-surface-2 text-fg border-2 border-line font-black px-6 py-3 shadow-(--shadow-2) transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-(--shadow-3) active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm"
           >
             <Icon name="x" :size="16" class="mr-2" />
             CANCEL
@@ -141,7 +141,7 @@
             type="button"
             :disabled="savingAdd"
             @click="submitAdd"
-            class="bg-action hover:bg-surface hover:text-action text-on-action border-2 border-line font-black px-6 py-3 shadow-[3px_3px_0px_var(--color-shadow)] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_var(--color-shadow)] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm disabled:opacity-60"
+            class="bg-action hover:bg-surface hover:text-action text-on-action border-2 border-line font-black px-6 py-3 shadow-(--shadow-3) transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-(--shadow-4) active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm disabled:opacity-60"
           >
             <Icon name="plus-circle" :size="16" class="mr-2" />
             {{ savingAdd ? 'GENERATING...' : 'GENERATE TOKEN' }}
@@ -197,7 +197,7 @@
           <button
             type="button"
             @click="copyAndClose"
-            class="bg-action hover:bg-surface hover:text-action text-on-action border-2 border-line font-black px-6 py-3 shadow-[3px_3px_0px_var(--color-shadow)] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_var(--color-shadow)] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm"
+            class="bg-action hover:bg-surface hover:text-action text-on-action border-2 border-line font-black px-6 py-3 shadow-(--shadow-3) transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-(--shadow-4) active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm"
           >
             <Icon name="copy" :size="16" class="mr-2" />
             COPY & CLOSE
@@ -395,7 +395,7 @@ function isExpired(ts: string | null): boolean {
 .info-callout {
   background: var(--color-surface);
   border: 2px solid var(--color-line);
-  box-shadow: 2px 2px 0 var(--color-shadow);
+  box-shadow: var(--shadow-2);
   padding: 1rem 1.25rem;
   display: flex;
   align-items: flex-start;
@@ -486,7 +486,7 @@ function isExpired(ts: string | null): boolean {
   font-weight: 700;
   cursor: pointer;
   border-radius: 0;
-  box-shadow: 1px 1px 0 var(--color-shadow);
+  box-shadow: var(--shadow-1);
   transition: all 0.1s;
 }
 .badge-toggle:hover:not(:disabled) {

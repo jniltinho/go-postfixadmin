@@ -73,7 +73,7 @@
         <button
           type="button"
           @click="emit('update:modelValue', false)"
-          class="bg-surface hover:bg-surface-3 text-fg border-2 border-line font-black px-6 py-2.5 shadow-[2px_2px_0px_var(--color-shadow)] hover:translate-y-px hover:shadow-[1px_1px_0px_var(--color-shadow)] active:translate-y-0.5 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center"
+          class="bg-surface hover:bg-surface-3 text-fg border-2 border-line font-black px-6 py-2.5 shadow-(--shadow-2) hover:translate-y-px hover:shadow-(--shadow-1) active:translate-y-0.5 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center"
         >
           <Icon name="x" :size="16" class="mr-2" />
           CANCEL
@@ -82,7 +82,7 @@
           type="button"
           :disabled="saving"
           @click="submit"
-          class="bg-action hover:bg-surface hover:text-action text-on-action border-2 border-line font-black px-6 py-2.5 shadow-[3px_3px_0px_var(--color-shadow)] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_var(--color-shadow)] active:translate-x-0 active:translate-y-0 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center disabled:opacity-60"
+          class="bg-action hover:bg-surface hover:text-action text-on-action border-2 border-line font-black px-6 py-2.5 shadow-(--shadow-3) hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-(--shadow-4) active:translate-x-0 active:translate-y-0 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center disabled:opacity-60"
         >
           <Icon name="plus-circle" :size="16" class="mr-2" />
           {{ saving ? 'SAVING...' : 'CREATE ALIAS' }}

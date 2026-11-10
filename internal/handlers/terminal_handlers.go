@@ -54,6 +54,7 @@ const (
 	codeTimeout     = "timeout"
 	codeClosed      = "closed"
 	codeIdle        = "idle"
+	codeOff         = "off" // the terminal was disabled in Settings while open
 	codeInternal    = "internal"
 	codeBadRequest  = "bad_request"
 	codeForbidden   = "forbidden"
@@ -108,11 +109,13 @@ func terminalIdle() time.Duration {
 	return 30 * time.Minute
 }
 
-// terminalAllowed: an admin token of a superadmin who, with RBAC on, also holds settings:write.
-func terminalAllowed(cl *auth.Claims) bool {
+// superadminWith: an admin token of a superadmin who, with RBAC on, also holds perm.
+func superadminWith(cl *auth.Claims, perm string) bool {
 	return cl != nil && cl.Type == "admin" && cl.Superadmin &&
-		(!viper.GetBool("rbac.enabled") || rbac.HasPermission(cl.Permissions, rbac.PermSettingsWrite))
+		(!viper.GetBool("rbac.enabled") || rbac.HasPermission(cl.Permissions, perm))
 }
+
+func terminalAllowed(cl *auth.Claims) bool { return superadminWith(cl, rbac.PermSettingsWrite) }
 
 // sameOrigin reports whether the request's Origin is the panel's own (host and port equal to Host).
 func sameOrigin(r *http.Request) bool {
@@ -343,6 +346,10 @@ func (h *Handler) runTerminal(ctx context.Context, ws *websocket.Conn, ip string
 		case <-ping.C:
 			_ = send(websocket.PingFrame, nil)
 		case <-check.C:
+			if !viper.GetBool("terminal.enabled") {
+				control(map[string]any{"type": "error", "code": codeOff})
+				return
+			}
 			amu.Lock()
 			quiet := time.Since(last)
 			amu.Unlock()

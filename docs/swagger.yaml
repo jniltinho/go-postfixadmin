@@ -95,6 +95,64 @@ definitions:
       role_id:
         type: integer
     type: object
+  dto.ConfigField:
+    properties:
+      configurable:
+        description: editable kind of key (may be locked by file permissions or env)
+        type: boolean
+      editable:
+        description: can be changed now
+        type: boolean
+      env:
+        type: string
+      key:
+        example: smtp.port
+        type: string
+      kind:
+        example: int
+        type: string
+      max:
+        type: integer
+      min:
+        type: integer
+      options:
+        items:
+          type: string
+        type: array
+      restart:
+        type: boolean
+      secret:
+        type: boolean
+      set:
+        type: boolean
+      value: {}
+    type: object
+  dto.ConfigResponse:
+    properties:
+      fields:
+        items:
+          $ref: '#/definitions/dto.ConfigField'
+        type: array
+      file:
+        type: string
+      writable:
+        type: boolean
+    type: object
+  dto.ConfigUpdateRequest:
+    properties:
+      changes:
+        additionalProperties: {}
+        type: object
+    type: object
+  dto.ConfigUpdateResponse:
+    properties:
+      restart_required:
+        type: boolean
+      updated:
+        items:
+          type: string
+        type: array
+    type: object
   dto.CreateAdminRequest:
     properties:
       active:
@@ -2466,10 +2524,72 @@ paths:
       summary: Update API Key
       tags:
       - Settings
+  /system/config:
+    get:
+      description: 'config.toml values shown in Settings > Configuration: which keys
+        are editable, read-only or secret (secret values are never returned). Superadmins
+        only.'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ConfigResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Panel configuration
+      tags:
+      - System
+    put:
+      consumes:
+      - application/json
+      description: Changes editable config.toml keys (comments and formatting are
+        kept, the previous file is saved as config.toml.bak). Read-only and unknown
+        keys are refused. Superadmins only.
+      parameters:
+      - description: keys to change
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ConfigUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ConfigUpdateResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Update panel configuration
+      tags:
+      - System
   /system/services:
     get:
-      description: Read-only systemd state of Postfix and Dovecot on the panel's host
-        (systemctl show).
+      description: Read-only systemd state of Postfix, Dovecot and Rspamd on the panel's
+        host (systemctl show).
       produces:
       - application/json
       responses:

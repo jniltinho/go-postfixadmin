@@ -213,7 +213,7 @@ onUnmounted(() => {
   border-radius: 0;
   transition: all 0.15s;
   text-transform: uppercase;
-  box-shadow: 2px 2px 0 var(--color-shadow);
+  box-shadow: var(--shadow-2);
   display: flex;
   align-items: center;
 }

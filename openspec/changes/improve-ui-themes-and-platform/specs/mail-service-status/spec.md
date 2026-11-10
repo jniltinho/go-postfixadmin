@@ -1,10 +1,10 @@
 ## ADDED Requirements
 
 ### Requirement: Read-only mail service status
-Settings › Services SHALL show, for `postfix.service` and `dovecot.service`, the systemd active state, sub-state, boot (unit file) state and the time it entered the active state, read with `systemctl show`. The unit list SHALL be a fixed allowlist, never taken from the request. The API (`GET /api/v1/system/services`) SHALL require the `settings:read` permission when RBAC is enabled.
+Settings › Services SHALL show, for `postfix.service`, `dovecot.service` and `rspamd.service`, the systemd active state, sub-state, boot (unit file) state and the time it entered the active state, read with `systemctl show`. The unit list SHALL be a fixed allowlist, never taken from the request. The API (`GET /api/v1/system/services`) SHALL require the `settings:read` permission when RBAC is enabled.
 
 #### Scenario: Services running
-- **WHEN** both units are active on the panel's host
+- **WHEN** the units are active on the panel's host
 - **THEN** each row shows `active/running` (or `active/exited`) with a check icon, `enabled` and its start time
 
 #### Scenario: Unit not installed

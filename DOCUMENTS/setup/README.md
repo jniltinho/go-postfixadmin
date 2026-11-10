@@ -193,8 +193,9 @@ Go-PostfixAdmin will manage the database structure (tables, domains, accounts, a
 ### 3.1 Appearance, service status and web terminal (Settings)
 
 - **Theme**: each admin picks one of the 20 themes in *Settings › Appearance* (saved in the browser). The default for browsers without a choice is `[ui] default_theme` in `config.toml` (env `UI_DEFAULT_THEME`), e.g. `default_theme = "xp"`.
-- **Services**: *Settings › Services* shows `postfix.service` and `dovecot.service` from `systemctl show` (read-only, needs the `settings:read` permission when RBAC is on). It needs systemd on the host where Go-PostfixAdmin runs; inside a container it reports that systemctl is not available.
-- **Terminal**: *Settings › Terminal* opens an SSH shell (`xterm-256color`) to the mail host from the browser. It is **off by default**; enable it only if you need it:
+- **Services**: *Settings › Services* shows `postfix.service`, `dovecot.service` and `rspamd.service` from `systemctl show` (read-only, needs the `settings:read` permission when RBAC is on). It needs systemd on the host where Go-PostfixAdmin runs; inside a container it reports that systemctl is not available.
+- **Configuration**: *Settings › Configuration* lets superadmins change a few operational keys (`ui.default_theme`, `vacation.enabled`, `smtp.server/port/type`, `server.swagger_enable` — after a restart —, `terminal.enabled` and `terminal.idle_timeout`). The panel edits only those lines of `config.toml`, keeps comments, saves the previous file as `config.toml.bak` and logs `config_update`; it needs write access to the file and its directory (otherwise everything is shown read-only). All other keys, including database, secrets, TLS, JWT, trusted proxies, RBAC, transport, the terminal host/port, backup and observability, are read-only there and must be changed on the server.
+- **Terminal**: *Settings › Terminal* opens an SSH shell (`xterm-256color`) to the mail host from the browser. It is **off by default**; a superadmin can switch it on or off in *Settings › Configuration* (enabling asks for confirmation, disabling closes open sessions), or set it in `config.toml`:
 
   ```toml
   [terminal]

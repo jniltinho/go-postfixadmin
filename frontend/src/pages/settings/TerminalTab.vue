@@ -99,7 +99,10 @@
         <Icon name="square-terminal" :size="40" />
         <p>{{ t('empty', { target: info.target }) }}</p>
       </div>
-      <div v-show="state !== 'idle' || started" ref="termEl" class="tm-term"></div>
+      <!-- frame (padding, border, black) outside the element xterm.js fits into: the fit addon measures its parent -->
+      <div v-show="state !== 'idle' || started" class="tm-term">
+        <div ref="termEl" class="tm-term-fit"></div>
+      </div>
     </section>
 
     <ConfirmDialog v-model="askTrust" :title="t('trustTitle')" :confirm-label="t('trustOk')" @confirm="trustAndConnect">
@@ -121,7 +124,6 @@ import { FitAddon } from '@xterm/addon-fit'
 import '@xterm/xterm/css/xterm.css'
 import { xtermTheme } from '../../themes/xterm'
 import { useAuthStore } from '../../stores/auth'
-import { useThemeStore } from '../../stores/theme'
 import { useToastStore } from '../../stores/toast'
 import http from '../../utils/http'
 import { useT, type Key } from './i18n'
@@ -130,7 +132,6 @@ type Info = { enabled: boolean; target: string; host_key?: string; idle_minutes:
 
 const auth = useAuthStore()
 const t = useT()
-const theme = useThemeStore()
 const toast = useToastStore()
 const info = ref<Info | null>(null)
 const loading = ref(false)
@@ -160,6 +161,7 @@ const codes: Key[] = [
   'forbidden',
   'busy',
   'internal',
+  'off',
 ]
 const codeKey = (c: string): Key => (codes.includes(c as Key) ? (c as Key) : 'internal')
 
@@ -199,7 +201,7 @@ function ensureTerm() {
     fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace',
     // follows the root font size (16px up to FullHD, larger on QHD/4K)
     fontSize: Math.round(parseFloat(getComputedStyle(document.documentElement).fontSize) * 0.8125),
-    theme: xtermTheme(),
+    theme: xtermTheme,
   })
   fit = new FitAddon()
   term.loadAddon(fit)
@@ -299,11 +301,6 @@ async function resetKey() {
   }
 }
 
-// the palette follows the panel theme, also while connected
-watch(
-  () => theme.current,
-  () => nextTick(() => term && (term.options.theme = xtermTheme())),
-)
 // logout or session loss closes the terminal
 watch(
   () => auth.accessToken,
@@ -453,13 +450,19 @@ load()
   color: var(--color-fg);
 }
 .tm-term {
-  /* a fixed height: with flex growth the fit addon and the content would size each other without end */
-  min-height: 18rem;
-  height: calc(100vh - 21rem);
+  overflow: hidden;
+  min-height: 16rem;
+  /* the window below the page header, tabs and card head */
+  height: calc(100vh - 24rem);
   margin: 1.25rem;
-  padding: 0.75rem;
+  padding: 0.5rem 0.75rem;
   background: var(--term-bg);
   border: 2px solid var(--color-line);
+}
+.tm-term-fit {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 .tm-fp {
   margin: 0.75rem 0;

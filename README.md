@@ -134,7 +134,7 @@ See [DEVELOPMENT.md](DEVELOPMENT.md) for the full developer workflow.
 |------------|--------|---------------|
 | ![Windows XP theme](DOCUMENTS/screenshots/theme-xp.png) | ![Matrix theme](DOCUMENTS/screenshots/theme-matrix.png) | ![Breeze dark theme](DOCUMENTS/screenshots/theme-breeze-dark.png) |
 
-**Settings › Services** shows `postfix.service` and `dovecot.service` from systemd. **Settings › Terminal** is an opt-in web SSH terminal (xterm.js, `xterm-256color`, 256 colors) for superadmins: credentials are never stored, the host key is pinned after you confirm its fingerprint, and opening/closing is audited. Enable it with `[terminal] enabled = true` — see the [setup guide](DOCUMENTS/setup/README.md#31-appearance-service-status-and-web-terminal-settings).
+**Settings › Configuration** edits a few operational `config.toml` keys from the panel (critical ones stay read-only, secrets are never shown). **Settings › Services** shows `postfix.service`, `dovecot.service` and `rspamd.service` from systemd. **Settings › Terminal** is an opt-in web SSH terminal (xterm.js, `xterm-256color`, 256 colors) for superadmins: credentials are never stored, the host key is pinned after you confirm its fingerprint, and opening/closing is audited. Enable it with `[terminal] enabled = true` — see the [setup guide](DOCUMENTS/setup/README.md#31-appearance-service-status-and-web-terminal-settings).
 
 | Services | Terminal |
 |----------|----------|
@@ -152,7 +152,7 @@ More screenshots (login pages, transports, API keys, create admin/alias…) in [
 - **Access control** — superadmin / domain-admin separation plus optional fine-grained RBAC roles
 - **Operations** — admin audit log, mail delivery log ingestion (`readlog`), quota reports, MySQL/MariaDB backups, optional OpenTelemetry export to OpenObserve
 - **Themes & layout** — 20 themes incl. Windows XP, FullHD/QHD/4K scaling, AAA contrast in Settings
-- **Settings** — Postfix/Dovecot status, opt-in web SSH terminal with pinned host key
+- **Settings** — Postfix/Dovecot/Rspamd status, opt-in web SSH terminal with pinned host key
 - **i18n** — English, Português (pt_BR) and Español; detected from the browser, changeable in Settings
 - **Databases** — MariaDB/MySQL and PostgreSQL
 

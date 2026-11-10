@@ -7,6 +7,10 @@ Settings › Terminal SHALL open an SSH shell on `terminal.host`:`terminal.port`
 - **WHEN** `terminal.enabled` is not set
 - **THEN** the WebSocket endpoint answers 404 and the tab explains how to enable it
 
+#### Scenario: Disabled while open
+- **WHEN** a superadmin disables the terminal in Settings › Configuration while sessions are open
+- **THEN** the open sessions are closed within 15 seconds with "the web terminal was disabled"
+
 #### Scenario: Not a superadmin
 - **WHEN** a domain admin or a mailbox token opens the WebSocket
 - **THEN** the server answers `forbidden` before dialing anything
@@ -34,15 +38,15 @@ On the first connection the panel SHALL show the server's host key type and SHA-
 - **THEN** the connection is refused with "host key changed" and `terminal_open_failed … hostkey_changed` is logged
 
 ### Requirement: Real terminal behavior
-The server SHALL request an `xterm-256color` PTY and the browser SHALL render it with xterm.js, resize the PTY with the panel and close the session after `terminal.idle_timeout` without keystrokes. Terminal colors SHALL come from the active theme's `--term-*` roles and follow theme changes live.
+The server SHALL request an `xterm-256color` PTY and the browser SHALL render it with xterm.js, resize the PTY with the panel and close the session after `terminal.idle_timeout` without keystrokes. The console SHALL use the classic xterm palette (black background, the 16 standard ANSI colors) in every panel theme and SHALL fit inside its frame without spilling below it.
 
 #### Scenario: 256 colors
 - **WHEN** `echo $TERM; tput colors` runs in the terminal
 - **THEN** it prints `xterm-256color` and `256`
 
-#### Scenario: Theme change while connected
-- **WHEN** the operator switches to the Matrix theme with a terminal open
-- **THEN** the open terminal turns to the green phosphor palette without reconnecting
+#### Scenario: Same console in every theme
+- **WHEN** the panel uses a dark or colored theme such as Breeze (dark) or Matrix
+- **THEN** the console is still black with the classic xterm colors and its last row ends inside the frame
 
 ### Requirement: Audit and limits
 Opening, failing to open, closing (with duration), trusting and forgetting a host key SHALL be written to the admin log. An admin SHALL have at most 4 open terminals.

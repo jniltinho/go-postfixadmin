@@ -158,6 +158,13 @@ func RegisterRoutes(e *echo.Echo, h *handlers.Handler, spaFS fs.FS) {
 		middleware.RequirePermission(rbac.PermSettingsWrite))
 	apiV1.GET("/system/terminal/ws", h.TerminalWS)
 
+	// config.toml in Settings > Configuration: superadmins only (checked in the handlers); a few operational keys
+	// are editable, the rest read-only and secrets never returned
+	protected.GET("/system/config", h.GetConfigV1,
+		middleware.RequirePermission(rbac.PermSettingsRead))
+	protected.PUT("/system/config", h.UpdateConfigV1,
+		middleware.RequirePermission(rbac.PermSettingsWrite))
+
 	// API key management
 	protected.GET("/settings/apikeys", h.ListApiKeys,
 		middleware.RequirePermission(rbac.PermAPIKeysRead))

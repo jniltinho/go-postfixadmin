@@ -213,7 +213,7 @@ onMounted(loadDashboardData)
   background: var(--color-surface);
   border: 2px solid var(--color-line);
   padding: 1.125rem 1.125rem 0.875rem;
-  box-shadow: 2px 2px 0px var(--color-shadow);
+  box-shadow: var(--shadow-2);
   cursor: pointer;
   transition:
     transform 0.2s,
@@ -221,7 +221,7 @@ onMounted(loadDashboardData)
 }
 .stat-card:hover {
   transform: translate(-1px, -1px);
-  box-shadow: 3px 3px 0px var(--color-shadow);
+  box-shadow: var(--shadow-3);
 }
 
 .stat-card-top {
@@ -291,7 +291,7 @@ onMounted(loadDashboardData)
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: 3px 3px 0px var(--color-shadow);
+  box-shadow: var(--shadow-3);
 }
 .cta-card--disabled {
   opacity: 0.58;
@@ -334,14 +334,14 @@ onMounted(loadDashboardData)
   padding: 0.4375rem 0.75rem;
   text-decoration: none;
   border: 2px solid var(--color-line);
-  box-shadow: 2px 2px 0px var(--color-shadow);
+  box-shadow: var(--shadow-2);
   transition:
     transform 0.15s,
     box-shadow 0.15s;
 }
 .cta-btn:hover {
   transform: translate(-1px, -1px);
-  box-shadow: 3px 3px 0px var(--color-shadow);
+  box-shadow: var(--shadow-3);
 }
 .cta-btn--disabled,
 .cta-btn--disabled:hover {
@@ -349,7 +349,7 @@ onMounted(loadDashboardData)
   color: var(--color-fg-muted);
   cursor: not-allowed;
   transform: none;
-  box-shadow: 2px 2px 0px var(--color-shadow);
+  box-shadow: var(--shadow-2);
 }
 
 /* ─── Table Controls & Custom Elements ─── */

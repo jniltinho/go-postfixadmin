@@ -2661,6 +2661,98 @@ const docTemplate = `{
                 }
             }
         },
+        "/system/config": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "config.toml values shown in Settings \u003e Configuration: which keys are editable, read-only or secret (secret values are never returned). Superadmins only.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "System"
+                ],
+                "summary": "Panel configuration",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ConfigResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.APIResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/dto.APIResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Changes editable config.toml keys (comments and formatting are kept, the previous file is saved as config.toml.bak). Read-only and unknown keys are refused. Superadmins only.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "System"
+                ],
+                "summary": "Update panel configuration",
+                "parameters": [
+                    {
+                        "description": "keys to change",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ConfigUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ConfigUpdateResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.APIResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.APIResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/dto.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/system/services": {
             "get": {
                 "security": [
@@ -2668,7 +2760,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Read-only systemd state of Postfix and Dovecot on the panel's host (systemctl show).",
+                "description": "Read-only systemd state of Postfix, Dovecot and Rspamd on the panel's host (systemctl show).",
                 "produces": [
                     "application/json"
                 ],
@@ -3512,6 +3604,92 @@ const docTemplate = `{
                 },
                 "role_id": {
                     "type": "integer"
+                }
+            }
+        },
+        "dto.ConfigField": {
+            "type": "object",
+            "properties": {
+                "configurable": {
+                    "description": "editable kind of key (may be locked by file permissions or env)",
+                    "type": "boolean"
+                },
+                "editable": {
+                    "description": "can be changed now",
+                    "type": "boolean"
+                },
+                "env": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string",
+                    "example": "smtp.port"
+                },
+                "kind": {
+                    "type": "string",
+                    "example": "int"
+                },
+                "max": {
+                    "type": "integer"
+                },
+                "min": {
+                    "type": "integer"
+                },
+                "options": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "restart": {
+                    "type": "boolean"
+                },
+                "secret": {
+                    "type": "boolean"
+                },
+                "set": {
+                    "type": "boolean"
+                },
+                "value": {}
+            }
+        },
+        "dto.ConfigResponse": {
+            "type": "object",
+            "properties": {
+                "fields": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.ConfigField"
+                    }
+                },
+                "file": {
+                    "type": "string"
+                },
+                "writable": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "dto.ConfigUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "changes": {
+                    "type": "object",
+                    "additionalProperties": {}
+                }
+            }
+        },
+        "dto.ConfigUpdateResponse": {
+            "type": "object",
+            "properties": {
+                "restart_required": {
+                    "type": "boolean"
+                },
+                "updated": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
