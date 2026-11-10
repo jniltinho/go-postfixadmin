@@ -205,6 +205,7 @@ The Default theme is **Neo-Brutalism**:
 Rules that keep every theme working:
 - Use theme roles only (`bg-surface`, `text-fg`, `border-line`, `bg-action text-on-action`, `var(--color-…)`): never hex values or Tailwind palette classes such as `bg-white` or `text-gray-500` — a unit test rejects them.
 - Size with `rem` (Tailwind spacing, `font-size: 0.8125rem`), not `px`, so the UI scales on QHD/4K; borders stay in `px`.
+- `--color-action` is a fill (buttons, table heads, with `--color-on-action` on top). For an accent icon or text on a surface use `--color-icon-accent`: in some themes the fill is gray (Windows 98) or dark and would vanish on the sidebar.
 - Shadows and corners are theme roles too: `box-shadow: var(--shadow-3)` / `shadow-(--shadow-3)` and `border-radius: var(--radius)` (`themes/shape.css`). Default keeps hard offset shadows and square corners; other themes get soft shadows, rounded corners and lighter lines.
 
 ## 🎨 Themes

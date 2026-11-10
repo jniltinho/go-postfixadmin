@@ -21,7 +21,7 @@
     <div v-else class="space-y-2">
       <div v-for="a in assignments" :key="a.id" class="assignment-row">
         <div class="assignment-info">
-          <Icon name="shield" :size="13" class="text-action flex-shrink-0" />
+          <Icon name="shield" :size="13" class="text-icon-accent flex-shrink-0" />
           <span class="font-mono font-bold text-xs text-fg uppercase">{{ a.role.name }}</span>
           <span v-if="a.domain" class="text-xs text-fg-muted">@ {{ a.domain }}</span>
           <span v-else class="text-xs text-fg-subtle">(global)</span>
@@ -52,7 +52,7 @@
             >
             <select
               v-model.number="assignForm.roleId"
-              class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium text-sm bg-surface cursor-pointer"
+              class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium text-sm bg-surface cursor-pointer"
             >
               <option :value="0" disabled>Select a role…</option>
               <option v-for="r in availableRoles" :key="r.id" :value="r.id">{{ r.name }}</option>
@@ -64,7 +64,7 @@
               v-model="assignForm.domain"
               type="text"
               placeholder="Leave empty for global scope (all domains)"
-              class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium text-sm"
+              class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium text-sm"
             />
             <p class="text-[0.625rem] text-fg-subtle mt-1">Optional. Restricts the role to a specific domain.</p>
           </div>
@@ -74,7 +74,7 @@
           <button
             type="button"
             @click="showAssign = false"
-            class="bg-surface text-fg border-2 border-line font-black px-5 py-2 cursor-pointer uppercase tracking-widest flex items-center text-xs hover:bg-surface-2 transition-colors"
+            class="btn-cancel bg-surface text-fg border-2 border-line font-black px-5 py-2 cursor-pointer uppercase tracking-widest flex items-center text-xs hover:bg-surface-2 transition-colors"
           >
             <Icon name="x" :size="14" class="mr-1" /> CANCEL
           </button>
@@ -82,7 +82,7 @@
             type="button"
             :disabled="assigning || !assignForm.roleId"
             @click="submitAssign"
-            class="bg-action text-on-action border-2 border-line font-black px-5 py-2 cursor-pointer uppercase tracking-widest flex items-center text-xs hover:bg-surface hover:text-action transition-colors disabled:opacity-60"
+            class="bg-action text-on-action border-2 border-line font-black px-5 py-2 cursor-pointer uppercase tracking-widest flex items-center text-xs hover:bg-surface hover:text-icon-accent transition-colors disabled:opacity-60"
           >
             <Icon name="check" :size="14" class="mr-1" />
             {{ assigning ? 'ASSIGNING...' : 'ASSIGN' }}

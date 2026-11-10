@@ -34,7 +34,7 @@
                 type="text"
                 required
                 placeholder="example.com"
-                class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors text-sm"
+                class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium transition-colors text-sm"
               />
               <p class="text-[0.625rem] text-fg-muted mt-1">Enter a valid domain name (e.g., example.com)</p>
             </div>
@@ -45,7 +45,7 @@
                 v-model="form.description"
                 type="text"
                 placeholder="Optional description for this domain"
-                class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors text-sm"
+                class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium transition-colors text-sm"
               />
             </div>
 
@@ -77,7 +77,7 @@
                     v-model.number="form.aliases"
                     type="number"
                     min="0"
-                    class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors text-sm"
+                    class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium transition-colors text-sm"
                   />
                   <p class="text-[0.625rem] text-fg-muted mt-1">Maximum number of aliases (0 = unlimited)</p>
                 </div>
@@ -87,7 +87,7 @@
                     v-model.number="form.mailboxes"
                     type="number"
                     min="0"
-                    class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors text-sm"
+                    class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium transition-colors text-sm"
                   />
                   <p class="text-[0.625rem] text-fg-muted mt-1">Maximum number of mailboxes (0 = unlimited)</p>
                 </div>
@@ -99,7 +99,7 @@
                     v-model.number="form.quotaMB"
                     type="number"
                     min="0"
-                    class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors text-sm"
+                    class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium transition-colors text-sm"
                   />
                   <p class="text-[0.625rem] text-fg-muted mt-1">Maximum quota limit in MB (0 = unlimited)</p>
                 </div>
@@ -112,7 +112,7 @@
                     type="number"
                     min="0"
                     placeholder="365"
-                    class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors text-sm"
+                    class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium transition-colors text-sm"
                   />
                   <p class="text-[0.625rem] text-fg-muted mt-1">Password expiry in days (empty = never)</p>
                 </div>
@@ -123,7 +123,7 @@
                 <div class="relative">
                   <select
                     v-model="form.transport"
-                    class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors text-sm appearance-none bg-surface cursor-pointer pr-10"
+                    class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium transition-colors text-sm appearance-none bg-surface cursor-pointer pr-10"
                   >
                     <option value="virtual">virtual</option>
                     <option v-for="t in transports" :key="t.id" :value="t.transport">
@@ -161,7 +161,7 @@
         <button
           type="button"
           @click="emit('update:modelValue', false)"
-          class="bg-surface hover:bg-surface-3 text-fg border-2 border-line font-black px-6 py-2.5 shadow-(--shadow-2) hover:translate-y-px hover:shadow-(--shadow-1) active:translate-y-0.5 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center"
+          class="btn-cancel bg-surface hover:bg-surface-3 text-fg border-2 border-line font-black px-6 py-2.5 shadow-(--shadow-2) hover:translate-y-px hover:shadow-(--shadow-1) active:translate-y-0.5 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center"
         >
           <Icon name="x" :size="16" class="mr-2" />
           CANCEL
@@ -170,7 +170,7 @@
           type="button"
           :disabled="saving"
           @click="submit"
-          class="bg-action hover:bg-surface hover:text-action text-on-action border-2 border-line font-black px-6 py-2.5 shadow-(--shadow-3) hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-(--shadow-4) active:translate-x-0 active:translate-y-0 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center disabled:opacity-60"
+          class="bg-action hover:bg-surface hover:text-icon-accent text-on-action border-2 border-line font-black px-6 py-2.5 shadow-(--shadow-3) hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-(--shadow-4) active:translate-x-0 active:translate-y-0 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center disabled:opacity-60"
         >
           <Icon name="plus-circle" :size="16" class="mr-2" />
           {{ saving ? 'SAVING...' : 'SAVE DOMAIN' }}

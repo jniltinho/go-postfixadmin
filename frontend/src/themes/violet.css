@@ -32,7 +32,7 @@
   --color-danger-strong: #c0213a;
   --color-err-soft: #f7e4e7;
   --color-err-line-soft: #c0213a;
-  --color-ok-strong: #007a65;
+  --color-ok-strong: #006b59;
   --color-ok-soft: #e0efed;
   --color-warn-strong: #845500;
   --color-warn-soft: #fdf5e6;
@@ -45,6 +45,10 @@
   --color-warn: #845500;
   --color-shadow: color-mix(in srgb, #151b26 35%, transparent);
   --font-sans: 'Inter', Tahoma, Verdana, Arial, sans-serif;
+  --color-on-toast-info: #ffffff;
+  --color-on-toast-ok: #ffffff;
+  --color-on-toast-warn: #ffffff;
+  --color-on-toast-err: #ffffff;
 }
 
 /* Violet (dark) */
@@ -91,4 +95,8 @@
   --color-warn: #f9bb51;
   --color-shadow: color-mix(in srgb, #a36eff 35%, transparent);
   --font-sans: 'Inter', Tahoma, Verdana, Arial, sans-serif;
+  --color-on-toast-info: #000000;
+  --color-on-toast-ok: #000000;
+  --color-on-toast-warn: #000000;
+  --color-on-toast-err: #000000;
 }

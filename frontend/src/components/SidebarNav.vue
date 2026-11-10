@@ -143,8 +143,9 @@ function isSettingsDisabled(item: { to: string; perm: string | null }) {
 
 /* hover: tint and left bar only — a top/bottom border here drew a box closed by the sidebar edge (a stray line) */
 .nav-item:hover {
-  background: color-mix(in srgb, var(--color-action) 10%, transparent);
-  border-left-color: var(--color-line-soft);
+  /* the accent, not the action fill: in Windows 98 the fill is the sidebar's own gray and the hover was invisible */
+  background: color-mix(in srgb, var(--color-icon-accent) 10%, transparent);
+  border-left-color: var(--nav-hover-bar, var(--color-line-soft));
   color: var(--color-fg);
 }
 
@@ -157,7 +158,7 @@ function isSettingsDisabled(item: { to: string; perm: string | null }) {
   opacity: 0.48;
 }
 .nav-item:hover :deep(.nav-icon) {
-  color: var(--color-action);
+  color: var(--color-icon-accent);
 }
 .nav-item--disabled:hover :deep(.nav-icon) {
   color: var(--color-fg-subtle);
@@ -174,7 +175,7 @@ function isSettingsDisabled(item: { to: string; perm: string | null }) {
 }
 
 .nav-item--active :deep(.nav-icon) {
-  color: var(--color-action);
+  color: var(--color-icon-accent);
 }
 
 .nav-section-title {

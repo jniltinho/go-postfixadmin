@@ -102,7 +102,7 @@
                   type="text"
                   required
                   placeholder="e.g. My Swagger Client, Python Script"
-                  class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors text-sm"
+                  class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium transition-colors text-sm"
                 />
                 <p class="text-[0.625rem] text-fg-subtle mt-1">Enter a descriptive name to identify this token later</p>
               </div>
@@ -113,7 +113,7 @@
                 <select
                   v-model.number="addForm.daysValid"
                   required
-                  class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors cursor-pointer text-sm bg-surface"
+                  class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium transition-colors cursor-pointer text-sm bg-surface"
                 >
                   <option :value="0">Never expires</option>
                   <option :value="30">30 Days</option>
@@ -132,7 +132,7 @@
           <button
             type="button"
             @click="showAdd = false"
-            class="bg-surface hover:bg-surface-2 text-fg border-2 border-line font-black px-6 py-3 shadow-(--shadow-2) transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-(--shadow-3) active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm"
+            class="btn-cancel bg-surface hover:bg-surface-2 text-fg border-2 border-line font-black px-6 py-3 shadow-(--shadow-2) transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-(--shadow-3) active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm"
           >
             <Icon name="x" :size="16" class="mr-2" />
             CANCEL
@@ -141,7 +141,7 @@
             type="button"
             :disabled="savingAdd"
             @click="submitAdd"
-            class="bg-action hover:bg-surface hover:text-action text-on-action border-2 border-line font-black px-6 py-3 shadow-(--shadow-3) transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-(--shadow-4) active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm disabled:opacity-60"
+            class="bg-action hover:bg-surface hover:text-icon-accent text-on-action border-2 border-line font-black px-6 py-3 shadow-(--shadow-3) transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-(--shadow-4) active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm disabled:opacity-60"
           >
             <Icon name="plus-circle" :size="16" class="mr-2" />
             {{ savingAdd ? 'GENERATING...' : 'GENERATE TOKEN' }}
@@ -183,7 +183,7 @@
             </h4>
             <div
               @click="copyText(createdKeyToken)"
-              class="w-full bg-surface-2 hover:bg-action-soft border-2 border-dashed border-action hover:border-solid p-4 text-center font-mono text-base font-bold text-action-hover cursor-pointer break-all transition-all"
+              class="w-full bg-surface-2 hover:bg-action-soft border-2 border-dashed border-action hover:border-solid p-4 text-center font-mono text-base font-bold text-icon-accent-hover cursor-pointer break-all transition-all"
               title="Click to copy token"
             >
               {{ createdKeyToken }}
@@ -197,7 +197,7 @@
           <button
             type="button"
             @click="copyAndClose"
-            class="bg-action hover:bg-surface hover:text-action text-on-action border-2 border-line font-black px-6 py-3 shadow-(--shadow-3) transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-(--shadow-4) active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm"
+            class="bg-action hover:bg-surface hover:text-icon-accent text-on-action border-2 border-line font-black px-6 py-3 shadow-(--shadow-3) transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-(--shadow-4) active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm"
           >
             <Icon name="copy" :size="16" class="mr-2" />
             COPY & CLOSE
@@ -403,7 +403,7 @@ function isExpired(ts: string | null): boolean {
   margin-bottom: 1.25rem;
 }
 .callout-icon {
-  color: var(--color-action);
+  color: var(--color-icon-accent);
   flex-shrink: 0;
   margin-top: 0.125rem;
 }
@@ -548,7 +548,7 @@ function isExpired(ts: string | null): boolean {
   padding: 0.875rem;
   font-size: 0.9375rem;
   font-weight: 700;
-  color: var(--color-action-hover);
+  color: var(--color-icon-accent-hover);
   text-align: center;
   cursor: pointer;
   transition: all 0.15s;

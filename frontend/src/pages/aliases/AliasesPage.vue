@@ -28,7 +28,7 @@
           <label class="text-xs font-black uppercase tracking-widest text-fg">FILTER BY DOMAIN:</label>
           <select
             v-model="domainFilter"
-            class="h-9 px-3 border-2 border-line focus:border-action focus:outline-none font-medium bg-surface"
+            class="h-9 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium bg-surface"
           >
             <option value="">All Domains</option>
             <option v-for="d in domains" :key="d.domain" :value="d.domain">{{ d.domain }}</option>

@@ -325,11 +325,11 @@ async function submitDelete() {
 }
 .badge-super {
   background: var(--color-accent-soft);
-  color: var(--color-accent-strong);
+  color: var(--color-accent-text);
   padding: 0.25rem 0.5rem;
   font-size: 0.75rem;
   font-weight: 700;
-  border: 2px solid var(--color-accent-strong);
+  border: 2px solid var(--color-accent-text);
 }
 .act-disabled {
   opacity: 0.4;
@@ -361,8 +361,8 @@ async function submitDelete() {
   white-space: nowrap;
 }
 .role-badge--super {
-  border-color: var(--color-accent-strong);
-  color: var(--color-accent-strong);
+  border-color: var(--color-accent-text);
+  color: var(--color-accent-text);
   background: var(--color-accent-soft);
 }
 </style>

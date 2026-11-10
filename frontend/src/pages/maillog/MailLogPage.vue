@@ -219,7 +219,7 @@ onUnmounted(() => {
 }
 .btn-primary:hover {
   background: var(--color-surface);
-  color: var(--color-action);
+  color: var(--color-icon-accent);
 }
 .btn-primary:active {
   transform: translate(0, 0);
@@ -239,7 +239,7 @@ onUnmounted(() => {
   width: 1.125rem;
   height: 1.125rem;
   cursor: pointer;
-  accent-color: var(--color-action);
+  accent-color: var(--color-icon-accent);
 }
 
 .font-mono {
@@ -264,7 +264,7 @@ onUnmounted(() => {
 
 .ip-address {
   cursor: pointer;
-  color: var(--color-action);
+  color: var(--color-icon-accent);
   font-weight: 700;
   border-bottom: 1px dashed var(--color-action);
   padding: 0.0625rem 0;

@@ -44,6 +44,16 @@
   --color-action-soft: #eff6ff;
   --color-action-line-soft: #93c5fd;
   --color-on-action: #ffffff;
+  /* accent for icons and text on surfaces (action is a fill: in some themes it is gray or dark) */
+  --color-icon-accent: var(--color-action);
+  --color-accent-text: var(--color-accent-strong);
+  --color-danger-text: var(--color-danger);
+  --color-icon-accent-hover: var(--color-action-hover);
+  /* text on the colored toasts (themes pick white or black per status for contrast) */
+  --color-on-toast-info: var(--color-on-action);
+  --color-on-toast-ok: var(--color-on-action);
+  --color-on-toast-warn: var(--color-on-action);
+  --color-on-toast-err: var(--color-on-action);
   --color-accent: #6366f1;
   --color-accent-strong: #7c3aed;
   --color-accent-soft: #ede9fe;
@@ -205,7 +215,7 @@ body {
 }
 
 .card-link {
-  color: var(--color-action);
+  color: var(--color-icon-accent);
   font-weight: 600;
   text-decoration: none;
 }
@@ -291,7 +301,7 @@ body {
   align-items: center;
   gap: 0.375rem;
   background: var(--color-action);
-  color: white;
+  color: var(--color-on-action);
   border: 2px solid var(--color-line);
   padding: 0.5rem 1rem;
   font-size: 0.75rem;
@@ -442,7 +452,11 @@ body {
   box-shadow: var(--shadow-3);
   display: inline-flex;
   align-items: center;
-  transition: all 0.15s ease-in-out;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
   cursor: pointer;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -451,9 +465,9 @@ body {
 
 .btn-add-big:hover {
   background-color: var(--color-surface);
-  color: var(--color-action);
-  transform: translate(-4px, -4px);
-  box-shadow: var(--shadow-7);
+  color: var(--color-icon-accent);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-4);
 }
 
 .btn-add-big:active {
@@ -483,10 +497,11 @@ body {
 .st-card-head {
   display: flex;
   align-items: center;
-  gap: 0.625rem;
-  padding: 1rem 1.25rem;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
   border-bottom: 2px solid var(--color-line);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 900;
   letter-spacing: 0.0625rem;
   color: var(--color-fg);
@@ -573,4 +588,58 @@ body {
 .st-page :is(a, button, input, select, [tabindex]):focus-visible {
   outline: 3px solid var(--color-fg);
   outline-offset: 2px;
+}
+
+/* ─── Toasts (lib/toast) mapped to the theme roles ─────────────────────────── */
+:root {
+  --toast-font: var(--font-sans);
+  --toast-radius: var(--radius-sm);
+  --toast-shadow: var(--shadow-4);
+  --toast-border-width: 2px;
+  --toast-border-color: var(--color-line);
+  --toast-info-bg: var(--color-icon-accent);
+  --toast-info-fg: var(--color-on-toast-info);
+  --toast-success-bg: var(--color-ok);
+  --toast-success-fg: var(--color-on-toast-ok);
+  --toast-warning-bg: var(--color-warn);
+  --toast-warning-fg: var(--color-on-toast-warn);
+  --toast-error-bg: var(--color-err);
+  --toast-error-fg: var(--color-on-toast-err);
+}
+
+/* ─── Cancel buttons: red text on hover/focus in every dialog ─────────────────
+   Unlayered, so it wins over the buttons' own hover utilities; --color-danger-text is a red readable as text on
+   surfaces in every theme (>= 4.5:1). */
+.btn-cancel:hover,
+.btn-cancel:focus-visible {
+  color: var(--color-danger-text);
+}
+
+/* ─── Buttons: subtle motion ─────────────────────────────────────────────────
+   The buttons' own utilities jumped 2-4px up-left with a bigger shadow and transition-all. Every button that has a
+   shadow (pages, dialogs, user portal) now rises 1px with one shadow step, and only color/shadow/position animate. */
+button[class*='shadow-'] {
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    translate 0.15s ease;
+}
+button[class*='shadow-']:hover:not(:disabled) {
+  translate: 0 -1px;
+  box-shadow: var(--shadow-3);
+}
+button[class*='shadow-']:active:not(:disabled) {
+  translate: 0 0;
+  box-shadow: var(--shadow-1);
+}
+@media (prefers-reduced-motion: reduce) {
+  button[class*='shadow-'],
+  button[class*='shadow-']:hover:not(:disabled),
+  .btn-add-big:hover {
+    translate: none;
+    transform: none;
+    transition: none;
+  }
 }

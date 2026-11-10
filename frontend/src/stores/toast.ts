@@ -1,24 +1,10 @@
 import { defineStore } from 'pinia'
-import { toast as notify, updateGlobalOptions, Zoom } from 'vue3-toastify'
-import type { ToastOptions } from 'vue3-toastify'
+import { toast, type ToastOptions } from '../lib/toast'
 
-export const useToastStore = defineStore('toast', () => {
-  updateGlobalOptions({
-    position: 'top-right',
-    theme: 'colored',
-    transition: Zoom,
-    autoClose: 3000,
-    newestOnTop: true,
-    pauseOnHover: true,
-    pauseOnFocusLoss: true,
-    closeOnClick: true,
-    closeButton: false,
-  })
-
-  return {
-    success: (message: string, extra?: ToastOptions) => notify.success(message, extra),
-    error: (message: string, extra?: ToastOptions) => notify.error(message, extra),
-    info: (message: string, extra?: ToastOptions) => notify.info(message, extra),
-    warning: (message: string, extra?: ToastOptions) => notify.warning(message, extra),
-  }
-})
+// app-wide toasts (lib/toast, no external dependency); the store keeps the call sites as they were
+export const useToastStore = defineStore('toast', () => ({
+  success: (message: string, options?: ToastOptions) => toast.success(message, options),
+  error: (message: string, options?: ToastOptions) => toast.error(message, options),
+  info: (message: string, options?: ToastOptions) => toast.info(message, options),
+  warning: (message: string, options?: ToastOptions) => toast.warning(message, options),
+}))

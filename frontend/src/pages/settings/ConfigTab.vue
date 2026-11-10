@@ -90,23 +90,30 @@
         </div>
         <div class="cf-scroll">
           <p class="st-hint cf-ro-hint">{{ t('readOnlyHint') }}</p>
-          <div class="cf-sections">
-            <div v-for="(fields, section) in readOnly" :key="section" class="cf-section">
-              <h4 class="cf-section-name">[{{ section }}]</h4>
-              <dl>
-                <template v-for="f in fields" :key="f.key">
-                  <dt>{{ f.key.split('.')[1] }}</dt>
-                  <dd>
-                    <template v-if="f.secret">
-                      <Icon :name="f.set ? 'eye-off' : 'circle-minus'" :size="14" />
-                      {{ f.set ? t('secretSet') : t('secretUnset') }}
-                    </template>
-                    <template v-else>{{ show(f) }}</template>
-                  </dd>
-                </template>
-              </dl>
-            </div>
-          </div>
+          <table class="cf-table">
+            <thead>
+              <tr>
+                <th scope="col">{{ t('colSection') }}</th>
+                <th scope="col">{{ t('colKey') }}</th>
+                <th scope="col">{{ t('colValue') }}</th>
+              </tr>
+            </thead>
+            <tbody v-for="(fields, section) in readOnly" :key="section">
+              <tr v-for="(f, i) in fields" :key="f.key">
+                <th v-if="i === 0" scope="rowgroup" :rowspan="fields.length" class="cf-sec">[{{ section }}]</th>
+                <td class="cf-k">{{ f.key.split('.')[1] }}</td>
+                <td class="cf-v">
+                  <span v-if="f.secret" class="cf-secret">
+                    <Icon :name="f.set ? 'eye-off' : 'circle-minus'" :size="14" />
+                    {{ f.set ? t('secretSet') : t('secretUnset') }}
+                  </span>
+                  <template v-for="(part, i) in show(f).split('/')" v-else :key="i"
+                    ><wbr v-if="i" />{{ i ? '/' : '' }}{{ part }}</template
+                  >
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </section>
     </div>
@@ -238,7 +245,7 @@ load()
   flex-direction: column;
   min-height: 0;
   /* as tall as its content, never taller than the window below the tabs (then it scrolls inside) */
-  max-height: calc(100vh - 16rem);
+  max-height: calc(100vh - 17.5rem);
 }
 .cf-scroll {
   flex: 1;
@@ -335,7 +342,7 @@ load()
 .cf-check input {
   width: 1.25rem;
   height: 1.25rem;
-  accent-color: var(--color-action);
+  accent-color: var(--color-icon-accent);
 }
 .cf-actions {
   display: flex;
@@ -355,42 +362,58 @@ load()
   padding: 0.75rem 1.25rem 0.5rem;
   font-size: 0.75rem;
 }
-.cf-sections {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
-  gap: 0.75rem;
-  padding: 0.25rem 1.25rem 1rem;
-}
-.cf-section {
-  padding: 0.5rem 0.75rem;
-  background: var(--color-surface-2);
-  border: 1px solid var(--color-line-soft);
-  border-radius: var(--radius-sm);
-}
-.cf-section-name {
-  margin-bottom: 0.25rem;
-  font-family: var(--font-mono);
+.cf-table {
+  width: calc(100% - 2.5rem);
+  margin: 0 1.25rem 1.25rem;
+  border-collapse: collapse;
   font-size: 0.8125rem;
-  font-weight: 800;
   color: var(--color-fg);
 }
-dl {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.125rem 0.75rem;
-  font-size: 0.75rem;
+.cf-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  font-size: 0.6875rem;
+  font-weight: 900;
+  letter-spacing: 0.0625rem;
+  text-transform: uppercase;
+  color: var(--color-surface);
+  background: var(--color-fg);
 }
-dt {
+.cf-table td,
+.cf-sec {
+  padding: 0.375rem 0.75rem;
+  border-bottom: 1px solid var(--color-line-soft);
+  vertical-align: top;
+}
+.cf-table tbody:not(:last-of-type) tr:last-child > * {
+  border-bottom: 2px solid var(--color-line);
+}
+.cf-sec {
+  width: 1%;
+  white-space: nowrap;
+  text-align: left;
+  font-family: var(--font-mono);
+  font-weight: 800;
+  background: var(--color-surface-2);
+}
+.cf-k {
+  width: 1%;
+  white-space: nowrap;
   font-family: var(--font-mono);
   color: var(--color-fg-2);
 }
-dd {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
+.cf-v {
   font-family: var(--font-mono);
   font-weight: 600;
-  color: var(--color-fg);
+  /* the whole value: paths wrap only where they must */
   overflow-wrap: anywhere;
+}
+.cf-secret {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
 }
 </style>

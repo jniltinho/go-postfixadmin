@@ -112,6 +112,10 @@ Components never use literal colors: they use the roles of `frontend/src/style.c
 
 Sizes are in `rem`: the root font size is 16px up to FullHD and grows to ~19px on QHD and 24px on 4K, so the whole UI scales with the screen.
 
+### Reusable modules
+
+`frontend/src/lib/` holds self-contained modules meant to be copied to other projects, with their own neutral CSS defaults (exempt from the literal-color test). `lib/toast` is the toast system — queue, host component, tests and [README](frontend/src/lib/toast/README.md) — mapped to the theme roles at the end of `src/style.css`.
+
 ### Visual checks (FullHD / QHD / 4K)
 
 `tests/visual/capture.sh` drives [agent-browser](https://github.com/vercel-labs/agent-browser) through login, dashboard, domains, mailboxes, a modal and the user portal for every theme and resolution, saves screenshots and fails on horizontal scroll, a too-small login card or root font. See [tests/visual/README.md](tests/visual/README.md).

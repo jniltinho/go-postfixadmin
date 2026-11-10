@@ -72,7 +72,7 @@
         <div class="card-footer-neo">
           <p class="text-xs text-fg-muted">
             {{ t.userLink1 }}
-            <a href="/users/login" class="text-action font-bold hover:underline">
+            <a href="/users/login" class="text-icon-accent font-bold hover:underline">
               {{ t.userLink2 }}
             </a>
             {{ t.userLink3 }}
@@ -375,7 +375,7 @@ onMounted(async () => {
 
 .btn-authenticate:hover:not(:disabled) {
   background: var(--color-surface);
-  color: var(--color-action);
+  color: var(--color-icon-accent);
 }
 
 .btn-authenticate:active:not(:disabled) {
@@ -432,8 +432,8 @@ onMounted(async () => {
 .text-fg-muted {
   color: var(--color-fg-muted);
 }
-.text-action {
-  color: var(--color-action);
+.text-icon-accent {
+  color: var(--color-icon-accent);
 }
 .font-bold {
   font-weight: 700;

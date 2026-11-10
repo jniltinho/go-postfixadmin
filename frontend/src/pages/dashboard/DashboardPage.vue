@@ -359,7 +359,7 @@ onMounted(loadDashboardData)
   gap: 0.25rem;
   font-size: 0.6875rem;
   font-weight: 900;
-  color: var(--color-action);
+  color: var(--color-icon-accent);
   text-decoration: none;
   letter-spacing: 0.03125rem;
   text-transform: uppercase;
@@ -369,7 +369,7 @@ onMounted(loadDashboardData)
 }
 
 .td-link {
-  color: var(--color-action);
+  color: var(--color-icon-accent);
   font-weight: 700;
 }
 .activity-action {

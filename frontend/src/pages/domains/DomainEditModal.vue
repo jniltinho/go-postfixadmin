@@ -42,7 +42,7 @@
                 v-model="form.description"
                 type="text"
                 placeholder="Optional description for this domain"
-                class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors text-sm"
+                class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium transition-colors text-sm"
               />
             </div>
 
@@ -84,7 +84,7 @@
                     type="number"
                     min="0"
                     :disabled="!canEditAdvanced"
-                    class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors text-sm disabled:bg-surface-3 disabled:cursor-not-allowed"
+                    class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium transition-colors text-sm disabled:bg-surface-3 disabled:cursor-not-allowed"
                   />
                   <p class="text-[0.625rem] text-fg-muted mt-1">Maximum number of aliases (0 = unlimited)</p>
                 </div>
@@ -95,7 +95,7 @@
                     type="number"
                     min="0"
                     :disabled="!canEditAdvanced"
-                    class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors text-sm disabled:bg-surface-3 disabled:cursor-not-allowed"
+                    class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium transition-colors text-sm disabled:bg-surface-3 disabled:cursor-not-allowed"
                   />
                   <p class="text-[0.625rem] text-fg-muted mt-1">Maximum number of mailboxes (0 = unlimited)</p>
                 </div>
@@ -108,7 +108,7 @@
                     type="number"
                     min="0"
                     :disabled="!canEditAdvanced"
-                    class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors text-sm disabled:bg-surface-3 disabled:cursor-not-allowed"
+                    class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium transition-colors text-sm disabled:bg-surface-3 disabled:cursor-not-allowed"
                   />
                   <p class="text-[0.625rem] text-fg-muted mt-1">Maximum quota limit in MB (0 = unlimited)</p>
                 </div>
@@ -122,7 +122,7 @@
                     min="0"
                     placeholder="365"
                     :disabled="!canEditAdvanced"
-                    class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors text-sm disabled:bg-surface-3 disabled:cursor-not-allowed"
+                    class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium transition-colors text-sm disabled:bg-surface-3 disabled:cursor-not-allowed"
                   />
                   <p class="text-[0.625rem] text-fg-muted mt-1">Password expiry in days (empty = never)</p>
                 </div>
@@ -134,7 +134,7 @@
                   <select
                     v-model="form.transport"
                     :disabled="!canEditAdvanced"
-                    class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors text-sm appearance-none bg-surface pr-10 disabled:bg-surface-3 disabled:cursor-not-allowed"
+                    class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium transition-colors text-sm appearance-none bg-surface pr-10 disabled:bg-surface-3 disabled:cursor-not-allowed"
                     :class="canEditAdvanced ? 'cursor-pointer' : 'cursor-not-allowed'"
                   >
                     <option value="virtual">virtual</option>
@@ -180,7 +180,7 @@
         <button
           type="button"
           @click="emit('update:modelValue', false)"
-          class="bg-surface hover:bg-surface-3 text-fg border-2 border-line font-black px-6 py-2.5 shadow-(--shadow-2) hover:translate-y-px hover:shadow-(--shadow-1) active:translate-y-0.5 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center"
+          class="btn-cancel bg-surface hover:bg-surface-3 text-fg border-2 border-line font-black px-6 py-2.5 shadow-(--shadow-2) hover:translate-y-px hover:shadow-(--shadow-1) active:translate-y-0.5 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center"
         >
           <Icon name="x" :size="16" class="mr-2" />
           CANCEL
@@ -189,7 +189,7 @@
           type="button"
           :disabled="saving"
           @click="submit"
-          class="bg-action hover:bg-surface hover:text-action text-on-action border-2 border-line font-black px-6 py-2.5 shadow-(--shadow-3) hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-(--shadow-4) active:translate-x-0 active:translate-y-0 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center disabled:opacity-60"
+          class="bg-action hover:bg-surface hover:text-icon-accent text-on-action border-2 border-line font-black px-6 py-2.5 shadow-(--shadow-3) hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-(--shadow-4) active:translate-x-0 active:translate-y-0 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center disabled:opacity-60"
         >
           <Icon name="save" :size="16" class="mr-2" />
           {{ saving ? 'SAVING...' : 'UPDATE DOMAIN' }}

@@ -17,6 +17,16 @@
 [data-theme]:not([data-theme='default']) {
   --radius: 0.5rem;
   --radius-sm: 0.3125rem;
+  /* icons on the sidebar/page: the theme's link color, readable on surfaces in every theme (>= 4:1); the action
+     color is a button fill and matched the background in Windows 98 */
+  --color-icon-accent: var(--color-action-strong);
+  --color-icon-accent-hover: var(--color-action-strong);
+  --color-accent-text: var(--color-action-strong);
+  /* the theme's error text color (>= 5.4:1 on its surface); danger is a fill there */
+  --color-danger-text: var(--color-err);
+  /* row EDIT buttons: the action fill (contrast with on-action is guaranteed); the hover tint can be light */
+  --color-action-edit: var(--color-action);
+  --nav-hover-bar: var(--color-icon-accent);
 }
 /* Windows 98 was square: keep it almost so */
 [data-theme='classic-gray'][data-theme] {
@@ -158,4 +168,9 @@
 }
 [data-theme]:not([data-theme='default']) .nav-item {
   border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+}
+
+/* High contrast: the usage bar's gray track was too light for the white count (3.95:1) */
+[data-theme='high-contrast'] {
+  --progress-track: var(--color-surface-3);
 }

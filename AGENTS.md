@@ -146,6 +146,7 @@ Generated config: `./bin/postfixadmin --generate-config` → `config.toml` (also
 - **Sizes in `rem`** (borders stay `px`): the root font scales 16px → 24px from FullHD to 4K.
 - **Shadows/corners via roles**: `var(--shadow-N)` / `shadow-(--shadow-N)` and `var(--radius)` / `var(--radius-sm)` (`frontend/src/themes/shape.css`); never literal offset shadows.
 - Frontend checks: `npm run check` (vp check) and `npm run test` (vp test run); visual matrix: `tests/visual/capture.sh`.
+- Toasts: `useToastStore()` (or `toast` from `frontend/src/lib/toast`, a dependency-free module documented in its README). Cancel buttons get the `btn-cancel` class (red on hover).
 
 ### Database / migrations
 

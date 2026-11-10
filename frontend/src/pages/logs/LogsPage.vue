@@ -244,7 +244,7 @@ function getActionBadgeClass(action: string): string {
 .badge-action-create { background: var(--color-ok-soft); color: var(--color-ok-strong); }
 .badge-action-edit   { background: var(--color-action-soft); color: var(--color-action-hover); }
 .badge-action-delete { background: var(--color-err-soft); color: var(--color-danger); }
-.badge-action-login  { background: var(--color-accent-soft); color: var(--color-accent-strong); }
+.badge-action-login  { background: var(--color-accent-soft); color: var(--color-accent-text); }
 .badge-action-other  { background: var(--color-surface-3); color: var(--color-fg-2); }
 
 .font-mono { font-family: 'Fira Code', var(--font-mono), monospace; }

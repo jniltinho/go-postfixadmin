@@ -35,7 +35,7 @@
                   type="text"
                   required
                   placeholder="alias-name"
-                  class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors text-sm lowercase"
+                  class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium transition-colors text-sm lowercase"
                   style="text-transform: lowercase"
                   @input="onLocalPartInput"
                 />
@@ -56,7 +56,7 @@
                   v-else
                   v-model="form.domain"
                   required
-                  class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors bg-surface cursor-pointer text-sm"
+                  class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium transition-colors bg-surface cursor-pointer text-sm"
                 >
                   <option value="" disabled>Select a domain...</option>
                   <option v-for="d in domains" :key="d.domain" :value="d.domain">{{ d.domain }}</option>
@@ -70,8 +70,8 @@
                 >FULL ADDRESS:</span
               >
               <p class="font-mono text-sm font-bold">
-                <span class="text-action">{{ form.localPart || 'alias' }}</span
-                >@<span class="text-action">{{ form.domain || 'domain.com' }}</span>
+                <span class="text-icon-accent">{{ form.localPart || 'alias' }}</span
+                >@<span class="text-icon-accent">{{ form.domain || 'domain.com' }}</span>
               </p>
             </div>
 
@@ -85,7 +85,7 @@
                 rows="4"
                 required
                 placeholder="recipient@example.com&#10;another@example.com"
-                class="w-full px-3 py-2 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors resize-y text-sm"
+                class="w-full px-3 py-2 border-2 border-line focus:border-icon-accent focus:outline-none font-medium transition-colors resize-y text-sm"
               ></textarea>
               <p class="text-[0.625rem] text-fg-muted mt-1">
                 One email address per line. Multiple recipients are supported.
@@ -111,7 +111,7 @@
         <button
           type="button"
           @click="emit('update:modelValue', false)"
-          class="bg-surface hover:bg-surface-3 text-fg border-2 border-line font-black px-6 py-2.5 shadow-(--shadow-2) hover:translate-y-px hover:shadow-(--shadow-1) active:translate-y-0.5 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center"
+          class="btn-cancel bg-surface hover:bg-surface-3 text-fg border-2 border-line font-black px-6 py-2.5 shadow-(--shadow-2) hover:translate-y-px hover:shadow-(--shadow-1) active:translate-y-0.5 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center"
         >
           <Icon name="x" :size="16" class="mr-2" />
           CANCEL
@@ -120,7 +120,7 @@
           type="button"
           :disabled="saving"
           @click="submit"
-          class="bg-action hover:bg-surface hover:text-action text-on-action border-2 border-line font-black px-6 py-2.5 shadow-(--shadow-3) hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-(--shadow-4) active:translate-x-0 active:translate-y-0 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center disabled:opacity-60"
+          class="bg-action hover:bg-surface hover:text-icon-accent text-on-action border-2 border-line font-black px-6 py-2.5 shadow-(--shadow-3) hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-(--shadow-4) active:translate-x-0 active:translate-y-0 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center disabled:opacity-60"
         >
           <Icon name="plus-circle" :size="16" class="mr-2" />
           {{ saving ? 'SAVING...' : 'CREATE ALIAS' }}

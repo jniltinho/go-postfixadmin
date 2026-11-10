@@ -90,6 +90,15 @@
 - [x] 13.2 Refreshed screenshots (current UI, soft shapes) plus `themes.png` and `settings-config.png`.
 - [x] 13.3 Terminal tab reloads its settings when shown again (enabling in Configuration no longer needs F5).
 - [x] 13.4 All dialogs open 5% below the top of the window.
+- [x] 13.5 Menu icons on hover/active use `--color-icon-accent` (the theme's link color, >= 4:1 on the sidebar in every theme; Default unchanged): the action fill matched the Windows 98 sidebar (1:1) and was low on crystal-dark, graphite and grafana.
+- [x] 13.7 Own toast module `frontend/src/lib/toast` (reactive queue, `ToastHost` with ARIA roles, pause on hover/focus loss, progress, reduced motion, tests, README) replaces vue3-toastify (dependency and vendored tarball removed); toasts mapped to theme roles.
+- [x] 13.8 Cancel buttons (`btn-cancel`, 18 in dialogs): red text on hover/focus (`--color-danger-text`, >= 4.5:1 on the surface in every theme).
+- [x] 13.13 Configuration read-only card as a simple table (Section | Key | Value, section once per group, sticky header): full values, certificate paths wrap only before a slash; the card scrolls on its own, the page does not.
+- [x] 13.12 Configuration read-only card: one line per key (long values end in an ellipsis, full value as tooltip), sections in newspaper columns; smaller Settings card headers; no page or card scroll at 1920×1080, 2000×1100 and 2560×1440.
+- [x] 13.11 Configuration tab shows values in effect: `server.ssl_enable` follows the automatic TLS rule (ssl_cert + ssl_key without ssl_enable), `ssl_cert`/`ssl_key` paths listed, JWT lifetimes show their defaults (15m / 168h).
+- [x] 13.10 Buttons app-wide (dialogs, pages, portal, the big ADD buttons): subtle motion (1px rise, one shadow step, only color/shadow/position animate, none with reduced motion) instead of the 2–4px jump with transition-all.
+- [x] 13.9 Terminal errors (connection closed, auth, host key…) shown as toasts instead of a banner above the console, so the page no longer scrolls when a session ends.
+- [x] 13.6 Text/focus uses of the action fill moved to `--color-icon-accent(-hover)` (links, row icons, focus borders, checkbox accent); menu hover tint/bar from the accent; `--color-accent-text` for accent badges; per-theme `--color-on-toast-*` (white/black by contrast, 76 pairs >= 4.5:1); EDIT buttons on the action fill in ported themes; literal `oklch()`/named colors removed and now rejected by the test. AA check of every non-default theme on dashboard, admins, mailboxes, domains, transports and API keys: no text below 4.5:1 (Default left as designed).
 
 ## 11. Final validation
 

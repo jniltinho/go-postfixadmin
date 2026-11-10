@@ -20,7 +20,7 @@
       <div class="overflow-y-auto flex-1">
         <div v-if="loading" class="flex items-center justify-center p-12">
           <div class="flex flex-col items-center">
-            <Icon name="loader-2" :size="28" class="text-action animate-spin mb-2" />
+            <Icon name="loader-2" :size="28" class="text-icon-accent animate-spin mb-2" />
             <span class="text-sm font-bold uppercase tracking-widest text-fg">LOADING...</span>
           </div>
         </div>
@@ -50,7 +50,7 @@
                   <select
                     v-model="form.target_domain"
                     required
-                    class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors bg-surface cursor-pointer text-sm"
+                    class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium transition-colors bg-surface cursor-pointer text-sm"
                   >
                     <option value="" disabled>Select target domain...</option>
                     <option v-for="d in domains" :key="d.domain" :value="d.domain">{{ d.domain }}</option>
@@ -78,7 +78,7 @@
         <button
           type="button"
           @click="emit('update:modelValue', false)"
-          class="bg-surface hover:bg-surface-3 text-fg border-2 border-line font-black px-6 py-2.5 shadow-(--shadow-2) hover:translate-y-px hover:shadow-(--shadow-1) active:translate-y-0.5 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center"
+          class="btn-cancel bg-surface hover:bg-surface-3 text-fg border-2 border-line font-black px-6 py-2.5 shadow-(--shadow-2) hover:translate-y-px hover:shadow-(--shadow-1) active:translate-y-0.5 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center"
         >
           <Icon name="x" :size="16" class="mr-2" />
           CANCEL
@@ -87,7 +87,7 @@
           type="button"
           :disabled="saving || loading"
           @click="submit"
-          class="bg-action hover:bg-surface hover:text-action text-on-action border-2 border-line font-black px-6 py-2.5 shadow-(--shadow-3) hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-(--shadow-4) active:translate-x-0 active:translate-y-0 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center disabled:opacity-60"
+          class="bg-action hover:bg-surface hover:text-icon-accent text-on-action border-2 border-line font-black px-6 py-2.5 shadow-(--shadow-3) hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-(--shadow-4) active:translate-x-0 active:translate-y-0 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center disabled:opacity-60"
         >
           <Icon name="save" :size="16" class="mr-2" />
           {{ saving ? 'SAVING...' : 'UPDATE ALIAS' }}

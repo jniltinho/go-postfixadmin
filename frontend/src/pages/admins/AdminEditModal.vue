@@ -93,12 +93,12 @@
                       :type="showPw3 ? 'text' : 'password'"
                       v-model="form.password"
                       placeholder="New password (min. 8 chars)"
-                      class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors text-sm pr-10"
+                      class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium transition-colors text-sm pr-10"
                       @input="onPasswordInput"
                     />
                     <button
                       type="button"
-                      class="absolute right-2 top-1/2 -translate-y-1/2 text-fg-muted hover:text-action transition-colors"
+                      class="absolute right-2 top-1/2 -translate-y-1/2 text-fg-muted hover:text-icon-accent transition-colors"
                       @click="showPw3 = !showPw3"
                     >
                       <Icon :name="showPw3 ? 'eye-off' : 'eye'" :size="16" />
@@ -109,12 +109,12 @@
                       :type="showPw4 ? 'text' : 'password'"
                       v-model="form.passwordConfirm"
                       placeholder="Repeat new password"
-                      class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors text-sm pr-10"
+                      class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium transition-colors text-sm pr-10"
                       @input="onPasswordInput"
                     />
                     <button
                       type="button"
-                      class="absolute right-2 top-1/2 -translate-y-1/2 text-fg-muted hover:text-action transition-colors"
+                      class="absolute right-2 top-1/2 -translate-y-1/2 text-fg-muted hover:text-icon-accent transition-colors"
                       @click="showPw4 = !showPw4"
                     >
                       <Icon :name="showPw4 ? 'eye-off' : 'eye'" :size="16" />
@@ -123,7 +123,7 @@
                   <button
                     type="button"
                     @click="genPassword"
-                    class="bg-action hover:bg-surface hover:text-action text-on-action text-xs font-black px-3 h-10 border-2 border-line cursor-pointer uppercase tracking-widest flex items-center gap-1 whitespace-nowrap flex-shrink-0 transition-colors"
+                    class="bg-action hover:bg-surface hover:text-icon-accent text-on-action text-xs font-black px-3 h-10 border-2 border-line cursor-pointer uppercase tracking-widest flex items-center gap-1 whitespace-nowrap flex-shrink-0 transition-colors"
                   >
                     <Icon name="wand-2" :size="14" />
                     GENERATE
@@ -199,7 +199,7 @@
         <button
           type="button"
           @click="emit('update:modelValue', false)"
-          class="bg-surface hover:bg-surface-2 text-fg border-2 border-line font-black px-6 py-3 shadow-(--shadow-2) transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-(--shadow-3) active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm"
+          class="btn-cancel bg-surface hover:bg-surface-2 text-fg border-2 border-line font-black px-6 py-3 shadow-(--shadow-2) transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-(--shadow-3) active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm"
         >
           <Icon name="x" :size="16" class="mr-2" />
           CANCEL
@@ -208,7 +208,7 @@
           type="button"
           :disabled="saving || loading || pwdMismatch"
           @click="submit"
-          class="bg-action hover:bg-surface hover:text-action text-on-action border-2 border-line font-black px-6 py-3 shadow-(--shadow-3) transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-(--shadow-4) active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm disabled:opacity-60"
+          class="bg-action hover:bg-surface hover:text-icon-accent text-on-action border-2 border-line font-black px-6 py-3 shadow-(--shadow-3) transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-(--shadow-4) active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm disabled:opacity-60"
         >
           <Icon name="save" :size="16" class="mr-2" />
           {{ saving ? 'SAVING...' : 'SAVE CHANGES' }}

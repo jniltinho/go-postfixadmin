@@ -45,6 +45,10 @@
   --color-warn: #9a4a07;
   --color-shadow: color-mix(in srgb, #07060f 35%, transparent);
   --font-sans: 'Inter', Tahoma, Verdana, Arial, sans-serif;
+  --color-on-toast-info: #ffffff;
+  --color-on-toast-ok: #ffffff;
+  --color-on-toast-warn: #ffffff;
+  --color-on-toast-err: #ffffff;
 }
 
 /* Aurora (dark) */
@@ -91,4 +95,8 @@
   --color-warn: #ff862e;
   --color-shadow: color-mix(in srgb, #967aff 35%, transparent);
   --font-sans: 'Inter', Tahoma, Verdana, Arial, sans-serif;
+  --color-on-toast-info: #000000;
+  --color-on-toast-ok: #000000;
+  --color-on-toast-warn: #000000;
+  --color-on-toast-err: #000000;
 }
