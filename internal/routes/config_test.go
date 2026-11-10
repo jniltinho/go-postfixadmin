@@ -53,6 +53,16 @@ func TestConfigAPI(t *testing.T) {
 		t.Fatalf("secret should be reported as set without its value: %s", get.Body)
 	}
 
+	// TLS in effect: cert + key without ssl_enable switch it on (cmd/server.go); JWT lifetimes show their defaults
+	viper.Set("server.ssl_cert", "/etc/ssl/panel.crt")
+	viper.Set("server.ssl_key", "/etc/ssl/panel.key")
+	eff := do(http.MethodGet, "", superToken(t)).Body.String()
+	for _, want := range []string{`"key":"server.ssl_enable","kind":"bool","value":true`, `"key":"server.ssl_cert","kind":"string","value":"/etc/ssl/panel.crt"`, `"key":"server.jwt_access_ttl","kind":"duration","value":"15m"`, `"key":"server.jwt_refresh_ttl","kind":"duration","value":"168h"`} {
+		if !strings.Contains(eff, want) {
+			t.Fatalf("missing %s in %s", want, eff)
+		}
+	}
+
 	if rec := do(http.MethodGet, "", adminToken(t)); rec.Code != http.StatusForbidden {
 		t.Fatalf("domain admin GET = %d, want 403", rec.Code)
 	}

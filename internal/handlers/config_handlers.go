@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"go-postfixadmin/internal/api/dto"
+	"go-postfixadmin/internal/auth"
 	"go-postfixadmin/internal/middleware"
 	"go-postfixadmin/internal/rbac"
 	"go-postfixadmin/internal/utils"
@@ -55,6 +56,8 @@ var configSchema = []configField{
 
 	{Key: "server.port", Kind: "int"},
 	{Key: "server.ssl_enable", Kind: "bool"},
+	{Key: "server.ssl_cert", Kind: "string"},
+	{Key: "server.ssl_key", Kind: "string"}, // a path, not the key itself
 	{Key: "server.cleanup_maildir", Kind: "bool"},
 	{Key: "server.jwt_access_ttl", Kind: "duration"},
 	{Key: "server.jwt_refresh_ttl", Kind: "duration"},
@@ -123,9 +126,21 @@ func configWritable() (string, bool) {
 	return path, true
 }
 
+// displayValue is the value in effect, not just the file's: TLS is switched on by ssl_cert + ssl_key when
+// ssl_enable is not set (cmd/server.go), and the JWT lifetimes have defaults in internal/auth.
 func displayValue(f configField) any {
 	if f.Secret {
 		return nil
+	}
+	switch f.Key {
+	case "server.ssl_enable":
+		if !viper.IsSet(f.Key) {
+			return viper.GetString("server.ssl_cert") != "" && viper.GetString("server.ssl_key") != ""
+		}
+	case "server.jwt_access_ttl":
+		return shortDuration(auth.GetAccessTTL())
+	case "server.jwt_refresh_ttl":
+		return shortDuration(auth.GetRefreshTTL())
 	}
 	switch f.Kind {
 	case "bool":
@@ -137,6 +152,18 @@ func displayValue(f configField) any {
 	default:
 		return viper.GetString(f.Key)
 	}
+}
+
+// shortDuration writes 15m and 168h instead of 15m0s and 168h0m0s.
+func shortDuration(d time.Duration) string {
+	s := d.String()
+	if strings.HasSuffix(s, "m0s") {
+		s = strings.TrimSuffix(s, "0s")
+	}
+	if strings.HasSuffix(s, "h0m") {
+		s = strings.TrimSuffix(s, "0m")
+	}
+	return s
 }
 
 // GetConfigV1 godoc
