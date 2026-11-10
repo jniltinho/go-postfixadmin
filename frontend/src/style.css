@@ -44,6 +44,8 @@
   --color-action-soft: #eff6ff;
   --color-action-line-soft: #93c5fd;
   --color-on-action: #ffffff;
+  /* accent for icons and text on surfaces (action is a fill: in some themes it is gray or dark) */
+  --color-icon-accent: var(--color-action);
   --color-accent: #6366f1;
   --color-accent-strong: #7c3aed;
   --color-accent-soft: #ede9fe;

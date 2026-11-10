@@ -90,6 +90,7 @@
 - [x] 13.2 Refreshed screenshots (current UI, soft shapes) plus `themes.png` and `settings-config.png`.
 - [x] 13.3 Terminal tab reloads its settings when shown again (enabling in Configuration no longer needs F5).
 - [x] 13.4 All dialogs open 5% below the top of the window.
+- [x] 13.5 Menu icons on hover/active use `--color-icon-accent` (the theme's link color, >= 4:1 on the sidebar in every theme; Default unchanged): the action fill matched the Windows 98 sidebar (1:1) and was low on crystal-dark, graphite and grafana.
 
 ## 11. Final validation
 

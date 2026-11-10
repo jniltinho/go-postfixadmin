@@ -157,7 +157,7 @@ function isSettingsDisabled(item: { to: string; perm: string | null }) {
   opacity: 0.48;
 }
 .nav-item:hover :deep(.nav-icon) {
-  color: var(--color-action);
+  color: var(--color-icon-accent);
 }
 .nav-item--disabled:hover :deep(.nav-icon) {
   color: var(--color-fg-subtle);
@@ -174,7 +174,7 @@ function isSettingsDisabled(item: { to: string; perm: string | null }) {
 }
 
 .nav-item--active :deep(.nav-icon) {
-  color: var(--color-action);
+  color: var(--color-icon-accent);
 }
 
 .nav-section-title {

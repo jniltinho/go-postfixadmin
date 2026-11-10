@@ -17,6 +17,9 @@
 [data-theme]:not([data-theme='default']) {
   --radius: 0.5rem;
   --radius-sm: 0.3125rem;
+  /* icons on the sidebar/page: the theme's link color, readable on surfaces in every theme (>= 4:1); the action
+     color is a button fill and matched the background in Windows 98 */
+  --color-icon-accent: var(--color-action-strong);
 }
 /* Windows 98 was square: keep it almost so */
 [data-theme='classic-gray'][data-theme] {
