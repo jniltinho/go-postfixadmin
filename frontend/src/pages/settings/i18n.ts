@@ -3,6 +3,9 @@ import { useLangStore, type Lang } from '../../stores/lang'
 
 const en = {
   tabConfig: 'CONFIGURATION',
+  colSection: 'Section',
+  colKey: 'Key',
+  colValue: 'Value',
   editable: 'EDITABLE',
   readOnlyTitle: 'READ-ONLY',
   configFile: 'File',
@@ -102,6 +105,9 @@ type Dict = typeof en
 
 const pt: Dict = {
   tabConfig: 'CONFIGURAÇÃO',
+  colSection: 'Seção',
+  colKey: 'Chave',
+  colValue: 'Valor',
   editable: 'EDITÁVEIS',
   readOnlyTitle: 'SOMENTE LEITURA',
   configFile: 'Arquivo',
@@ -202,6 +208,9 @@ const pt: Dict = {
 
 const es: Dict = {
   tabConfig: 'CONFIGURACIÓN',
+  colSection: 'Sección',
+  colKey: 'Clave',
+  colValue: 'Valor',
   editable: 'EDITABLES',
   readOnlyTitle: 'SOLO LECTURA',
   configFile: 'Archivo',
