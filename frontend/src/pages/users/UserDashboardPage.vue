@@ -878,7 +878,7 @@ onMounted(async () => {
 
 .btn-modal-cancel:hover {
   background: var(--color-surface-2);
-  transform: translate(-2px, -2px);
+  transform: translateY(-1px);
   box-shadow: var(--shadow-3);
 }
 
@@ -906,8 +906,8 @@ onMounted(async () => {
 .btn-modal-save:hover:not(:disabled) {
   background: var(--color-surface);
   color: var(--color-accent);
-  transform: translate(-1px, -1px);
-  box-shadow: var(--shadow-4);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-3);
 }
 
 .btn-modal-save:active:not(:disabled) {

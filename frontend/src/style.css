@@ -609,3 +609,30 @@ body {
 .btn-cancel:focus-visible {
   color: var(--color-danger-text);
 }
+
+/* ─── Dialog buttons: subtle motion ───────────────────────────────────────────
+   The buttons' own utilities jumped 2-4px up-left with a bigger shadow and transition-all. Inside any dialog the
+   buttons that have a shadow now rise 1px with one shadow step, and only color/shadow/position animate. */
+:is(.modal-overlay, .vacation-modal-backdrop) button[class*='shadow-'] {
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    translate 0.15s ease;
+}
+:is(.modal-overlay, .vacation-modal-backdrop) button[class*='shadow-']:hover:not(:disabled) {
+  translate: 0 -1px;
+  box-shadow: var(--shadow-3);
+}
+:is(.modal-overlay, .vacation-modal-backdrop) button[class*='shadow-']:active:not(:disabled) {
+  translate: 0 0;
+  box-shadow: var(--shadow-1);
+}
+@media (prefers-reduced-motion: reduce) {
+  :is(.modal-overlay, .vacation-modal-backdrop) button[class*='shadow-'],
+  :is(.modal-overlay, .vacation-modal-backdrop) button[class*='shadow-']:hover:not(:disabled) {
+    translate: none;
+    transition: none;
+  }
+}
