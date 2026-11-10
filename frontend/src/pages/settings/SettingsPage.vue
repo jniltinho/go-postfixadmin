@@ -138,7 +138,13 @@
     <ConfigTab v-if="tab === 'config'" class="st-panel" role="tabpanel" />
 
     <!-- mounted on first visit and then only hidden, so an open SSH session survives switching tabs -->
-    <TerminalTab v-if="terminalSeen" v-show="tab === 'terminal'" class="st-panel" role="tabpanel" />
+    <TerminalTab
+      v-if="terminalSeen"
+      v-show="tab === 'terminal'"
+      :active="tab === 'terminal'"
+      class="st-panel"
+      role="tabpanel"
+    />
   </div>
 </template>
 

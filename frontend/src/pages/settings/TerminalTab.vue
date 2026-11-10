@@ -130,6 +130,9 @@ import { useT, type Key } from './i18n'
 
 type Info = { enabled: boolean; target: string; host_key?: string; idle_minutes: number }
 
+// active: this tab is shown. The component stays mounted (an open session survives tab switches), so it reloads the
+// terminal settings each time it is shown again: enabling it in Configuration must show up here without F5.
+const props = defineProps<{ active?: boolean }>()
 const auth = useAuthStore()
 const t = useT()
 const toast = useToastStore()
@@ -305,6 +308,11 @@ async function resetKey() {
 watch(
   () => auth.accessToken,
   (t) => !t && ws?.close(),
+)
+
+watch(
+  () => props.active,
+  (shown, was) => shown && was === false && state.value === 'idle' && load(),
 )
 
 onUnmounted(() => {
