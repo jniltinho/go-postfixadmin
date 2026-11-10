@@ -46,6 +46,13 @@
   --color-on-action: #ffffff;
   /* accent for icons and text on surfaces (action is a fill: in some themes it is gray or dark) */
   --color-icon-accent: var(--color-action);
+  --color-accent-text: var(--color-accent-strong);
+  --color-icon-accent-hover: var(--color-action-hover);
+  /* text on the colored toasts (themes pick white or black per status for contrast) */
+  --color-on-toast-info: var(--color-on-action);
+  --color-on-toast-ok: var(--color-on-action);
+  --color-on-toast-warn: var(--color-on-action);
+  --color-on-toast-err: var(--color-on-action);
   --color-accent: #6366f1;
   --color-accent-strong: #7c3aed;
   --color-accent-soft: #ede9fe;
@@ -207,7 +214,7 @@ body {
 }
 
 .card-link {
-  color: var(--color-action);
+  color: var(--color-icon-accent);
   font-weight: 600;
   text-decoration: none;
 }
@@ -293,7 +300,7 @@ body {
   align-items: center;
   gap: 0.375rem;
   background: var(--color-action);
-  color: white;
+  color: var(--color-on-action);
   border: 2px solid var(--color-line);
   padding: 0.5rem 1rem;
   font-size: 0.75rem;
@@ -453,7 +460,7 @@ body {
 
 .btn-add-big:hover {
   background-color: var(--color-surface);
-  color: var(--color-action);
+  color: var(--color-icon-accent);
   transform: translate(-4px, -4px);
   box-shadow: var(--shadow-7);
 }

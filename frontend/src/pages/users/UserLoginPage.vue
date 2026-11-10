@@ -72,7 +72,7 @@
         <div class="card-footer-neo">
           <p class="text-xs text-fg-muted">
             {{ t.adminLink1 }}
-            <a href="/login" class="text-action font-bold hover:underline">
+            <a href="/login" class="text-icon-accent font-bold hover:underline">
               {{ t.adminLink2 }}
             </a>
             {{ t.adminLink3 }}
@@ -427,7 +427,7 @@ onMounted(async () => {
 .text-fg-muted {
   color: var(--color-fg-muted);
 }
-.text-action {
+.text-icon-accent {
   color: var(--color-accent);
 }
 .font-bold {

@@ -11,7 +11,7 @@
         </a>
         <a
           href="/users/dashboard"
-          class="text-xl font-mono font-bold tracking-tight hover:text-action transition-colors"
+          class="text-xl font-mono font-bold tracking-tight hover:text-icon-accent transition-colors"
           >{{ t.userPortal }}</a
         >
       </div>
@@ -133,7 +133,7 @@
                 <textarea
                   v-model="forwardingForm.forwarding"
                   rows="4"
-                  class="w-full px-4 py-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors resize-y text-sm bg-surface"
+                  class="w-full px-4 py-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium transition-colors resize-y text-sm bg-surface"
                   :placeholder="t.forwardToPlaceholder"
                   :disabled="savingForwarding"
                 ></textarea>
@@ -169,7 +169,7 @@
                   </label>
                   <div class="relative group">
                     <div
-                      class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-fg-subtle group-focus-within:text-action transition-colors"
+                      class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-fg-subtle group-focus-within:text-icon-accent transition-colors"
                     >
                       <Icon name="lock" :size="20" />
                     </div>
@@ -178,7 +178,7 @@
                       type="password"
                       required
                       :placeholder="t.placeholderCurrentPassword"
-                      class="w-full pl-11 pr-4 py-2 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors h-10 text-sm bg-surface"
+                      class="w-full pl-11 pr-4 py-2 border-2 border-line focus:border-icon-accent focus:outline-none font-medium transition-colors h-10 text-sm bg-surface"
                       :disabled="savingPassword"
                     />
                   </div>
@@ -206,13 +206,13 @@
                         :type="showNewPassword ? 'text' : 'password'"
                         required
                         :placeholder="t.placeholderNewPassword"
-                        class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors text-sm pr-10 bg-surface"
+                        class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium transition-colors text-sm pr-10 bg-surface"
                         :disabled="savingPassword"
                       />
                       <button
                         type="button"
                         @click="showNewPassword = !showNewPassword"
-                        class="absolute right-2 top-1/2 -translate-y-1/2 text-fg-muted hover:text-action transition-colors cursor-pointer bg-none border-none p-1 flex items-center"
+                        class="absolute right-2 top-1/2 -translate-y-1/2 text-fg-muted hover:text-icon-accent transition-colors cursor-pointer bg-none border-none p-1 flex items-center"
                       >
                         <Icon :name="showNewPassword ? 'eye-off' : 'eye'" :size="16" />
                       </button>
@@ -224,13 +224,13 @@
                         :type="showConfirmPassword ? 'text' : 'password'"
                         required
                         :placeholder="t.placeholderConfirmPassword"
-                        class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors text-sm pr-10 bg-surface"
+                        class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium transition-colors text-sm pr-10 bg-surface"
                         :disabled="savingPassword"
                       />
                       <button
                         type="button"
                         @click="showConfirmPassword = !showConfirmPassword"
-                        class="absolute right-2 top-1/2 -translate-y-1/2 text-fg-muted hover:text-action transition-colors cursor-pointer bg-none border-none p-1 flex items-center"
+                        class="absolute right-2 top-1/2 -translate-y-1/2 text-fg-muted hover:text-icon-accent transition-colors cursor-pointer bg-none border-none p-1 flex items-center"
                       >
                         <Icon :name="showConfirmPassword ? 'eye-off' : 'eye'" :size="16" />
                       </button>

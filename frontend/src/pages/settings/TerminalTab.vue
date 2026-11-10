@@ -353,7 +353,7 @@ load()
   color: var(--color-fg);
   background: var(--color-action-soft);
   border: 2px solid var(--color-line);
-  border-left: 6px solid var(--color-action);
+  border-left: 6px solid var(--color-icon-accent);
 }
 .tm-mono {
   font-family: var(--font-mono);

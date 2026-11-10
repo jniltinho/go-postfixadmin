@@ -297,8 +297,9 @@ async function submitDelete() {
 }
 
 .progress-bar-wrap {
+  /* --progress-track: a theme may need a darker track under the white count (High contrast) */
   width: 8rem;
-  background-color: var(--color-line-soft);
+  background-color: var(--progress-track, var(--color-line-soft));
   height: 1.5rem;
   position: relative;
   border: 1px solid var(--color-line);

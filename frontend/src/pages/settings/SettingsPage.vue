@@ -265,7 +265,7 @@ watch(
   color: var(--color-fg);
   background: var(--color-surface);
   border-width: 3px 3px 0;
-  box-shadow: inset 0 4px 0 var(--color-action);
+  box-shadow: inset 0 4px 0 var(--color-icon-accent);
 }
 .st-right {
   margin-left: auto;

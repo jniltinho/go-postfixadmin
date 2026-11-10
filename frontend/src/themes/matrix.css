@@ -46,4 +46,8 @@
   --color-shadow: color-mix(in srgb, #00ff41 35%, transparent);
   --font-sans:
     'Cascadia Mono', 'JetBrains Mono', 'DejaVu Sans Mono', Consolas, 'Liberation Mono', 'Courier New', monospace;
+  --color-on-toast-info: #000000;
+  --color-on-toast-ok: #000000;
+  --color-on-toast-warn: #000000;
+  --color-on-toast-err: #000000;
 }

@@ -421,29 +421,29 @@ tbody tr:hover {
 }
 .act-edit,
 :slotted(.act-edit) {
-  background: oklch(0.546 0.245 262.881);
+  background: var(--color-action-edit, var(--color-action-hover));
   color: var(--color-on-action);
 }
 .act-edit:hover,
 :slotted(.act-edit:hover) {
   background: var(--color-surface);
-  color: oklch(0.546 0.245 262.881);
+  color: var(--color-icon-accent);
 }
 .act-del,
 :slotted(.act-del) {
-  background: oklch(0.577 0.245 27.325);
+  background: var(--color-danger);
   color: var(--color-on-action);
 }
 .act-del:hover,
 :slotted(.act-del:hover) {
   background: var(--color-surface);
-  color: oklch(0.577 0.245 27.325);
+  color: var(--color-danger);
 }
 
 :slotted(.badge-yes) {
-  background: oklch(0.962 0.044 156.743);
-  color: oklch(0.527 0.154 150.069);
-  border: 2px solid oklch(0.527 0.154 150.069);
+  background: var(--color-ok-soft);
+  color: var(--color-ok-strong);
+  border: 2px solid var(--color-ok-strong);
   padding: 0.25rem 0.5rem;
   font-size: 0.75rem;
   font-weight: 700;
@@ -473,7 +473,7 @@ tbody tr:hover {
 }
 
 :slotted(.row-icon) {
-  color: var(--color-action);
+  color: var(--color-icon-accent);
   flex-shrink: 0;
 }
 </style>

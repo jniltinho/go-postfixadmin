@@ -45,6 +45,10 @@
   --color-warn: #8c4500;
   --color-shadow: color-mix(in srgb, #1d1d1f 35%, transparent);
   --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', 'Inter', Arial, sans-serif;
+  --color-on-toast-info: #ffffff;
+  --color-on-toast-ok: #ffffff;
+  --color-on-toast-warn: #ffffff;
+  --color-on-toast-err: #ffffff;
 }
 
 /* Crystal (dark) */
@@ -91,4 +95,8 @@
   --color-warn: #a66706;
   --color-shadow: color-mix(in srgb, #4ea2ff 35%, transparent);
   --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', 'Inter', Arial, sans-serif;
+  --color-on-toast-info: #000000;
+  --color-on-toast-ok: #000000;
+  --color-on-toast-warn: #ffffff;
+  --color-on-toast-err: #000000;
 }

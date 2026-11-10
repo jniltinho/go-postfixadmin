@@ -20,7 +20,9 @@ it('components use theme roles, not literal colors (themes/ and the contract in 
     if (f.endsWith('style.css')) src = src.replace(/@theme static \{[\s\S]*?\n\}/, '')
     src.split('\n').forEach((line, i) => {
       if (
-        /#[0-9a-fA-F]{3,8}\b(?![\w-])|rgba?\(/.test(line.replace(/href="#[^"]*"|url\(#[^)]*\)/g, '')) ||
+        /#[0-9a-fA-F]{3,8}\b(?![\w-])|rgba?\(|(?:oklch|oklab|hsla?|lab|lch)\(|(?:^|[;{]\s*)(?:color|background(?:-color)?|fill|stroke)\s*:\s*(?:white|black)\b/.test(
+          line.replace(/href="#[^"]*"|url\(#[^)]*\)/g, ''),
+        ) ||
         palette.test(line)
       )
         bad.push(`${f.slice(root.length)}:${i + 1}: ${line.trim()}`)

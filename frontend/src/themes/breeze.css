@@ -45,6 +45,10 @@
   --color-warn: #9c4800;
   --color-shadow: color-mix(in srgb, #31363b 35%, transparent);
   --font-sans: 'Noto Sans', 'Inter', Tahoma, Verdana, Arial, sans-serif;
+  --color-on-toast-info: #ffffff;
+  --color-on-toast-ok: #ffffff;
+  --color-on-toast-warn: #ffffff;
+  --color-on-toast-err: #ffffff;
 }
 
 /* Breeze (dark) */
@@ -91,4 +95,8 @@
   --color-warn: #f67400;
   --color-shadow: color-mix(in srgb, #3daee9 35%, transparent);
   --font-sans: 'Noto Sans', 'Inter', Tahoma, Verdana, Arial, sans-serif;
+  --color-on-toast-info: #000000;
+  --color-on-toast-ok: #000000;
+  --color-on-toast-warn: #000000;
+  --color-on-toast-err: #000000;
 }

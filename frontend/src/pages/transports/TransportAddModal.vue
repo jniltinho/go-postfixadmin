@@ -33,7 +33,7 @@
                 type="text"
                 required
                 placeholder="example.com"
-                class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors text-sm"
+                class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium transition-colors text-sm"
                 @input="form.domain = form.domain.toLowerCase()"
               />
               <p class="text-[0.625rem] text-fg-subtle mt-1">Domain or pattern for this transport rule</p>
@@ -48,7 +48,7 @@
                 type="text"
                 required
                 placeholder="smtp:[mail.example.com]:25"
-                class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors text-sm"
+                class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium transition-colors text-sm"
               />
               <p class="text-[0.625rem] text-fg-subtle mt-1">
                 Transport definition, e.g. smtp:[host]:port or relay:[host]
@@ -82,7 +82,7 @@
           type="button"
           :disabled="saving"
           @click="submit"
-          class="bg-action hover:bg-surface hover:text-action text-on-action border-2 border-line font-black px-6 py-3 shadow-(--shadow-3) transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-(--shadow-4) active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm disabled:opacity-60"
+          class="bg-action hover:bg-surface hover:text-icon-accent text-on-action border-2 border-line font-black px-6 py-3 shadow-(--shadow-3) transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-(--shadow-4) active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm disabled:opacity-60"
         >
           <Icon name="save" :size="16" class="mr-2" />
           {{ saving ? 'SAVING...' : 'CREATE TRANSPORT' }}

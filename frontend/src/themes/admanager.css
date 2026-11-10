@@ -45,4 +45,8 @@
   --color-warn: #c25418;
   --color-shadow: color-mix(in srgb, #424f56 35%, transparent);
   --font-sans: Verdana, 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --color-on-toast-info: #ffffff;
+  --color-on-toast-ok: #000000;
+  --color-on-toast-warn: #ffffff;
+  --color-on-toast-err: #ffffff;
 }

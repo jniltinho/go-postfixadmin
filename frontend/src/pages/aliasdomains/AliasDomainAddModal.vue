@@ -32,7 +32,7 @@
                 <select
                   v-model="form.alias_domain"
                   required
-                  class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors bg-surface cursor-pointer text-sm"
+                  class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium transition-colors bg-surface cursor-pointer text-sm"
                 >
                   <option value="" disabled>Select source domain...</option>
                   <option v-for="d in availableAlias" :key="d.domain" :value="d.domain">{{ d.domain }}</option>
@@ -46,7 +46,7 @@
                 <select
                   v-model="form.target_domain"
                   required
-                  class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors bg-surface cursor-pointer text-sm"
+                  class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium transition-colors bg-surface cursor-pointer text-sm"
                 >
                   <option value="" disabled>Select target domain...</option>
                   <option v-for="d in domains" :key="d.domain" :value="d.domain">{{ d.domain }}</option>
@@ -82,7 +82,7 @@
           type="button"
           :disabled="saving"
           @click="submit"
-          class="bg-action hover:bg-surface hover:text-action text-on-action border-2 border-line font-black px-6 py-2.5 shadow-(--shadow-3) hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-(--shadow-4) active:translate-x-0 active:translate-y-0 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center disabled:opacity-60"
+          class="bg-action hover:bg-surface hover:text-icon-accent text-on-action border-2 border-line font-black px-6 py-2.5 shadow-(--shadow-3) hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-(--shadow-4) active:translate-x-0 active:translate-y-0 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center disabled:opacity-60"
         >
           <Icon name="plus-circle" :size="16" class="mr-2" />
           {{ saving ? 'SAVING...' : 'CREATE ALIAS' }}

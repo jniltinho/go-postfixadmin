@@ -45,4 +45,8 @@
   --color-warn: #ffca28;
   --color-shadow: color-mix(in srgb, #ff8800 35%, transparent);
   --font-sans: 'Inter', Tahoma, Verdana, Arial, sans-serif;
+  --color-on-toast-info: #000000;
+  --color-on-toast-ok: #000000;
+  --color-on-toast-warn: #000000;
+  --color-on-toast-err: #000000;
 }

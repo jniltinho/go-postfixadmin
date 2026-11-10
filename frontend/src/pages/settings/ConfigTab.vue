@@ -335,7 +335,7 @@ load()
 .cf-check input {
   width: 1.25rem;
   height: 1.25rem;
-  accent-color: var(--color-action);
+  accent-color: var(--color-icon-accent);
 }
 .cf-actions {
   display: flex;

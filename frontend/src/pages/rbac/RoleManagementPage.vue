@@ -22,7 +22,7 @@
         <!-- Card header -->
         <div class="role-card-header">
           <div class="role-card-title">
-            <Icon name="shield" :size="16" class="mr-2 text-action" />
+            <Icon name="shield" :size="16" class="mr-2 text-icon-accent" />
             {{ role.name }}
             <span v-if="role.system" class="badge-system">SYSTEM</span>
           </div>
@@ -72,7 +72,7 @@
                 v-model="createForm.name"
                 type="text"
                 placeholder="e.g. billing_admin"
-                class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium text-sm"
+                class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium text-sm"
               />
             </div>
             <div>
@@ -81,7 +81,7 @@
                 v-model="createForm.description"
                 type="text"
                 placeholder="Short description of this role"
-                class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium text-sm"
+                class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium text-sm"
               />
             </div>
           </div>
@@ -120,7 +120,7 @@
             type="button"
             :disabled="creating"
             @click="submitCreate"
-            class="bg-action hover:bg-surface hover:text-action text-on-action border-2 border-line font-black px-6 py-3 shadow-(--shadow-3) hover:-translate-x-1 hover:-translate-y-1 hover:shadow-(--shadow-4) active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm transition-all disabled:opacity-60"
+            class="bg-action hover:bg-surface hover:text-icon-accent text-on-action border-2 border-line font-black px-6 py-3 shadow-(--shadow-3) hover:-translate-x-1 hover:-translate-y-1 hover:shadow-(--shadow-4) active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm transition-all disabled:opacity-60"
           >
             <Icon name="plus-circle" :size="16" class="mr-2" />
             {{ creating ? 'CREATING...' : 'CREATE ROLE' }}
@@ -148,7 +148,7 @@
             v-if="editTarget?.system"
             class="bg-action-soft border-2 border-action-line-soft p-3 flex items-start gap-2"
           >
-            <Icon name="info" :size="16" class="text-action mt-0.5 flex-shrink-0" />
+            <Icon name="info" :size="16" class="text-icon-accent mt-0.5 flex-shrink-0" />
             <p class="text-xs font-bold text-action-strong">
               This is a system role. You can update its description but permissions are managed by the system.
             </p>
@@ -161,7 +161,7 @@
                 v-model="editForm.description"
                 type="text"
                 placeholder="Short description of this role"
-                class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium text-sm"
+                class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium text-sm"
               />
             </div>
           </div>
@@ -216,7 +216,7 @@
             type="button"
             :disabled="saving"
             @click="submitEdit"
-            class="bg-action hover:bg-surface hover:text-action text-on-action border-2 border-line font-black px-6 py-3 shadow-(--shadow-3) hover:-translate-x-1 hover:-translate-y-1 hover:shadow-(--shadow-4) active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm transition-all disabled:opacity-60"
+            class="bg-action hover:bg-surface hover:text-icon-accent text-on-action border-2 border-line font-black px-6 py-3 shadow-(--shadow-3) hover:-translate-x-1 hover:-translate-y-1 hover:shadow-(--shadow-4) active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm transition-all disabled:opacity-60"
           >
             <Icon name="save" :size="16" class="mr-2" />
             {{ saving ? 'SAVING...' : 'SAVE CHANGES' }}

@@ -34,7 +34,7 @@
                 type="email"
                 required
                 placeholder="admin@example.com"
-                class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors text-sm lowercase"
+                class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium transition-colors text-sm lowercase"
                 style="text-transform: lowercase"
                 @input="form.username = form.username.toLowerCase()"
               />
@@ -83,12 +83,12 @@
                   required
                   minlength="8"
                   placeholder="New password"
-                  class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors text-sm pr-10"
+                  class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium transition-colors text-sm pr-10"
                   @input="onPasswordInput"
                 />
                 <button
                   type="button"
-                  class="absolute right-2 top-1/2 -translate-y-1/2 text-fg-muted hover:text-action transition-colors"
+                  class="absolute right-2 top-1/2 -translate-y-1/2 text-fg-muted hover:text-icon-accent transition-colors"
                   @click="showPw1 = !showPw1"
                 >
                   <Icon :name="showPw1 ? 'eye-off' : 'eye'" :size="16" />
@@ -100,12 +100,12 @@
                   v-model="form.passwordConfirm"
                   required
                   placeholder="Repeat password"
-                  class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors text-sm pr-10"
+                  class="w-full h-10 px-3 border-2 border-line focus:border-icon-accent focus:outline-none font-medium transition-colors text-sm pr-10"
                   @input="onPasswordInput"
                 />
                 <button
                   type="button"
-                  class="absolute right-2 top-1/2 -translate-y-1/2 text-fg-muted hover:text-action transition-colors"
+                  class="absolute right-2 top-1/2 -translate-y-1/2 text-fg-muted hover:text-icon-accent transition-colors"
                   @click="showPw2 = !showPw2"
                 >
                   <Icon :name="showPw2 ? 'eye-off' : 'eye'" :size="16" />
@@ -114,7 +114,7 @@
               <button
                 type="button"
                 @click="genPassword"
-                class="bg-action hover:bg-surface hover:text-action text-on-action text-xs font-black px-3 h-10 border-2 border-line cursor-pointer uppercase tracking-widest flex items-center gap-1 whitespace-nowrap flex-shrink-0 transition-colors"
+                class="bg-action hover:bg-surface hover:text-icon-accent text-on-action text-xs font-black px-3 h-10 border-2 border-line cursor-pointer uppercase tracking-widest flex items-center gap-1 whitespace-nowrap flex-shrink-0 transition-colors"
               >
                 <Icon name="wand-2" :size="14" />
                 GENERATE
@@ -194,7 +194,7 @@
           type="button"
           :disabled="saving || pwdMismatch"
           @click="submit"
-          class="bg-action hover:bg-surface hover:text-action text-on-action border-2 border-line font-black px-6 py-3 shadow-(--shadow-3) transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-(--shadow-4) active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm disabled:opacity-60"
+          class="bg-action hover:bg-surface hover:text-icon-accent text-on-action border-2 border-line font-black px-6 py-3 shadow-(--shadow-3) transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-(--shadow-4) active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm disabled:opacity-60"
         >
           <Icon name="save" :size="16" class="mr-2" />
           {{ saving ? 'SAVING...' : 'CREATE ADMIN' }}
