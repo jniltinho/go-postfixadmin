@@ -84,6 +84,13 @@
 - [x] 12.4 Settings › Configuration: `GET/PUT /api/v1/system/config`, schema of editable/read-only/secret keys, line-preserving TOML editor (`utils.SetTOMLValue`, tested), validation, `.bak`, atomic write, audit; tab in PT/EN/ES at AAA; route tests (secrets hidden, 403, read-only/invalid refused, file updated in place).
 - [x] 12.5 `terminal.enabled` editable in Settings › Configuration (confirmation to enable; open sessions closed within 15 s when disabled); host/port stay read-only.
 
+## 13. Showcase README and polish
+
+- [x] 13.1 Root README rewritten as a showcase (one-minute start, GHCR image, themes collage, feature table); advanced material moved to `DOCUMENTS/README.md` (install options, Docker image workflow and publishing, configuration, Settings, themes, reverse proxy, security, API, observability).
+- [x] 13.2 Refreshed screenshots (current UI, soft shapes) plus `themes.png` and `settings-config.png`.
+- [x] 13.3 Terminal tab reloads its settings when shown again (enabling in Configuration no longer needs F5).
+- [x] 13.4 All dialogs open 5% below the top of the window.
+
 ## 11. Final validation
 
 - [x] 11.1 `openspec validate improve-ui-themes-and-platform --strict`.
