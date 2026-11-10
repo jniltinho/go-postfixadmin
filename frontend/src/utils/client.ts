@@ -6,7 +6,7 @@ export const apiClient = axios.create({
   withCredentials: true,
 })
 
-apiClient.interceptors.request.use(config => {
+apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('access_token')
   if (token) config.headers.Authorization = `Bearer ${token}`
   return config
@@ -20,7 +20,7 @@ async function refreshSession(): Promise<boolean> {
 }
 
 apiClient.interceptors.response.use(
-  res => res,
+  (res) => res,
   async (err) => {
     const original = err.config
     const url: string = original?.url ?? ''
@@ -28,7 +28,9 @@ apiClient.interceptors.response.use(
     if (err.response?.status === 401 && !original._retry && !url.includes('/auth/')) {
       original._retry = true
       try {
-        refreshPromise ??= refreshSession().finally(() => { refreshPromise = null })
+        refreshPromise ??= refreshSession().finally(() => {
+          refreshPromise = null
+        })
         const ok = await refreshPromise
         if (!ok) {
           const { useAuthStore } = await import('../stores/auth')
@@ -45,5 +47,5 @@ apiClient.interceptors.response.use(
       }
     }
     return Promise.reject(err)
-  }
+  },
 )

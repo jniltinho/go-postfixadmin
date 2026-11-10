@@ -17,7 +17,8 @@ services:
 
   postfixadmin:
     stop_grace_period: 30s
-    image: jniltinho/go-postfixadmin:latest
+    image: ghcr.io/jniltinho/go-postfixadmin:latest
+    # build: .   # uncomment to build from this checkout instead of pulling the published image
     container_name: postfixadmin-app
     depends_on:
       mariadb:

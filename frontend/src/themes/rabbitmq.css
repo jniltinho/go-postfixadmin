@@ -1,0 +1,47 @@
+/* Ported from jniltinho/ad-manager frontend/src/themes (rabbitmq): values of its role contract mapped onto
+ * ours (see ../style.css). Only role values; layout stays the same in every theme. */
+
+/* RabbitMQ */
+[data-theme='rabbitmq'] {
+  color-scheme: light;
+  --color-page: #e7e7e7;
+  --color-login-page: #f2f2f2;
+  --color-page-dots: rgba(0, 0, 0, 0.12);
+  --color-surface: #ffffff;
+  --color-surface-2: #f4f4f4;
+  --color-surface-3: #f8f8f8;
+  --color-header: #ffffff;
+  --color-sidebar: #ffffff;
+  --color-backdrop: rgba(0, 0, 0, 0.45);
+  --color-fg: #333333;
+  --color-fg-2: #333333;
+  --color-fg-muted: #5e5e5e;
+  --color-fg-subtle: #5e5e5e;
+  --color-line: #8c8c8c;
+  --color-line-soft: #ebebeb;
+  --color-field-line: #d6d6d6;
+  --color-strong-fill: #484848;
+  --color-action-hover: #a64000;
+  --color-action-strong: #a64000;
+  --color-action-soft: #fff0e5;
+  --color-action-line-soft: #d65200;
+  --color-on-action: #ffffff;
+  --color-accent-soft: #f8f8f8;
+  --color-err: #c0201f;
+  --color-danger-strong: #c0201f;
+  --color-err-soft: #fbe3e3;
+  --color-err-line-soft: #8e1c1c;
+  --color-ok-strong: #2a7a2a;
+  --color-ok-soft: #e1f5e1;
+  --color-warn-strong: #9a5800;
+  --color-warn-soft: #fff4d6;
+  --color-warn-line: #ffcc33;
+  --color-action: #b84700;
+  --color-accent: #b84700;
+  --color-accent-strong: #b84700;
+  --color-danger: #c62828;
+  --color-ok: #2a7a2a;
+  --color-warn: #9a5800;
+  --color-shadow: color-mix(in srgb, #484848 35%, transparent);
+  --font-sans: Verdana, Geneva, 'DejaVu Sans', Arial, sans-serif;
+}

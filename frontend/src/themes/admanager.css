@@ -1,0 +1,47 @@
+/* Ported from jniltinho/ad-manager frontend/src/themes (admanager): values of its role contract mapped onto
+ * ours (see ../style.css). Only role values; layout stays the same in every theme. */
+
+/* ADManager */
+[data-theme='admanager'] {
+  color-scheme: light;
+  --color-page: #f0f1f3;
+  --color-login-page: #f9f9f9;
+  --color-page-dots: rgba(17, 48, 88, 0.25);
+  --color-surface: #fff;
+  --color-surface-2: #f9f9f9;
+  --color-surface-3: #dfe1e3;
+  --color-header: #fff;
+  --color-sidebar: #fff;
+  --color-backdrop: rgba(14, 23, 45, 0.55);
+  --color-fg: #0f172b;
+  --color-fg-2: #0f172b;
+  --color-fg-muted: #636363;
+  --color-fg-subtle: #626262;
+  --color-line: #8b94a3;
+  --color-line-soft: #f9f9f9;
+  --color-field-line: #dddddd;
+  --color-strong-fill: #424f56;
+  --color-action-hover: #64ac4b;
+  --color-action-strong: #424f56;
+  --color-action-soft: #dfe1e3;
+  --color-action-line-soft: #424f56;
+  --color-on-action: #fff;
+  --color-accent-soft: #dfe1e3;
+  --color-err: #ca0011;
+  --color-danger-strong: #ca0011;
+  --color-err-soft: #f6dcdc;
+  --color-err-line-soft: #82181a;
+  --color-ok-strong: #2b7206;
+  --color-ok-soft: #d9ecd9;
+  --color-warn-strong: #ad4100;
+  --color-warn-soft: #fef3d7;
+  --color-warn-line: #c25418;
+  --color-action: #424f56;
+  --color-accent: #424f56;
+  --color-accent-strong: #424f56;
+  --color-danger: #e5242c;
+  --color-ok: #3e8522;
+  --color-warn: #c25418;
+  --color-shadow: color-mix(in srgb, #424f56 35%, transparent);
+  --font-sans: Verdana, 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}

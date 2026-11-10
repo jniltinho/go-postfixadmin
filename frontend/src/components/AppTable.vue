@@ -12,7 +12,7 @@
         <div class="controls-left">
           <div class="per-page-wrap">
             <select v-model="rowsPerPage" class="ctrl-select" @change="currentPage = 1">
-              <option :value="10">10</option>           
+              <option :value="10">10</option>
               <option :value="12">12</option>
               <option :value="15">15</option>
               <option :value="25">25</option>
@@ -39,7 +39,7 @@
                   <span :class="{ 'sort-active': sortKey === col.key && sortDir === 'desc' }">▼</span>
                 </span>
               </th>
-              <th v-if="showActions" class="table-th" style="text-align:right">ACTIONS</th>
+              <th v-if="showActions" class="table-th" style="text-align: right">ACTIONS</th>
             </tr>
           </thead>
           <tbody>
@@ -61,10 +61,10 @@
                 <td v-if="showActions" class="table-td actions-td">
                   <slot name="actions" :row="row">
                     <button class="act-btn act-edit" @click="emit('edit', row)">
-                      <Icon name="pencil" :size="12" style="margin-right:4px;vertical-align:middle" />EDIT
+                      <Icon name="pencil" :size="12" style="margin-right: 0.25rem; vertical-align: middle" />EDIT
                     </button>
                     <button class="act-btn act-del" @click="emit('delete', row)">
-                      <Icon name="trash-2" :size="12" style="margin-right:4px;vertical-align:middle" />DELETE
+                      <Icon name="trash-2" :size="12" style="margin-right: 0.25rem; vertical-align: middle" />DELETE
                     </button>
                   </slot>
                 </td>
@@ -79,18 +79,21 @@
           <template v-if="filteredRows.length === 0">Showing 0 entries</template>
           <template v-else>
             Showing {{ (currentPage - 1) * rowsPerPage + 1 }} to
-            {{ Math.min(currentPage * rowsPerPage, filteredRows.length) }} of
-            {{ filteredRows.length }} entries
+            {{ Math.min(currentPage * rowsPerPage, filteredRows.length) }} of {{ filteredRows.length }} entries
           </template>
         </div>
         <div class="pagination">
           <button class="pg-btn" :disabled="currentPage === 1" @click="currentPage = 1">FIRST</button>
           <button class="pg-btn" :disabled="currentPage === 1" @click="currentPage--">PREVIOUS</button>
           <button
-            v-for="p in pageButtons" :key="p"
-            class="pg-btn" :class="{ 'pg-active': p === currentPage }"
+            v-for="p in pageButtons"
+            :key="p"
+            class="pg-btn"
+            :class="{ 'pg-active': p === currentPage }"
             @click="currentPage = p"
-          >{{ p }}</button>
+          >
+            {{ p }}
+          </button>
           <button class="pg-btn" :disabled="currentPage === totalPages" @click="currentPage++">NEXT</button>
           <button class="pg-btn" :disabled="currentPage === totalPages" @click="currentPage = totalPages">LAST</button>
         </div>
@@ -109,21 +112,24 @@ interface Column {
 
 const slots = useSlots()
 
-const props = withDefaults(defineProps<{
-  rows: any[]
-  columns: Column[]
-  rowKey?: string
-  searchFields?: string[]
-  defaultSortKey?: string
-  defaultSortDir?: 'asc' | 'desc'
-  loading?: boolean
-  showActions?: boolean
-  title?: string
-  initialRowsPerPage?: number
-}>(), {
-  showActions: true,
-  initialRowsPerPage: 12,
-})
+const props = withDefaults(
+  defineProps<{
+    rows: any[]
+    columns: Column[]
+    rowKey?: string
+    searchFields?: string[]
+    defaultSortKey?: string
+    defaultSortDir?: 'asc' | 'desc'
+    loading?: boolean
+    showActions?: boolean
+    title?: string
+    initialRowsPerPage?: number
+  }>(),
+  {
+    showActions: true,
+    initialRowsPerPage: 12,
+  },
+)
 
 const emit = defineEmits<{
   edit: [row: any]
@@ -141,15 +147,24 @@ const sortDir = ref<'asc' | 'desc'>(props.defaultSortDir ?? 'asc')
 
 function sortBy(key: string) {
   if (sortKey.value === key) sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc'
-  else { sortKey.value = key; sortDir.value = 'asc' }
+  else {
+    sortKey.value = key
+    sortDir.value = 'asc'
+  }
 }
 
 const filteredRows = computed(() => {
   let rows = props.rows
   const q = search.value.toLowerCase()
   if (q) {
-    const fields = props.searchFields ?? props.columns.map(c => c.key)
-    rows = rows.filter(r => fields.some(f => String((r as any)[f] ?? '').toLowerCase().includes(q)))
+    const fields = props.searchFields ?? props.columns.map((c) => c.key)
+    rows = rows.filter((r) =>
+      fields.some((f) =>
+        String((r as any)[f] ?? '')
+          .toLowerCase()
+          .includes(q),
+      ),
+    )
   }
   return [...rows].sort((a, b) => {
     const av = String((a as any)[sortKey.value] ?? '')
@@ -164,7 +179,7 @@ const pageButtons = computed(() => {
   const total = totalPages.value
   if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
   const cur = currentPage.value
-  const pages = new Set([1, total, cur, cur - 1, cur + 1].filter(p => p >= 1 && p <= total))
+  const pages = new Set([1, total, cur, cur - 1, cur + 1].filter((p) => p >= 1 && p <= total))
   return Array.from(pages).sort((a, b) => a - b)
 })
 
@@ -173,69 +188,70 @@ const pagedRows = computed(() => {
   return filteredRows.value.slice(start, start + rowsPerPage.value)
 })
 
-watch([search, rowsPerPage, () => props.rows], () => { currentPage.value = 1 })
+watch([search, rowsPerPage, () => props.rows], () => {
+  currentPage.value = 1
+})
 </script>
 
 <style scoped>
-
 .table-card {
-  background: #fff;
-  border: 2px solid #1e293b;
-  box-shadow: 2px 2px 0 #1e293b;
+  background: var(--color-surface);
+  border: 2px solid var(--color-line);
+  box-shadow: 2px 2px 0 var(--color-shadow);
   overflow: hidden;
-  padding: 16px 8px 4px;
+  padding: 1rem 0.5rem 0.25rem;
 }
 
 .table-topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 0 12px;
+  padding: 0 0 0.75rem;
   border-bottom: none;
   background: transparent;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.03125rem;
 }
 
 .table-topbar-title {
   font-weight: 900;
-  color: #1e293b;
+  color: var(--color-fg);
 }
 
 .table-titlebar + .table-controls {
-  border-top: 1px solid #e2e8f0;
-  padding-top: 12px;
-  margin-top: 8px;
+  border-top: 1px solid var(--color-line-soft);
+  padding-top: 0.75rem;
+  margin-top: 0.5rem;
 }
 
 .table-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 0 0;
+  padding: 0.75rem 0 0;
   border-top: none;
   background: transparent;
 }
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 12.5px;
-  border: 2px solid #1e293b;
+  font-size: 0.78125rem;
+  border: 2px solid var(--color-line);
 }
 
 .table-head-row {
-  background: #3b82f6;
-  border-bottom: 2px solid #1e293b;
+  background: var(--color-action);
+  border-bottom: 2px solid var(--color-line);
 }
 
 .table-th {
-  color: #fff;
+  color: var(--color-on-action);
   font-weight: 700;
-  font-size: 12px;
-  letter-spacing: 0.4px;
-  padding: 10px;
+  font-size: 0.75rem;
+  letter-spacing: 0.025rem;
+  padding: 0.625rem;
   text-align: left;
   cursor: pointer;
   white-space: nowrap;
@@ -243,10 +259,12 @@ watch([search, rowsPerPage, () => props.rows], () => { currentPage.value = 1 })
   font-family: var(--font-sans);
 }
 
-.table-th:hover { background: #2563eb; }
+.table-th:hover {
+  background: var(--color-action-hover);
+}
 
 tbody tr {
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--color-line-soft);
 }
 
 tbody tr:last-child {
@@ -254,67 +272,67 @@ tbody tr:last-child {
 }
 
 tbody tr:nth-child(even) {
-  background: #f8fafc;
+  background: var(--color-surface-2);
 }
 
 tbody tr:hover {
-  background: #eff6ff;
+  background: var(--color-action-soft);
 }
 
 .table-td {
-  padding: 7px 10px;
-  color: #1e293b;
-  font-size: 12px;
+  padding: 0.4375rem 0.625rem;
+  color: var(--color-fg);
+  font-size: 0.75rem;
 }
 
 .actions-td {
   display: flex;
-  gap: 6px;
+  gap: 0.375rem;
   align-items: center;
   justify-content: flex-end;
 }
 
 .td-link {
-  color: #1e293b;
+  color: var(--color-fg);
   font-weight: 600;
 }
 
 .table-loading,
 .table-empty {
   text-align: center;
-  padding: 28px;
-  color: #94a3b8;
-  font-size: 13px;
+  padding: 1.75rem;
+  color: var(--color-fg-subtle);
+  font-size: 0.8125rem;
 }
 
 .controls-left,
 .controls-right {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
 .per-page-wrap {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 0.375rem;
 }
 
 .ctrl-label {
-  font-size: 12px;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: var(--color-fg-muted);
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.03125rem;
 }
 
 .ctrl-select,
 .search-input {
-  border: 2px solid #1e293b !important;
-  padding: 4px 8px !important;
-  font-size: 13px !important;
-  color: #1e293b !important;
-  background-color: #ffffff !important;
+  border: 2px solid var(--color-line) !important;
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.8125rem !important;
+  color: var(--color-fg) !important;
+  background-color: var(--color-surface) !important;
   outline: none !important;
   border-radius: 0 !important;
   box-sizing: border-box !important;
@@ -324,45 +342,45 @@ tbody tr:hover {
 
 .ctrl-select:focus,
 .search-input:focus {
-  border-color: #3b82f6 !important;
+  border-color: var(--color-action) !important;
 }
 
 .search-input {
-  width: 200px;
+  width: 12.5rem;
 }
 
 .showing-text {
-  font-size: 12.5px;
-  color: #64748b;
+  font-size: 0.78125rem;
+  color: var(--color-fg-muted);
   font-weight: 500;
 }
 
 .pagination {
   display: flex;
-  gap: 3px;
+  gap: 0.1875rem;
   align-items: center;
 }
 
 .pg-btn {
-  height: 28px;
-  padding: 0 10px;
-  font-size: 10px;
+  height: 1.75rem;
+  padding: 0 0.625rem;
+  font-size: 0.625rem;
   font-weight: 700;
-  color: #374151;
-  background: #ffffff;
-  border: 1px solid #d1d5db;
+  color: var(--color-fg-2);
+  background: var(--color-surface);
+  border: 1px solid var(--color-field-line);
   border-radius: 0;
   cursor: pointer;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.025rem;
   text-transform: uppercase;
   white-space: nowrap;
   transition: all 0.1s ease-in-out;
 }
 
 .pg-btn:hover:not(:disabled) {
-  border-color: #1e293b;
-  color: #1e293b;
-  background: #f8fafc;
+  border-color: var(--color-line);
+  color: var(--color-fg);
+  background: var(--color-surface-2);
 }
 
 .pg-btn:disabled {
@@ -371,72 +389,91 @@ tbody tr:hover {
 }
 
 .pg-active {
-  background: #3b82f6 !important;
-  color: #ffffff !important;
-  border-color: #3b82f6 !important;
+  background: var(--color-action) !important;
+  color: var(--color-on-action) !important;
+  border-color: var(--color-action) !important;
 }
 
 .act-btn,
 :slotted(.act-btn) {
-  padding: 4px 8px;
-  font-size: 12px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
   font-weight: 800;
   cursor: pointer;
-  border: 1px solid #1e293b;
-  letter-spacing: 0.4px;
+  border: 1px solid var(--color-line);
+  letter-spacing: 0.025rem;
   border-radius: 0;
   display: inline-flex;
   align-items: center;
-  transition: all .12s;
-  box-shadow: 1px 1px 0 #1e293b;
+  transition: all 0.12s;
+  box-shadow: 1px 1px 0 var(--color-shadow);
   text-transform: uppercase;
 }
 
 .act-btn:hover,
-:slotted(.act-btn:hover) { transform: translate(-0.5px, -0.5px); }
+:slotted(.act-btn:hover) {
+  transform: translate(-0.5px, -0.5px);
+}
 .act-btn:active,
-:slotted(.act-btn:active) { transform: translate(0,0); box-shadow: none; }
+:slotted(.act-btn:active) {
+  transform: translate(0, 0);
+  box-shadow: none;
+}
 .act-edit,
-:slotted(.act-edit) { background: oklch(0.546 0.245 262.881); color: #fff; }
+:slotted(.act-edit) {
+  background: oklch(0.546 0.245 262.881);
+  color: var(--color-on-action);
+}
 .act-edit:hover,
-:slotted(.act-edit:hover) { background: #fff; color: oklch(0.546 0.245 262.881); }
+:slotted(.act-edit:hover) {
+  background: var(--color-surface);
+  color: oklch(0.546 0.245 262.881);
+}
 .act-del,
-:slotted(.act-del) { background: oklch(0.577 0.245 27.325); color: #fff; }
+:slotted(.act-del) {
+  background: oklch(0.577 0.245 27.325);
+  color: var(--color-on-action);
+}
 .act-del:hover,
-:slotted(.act-del:hover) { background: #fff; color: oklch(0.577 0.245 27.325); }
-
+:slotted(.act-del:hover) {
+  background: var(--color-surface);
+  color: oklch(0.577 0.245 27.325);
+}
 
 :slotted(.badge-yes) {
   background: oklch(0.962 0.044 156.743);
   color: oklch(0.527 0.154 150.069);
   border: 2px solid oklch(0.527 0.154 150.069);
-  padding: 4px 8px;
-  font-size: 12px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
   font-weight: 700;
   display: inline-block;
 }
 
 :slotted(.badge-no) {
-  background: #fee2e2;
-  color: #dc2626;
-  border: 2px solid #dc2626;
-  padding: 4px 8px;
-  font-size: 12px;
+  background: var(--color-err-soft);
+  color: var(--color-danger);
+  border: 2px solid var(--color-danger);
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
   font-weight: 700;
   display: inline-block;
 }
 
-:slotted(.act-disabled) { opacity: .4; cursor: not-allowed; pointer-events: none; }
+:slotted(.act-disabled) {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
 
 :slotted(.cell-with-icon) {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 0.375rem;
 }
 
 :slotted(.row-icon) {
-  color: #3b82f6;
+  color: var(--color-action);
   flex-shrink: 0;
 }
-
 </style>

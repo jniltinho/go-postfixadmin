@@ -1,0 +1,45 @@
+/* Default theme: the role defaults of ../style.css (@theme static) repeated under [data-theme] so an element
+ * (a preview card in Settings) can show it inside another theme; themes.test.ts keeps both equal. */
+[data-theme='default'] {
+  color-scheme: light;
+  --font-sans: 'Fira Sans', ui-sans-serif, system-ui, sans-serif;
+  --color-page: #ebf2fe;
+  --color-login-page: #f8fafc;
+  --color-page-dots: #c7d2e0;
+  --color-surface: #ffffff;
+  --color-surface-2: #f8fafc;
+  --color-surface-3: #f1f5f9;
+  --color-header: var(--color-surface);
+  --color-sidebar: var(--color-surface);
+  --color-backdrop: rgba(15, 23, 42, 0.6);
+  --color-fg: #1e293b;
+  --color-fg-2: #374151;
+  --color-fg-muted: #64748b;
+  --color-fg-subtle: #94a3b8;
+  --color-line: #1e293b;
+  --color-line-soft: #e2e8f0;
+  --color-field-line: #cbd5e1;
+  --color-shadow: #1e293b;
+  --color-strong-fill: #1e293b;
+  --color-action: #3b82f6;
+  --color-action-hover: #2563eb;
+  --color-action-strong: #1d4ed8;
+  --color-action-soft: #eff6ff;
+  --color-action-line-soft: #93c5fd;
+  --color-on-action: #ffffff;
+  --color-accent: #6366f1;
+  --color-accent-strong: #7c3aed;
+  --color-accent-soft: #ede9fe;
+  --color-err: #ef4444;
+  --color-danger: #dc2626;
+  --color-danger-strong: #b91c1c;
+  --color-err-soft: #fef2f2;
+  --color-err-line-soft: #fca5a5;
+  --color-ok: #22c55e;
+  --color-ok-strong: #16a34a;
+  --color-ok-soft: #dcfce7;
+  --color-warn: #f97316;
+  --color-warn-strong: #d97706;
+  --color-warn-soft: #fef3c7;
+  --color-warn-line: #fcd34d;
+}

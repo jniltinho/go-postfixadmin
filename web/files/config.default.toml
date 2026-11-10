@@ -20,6 +20,9 @@ ssl_enable = false
 # Generate a random 64-character hex string for production use, E.g., using "openssl rand -hex 32"
 session_secret = "9a048f79e88e35de37dc2c43c1fc002f358f92957a7690e60109cfe8a65178e0"
 swagger_enable = true # Set to true to enable Swagger UI /swagger/*, false to disable
+# X-Forwarded-For is read only from loopback (a reverse proxy on this host) and from these proxy addresses or CIDRs,
+# e.g. ["172.18.0.0/16"] for a proxy in a Docker network or ["203.0.113.10"]; other peers are identified by their socket IP.
+trusted_proxies = []
 
 # JWT settings (for the new Vue/Quasar SPA frontend)
 # Access tokens should be short-lived. Refresh tokens use httpOnly cookies (7d).
@@ -58,6 +61,22 @@ fetchmail = false
 # and assigning roles to existing admins. When false, all permission checks
 # are no-ops and the system behaves exactly as before RBAC was introduced.
 enabled = false
+
+[ui]
+# Theme used when the browser has no saved choice (users pick theirs in Settings).
+# Ids: default, admanager, breeze, breeze-dark, violet, violet-dark, aurora, aurora-dark, crystal, crystal-dark,
+# cone, xp, classic-gray, graphite, grafana, rabbitmq, matrix, winamp, pink-panther, high-contrast.
+# An unknown id falls back to "default". Env: UI_DEFAULT_THEME.
+default_theme = "default"
+
+[terminal]
+# Web SSH terminal in Settings > Terminal (superadmins only; with RBAC on they also need settings:write).
+# It opens a shell on host:port with the credentials typed in the browser, which are not stored; the host key is
+# pinned on first use (table terminal_host_key) and opening/closing go to the audit log. Off by default.
+enabled = false
+host = "127.0.0.1"
+port = 22
+idle_timeout = "30m"
 
 [smtp]
 server  = "localhost"

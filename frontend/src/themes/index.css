@@ -1,0 +1,17 @@
+/* Theme catalog: one file per family, each only redefines roles of the contract in ../style.css.
+ * Selectors are [data-theme] (not :root) so any element can carry a theme, e.g. the previews in Settings. */
+@import './default.css';
+@import './admanager.css';
+@import './breeze.css';
+@import './violet.css';
+@import './aurora.css';
+@import './crystal.css';
+@import './cone.css';
+@import './classics.css';
+@import './graphite.css';
+@import './grafana.css';
+@import './rabbitmq.css';
+@import './matrix.css';
+@import './winamp.css';
+@import './pink-panther.css';
+@import './high-contrast.css';

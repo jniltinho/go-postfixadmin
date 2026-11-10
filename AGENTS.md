@@ -25,10 +25,10 @@ The repo already ships a 16-agent specialist kit in `.agent/agents/` plus 25+ sk
 
 ## Project snapshot
 
-- **Module**: `go-postfixadmin` (Go 1.26)
+- **Module**: `go-postfixadmin` (Go 1.27)
 - **Backend**: Echo v5, GORM (MySQL + PostgreSQL), Cobra CLI, Viper config, `log/slog`, `swaggo/swag`
 - **Auth**: JWT (short-lived access + httpOnly refresh) with RBAC roles/permissions, optional API keys
-- **Frontend**: Vue 3 + TS + Vite + Pinia + Tailwind v4 + Lucide icons — **embedded** at build time via `//go:embed`
+- **Frontend**: Vue 3 + TS + Vite+ (`vp`) + Pinia + Tailwind v4 + Lucide icons + xterm.js — **embedded** at build time via `//go:embed`
 - **i18n**: GNU Gettext `.po` files loaded with `leonelquinteros/gotext` (en, pt_BR, es)
 - **Packaging**: single static binary (UPX-compressed for releases) + multi-stage Alpine Docker image + `.deb` / `.rpm`
 - **API surface**: versioned REST at `/api/v1` with Swagger UI at `/swagger/`
@@ -101,7 +101,7 @@ Generated config: `./bin/postfixadmin --generate-config` → `config.toml` (also
 │   ├── utils/                   # mailer, password, maillog_reader, vacation, quota
 │   └── i18n/                    # gotext wrapper, embedded .po loader
 ├── pkg/crypt/                   # Publicly importable helpers
-├── frontend/                    # Vue 3 + TS + Vite source (npm run build → web/dist)
+├── frontend/                    # Vue 3 + TS + Vite+ source (npm run build → web/dist); themes in src/themes/
 ├── web/
 │   ├── dist/                    # Built SPA — embedded at runtime via //go:embed
 │   ├── files/                   # config.default.toml (embedded)
@@ -121,7 +121,7 @@ Generated config: `./bin/postfixadmin --generate-config` → `config.toml` (also
 
 ### Go style
 
-- **Go 1.26**, no `// TODO: modernize` — use `slices`, `maps`, `cmp`, generic helpers freely.
+- **Go 1.27**, no `// TODO: modernize` — use `slices`, `maps`, `cmp`, generic helpers freely.
 - One package per concern. Handlers are methods on a single `*Handler{DB *gorm.DB}` in `internal/handlers`.
 - Cobra: one file per subcommand in `cmd/`. Subcommand implementation in `cmd/<group>/...` package, wired in `cmd/<group>.go`.
 - Use `log/slog` (not zerolog/logrus) for new code. `zerolog` is used **only** in `cmd/transport` and `cmd/transport/tcpserver.go` — keep it there.
@@ -141,7 +141,10 @@ Generated config: `./bin/postfixadmin --generate-config` → `config.toml` (also
 
 - **Build the SPA from `frontend/`. Never edit `web/dist/`** — it is generated and re-embedded.
 - Tailwind v4 utilities, Lucide icons, Pinia stores under `frontend/src/stores`, vue-router under `frontend/src/router`.
-- Design aesthetic: **neo-brutalism** (2px/4px borders, high contrast, sharp `neo-shadow`).
+- Design aesthetic: **neo-brutalism** (2px/4px borders, high contrast, sharp `neo-shadow`) is the Default theme; 19 more themes (incl. Windows XP) live in `frontend/src/themes/`.
+- **Colors only through theme roles** (`bg-surface`, `text-fg`, `border-line`, `var(--color-action)`, terminal `--term-*`). No hex values or Tailwind palette classes outside `frontend/src/themes/` — `npm run test` fails on them. See CONTRIBUTING.md § Themes.
+- **Sizes in `rem`** (borders/shadow offsets stay `px`): the root font scales 16px → 24px from FullHD to 4K.
+- Frontend checks: `npm run check` (vp check) and `npm run test` (vp test run); visual matrix: `tests/visual/capture.sh`.
 
 ### Database / migrations
 

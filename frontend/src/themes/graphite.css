@@ -1,0 +1,47 @@
+/* Ported from jniltinho/ad-manager frontend/src/themes (graphite): values of its role contract mapped onto
+ * ours (see ../style.css). Only role values; layout stays the same in every theme. */
+
+/* Graphite (dark) */
+[data-theme='graphite'] {
+  color-scheme: dark;
+  --color-page: #111217;
+  --color-login-page: #111217;
+  --color-page-dots: rgba(204, 204, 220, 0.18);
+  --color-surface: #181b1f;
+  --color-surface-2: #22252b;
+  --color-surface-3: #22252b;
+  --color-header: #181b1f;
+  --color-sidebar: #181b1f;
+  --color-backdrop: rgba(0, 0, 0, 0.6);
+  --color-fg: #ccccdc;
+  --color-fg-2: #ccccdc;
+  --color-fg-muted: rgba(204, 204, 220, 0.65);
+  --color-fg-subtle: rgba(204, 204, 220, 0.65);
+  --color-line: rgba(204, 204, 220, 0.5);
+  --color-line-soft: rgba(204, 204, 220, 0.07);
+  --color-field-line: rgba(204, 204, 220, 0.12);
+  --color-strong-fill: #3d71d9;
+  --color-action-hover: #2f5fc0;
+  --color-action-strong: #6e9fff;
+  --color-action-soft: #22252b;
+  --color-action-line-soft: #6e9fff;
+  --color-on-action: #ffffff;
+  --color-accent-soft: #22252b;
+  --color-err: #ff5286;
+  --color-danger-strong: #ff5286;
+  --color-err-soft: #361929;
+  --color-err-line-soft: #d10e5c;
+  --color-ok-strong: #6ccf8e;
+  --color-ok-soft: #182b26;
+  --color-warn-strong: #fbad37;
+  --color-warn-soft: #3d2f1a;
+  --color-warn-line: #ff9900;
+  --color-action: #3461bb;
+  --color-accent: #3461bb;
+  --color-accent-strong: #3461bb;
+  --color-danger: #d10e5c;
+  --color-ok: #1a7f4b;
+  --color-warn: #a66300;
+  --color-shadow: color-mix(in srgb, #3d71d9 35%, transparent);
+  --font-sans: 'Inter', Tahoma, Verdana, Arial, sans-serif;
+}

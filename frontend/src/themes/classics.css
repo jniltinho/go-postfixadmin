@@ -1,0 +1,92 @@
+/* Ported from jniltinho/ad-manager frontend/src/themes (classics): values of its role contract mapped onto
+ * ours (see ../style.css). Only role values; layout stays the same in every theme. */
+
+/* Windows XP (ad-manager: classic-blue) */
+[data-theme='xp'] {
+  color-scheme: light;
+  --color-page: #ece9d8;
+  --color-login-page: #ece9d8;
+  --color-page-dots: rgba(0, 0, 0, 0.25);
+  --color-surface: #ffffff;
+  --color-surface-2: #dde6fb;
+  --color-surface-3: #e8eefc;
+  --color-header: #ffffff;
+  --color-sidebar: #ffffff;
+  --color-backdrop: rgba(0, 0, 0, 0.4);
+  --color-fg: #000000;
+  --color-fg-2: #000000;
+  --color-fg-muted: #404040;
+  --color-fg-subtle: #404040;
+  --color-line: #7f9db9;
+  --color-line-soft: #ebeadb;
+  --color-field-line: #d6d2c2;
+  --color-strong-fill: #0846c8;
+  --color-action-hover: #0846c8;
+  --color-action-strong: #00408a;
+  --color-action-soft: #e8eefc;
+  --color-action-line-soft: #7f9db9;
+  --color-on-action: #ffffff;
+  --color-accent-soft: #e8eefc;
+  --color-err: #a00000;
+  --color-danger-strong: #a00000;
+  --color-err-soft: #f6e0e0;
+  --color-err-line-soft: #b00000;
+  --color-ok-strong: #1b561b;
+  --color-ok-soft: #e5eee5;
+  --color-warn-strong: #6b4500;
+  --color-warn-soft: #fff9e0;
+  --color-warn-line: #ffcc00;
+  --color-action: #0054e3;
+  --color-accent: #1a5c1e;
+  --color-accent-strong: #1a5c1e;
+  --color-danger: #7b0000;
+  --color-ok: #1b561b;
+  --color-warn: #6b4500;
+  --color-shadow: color-mix(in srgb, #0846c8 35%, transparent);
+  --font-sans: Tahoma, Verdana, 'Segoe UI', Arial, sans-serif;
+}
+
+/* Windows 98 */
+[data-theme='classic-gray'] {
+  color-scheme: light;
+  --color-page: #7fbfbf;
+  --color-login-page: #7fbfbf;
+  --color-page-dots: rgba(0, 0, 0, 0.25);
+  --color-surface: #c0c0c0;
+  --color-surface-2: #c8c8c8;
+  --color-surface-3: #dfdfdf;
+  --color-header: #c0c0c0;
+  --color-sidebar: #c0c0c0;
+  --color-backdrop: rgba(0, 0, 0, 0.4);
+  --color-fg: #000000;
+  --color-fg-2: #000000;
+  --color-fg-muted: #404040;
+  --color-fg-subtle: #404040;
+  --color-line: #000000;
+  --color-line-soft: #a8a8a8;
+  --color-field-line: #808080;
+  --color-strong-fill: #000080;
+  --color-action-hover: #d4d4d4;
+  --color-action-strong: #0000ff;
+  --color-action-soft: #dfdfdf;
+  --color-action-line-soft: #000080;
+  --color-on-action: #000000;
+  --color-accent-soft: #dfdfdf;
+  --color-err: #800000;
+  --color-danger-strong: #800000;
+  --color-err-soft: #b8a9a9;
+  --color-err-line-soft: #800000;
+  --color-ok-strong: #005000;
+  --color-ok-soft: #a9b3a9;
+  --color-warn-strong: #5c4d00;
+  --color-warn-soft: #c8c8a9;
+  --color-warn-line: #ffff00;
+  --color-action: #c0c0c0;
+  --color-accent: #c0c0c0;
+  --color-accent-strong: #c0c0c0;
+  --color-danger: #b36666;
+  --color-ok: #4c844c;
+  --color-warn: #ffff00;
+  --color-shadow: color-mix(in srgb, #000080 35%, transparent);
+  --font-sans: Tahoma, Verdana, 'Segoe UI', Arial, sans-serif;
+}

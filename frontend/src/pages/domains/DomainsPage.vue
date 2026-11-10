@@ -1,6 +1,5 @@
 <template>
   <div class="dom-page">
-
     <!-- ─── Header ─── -->
     <div class="dom-header">
       <div>
@@ -8,11 +7,10 @@
         <div class="dom-subtitle">MANAGE AND MONITOR YOUR REGISTERED EMAIL DOMAINS.</div>
       </div>
       <button v-if="canAddDomain" class="btn-add-big" @click="openAdd">
-        <Icon name="plus-circle" :size="20" style="margin-right:12px;vertical-align:middle" />
+        <Icon name="plus-circle" :size="20" style="margin-right: 0.75rem; vertical-align: middle" />
         ADD DOMAIN
       </button>
     </div>
-
 
     <!-- ─── Table ─── -->
     <AppTable
@@ -35,40 +33,52 @@
       <template #cell-description="{ value }">{{ value || '—' }}</template>
       <template #cell-aliases="{ row }">
         <div class="progress-bar-wrap">
-          <div class="progress-bar-fill" :style="{ width: (row.aliases > 0 ? Math.min(100, Math.round(((row.alias_count ?? 0) / row.aliases) * 100)) : 0) + '%' }"></div>
+          <div
+            class="progress-bar-fill"
+            :style="{
+              width:
+                (row.aliases > 0 ? Math.min(100, Math.round(((row.alias_count ?? 0) / row.aliases) * 100)) : 0) + '%',
+            }"
+          ></div>
           <div class="progress-bar-text">{{ row.alias_count ?? 0 }} / {{ row.aliases }}</div>
         </div>
       </template>
       <template #cell-mailboxes="{ row }">
         <div class="progress-bar-wrap">
-          <div class="progress-bar-fill" :style="{ width: (row.mailboxes > 0 ? Math.min(100, Math.round(((row.mailbox_count ?? 0) / row.mailboxes) * 100)) : 0) + '%' }"></div>
+          <div
+            class="progress-bar-fill"
+            :style="{
+              width:
+                (row.mailboxes > 0 ? Math.min(100, Math.round(((row.mailbox_count ?? 0) / row.mailboxes) * 100)) : 0) +
+                '%',
+            }"
+          ></div>
           <div class="progress-bar-text">{{ row.mailbox_count ?? 0 }} / {{ row.mailboxes }}</div>
         </div>
       </template>
-      <template #cell-transport="{ value }"><span class="mono">{{ value || 'virtual' }}</span></template>
+      <template #cell-transport="{ value }"
+        ><span class="mono">{{ value || 'virtual' }}</span></template
+      >
       <template #cell-backupmx="{ value }">{{ value ? 'Yes' : 'No' }}</template>
       <template #cell-active="{ value }">
         <span :class="value ? 'badge-yes' : 'badge-no'">{{ value ? 'YES' : 'NO' }}</span>
       </template>
       <template #cell-modified="{ value }">{{ formatDate(value) }}</template>
-      <template #cell-password_expiry="{ value }"><span class="mono">{{ value ?? 0 }}</span></template>
+      <template #cell-password_expiry="{ value }"
+        ><span class="mono">{{ value ?? 0 }}</span></template
+      >
       <template #actions="{ row }">
         <button v-if="canWrite" class="act-btn act-edit" @click="openEdit(row)">
-          <Icon name="pencil" :size="12" style="margin-right:4px;vertical-align:middle" />EDIT
+          <Icon name="pencil" :size="12" style="margin-right: 0.25rem; vertical-align: middle" />EDIT
         </button>
         <button v-if="canDelete" class="act-btn act-del" @click="confirmDelete(row)">
-          <Icon name="trash-2" :size="12" style="margin-right:4px;vertical-align:middle" />DELETE
+          <Icon name="trash-2" :size="12" style="margin-right: 0.25rem; vertical-align: middle" />DELETE
         </button>
       </template>
     </AppTable>
 
     <!-- ══════════ ADD MODAL ══════════ -->
-    <DomainAddModal
-      v-model="showAdd"
-      :transports="transports"
-      :saving="savingAdd"
-      @submit="handleAdd"
-    />
+    <DomainAddModal v-model="showAdd" :transports="transports" :saving="savingAdd" @submit="handleAdd" />
 
     <!-- ══════════ EDIT MODAL ══════════ -->
     <DomainEditModal
@@ -82,19 +92,16 @@
     />
 
     <!-- ══════════ DELETE CONFIRM ══════════ -->
-    <ConfirmDialog
-      v-model="showDeleteConfirm"
-      title="CONFIRM DELETE"
-      :loading="deletingRow"
-      @confirm="submitDelete"
-    >
-      <p class="text-sm font-medium text-brand-text leading-relaxed">
+    <ConfirmDialog v-model="showDeleteConfirm" title="CONFIRM DELETE" :loading="deletingRow" @confirm="submitDelete">
+      <p class="text-sm font-medium text-fg leading-relaxed">
         Are you sure you want to delete domain<br />
-        <strong class="font-mono break-all">{{ deleteTarget?.domain }}</strong>?<br />
-        <span class="text-xs text-red-600 font-bold mt-1 block">This will delete all mailboxes, aliases, and related data.</span>
+        <strong class="font-mono break-all">{{ deleteTarget?.domain }}</strong
+        >?<br />
+        <span class="text-xs text-danger font-bold mt-1 block"
+          >This will delete all mailboxes, aliases, and related data.</span
+        >
       </p>
     </ConfirmDialog>
-
   </div>
 </template>
 
@@ -108,12 +115,14 @@ import DomainEditModal from './DomainEditModal.vue'
 
 const toast = useToastStore()
 const auth = useAuthStore()
-const isSuperAdmin     = computed(() => auth.user?.superadmin === true)
-const canWrite         = computed(() => auth.hasPermission('domains:write'))
-const canDelete        = computed(() => auth.hasPermission('domains:delete'))
-const canAddDomain     = computed(() => auth.hasPermission('domain_add:write'))
-const canEditAdvanced  = computed(() => auth.hasPermission('domain_adset:write'))
-const canViewAdvanced  = computed(() => auth.hasPermission('domain_adset:read') || auth.hasPermission('domain_adset:write'))
+const isSuperAdmin = computed(() => auth.user?.superadmin === true)
+const canWrite = computed(() => auth.hasPermission('domains:write'))
+const canDelete = computed(() => auth.hasPermission('domains:delete'))
+const canAddDomain = computed(() => auth.hasPermission('domain_add:write'))
+const canEditAdvanced = computed(() => auth.hasPermission('domain_adset:write'))
+const canViewAdvanced = computed(
+  () => auth.hasPermission('domain_adset:read') || auth.hasPermission('domain_adset:write'),
+)
 
 interface Domain {
   domain: string
@@ -144,20 +153,26 @@ const transports = ref<Transport[]>([])
 const loading = ref(true)
 
 const columns = [
-  { key: 'domain',          label: 'DOMAIN' },
-  { key: 'description',     label: 'DESCRIPTION' },
-  { key: 'aliases',         label: 'ALIASES' },
-  { key: 'mailboxes',       label: 'EMAIL ACCOUNTS' },
-  { key: 'transport',       label: 'TRANSPORT' },
-  { key: 'backupmx',        label: 'BACKUP MX' },
-  { key: 'active',          label: 'ACTIVE' },
-  { key: 'modified',        label: 'MODIFIED' },
+  { key: 'domain', label: 'DOMAIN' },
+  { key: 'description', label: 'DESCRIPTION' },
+  { key: 'aliases', label: 'ALIASES' },
+  { key: 'mailboxes', label: 'EMAIL ACCOUNTS' },
+  { key: 'transport', label: 'TRANSPORT' },
+  { key: 'backupmx', label: 'BACKUP MX' },
+  { key: 'active', label: 'ACTIVE' },
+  { key: 'modified', label: 'MODIFIED' },
   { key: 'password_expiry', label: 'PASS EXPIRES' },
 ]
 
 function formatDate(ts: string): string {
   if (!ts) return '—'
-  return new Date(ts).toLocaleString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+  return new Date(ts).toLocaleString('pt-BR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 async function load() {
@@ -174,7 +189,9 @@ async function load() {
     }
   } catch (e: any) {
     toast.error(e?.response?.data?.error?.message || 'Failed to load data')
-  } finally { loading.value = false }
+  } finally {
+    loading.value = false
+  }
 }
 onMounted(load)
 
@@ -191,7 +208,10 @@ function openAdd() {
 }
 
 async function handleAdd(payload: any) {
-  if (!payload.domain.trim()) { toast.error('Domain name is required'); return }
+  if (!payload.domain.trim()) {
+    toast.error('Domain name is required')
+    return
+  }
   savingAdd.value = true
   try {
     await http.post(`${API_BASE}/domains`, payload)
@@ -200,7 +220,9 @@ async function handleAdd(payload: any) {
     await load()
   } catch (e: any) {
     toast.error(e?.response?.data?.error?.message || 'Failed to create domain')
-  } finally { savingAdd.value = false }
+  } finally {
+    savingAdd.value = false
+  }
 }
 
 // ─── Edit modal ───
@@ -234,7 +256,9 @@ async function handleEdit(payload: any) {
     await load()
   } catch (e: any) {
     toast.error(e?.response?.data?.error?.message || 'Failed to update domain')
-  } finally { savingEdit.value = false }
+  } finally {
+    savingEdit.value = false
+  }
 }
 
 // ─── Delete ───
@@ -253,32 +277,61 @@ async function submitDelete() {
   try {
     const domain = deleteTarget.value.domain
     await http.delete(`${API_BASE}/domains/${encodeURIComponent(domain)}`)
-    showDeleteConfirm.value = false; deleteTarget.value = null
+    showDeleteConfirm.value = false
+    deleteTarget.value = null
     toast.success(`Domain ${domain} deleted successfully`)
     await load()
   } catch (e: any) {
     toast.error(e?.response?.data?.error?.message || 'Failed to delete domain')
     showDeleteConfirm.value = false
-  } finally { deletingRow.value = false }
+  } finally {
+    deletingRow.value = false
+  }
 }
 </script>
 
 <style scoped>
-.dom-page { background: #ebf2fe; padding: 24px 28px 40px; }
+.dom-page {
+  background: var(--color-page);
+  padding: 1.5rem 1.75rem 2.5rem;
+}
 
 .progress-bar-wrap {
-  width: 128px; background-color: #e2e8f0; height: 24px;
-  position: relative; border: 1px solid #1e293b;
-  overflow: hidden; box-shadow: 1px 1px 0px #1e293b;
+  width: 8rem;
+  background-color: var(--color-line-soft);
+  height: 1.5rem;
+  position: relative;
+  border: 1px solid var(--color-line);
+  overflow: hidden;
+  box-shadow: 1px 1px 0px var(--color-shadow);
 }
 .progress-bar-fill {
-  background-color: #22c55e; height: 100%;
-  position: absolute; top: 0; left: 0; transition: width 0.3s ease;
+  background-color: var(--color-ok);
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: width 0.3s ease;
 }
 .progress-bar-text {
-  position: absolute; inset: 0; display: flex; align-items: center;
-  justify-content: center; font-size: 11px; font-weight: 700; color: #374151; z-index: 10;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--color-fg-2);
+  z-index: 10;
 }
-.act-disabled { opacity: .4; cursor: not-allowed; pointer-events: none; }
-.btn-add-big:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+.act-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.btn-add-big:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
 </style>

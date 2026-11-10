@@ -2661,6 +2661,117 @@ const docTemplate = `{
                 }
             }
         },
+        "/system/services": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Read-only systemd state of Postfix and Dovecot on the panel's host (systemctl show).",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "System"
+                ],
+                "summary": "Mail service status",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ServicesResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.APIResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/dto.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/system/terminal": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Whether the SSH terminal is enabled, its target and the pinned host key fingerprint. Superadmins only.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "System"
+                ],
+                "summary": "Web terminal status",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.TerminalInfoResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.APIResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/dto.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/system/terminal/hostkey": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "The next terminal connection asks the operator to trust the host key again. Superadmins only.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "System"
+                ],
+                "summary": "Forget the pinned SSH host key",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.APIResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.APIResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/dto.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/transports": {
             "get": {
                 "security": [
@@ -3884,6 +3995,71 @@ const docTemplate = `{
                 },
                 "token_type": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.ServiceStatus": {
+            "type": "object",
+            "properties": {
+                "active": {
+                    "type": "string",
+                    "example": "active"
+                },
+                "enabled": {
+                    "type": "string",
+                    "example": "enabled"
+                },
+                "found": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "postfix.service"
+                },
+                "since": {
+                    "type": "string",
+                    "example": "Sat 2026-11-07 20:15:02 -03"
+                },
+                "sub": {
+                    "type": "string",
+                    "example": "running"
+                }
+            }
+        },
+        "dto.ServicesResponse": {
+            "type": "object",
+            "properties": {
+                "available": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "services": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.ServiceStatus"
+                    }
+                }
+            }
+        },
+        "dto.TerminalInfoResponse": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "host_key": {
+                    "type": "string",
+                    "example": "ssh-ed25519 SHA256:abc..."
+                },
+                "idle_minutes": {
+                    "type": "integer",
+                    "example": 30
+                },
+                "target": {
+                    "type": "string",
+                    "example": "127.0.0.1:22"
                 }
             }
         },

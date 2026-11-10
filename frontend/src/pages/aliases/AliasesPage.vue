@@ -1,6 +1,5 @@
 <template>
   <div class="alias-page">
-
     <!-- ─── Header ─── -->
     <div class="dom-header">
       <div>
@@ -8,11 +7,10 @@
         <div class="dom-subtitle">MANAGE EMAIL ALIASES</div>
       </div>
       <button class="btn-add-big" @click="showAdd = true">
-        <Icon name="plus-circle" :size="20" style="margin-right:12px;vertical-align:middle" />
+        <Icon name="plus-circle" :size="20" style="margin-right: 0.75rem; vertical-align: middle" />
         ADD ALIAS
       </button>
     </div>
-
 
     <!-- ─── Table ─── -->
     <AppTable
@@ -27,12 +25,20 @@
     >
       <template #toolbar>
         <div class="mb-4 flex items-center gap-3">
-          <label class="text-xs font-black uppercase tracking-widest text-brand-text">FILTER BY DOMAIN:</label>
-          <select v-model="domainFilter" class="h-9 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium bg-white">
+          <label class="text-xs font-black uppercase tracking-widest text-fg">FILTER BY DOMAIN:</label>
+          <select
+            v-model="domainFilter"
+            class="h-9 px-3 border-2 border-line focus:border-action focus:outline-none font-medium bg-surface"
+          >
             <option value="">All Domains</option>
             <option v-for="d in domains" :key="d.domain" :value="d.domain">{{ d.domain }}</option>
           </select>
-          <a v-if="domainFilter" class="ml-2 text-xs font-bold text-red-500 hover:underline cursor-pointer" @click="domainFilter = ''">Clear Filter</a>
+          <a
+            v-if="domainFilter"
+            class="ml-2 text-xs font-bold text-err hover:underline cursor-pointer"
+            @click="domainFilter = ''"
+            >Clear Filter</a
+          >
         </div>
       </template>
 
@@ -42,8 +48,12 @@
           {{ row.address }}
         </div>
       </template>
-      <template #cell-goto="{ value }"><span class="mono" style="word-break:break-all">{{ value }}</span></template>
-      <template #cell-domain="{ value }"><span class="mono">{{ value }}</span></template>
+      <template #cell-goto="{ value }"
+        ><span class="mono" style="word-break: break-all">{{ value }}</span></template
+      >
+      <template #cell-domain="{ value }"
+        ><span class="mono">{{ value }}</span></template
+      >
       <template #cell-active="{ value }">
         <span :class="value ? 'badge-yes' : 'badge-no'">{{ value ? 'YES' : 'NO' }}</span>
       </template>
@@ -60,12 +70,7 @@
     />
 
     <!-- ══════════ EDIT MODAL ══════════ -->
-    <AliasEditModal
-      v-model="showEdit"
-      :initial-data="editInitialData"
-      :saving="savingEdit"
-      @submit="handleEdit"
-    />
+    <AliasEditModal v-model="showEdit" :initial-data="editInitialData" :saving="savingEdit" @submit="handleEdit" />
 
     <!-- ══════════ DELETE CONFIRM ══════════ -->
     <ConfirmDialog
@@ -75,7 +80,6 @@
       :loading="deletingRow"
       @confirm="submitDelete"
     />
-
   </div>
 </template>
 
@@ -97,7 +101,9 @@ interface Alias {
   created: string
 }
 
-interface Domain { domain: string }
+interface Domain {
+  domain: string
+}
 
 const allAliases = ref<Alias[]>([])
 const domains = ref<Domain[]>([])
@@ -106,34 +112,39 @@ const domainFilter = ref('')
 
 const domainFilteredRows = computed(() => {
   if (!domainFilter.value) return allAliases.value
-  return allAliases.value.filter(r => r.domain === domainFilter.value)
+  return allAliases.value.filter((r) => r.domain === domainFilter.value)
 })
 
 const columns = [
-  { key: 'address',  label: 'ALIAS' },
-  { key: 'goto',     label: 'TO' },
-  { key: 'domain',   label: 'DOMAIN' },
-  { key: 'active',   label: 'ACTIVE' },
+  { key: 'address', label: 'ALIAS' },
+  { key: 'goto', label: 'TO' },
+  { key: 'domain', label: 'DOMAIN' },
+  { key: 'active', label: 'ACTIVE' },
   { key: 'modified', label: 'MODIFIED' },
 ]
 
 function formatDate(ts: string): string {
   if (!ts) return '—'
-  return new Date(ts).toLocaleString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+  return new Date(ts).toLocaleString('pt-BR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 async function load() {
   loading.value = true
   try {
-    const [alRes, domRes] = await Promise.all([
-      http.get(`${API_BASE}/aliases`),
-      http.get(`${API_BASE}/domains`),
-    ])
+    const [alRes, domRes] = await Promise.all([http.get(`${API_BASE}/aliases`), http.get(`${API_BASE}/domains`)])
     allAliases.value = alRes.data?.data ?? []
     domains.value = domRes.data?.data ?? []
   } catch (e: any) {
     toast.error(e?.response?.data?.error?.message || 'Failed to load aliases')
-  } finally { loading.value = false }
+  } finally {
+    loading.value = false
+  }
 }
 onMounted(load)
 
@@ -142,8 +153,14 @@ const showAdd = ref(false)
 const savingAdd = ref(false)
 
 async function handleAdd(payload: any) {
-  if (!payload.local_part || !payload.domain) { toast.error('Alias and domain are required'); return }
-  if (!payload.goto) { toast.error('At least one recipient is required'); return }
+  if (!payload.local_part || !payload.domain) {
+    toast.error('Alias and domain are required')
+    return
+  }
+  if (!payload.goto) {
+    toast.error('At least one recipient is required')
+    return
+  }
   savingAdd.value = true
   try {
     await http.post(`${API_BASE}/aliases`, payload)
@@ -152,7 +169,9 @@ async function handleAdd(payload: any) {
     await load()
   } catch (e: any) {
     toast.error(e?.response?.data?.error?.message || 'Failed to create alias')
-  } finally { savingAdd.value = false }
+  } finally {
+    savingAdd.value = false
+  }
 }
 
 // ─── Edit modal ───
@@ -178,7 +197,10 @@ async function openEdit(row: Alias) {
 }
 
 async function handleEdit(payload: any) {
-  if (!payload.goto.trim()) { toast.error('At least one recipient is required'); return }
+  if (!payload.goto.trim()) {
+    toast.error('At least one recipient is required')
+    return
+  }
   savingEdit.value = true
   try {
     await http.put(`${API_BASE}/aliases/${encodeURIComponent(editAddress.value)}`, payload)
@@ -187,7 +209,9 @@ async function handleEdit(payload: any) {
     await load()
   } catch (e: any) {
     toast.error(e?.response?.data?.error?.message || 'Failed to update alias')
-  } finally { savingEdit.value = false }
+  } finally {
+    savingEdit.value = false
+  }
 }
 
 // ─── Delete ───
@@ -195,7 +219,10 @@ const showDeleteConfirm = ref(false)
 const deletingRow = ref(false)
 const deleteTarget = ref<Alias | null>(null)
 
-function confirmDelete(row: Alias) { deleteTarget.value = row; showDeleteConfirm.value = true }
+function confirmDelete(row: Alias) {
+  deleteTarget.value = row
+  showDeleteConfirm.value = true
+}
 
 async function submitDelete() {
   if (!deleteTarget.value) return
@@ -203,16 +230,22 @@ async function submitDelete() {
   try {
     const address = deleteTarget.value.address
     await http.delete(`${API_BASE}/aliases/${encodeURIComponent(address)}`)
-    showDeleteConfirm.value = false; deleteTarget.value = null
+    showDeleteConfirm.value = false
+    deleteTarget.value = null
     toast.success(`Alias ${address} deleted successfully`)
     await load()
   } catch (e: any) {
     toast.error(e?.response?.data?.error?.message || 'Failed to delete alias')
     showDeleteConfirm.value = false
-  } finally { deletingRow.value = false }
+  } finally {
+    deletingRow.value = false
+  }
 }
 </script>
 
 <style scoped>
-.alias-page { background: #ebf2fe; padding: 24px 28px 40px; }
+.alias-page {
+  background: var(--color-page);
+  padding: 1.5rem 1.75rem 2.5rem;
+}
 </style>

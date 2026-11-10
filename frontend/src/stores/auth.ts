@@ -66,20 +66,24 @@ export const useAuthStore = defineStore('auth', {
      * The wildcard "*" grants all permissions (superadmin fast-path).
      * Always returns true when superadmin=true, regardless of the permission list.
      */
-    hasPermission: (state) => (perm: string): boolean => {
-      if (!state.user) return false
-      if (state.user.superadmin) return true
-      const perms = state.user.permissions ?? []
-      return perms.includes('*') || perms.includes(perm)
-    },
+    hasPermission:
+      (state) =>
+      (perm: string): boolean => {
+        if (!state.user) return false
+        if (state.user.superadmin) return true
+        const perms = state.user.permissions ?? []
+        return perms.includes('*') || perms.includes(perm)
+      },
 
     /** Returns true when the user holds at least one of the given roles. */
-    hasRole: (state) => (...roles: string[]): boolean => {
-      if (!state.user) return false
-      if (state.user.superadmin) return true
-      const userRoles = state.user.roles ?? []
-      return roles.some(r => userRoles.includes(r))
-    },
+    hasRole:
+      (state) =>
+      (...roles: string[]): boolean => {
+        if (!state.user) return false
+        if (state.user.superadmin) return true
+        const userRoles = state.user.roles ?? []
+        return roles.some((r) => userRoles.includes(r))
+      },
   },
 
   actions: {
@@ -177,7 +181,9 @@ export const useAuthStore = defineStore('auth', {
             parsed.roles = decoded?.roles ?? []
           }
           this.user = parsed
-        } catch { /* ignore corrupted storage */ }
+        } catch {
+          /* ignore corrupted storage */
+        }
       }
     },
 

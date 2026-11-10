@@ -1,0 +1,47 @@
+/* Ported from jniltinho/ad-manager frontend/src/themes (winamp): values of its role contract mapped onto
+ * ours (see ../style.css). Only role values; layout stays the same in every theme. */
+
+/* Winamp (dark) */
+[data-theme='winamp'] {
+  color-scheme: dark;
+  --color-page: #15161d;
+  --color-login-page: #15161d;
+  --color-page-dots: transparent;
+  --color-surface: #1b1c25;
+  --color-surface-2: #22232e;
+  --color-surface-3: #2a2b38;
+  --color-header: #1b1c25;
+  --color-sidebar: #1b1c25;
+  --color-backdrop: rgba(0, 0, 0, 0.6);
+  --color-fg: #e2e3ea;
+  --color-fg-2: #e2e3ea;
+  --color-fg-muted: #b6b8ca;
+  --color-fg-subtle: #b6b8ca;
+  --color-line: #6a6d88;
+  --color-line-soft: #2a2b38;
+  --color-field-line: #3a3c4f;
+  --color-strong-fill: #f4a51c;
+  --color-action-hover: #ffc85c;
+  --color-action-strong: #ffbe45;
+  --color-action-soft: #2a2c3b;
+  --color-action-line-soft: #2cf02c;
+  --color-on-action: #16110a;
+  --color-accent-soft: #2a2b38;
+  --color-err: #ff7b7b;
+  --color-danger-strong: #ff7b7b;
+  --color-err-soft: #3a1c20;
+  --color-err-line-soft: #a12a2a;
+  --color-ok-strong: #2cf02c;
+  --color-ok-soft: #12301a;
+  --color-warn-strong: #ffbe45;
+  --color-warn-soft: #3a2c12;
+  --color-warn-line: #ffbe45;
+  --color-action: #f4a51c;
+  --color-accent: #f4a51c;
+  --color-accent-strong: #ffbe45;
+  --color-danger: #ff6b6b;
+  --color-ok: #2cf02c;
+  --color-warn: #ffbe45;
+  --color-shadow: color-mix(in srgb, #f4a51c 35%, transparent);
+  --font-sans: Tahoma, Verdana, 'Segoe UI', Arial, sans-serif;
+}

@@ -1,0 +1,92 @@
+/* Ported from jniltinho/ad-manager frontend/src/themes (crystal): values of its role contract mapped onto
+ * ours (see ../style.css). Only role values; layout stays the same in every theme. */
+
+/* Crystal */
+[data-theme='crystal'] {
+  color-scheme: light;
+  --color-page: #ececec;
+  --color-login-page: #ececec;
+  --color-page-dots: rgba(0, 0, 0, 0.25);
+  --color-surface: #ffffff;
+  --color-surface-2: #f5f5f7;
+  --color-surface-3: #e8e8ed;
+  --color-header: #ffffff;
+  --color-sidebar: #ffffff;
+  --color-backdrop: rgba(0, 0, 0, 0.4);
+  --color-fg: rgba(0, 0, 0, 0.85);
+  --color-fg-2: rgba(0, 0, 0, 0.85);
+  --color-fg-muted: rgba(0, 0, 0, 0.68);
+  --color-fg-subtle: rgba(0, 0, 0, 0.68);
+  --color-line: #8e8e93;
+  --color-line-soft: rgba(0, 0, 0, 0.06);
+  --color-field-line: rgba(0, 0, 0, 0.1);
+  --color-strong-fill: #1d1d1f;
+  --color-action-hover: #0052b8;
+  --color-action-strong: #0043a8;
+  --color-action-soft: #e8e8ed;
+  --color-action-line-soft: #0064e1;
+  --color-on-action: #ffffff;
+  --color-accent-soft: #e8e8ed;
+  --color-err: #9d0000;
+  --color-danger-strong: #9d0000;
+  --color-err-soft: #fae0e3;
+  --color-err-line-soft: #d70015;
+  --color-ok-strong: #00591b;
+  --color-ok-soft: #e3ede6;
+  --color-warn-strong: #7d3700;
+  --color-warn-soft: #fff2e0;
+  --color-warn-line: #ff9500;
+  --color-action: #00469e;
+  --color-accent: #00469e;
+  --color-accent-strong: #00469e;
+  --color-danger: #97000f;
+  --color-ok: #0b6729;
+  --color-warn: #8c4500;
+  --color-shadow: color-mix(in srgb, #1d1d1f 35%, transparent);
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', 'Inter', Arial, sans-serif;
+}
+
+/* Crystal (dark) */
+[data-theme='crystal-dark'] {
+  color-scheme: dark;
+  --color-page: #323232;
+  --color-login-page: #323232;
+  --color-page-dots: rgba(255, 255, 255, 0.18);
+  --color-surface: #1e1e1e;
+  --color-surface-2: #2a2a2a;
+  --color-surface-3: #2c2c2e;
+  --color-header: #1e1e1e;
+  --color-sidebar: #1e1e1e;
+  --color-backdrop: rgba(0, 0, 0, 0.6);
+  --color-fg: rgba(255, 255, 255, 0.85);
+  --color-fg-2: rgba(255, 255, 255, 0.85);
+  --color-fg-muted: rgba(255, 255, 255, 0.69);
+  --color-fg-subtle: rgba(255, 255, 255, 0.68);
+  --color-line: #7c7c80;
+  --color-line-soft: rgba(255, 255, 255, 0.06);
+  --color-field-line: rgba(255, 255, 255, 0.1);
+  --color-strong-fill: #4ea2ff;
+  --color-action-hover: #0052bf;
+  --color-action-strong: #78c2ff;
+  --color-action-soft: #2c2c2e;
+  --color-action-line-soft: #4ea2ff;
+  --color-on-action: #ffffff;
+  --color-accent-soft: #2c2c2e;
+  --color-err: #ff9f92;
+  --color-danger-strong: #ff9f92;
+  --color-err-soft: #422a29;
+  --color-err-line-soft: #ff6961;
+  --color-ok-strong: #34d45b;
+  --color-ok-soft: #213b27;
+  --color-warn-strong: #ffa51d;
+  --color-warn-soft: #42331b;
+  --color-warn-line: #ff9f0a;
+  --color-action: #0053ac;
+  --color-accent: #0053ac;
+  --color-accent-strong: #0053ac;
+  --color-danger: #bf4f49;
+  --color-ok: #1f8839;
+  --color-warn: #a66706;
+  --color-shadow: color-mix(in srgb, #4ea2ff 35%, transparent);
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', 'Inter', Arial, sans-serif;
+}

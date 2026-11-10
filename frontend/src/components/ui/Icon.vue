@@ -4,7 +4,7 @@
  *
  * Usage:
  *   <Icon name="mail" :size="18" />
- *   <Icon name="trash-2" :size="16" class="text-red-600" />
+ *   <Icon name="trash-2" :size="16" class="text-danger" />
  *
  * All lucide icon names are supported (kebab-case or PascalCase).
  * See: https://lucide.dev/icons
@@ -34,7 +34,7 @@ const iconComponent = computed<Component | undefined>(() => {
 
 const iconSize = computed(() => {
   const s = props.size
-  return typeof s === 'number' ? `${s}px` : s
+  return typeof s === 'number' ? `${s / 16}rem` : s // rem: icons scale with the root font size
 })
 </script>
 
@@ -47,5 +47,5 @@ const iconSize = computed(() => {
     :class="$attrs.class"
     v-bind="$attrs"
   />
-  <span v-else class="text-red-500 text-[10px]">?</span>
+  <span v-else class="text-err text-[0.625rem]">?</span>
 </template>

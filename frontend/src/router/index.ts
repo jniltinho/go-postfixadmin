@@ -5,7 +5,7 @@ const routes = [
   {
     path: '/login',
     name: 'Login',
-    component: () => import('../pages/LoginPage.vue')
+    component: () => import('../pages/LoginPage.vue'),
   },
   {
     path: '/',
@@ -17,86 +17,92 @@ const routes = [
         path: 'dashboard',
         name: 'Dashboard',
         component: () => import('../pages/dashboard/DashboardPage.vue'),
-        meta: { title: 'Dashboard' }
+        meta: { title: 'Dashboard' },
       },
       {
         path: 'domains',
         name: 'Domains',
         component: () => import('../pages/domains/DomainsPage.vue'),
-        meta: { title: 'Domains' }
+        meta: { title: 'Domains' },
       },
       {
         path: 'mailboxes',
         name: 'Mailboxes',
         component: () => import('../pages/mailboxes/MailboxesPage.vue'),
-        meta: { title: 'Mailboxes' }
+        meta: { title: 'Mailboxes' },
       },
       {
         path: 'aliases',
         name: 'Aliases',
         component: () => import('../pages/aliases/AliasesPage.vue'),
-        meta: { title: 'Aliases' }
+        meta: { title: 'Aliases' },
       },
       {
         path: 'alias-domains',
         name: 'AliasDomains',
         component: () => import('../pages/aliasdomains/AliasDomainsPage.vue'),
-        meta: { title: 'Domain Aliases' }
+        meta: { title: 'Domain Aliases' },
       },
       {
         path: 'logs',
         name: 'Logs',
         component: () => import('../pages/logs/LogsPage.vue'),
-        meta: { title: 'Logs' }
+        meta: { title: 'Logs' },
       },
       {
         path: 'maillog',
         name: 'MailLog',
         component: () => import('../pages/maillog/MailLogPage.vue'),
-        meta: { title: 'MailLog' }
+        meta: { title: 'MailLog' },
       },
       {
         path: 'admins',
         name: 'Admins',
         component: () => import('../pages/admins/AdminsPage.vue'),
-        meta: { title: 'Administrators', requirePermission: 'admins:read' }
+        meta: { title: 'Administrators', requirePermission: 'admins:read' },
       },
       {
         path: 'transports',
         name: 'Transports',
         component: () => import('../pages/transports/TransportsPage.vue'),
-        meta: { title: 'Transport List', requirePermission: 'transports:read' }
+        meta: { title: 'Transport List', requirePermission: 'transports:read' },
       },
       {
         path: 'apikeys',
         name: 'APIKeys',
         component: () => import('../pages/APIKeysPage.vue'),
-        meta: { title: 'API Keys', requirePermission: 'apikeys:read' }
+        meta: { title: 'API Keys', requirePermission: 'apikeys:read' },
+      },
+      {
+        path: 'settings',
+        name: 'Settings',
+        component: () => import('../pages/settings/SettingsPage.vue'),
+        meta: { title: 'Settings' },
       },
       {
         path: 'roles',
         name: 'Roles',
         component: () => import('../pages/rbac/RoleManagementPage.vue'),
-        meta: { title: 'Role Management', requirePermission: 'admins:write' }
+        meta: { title: 'Role Management', requirePermission: 'admins:write' },
       },
-    ]
+    ],
   },
   {
     path: '/users/login',
     name: 'UserLogin',
-    component: () => import('../pages/users/UserLoginPage.vue')
+    component: () => import('../pages/users/UserLoginPage.vue'),
   },
   {
     path: '/users/dashboard',
     name: 'UserDashboard',
     component: () => import('../pages/users/UserDashboardPage.vue'),
-    meta: { requiresUserAuth: true, title: 'My Account' }
-  }
+    meta: { requiresUserAuth: true, title: 'My Account' },
+  },
 ]
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
+  routes,
 })
 
 router.beforeEach((to, _from, next) => {

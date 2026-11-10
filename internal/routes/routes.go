@@ -37,9 +37,9 @@ func RegisterRoutes(e *echo.Echo, h *handlers.Handler, spaFS fs.FS) {
 
 	apiV1 := e.Group("/api/v1", apiLimiter.Middleware())
 
-	// Public: app version (no auth required)
+	// Public: app version and the UI default theme (no auth required)
 	apiV1.GET("/version", func(c *echo.Context) error {
-		return c.JSON(http.StatusOK, map[string]string{"version": AppVersion})
+		return c.JSON(http.StatusOK, map[string]string{"version": AppVersion, "default_theme": viper.GetString("ui.default_theme")})
 	})
 
 	// Public auth endpoints — CSRF check + strict rate limit (5 req/min per IP)
@@ -145,6 +145,18 @@ func RegisterRoutes(e *echo.Echo, h *handlers.Handler, spaFS fs.FS) {
 		middleware.RequirePermission(rbac.PermLogsRead))
 	protected.GET("/maillog", h.MailLogV1,
 		middleware.RequirePermission(rbac.PermLogsRead))
+
+	// Read-only status of the mail services on this host (Settings > Services)
+	protected.GET("/system/services", h.ListServicesV1,
+		middleware.RequirePermission(rbac.PermSettingsRead))
+
+	// Web SSH terminal (Settings > Terminal): superadmins only, checked in the handlers too. The WebSocket is outside
+	// the JWT group because a browser WebSocket cannot send headers: its first message carries the token.
+	protected.GET("/system/terminal", h.TerminalInfoV1,
+		middleware.RequirePermission(rbac.PermSettingsWrite))
+	protected.DELETE("/system/terminal/hostkey", h.ResetTerminalHostKeyV1,
+		middleware.RequirePermission(rbac.PermSettingsWrite))
+	apiV1.GET("/system/terminal/ws", h.TerminalWS)
 
 	// API key management
 	protected.GET("/settings/apikeys", h.ListApiKeys,

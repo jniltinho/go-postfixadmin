@@ -6,7 +6,7 @@ import (
 	"go-postfixadmin/internal/i18n"
 	"go-postfixadmin/internal/middleware"
 
-	"github.com/labstack/echo-contrib/session"
+	"github.com/labstack/echo-contrib/v5/session"
 	"github.com/labstack/echo/v5"
 )
 

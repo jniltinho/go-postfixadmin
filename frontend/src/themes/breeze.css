@@ -1,0 +1,92 @@
+/* Ported from jniltinho/ad-manager frontend/src/themes (breeze): values of its role contract mapped onto
+ * ours (see ../style.css). Only role values; layout stays the same in every theme. */
+
+/* Breeze */
+[data-theme='breeze'] {
+  color-scheme: light;
+  --color-page: #eff0f1;
+  --color-login-page: #eff0f1;
+  --color-page-dots: rgba(35, 38, 41, 0.25);
+  --color-surface: #ffffff;
+  --color-surface-2: #fcfcfc;
+  --color-surface-3: #e3f2fb;
+  --color-header: #ffffff;
+  --color-sidebar: #ffffff;
+  --color-backdrop: rgba(0, 0, 0, 0.4);
+  --color-fg: #232629;
+  --color-fg-2: #232629;
+  --color-fg-muted: #5f6b77;
+  --color-fg-subtle: #5f6b77;
+  --color-line: #8c949c;
+  --color-line-soft: #e3e5e7;
+  --color-field-line: #bdc3c7;
+  --color-strong-fill: #31363b;
+  --color-action-hover: #185a85;
+  --color-action-strong: #1f6fa3;
+  --color-action-soft: #e3f2fb;
+  --color-action-line-soft: #1f6fa3;
+  --color-on-action: #ffffff;
+  --color-accent-soft: #e3f2fb;
+  --color-err: #c4303e;
+  --color-danger-strong: #c4303e;
+  --color-err-soft: #f8e6e8;
+  --color-err-line-soft: #c4303e;
+  --color-ok-strong: #19703e;
+  --color-ok-soft: #e3eee8;
+  --color-warn-strong: #9c4800;
+  --color-warn-soft: #feeee0;
+  --color-warn-line: #f67400;
+  --color-action: #164e72;
+  --color-accent: #164e72;
+  --color-accent-strong: #164e72;
+  --color-danger: #89222b;
+  --color-ok: #19703e;
+  --color-warn: #9c4800;
+  --color-shadow: color-mix(in srgb, #31363b 35%, transparent);
+  --font-sans: 'Noto Sans', 'Inter', Tahoma, Verdana, Arial, sans-serif;
+}
+
+/* Breeze (dark) */
+[data-theme='breeze-dark'] {
+  color-scheme: dark;
+  --color-page: #2a2e32;
+  --color-login-page: #2a2e32;
+  --color-page-dots: rgba(252, 252, 252, 0.18);
+  --color-surface: #1b1e20;
+  --color-surface-2: #232629;
+  --color-surface-3: #272b2f;
+  --color-header: #1b1e20;
+  --color-sidebar: #1b1e20;
+  --color-backdrop: rgba(0, 0, 0, 0.6);
+  --color-fg: #fcfcfc;
+  --color-fg-2: #fcfcfc;
+  --color-fg-muted: #a1a9b1;
+  --color-fg-subtle: #a1a9b1;
+  --color-line: #7a8086;
+  --color-line-soft: #31363b;
+  --color-field-line: #4d5257;
+  --color-strong-fill: #3daee9;
+  --color-action-hover: #63bdec;
+  --color-action-strong: #3daee9;
+  --color-action-soft: #272b2f;
+  --color-action-line-soft: #3daee9;
+  --color-on-action: #1b1e20;
+  --color-accent-soft: #272b2f;
+  --color-err: #ed6a76;
+  --color-danger-strong: #ed6a76;
+  --color-err-soft: #3d2a2e;
+  --color-err-line-soft: #ed6a76;
+  --color-ok-strong: #27ae60;
+  --color-ok-soft: #1d352a;
+  --color-warn-strong: #f67400;
+  --color-warn-soft: #3e2c1b;
+  --color-warn-line: #f67400;
+  --color-action: #3daee9;
+  --color-accent: #3daee9;
+  --color-accent-strong: #3daee9;
+  --color-danger: #ed6a76;
+  --color-ok: #27ae60;
+  --color-warn: #f67400;
+  --color-shadow: color-mix(in srgb, #3daee9 35%, transparent);
+  --font-sans: 'Noto Sans', 'Inter', Tahoma, Verdana, Arial, sans-serif;
+}
