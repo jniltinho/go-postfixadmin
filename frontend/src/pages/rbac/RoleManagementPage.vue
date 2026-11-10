@@ -112,7 +112,7 @@
           <button
             type="button"
             @click="showCreate = false"
-            class="bg-surface hover:bg-surface-2 text-fg border-2 border-line font-black px-6 py-3 shadow-[2px_2px_0px_var(--color-shadow)] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_var(--color-shadow)] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm transition-all"
+            class="bg-surface hover:bg-surface-2 text-fg border-2 border-line font-black px-6 py-3 shadow-(--shadow-2) hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-(--shadow-3) active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm transition-all"
           >
             <Icon name="x" :size="16" class="mr-2" /> CANCEL
           </button>
@@ -120,7 +120,7 @@
             type="button"
             :disabled="creating"
             @click="submitCreate"
-            class="bg-action hover:bg-surface hover:text-action text-on-action border-2 border-line font-black px-6 py-3 shadow-[3px_3px_0px_var(--color-shadow)] hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_var(--color-shadow)] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm transition-all disabled:opacity-60"
+            class="bg-action hover:bg-surface hover:text-action text-on-action border-2 border-line font-black px-6 py-3 shadow-(--shadow-3) hover:-translate-x-1 hover:-translate-y-1 hover:shadow-(--shadow-4) active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm transition-all disabled:opacity-60"
           >
             <Icon name="plus-circle" :size="16" class="mr-2" />
             {{ creating ? 'CREATING...' : 'CREATE ROLE' }}
@@ -208,7 +208,7 @@
           <button
             type="button"
             @click="showEdit = false"
-            class="bg-surface hover:bg-surface-2 text-fg border-2 border-line font-black px-6 py-3 shadow-[2px_2px_0px_var(--color-shadow)] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_var(--color-shadow)] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm transition-all"
+            class="bg-surface hover:bg-surface-2 text-fg border-2 border-line font-black px-6 py-3 shadow-(--shadow-2) hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-(--shadow-3) active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm transition-all"
           >
             <Icon name="x" :size="16" class="mr-2" /> CANCEL
           </button>
@@ -216,7 +216,7 @@
             type="button"
             :disabled="saving"
             @click="submitEdit"
-            class="bg-action hover:bg-surface hover:text-action text-on-action border-2 border-line font-black px-6 py-3 shadow-[3px_3px_0px_var(--color-shadow)] hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_var(--color-shadow)] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm transition-all disabled:opacity-60"
+            class="bg-action hover:bg-surface hover:text-action text-on-action border-2 border-line font-black px-6 py-3 shadow-(--shadow-3) hover:-translate-x-1 hover:-translate-y-1 hover:shadow-(--shadow-4) active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest flex items-center text-sm transition-all disabled:opacity-60"
           >
             <Icon name="save" :size="16" class="mr-2" />
             {{ saving ? 'SAVING...' : 'SAVE CHANGES' }}
@@ -408,7 +408,7 @@ function permClass(action: string): string {
 .role-card {
   background: var(--color-surface);
   border: 2px solid var(--color-line);
-  box-shadow: 3px 3px 0 var(--color-shadow);
+  box-shadow: var(--shadow-3);
   padding: 1rem;
   display: flex;
   flex-direction: column;

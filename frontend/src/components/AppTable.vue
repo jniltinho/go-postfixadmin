@@ -197,7 +197,7 @@ watch([search, rowsPerPage, () => props.rows], () => {
 .table-card {
   background: var(--color-surface);
   border: 2px solid var(--color-line);
-  box-shadow: 2px 2px 0 var(--color-shadow);
+  box-shadow: var(--shadow-2);
   overflow: hidden;
   padding: 1rem 0.5rem 0.25rem;
 }
@@ -334,7 +334,7 @@ tbody tr:hover {
   color: var(--color-fg) !important;
   background-color: var(--color-surface) !important;
   outline: none !important;
-  border-radius: 0 !important;
+  border-radius: var(--radius-sm) !important;
   box-sizing: border-box !important;
   font-weight: 600;
   transition: border-color 0.15s ease-in-out;
@@ -406,7 +406,7 @@ tbody tr:hover {
   display: inline-flex;
   align-items: center;
   transition: all 0.12s;
-  box-shadow: 1px 1px 0 var(--color-shadow);
+  box-shadow: var(--shadow-1);
   text-transform: uppercase;
 }
 

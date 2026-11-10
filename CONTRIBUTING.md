@@ -204,16 +204,16 @@ The Default theme is **Neo-Brutalism**:
 
 Rules that keep every theme working:
 - Use theme roles only (`bg-surface`, `text-fg`, `border-line`, `bg-action text-on-action`, `var(--color-…)`): never hex values or Tailwind palette classes such as `bg-white` or `text-gray-500` — a unit test rejects them.
-- Size with `rem` (Tailwind spacing, `font-size: 0.8125rem`), not `px`, so the UI scales on QHD/4K; borders and shadow offsets stay in `px`.
+- Size with `rem` (Tailwind spacing, `font-size: 0.8125rem`), not `px`, so the UI scales on QHD/4K; borders stay in `px`.
+- Shadows and corners are theme roles too: `box-shadow: var(--shadow-3)` / `shadow-(--shadow-3)` and `border-radius: var(--radius)` (`themes/shape.css`). Default keeps hard offset shadows and square corners; other themes get soft shadows, rounded corners and lighter lines.
 
 ## 🎨 Themes
 
 To add a theme:
 1. Add a `[data-theme='my-theme'] { color-scheme: light|dark; --color-…: …; }` block (one file per family) in `frontend/src/themes/` and import it from `themes/index.css`. Redefine only roles of the contract in `style.css`.
 2. Register it in `frontend/src/themes/index.ts` (`id`, `label`, `scheme`).
-3. Optionally give the SSH terminal its own palette in `themes/terminal.css` (`--term-*`).
-4. Run `npm run test` (registry ↔ CSS, scheme) and check body text contrast (≥ 4.5:1 on page and surface) and white-on-action buttons.
-5. Mention it in the `[ui] default_theme` comment of `config.toml.example` and `web/files/config.default.toml`.
+3. Run `npm run test` (registry ↔ CSS, scheme) and check body text contrast (≥ 4.5:1 on page and surface) and white-on-action buttons.
+4. Mention it in the `[ui] default_theme` comment of `config.toml.example` and `web/files/config.default.toml`.
 
 ---
 

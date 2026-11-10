@@ -115,11 +115,13 @@
               <td>
                 <span v-if="!s.found" class="st-badge">
                   <Icon name="circle-minus" :size="14" />
-                  {{ t('notInstalled') }}
+                  <span>{{ t('notInstalled') }}</span>
                 </span>
                 <span v-else class="st-badge" :class="s.active === 'active' ? 'st-badge--ok' : 'st-badge--err'">
                   <Icon :name="s.active === 'active' ? 'circle-check' : 'circle-x'" :size="14" />
-                  {{ s.active || t('unknown') }}<span class="st-sub">/{{ s.sub }}</span>
+                  <span
+                    >{{ s.active || t('unknown') }}<span class="st-sub">/{{ s.sub }}</span></span
+                  >
                 </span>
               </td>
               <td>{{ s.found ? s.enabled : '—' }}</td>
@@ -133,6 +135,8 @@
       </p>
     </section>
 
+    <ConfigTab v-if="tab === 'config'" class="st-panel" role="tabpanel" />
+
     <!-- mounted on first visit and then only hidden, so an open SSH session survives switching tabs -->
     <TerminalTab v-if="terminalSeen" v-show="tab === 'terminal'" class="st-panel" role="tabpanel" />
   </div>
@@ -145,6 +149,7 @@ import { themes } from '../../themes'
 import { useThemeStore } from '../../stores/theme'
 import { useAuthStore } from '../../stores/auth'
 import TerminalTab from './TerminalTab.vue'
+import ConfigTab from './ConfigTab.vue'
 import http from '../../utils/http'
 import { useT, themeLabel, type Key } from './i18n'
 import { useLangStore, initialLang, type Lang } from '../../stores/lang'
@@ -160,7 +165,12 @@ const browserLang = { EN: 'English', PT: 'Português', ES: 'Español' }[initialL
 const tabs = computed(() => [
   { id: 'appearance', label: t('tabAppearance'), icon: 'palette' },
   { id: 'services', label: t('tabServices'), icon: 'server' },
-  ...(auth.user?.superadmin ? [{ id: 'terminal', label: t('tabTerminal'), icon: 'square-terminal' }] : []),
+  ...(auth.user?.superadmin
+    ? [
+        { id: 'config', label: t('tabConfig'), icon: 'sliders-horizontal' },
+        { id: 'terminal', label: t('tabTerminal'), icon: 'square-terminal' },
+      ]
+    : []),
 ])
 const route = useRoute()
 const tab = computed(() => (tabs.value.some((x) => x.id === route.query.tab) ? route.query.tab : 'appearance'))
@@ -263,6 +273,8 @@ watch(
 }
 .st-table {
   width: 100%;
+  /* fixed columns: unit, status, boot and since line up whatever the values */
+  table-layout: fixed;
   border-collapse: collapse;
   font-size: 0.875rem;
   color: var(--color-fg);
@@ -284,8 +296,18 @@ watch(
 .st-mono {
   font-family: var(--font-mono);
 }
+.st-table th:nth-child(1) {
+  width: 30%;
+}
+.st-table th:nth-child(2) {
+  width: 26%;
+}
+.st-table th:nth-child(3) {
+  width: 14%;
+}
 .st-badge {
   display: inline-flex;
+  min-width: 12rem;
   align-items: center;
   gap: 0.375rem;
   padding: 0.25rem 0.625rem;
@@ -331,7 +353,7 @@ watch(
 .st-theme--on {
   border: 3px solid var(--color-line);
   padding: calc(0.5rem - 1px);
-  box-shadow: 4px 4px 0 var(--color-shadow);
+  box-shadow: var(--shadow-4);
 }
 /* the preview carries its own data-theme, so these roles resolve to that theme's values */
 .st-preview {

@@ -6,8 +6,8 @@ The Vue SPA has a single hard-coded look: 520 hex colors spread over 33 `.vue`/`
 
 - Introduce a CSS role contract (semantic `--color-*` / recipe variables) in `frontend/src/style.css` and replace hard-coded colors in components with those roles. The current neo-brutalist look becomes the `default` theme with no visual change.
 - Port the theme catalog from `jniltinho/ad-manager` (`frontend/src/themes/*.css`): default, admanager, breeze/breeze-dark, violet/violet-dark, aurora/aurora-dark, crystal/crystal-dark, cone, graphite, grafana, rabbitmq, matrix, winamp, pink-panther, high-contrast, classic-gray (Windows 98) and **XP** (`xp`, the Luna look ported from ad-manager's `classic-blue`).
-- Add a **Settings** page (new sidebar entry — the old legacy-UI "Settings" link pointed to `#`) with tabs, like ad-manager: **Appearance** (theme cards with live previews), **Services** (read-only systemd status of Postfix and Dovecot, as in pf-report's Manager page) and **Terminal** (web SSH terminal, below). The mailbox portal gets a compact theme select in its header. Themes apply through `data-theme` + `color-scheme`, persist per browser in `localStorage` with an anti-flash inline script in `index.html`; the server default comes from a new `[ui] default_theme` config key.
-- Add an opt-in web SSH terminal (Settings › Terminal) ported from ad-manager: xterm.js in the browser, an `xterm-256color` PTY over `golang.org/x/crypto/ssh`, carried by a WebSocket; superadmins only, credentials never stored, host key pinned on first use after the operator confirms its fingerprint, open/close audited, idle timeout. Its palette is a set of `--term-*` theme roles so every theme can style it.
+- Add a **Settings** page (new sidebar entry — the old legacy-UI "Settings" link pointed to `#`) with tabs, like ad-manager: **Appearance** (theme cards with live previews), **Services** (read-only systemd status of Postfix, Dovecot and Rspamd, as in pf-report's Manager page) and **Terminal** (web SSH terminal, below). The mailbox portal gets a compact theme select in its header. Themes apply through `data-theme` + `color-scheme`, persist per browser in `localStorage` with an anti-flash inline script in `index.html`; the server default comes from a new `[ui] default_theme` config key.
+- Add an opt-in web SSH terminal (Settings › Terminal) ported from ad-manager: xterm.js in the browser, an `xterm-256color` PTY over `golang.org/x/crypto/ssh`, carried by a WebSocket; superadmins only, credentials never stored, host key pinned on first use after the operator confirms its fingerprint, open/close audited, idle timeout. The console keeps the classic xterm palette in every theme.
 - Settings meets WCAG AAA text contrast (7:1, 4.5:1 for large text) in every theme.
 - New screens in PT, EN and ES; the language follows the browser and is chosen in Settings › Appearance (the PT/EN/ES buttons of the admin header and login pages are removed; the portal keeps a compact select).
 - Make the layout scale for FullHD (1920x1080), QHD (2560x1440) and 4K (3840x2160): a `clamp()` root font size (16px up to FullHD — unchanged there — ~19px on QHD, 24px on 4K) with component sizes converted from `px` to `rem`, icons in `rem`, and wider login card and portal content on large screens.
@@ -24,8 +24,9 @@ The Vue SPA has a single hard-coded look: 520 hex colors spread over 33 `.vue`/`
 - `ui-theming`: Role-based CSS theme contract, theme catalog including XP, selector, persistence and server default.
 - `ui-high-resolution-layout`: Layout that scales across FullHD, QHD and 4K without empty space or tiny text.
 - `build-toolchain`: Go 1.27, Echo v5.4.x and Vite+ (`vp`) as the supported build toolchain.
-- `mail-service-status`: Settings › Services, read-only Postfix/Dovecot unit status.
+- `mail-service-status`: Settings › Services, read-only Postfix/Dovecot/Rspamd unit status.
 - `web-ssh-terminal`: Settings › Terminal, the opt-in browser SSH terminal and its security rules.
+- `panel-configuration`: Settings › Configuration, a few operational config.toml keys editable from the panel, critical ones read-only.
 - `container-image-publishing`: Multi-arch Docker image published to GHCR on release tags.
 
 ### Modified Capabilities

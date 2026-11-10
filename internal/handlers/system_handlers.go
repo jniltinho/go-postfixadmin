@@ -13,11 +13,11 @@ import (
 )
 
 // mailServices is the fixed allowlist of units the panel reports; names never come from the request.
-var mailServices = []string{"postfix.service", "dovecot.service"}
+var mailServices = []string{"postfix.service", "dovecot.service", "rspamd.service"}
 
 // ListServicesV1 godoc
 // @Summary      Mail service status
-// @Description  Read-only systemd state of Postfix and Dovecot on the panel's host (systemctl show).
+// @Description  Read-only systemd state of Postfix, Dovecot and Rspamd on the panel's host (systemctl show).
 // @Tags         System
 // @Produce      json
 // @Success      200 {object} dto.ServicesResponse

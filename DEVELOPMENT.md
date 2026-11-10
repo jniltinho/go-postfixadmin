@@ -108,7 +108,7 @@ The frontend uses Vite+ (`vite-plus`, CLI `vp`) with `vite` overridden to `@void
 
 ### Themes and the role contract
 
-Components never use literal colors: they use the roles of `frontend/src/style.css` (`bg-surface`, `text-fg`, `border-line`, `var(--color-action)`…), whose `@theme static` values are the Default theme. Each theme in `frontend/src/themes/*.css` only redefines roles under `[data-theme='id']`, and `frontend/src/themes/index.ts` is the registry shown in Settings. `npm run test` fails on a literal color outside `themes/`, on a registry/CSS mismatch and when `themes/default.css` drifts from `style.css`. The SSH terminal palette is the `--term-*` roles in `themes/terminal.css`. See [CONTRIBUTING.md](CONTRIBUTING.md#-themes) to add a theme.
+Components never use literal colors: they use the roles of `frontend/src/style.css` (`bg-surface`, `text-fg`, `border-line`, `var(--color-action)`…), whose `@theme static` values are the Default theme. Each theme in `frontend/src/themes/*.css` only redefines roles under `[data-theme='id']`, and `frontend/src/themes/index.ts` is the registry shown in Settings. `npm run test` fails on a literal color outside `themes/`, on a registry/CSS mismatch and when `themes/default.css` drifts from `style.css`. The SSH terminal always uses the classic xterm palette (`themes/xterm.ts`), whatever the theme. See [CONTRIBUTING.md](CONTRIBUTING.md#-themes) to add a theme.
 
 Sizes are in `rem`: the root font size is 16px up to FullHD and grows to ~19px on QHD and 24px on 4K, so the whole UI scales with the screen.
 

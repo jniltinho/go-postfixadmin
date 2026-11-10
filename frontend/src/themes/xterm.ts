@@ -1,36 +1,30 @@
 import type { ITheme } from '@xterm/xterm'
 
-const roles: Partial<Record<keyof ITheme, string>> = {
-  background: 'bg',
-  foreground: 'fg',
-  cursor: 'cursor',
-  cursorAccent: 'bg',
-  selectionBackground: 'selection',
-  black: 'black',
-  red: 'red',
-  green: 'green',
-  yellow: 'yellow',
-  blue: 'blue',
-  magenta: 'magenta',
-  cyan: 'cyan',
-  white: 'white',
-  brightBlack: 'bright-black',
-  brightRed: 'bright-red',
-  brightGreen: 'bright-green',
-  brightYellow: 'bright-yellow',
-  brightBlue: 'bright-blue',
-  brightMagenta: 'bright-magenta',
-  brightCyan: 'bright-cyan',
-  brightWhite: 'bright-white',
-}
-
-// the xterm.js palette of the active theme, from the --term-* roles in terminal.css
-export function xtermTheme(el: Element = document.documentElement): ITheme {
-  const css = getComputedStyle(el)
-  const theme: Record<string, string> = {}
-  for (const [key, role] of Object.entries(roles)) {
-    const v = css.getPropertyValue(`--term-${role}`).trim()
-    if (v) theme[key] = v
-  }
-  return theme as ITheme
+// The SSH terminal's colors: the classic xterm palette (the 16 ANSI colors; xterm.js derives the 256-color cube and
+// gray ramp from the standard), the same in every panel theme, like a real terminal window (as in ad-manager).
+export const xtermTheme: ITheme = {
+  background: '#000000',
+  foreground: '#e5e5e5',
+  cursor: '#e5e5e5',
+  cursorAccent: '#000000',
+  selectionBackground: '#4d4d4d',
+  scrollbarSliderBackground: 'rgba(255, 255, 255, 0.12)',
+  scrollbarSliderHoverBackground: 'rgba(255, 255, 255, 0.25)',
+  scrollbarSliderActiveBackground: 'rgba(255, 255, 255, 0.35)',
+  black: '#000000',
+  red: '#cd0000',
+  green: '#00cd00',
+  yellow: '#cdcd00',
+  blue: '#0000ee',
+  magenta: '#cd00cd',
+  cyan: '#00cdcd',
+  white: '#e5e5e5',
+  brightBlack: '#7f7f7f',
+  brightRed: '#ff0000',
+  brightGreen: '#00ff00',
+  brightYellow: '#ffff00',
+  brightBlue: '#5c5cff',
+  brightMagenta: '#ff00ff',
+  brightCyan: '#00ffff',
+  brightWhite: '#ffffff',
 }

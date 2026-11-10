@@ -11,7 +11,7 @@ const vars = (block: string) =>
 describe('theme catalog', () => {
   it('registry ids equal the [data-theme] blocks', () => {
     const ids = readdirSync(dir)
-      .filter((f) => f.endsWith('.css') && f !== 'terminal.css' && f !== 'index.css')
+      .filter((f) => f.endsWith('.css') && !['terminal.css', 'index.css', 'shape.css'].includes(f))
       .flatMap((f) => [...css(f).matchAll(/^\[data-theme='([\w-]+)'\] \{/gm)].map((m) => m[1]))
     expect(new Set(ids).size).toBe(ids.length)
     expect([...ids].sort()).toEqual(themes.map((t) => t.id).sort())
@@ -36,24 +36,7 @@ describe('theme catalog', () => {
       expect(all).toMatch(new RegExp(`\\[data-theme='${t.id}'\\] \\{\\s*color-scheme: ${t.scheme};`))
   })
 
-  it('terminal.css only overrides registered themes and defines every xterm role', () => {
-    const src = css('terminal.css')
-    for (const m of src.matchAll(/\[data-theme='([\w-]+)'\]/g)) expect(themes.map((t) => t.id)).toContain(m[1])
-    const root = vars(/:root \{([\s\S]*?)\}/.exec(src)![1])
-    for (const r of [
-      'bg',
-      'fg',
-      'cursor',
-      'selection',
-      'black',
-      'red',
-      'green',
-      'yellow',
-      'blue',
-      'magenta',
-      'cyan',
-      'white',
-    ])
-      expect(root[`--term-${r}`], r).toBeTruthy()
+  it('terminal.css only sets the console frame color', () => {
+    expect(css('terminal.css')).toMatch(/--term-bg: #000000;/)
   })
 })

@@ -6,6 +6,7 @@
 @import 'tailwindcss';
 @import './themes/index.css';
 @import './themes/terminal.css';
+@import './themes/shape.css';
 
 /* ─── Role contract ─────────────────────────────────────────────────────────
    Components use these roles (bg-surface, text-fg, border-line, var(--color-action)…), never literal colors.
@@ -144,7 +145,7 @@ body {
   background: var(--color-surface);
   border: 3px solid var(--color-line);
   padding: 2rem 1.75rem 1.75rem;
-  box-shadow: 4px 4px 0 var(--color-shadow);
+  box-shadow: var(--shadow-4);
 }
 
 .card-heading {
@@ -298,17 +299,17 @@ body {
   letter-spacing: 0.03125rem;
   text-transform: uppercase;
   cursor: pointer;
-  box-shadow: 2px 2px 0 var(--color-shadow);
+  box-shadow: var(--shadow-2);
   transition: all 0.1s;
 }
 .btn-primary:hover {
   background: var(--color-action-hover);
   transform: translate(-1px, -1px);
-  box-shadow: 3px 3px 0 var(--color-shadow);
+  box-shadow: var(--shadow-3);
 }
 .btn-primary:active {
   transform: translate(1px, 1px);
-  box-shadow: 1px 1px 0 var(--color-shadow);
+  box-shadow: var(--shadow-1);
 }
 
 /* ─── Loading & Skeleton ─────────────────────────────────────────────────── */
@@ -437,7 +438,7 @@ body {
   border: 2px solid var(--color-line);
   font-weight: 900;
   padding: 1.25rem 2rem;
-  box-shadow: 3px 3px 0px var(--color-shadow);
+  box-shadow: var(--shadow-3);
   display: inline-flex;
   align-items: center;
   transition: all 0.15s ease-in-out;
@@ -451,7 +452,7 @@ body {
   background-color: var(--color-surface);
   color: var(--color-action);
   transform: translate(-4px, -4px);
-  box-shadow: 7px 7px 0px var(--color-shadow);
+  box-shadow: var(--shadow-7);
 }
 
 .btn-add-big:active {
@@ -476,7 +477,7 @@ body {
 .st-card {
   background: var(--color-surface);
   border: 3px solid var(--color-line);
-  box-shadow: 4px 4px 0 var(--color-shadow);
+  box-shadow: var(--shadow-4);
 }
 .st-card-head {
   display: flex;
@@ -537,7 +538,7 @@ body {
   cursor: pointer;
 }
 .st-act:hover {
-  box-shadow: 2px 2px 0 var(--color-shadow);
+  box-shadow: var(--shadow-2);
 }
 .st-act:disabled {
   opacity: 0.6;
@@ -556,12 +557,12 @@ body {
   color: var(--color-surface);
   background: var(--color-fg);
   border: 3px solid var(--color-line);
-  box-shadow: 3px 3px 0 var(--color-shadow);
+  box-shadow: var(--shadow-3);
   cursor: pointer;
 }
 .st-primary:hover {
   transform: translate(-1px, -1px);
-  box-shadow: 4px 4px 0 var(--color-shadow);
+  box-shadow: var(--shadow-4);
 }
 .st-primary:disabled {
   opacity: 0.7;

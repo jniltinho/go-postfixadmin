@@ -303,7 +303,7 @@ async function submitDelete() {
   position: relative;
   border: 1px solid var(--color-line);
   overflow: hidden;
-  box-shadow: 1px 1px 0px var(--color-shadow);
+  box-shadow: var(--shadow-1);
 }
 .progress-bar-fill {
   background-color: var(--color-ok);

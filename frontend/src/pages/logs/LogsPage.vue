@@ -208,14 +208,14 @@ function getActionBadgeClass(action: string): string {
   background: var(--color-action); color: var(--color-on-action); border: 2px solid var(--color-line); padding: 0.625rem 1.125rem;
   font-size: 0.6875rem; font-weight: 800; letter-spacing: 0.0375rem; cursor: pointer;
   border-radius: 0; transition: all .15s; text-transform: uppercase;
-  box-shadow: 2px 2px 0 var(--color-shadow); display: flex; align-items: center;
+  box-shadow: var(--shadow-2); display: flex; align-items: center;
 }
 .btn-primary:hover { background: var(--color-surface); color: var(--color-action); }
 .btn-primary:active { transform: translate(0, 0); box-shadow: none; }
 
 /* ─── Filter card ─── */
 .filter-card {
-  background: var(--color-surface); border: 2px solid var(--color-line); box-shadow: 2px 2px 0 var(--color-shadow);
+  background: var(--color-surface); border: 2px solid var(--color-line); box-shadow: var(--shadow-2);
   padding: 0.875rem 1.125rem 1.125rem; margin-bottom: 1rem;
 }
 .filter-title {
@@ -239,7 +239,7 @@ function getActionBadgeClass(action: string): string {
 .badge-action {
   padding: 0.1875rem 0.5rem; font-size: 0.625rem; font-weight: 800; border-radius: 0;
   display: inline-block; border: 1px solid var(--color-line); text-align: center;
-  white-space: nowrap; box-shadow: 1px 1px 0 var(--color-shadow);
+  white-space: nowrap; box-shadow: var(--shadow-1);
 }
 .badge-action-create { background: var(--color-ok-soft); color: var(--color-ok-strong); }
 .badge-action-edit   { background: var(--color-action-soft); color: var(--color-action-hover); }

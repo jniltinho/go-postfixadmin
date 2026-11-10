@@ -96,7 +96,7 @@ function isSettingsDisabled(item: { to: string; perm: string | null }) {
   height: 2.5rem;
   background: var(--color-action);
   border: 2px solid var(--color-line);
-  box-shadow: 1px 1px 0 var(--color-shadow);
+  box-shadow: var(--shadow-1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -141,10 +141,10 @@ function isSettingsDisabled(item: { to: string; perm: string | null }) {
   transition: color 0.12s;
 }
 
+/* hover: tint and left bar only — a top/bottom border here drew a box closed by the sidebar edge (a stray line) */
 .nav-item:hover {
   background: color-mix(in srgb, var(--color-action) 10%, transparent);
-  border-color: var(--color-line);
-  border-right-color: transparent !important;
+  border-left-color: var(--color-line-soft);
   color: var(--color-fg);
 }
 
@@ -163,10 +163,12 @@ function isSettingsDisabled(item: { to: string; perm: string | null }) {
   color: var(--color-fg-subtle);
 }
 
-.nav-item--active {
+/* selected: a tab that opens into the content (covers the sidebar edge) */
+.nav-item--active,
+.nav-item--active:hover {
   background: var(--color-page);
   border-color: var(--color-line);
-  border-right-color: transparent !important;
+  border-right-color: transparent;
   color: var(--color-fg);
   margin-right: -0.1875rem;
 }

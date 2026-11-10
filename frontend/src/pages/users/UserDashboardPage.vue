@@ -5,7 +5,7 @@
       <div class="flex items-center">
         <a
           href="/users/dashboard"
-          class="w-10 h-10 bg-accent border-2 border-line neo-shadow-subtle flex items-center justify-center mr-3 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_var(--color-shadow)] transition-all cursor-pointer"
+          class="w-10 h-10 bg-accent border-2 border-line neo-shadow-subtle flex items-center justify-center mr-3 hover:-translate-y-0.5 hover:shadow-(--shadow-3) transition-all cursor-pointer"
         >
           <Icon name="user" class="text-on-action" :size="20" />
         </a>
@@ -239,7 +239,7 @@
                     <button
                       type="button"
                       @click="generateRandomPassword"
-                      class="bg-accent hover:bg-surface hover:text-accent text-on-action text-xs font-black px-3 h-10 border-2 border-line cursor-pointer uppercase tracking-widest flex items-center justify-center gap-1 shrink-0 transition-colors shadow-[1px_1px_0px_var(--color-shadow)]"
+                      class="bg-accent hover:bg-surface hover:text-accent text-on-action text-xs font-black px-3 h-10 border-2 border-line cursor-pointer uppercase tracking-widest flex items-center justify-center gap-1 shrink-0 transition-colors shadow-(--shadow-1)"
                       title="Generate password"
                     >
                       <Icon name="wand-2" :size="14" />
@@ -738,11 +738,11 @@ onMounted(async () => {
 }
 
 .neo-shadow {
-  box-shadow: 4px 4px 0px var(--color-shadow);
+  box-shadow: var(--shadow-4);
 }
 
 .neo-shadow-subtle {
-  box-shadow: 1px 1px 0px var(--color-shadow);
+  box-shadow: var(--shadow-1);
 }
 
 /* Configure Vacation Button */
@@ -755,7 +755,7 @@ onMounted(async () => {
   padding: 0.75rem 1.5rem;
   letter-spacing: 0.0625rem;
   cursor: pointer;
-  box-shadow: 3px 3px 0px var(--color-shadow);
+  box-shadow: var(--shadow-3);
   transition: all 0.15s;
   display: flex;
   align-items: center;
@@ -766,7 +766,7 @@ onMounted(async () => {
   background: var(--color-surface);
   color: var(--color-accent);
   transform: translate(-1px, -1px);
-  box-shadow: 4px 4px 0px var(--color-shadow);
+  box-shadow: var(--shadow-4);
 }
 
 .btn-vacation:active {
@@ -784,7 +784,7 @@ onMounted(async () => {
   padding: 0.875rem 1.25rem;
   letter-spacing: 0.0625rem;
   cursor: pointer;
-  box-shadow: 3px 3px 0px var(--color-shadow);
+  box-shadow: var(--shadow-3);
   transition: all 0.15s;
   display: flex;
   align-items: center;
@@ -797,7 +797,7 @@ onMounted(async () => {
   background: var(--color-surface);
   color: var(--color-accent);
   transform: translate(-1px, -1px);
-  box-shadow: 4px 4px 0px var(--color-shadow);
+  box-shadow: var(--shadow-4);
 }
 
 .btn-submit-blue:active:not(:disabled) {
@@ -815,7 +815,7 @@ onMounted(async () => {
   padding: 0.875rem 1.25rem;
   letter-spacing: 0.0625rem;
   cursor: pointer;
-  box-shadow: 3px 3px 0px var(--color-shadow);
+  box-shadow: var(--shadow-3);
   transition: all 0.15s;
   display: flex;
   align-items: center;
@@ -828,7 +828,7 @@ onMounted(async () => {
   background: var(--color-surface);
   color: var(--color-warn);
   transform: translate(-1px, -1px);
-  box-shadow: 4px 4px 0px var(--color-shadow);
+  box-shadow: var(--shadow-4);
 }
 
 .btn-submit-orange:active:not(:disabled) {
@@ -869,7 +869,7 @@ onMounted(async () => {
   padding: 0.75rem 1.5rem;
   letter-spacing: 0.03125rem;
   cursor: pointer;
-  box-shadow: 2px 2px 0px var(--color-shadow);
+  box-shadow: var(--shadow-2);
   transition: all 0.15s;
   display: flex;
   align-items: center;
@@ -879,7 +879,7 @@ onMounted(async () => {
 .btn-modal-cancel:hover {
   background: var(--color-surface-2);
   transform: translate(-2px, -2px);
-  box-shadow: 3px 3px 0px var(--color-shadow);
+  box-shadow: var(--shadow-3);
 }
 
 .btn-modal-cancel:active {
@@ -896,7 +896,7 @@ onMounted(async () => {
   padding: 0.75rem 1.5rem;
   letter-spacing: 0.03125rem;
   cursor: pointer;
-  box-shadow: 3px 3px 0px var(--color-shadow);
+  box-shadow: var(--shadow-3);
   transition: all 0.15s;
   display: flex;
   align-items: center;
@@ -907,7 +907,7 @@ onMounted(async () => {
   background: var(--color-surface);
   color: var(--color-accent);
   transform: translate(-1px, -1px);
-  box-shadow: 4px 4px 0px var(--color-shadow);
+  box-shadow: var(--shadow-4);
 }
 
 .btn-modal-save:active:not(:disabled) {

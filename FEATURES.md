@@ -39,7 +39,7 @@ A fully documented REST API at `/api/v1` with interactive Swagger UI at `/swagge
 | Logs | `GET /logs` (admin action logs), `GET /maillog` (SMTP logs) |
 | Dashboard | `GET /dashboard` |
 | Settings | `GET/POST /settings/apikeys`, `PUT/DELETE /settings/apikeys/{id}` |
-| System | `GET /system/services` (Postfix/Dovecot status), `GET /system/terminal`, `DELETE /system/terminal/hostkey`, `GET /system/terminal/ws` (WebSocket) |
+| System | `GET /system/services` (Postfix/Dovecot/Rspamd status), `GET/PUT /system/config`, `GET /system/terminal`, `DELETE /system/terminal/hostkey`, `GET /system/terminal/ws` (WebSocket) |
 | Public | `GET /version` (version and `default_theme`) |
 
 All endpoints return a structured `APIResponse` envelope with `success`, `data`, and `error` fields. All request and response schemas are typed and visible in the Swagger UI.
@@ -116,8 +116,9 @@ All endpoints return a structured `APIResponse` envelope with `success`, `data`,
 - Vue 3 SPA (Vite+, Pinia, Vue Router, Tailwind CSS v4) with frontend fully embedded in the Go binary via `//go:embed` — single deployable artifact
 - 20 themes, chosen in **Settings › Appearance** with live previews and saved per browser: Default (neo-brutalist), ADManager, Breeze, Violet, Aurora, Crystal (each light and dark), Cone, **Windows XP**, Windows 98, Graphite, Grafana, RabbitMQ, Matrix, Winamp, Pink Panther and High contrast — ported from [ad-manager](https://github.com/jniltinho/ad-manager); `[ui] default_theme` sets the server default
 - Layout that scales with the screen: FullHD (1920×1080), QHD (2560×1440) and 4K (3840×2160), still fine at 1366×768
-- **Settings › Services**: read-only `systemctl` status of `postfix.service` and `dovecot.service` (state, boot, since)
-- **Settings › Terminal**: web SSH terminal (xterm.js, `xterm-256color` PTY) to the mail host — superadmins only, off by default, host key pinned on first use, credentials never stored, open/close audited, idle timeout; its palette follows the theme
+- **Settings › Services**: read-only `systemctl` status of `postfix.service`, `dovecot.service` and `rspamd.service` (state, boot, since)
+- **Settings › Configuration** (superadmins): edit `ui.default_theme`, `vacation.enabled`, `smtp.*`, `server.swagger_enable`, `terminal.enabled` (enabling asks for confirmation; disabling closes open sessions) and `terminal.idle_timeout` from the panel (validated, comments kept, `config.toml.bak`, audited); database, security, delivery, RBAC, the terminal target, backup and telemetry are shown read-only, secrets never shown
+- **Settings › Terminal**: web SSH terminal (xterm.js, `xterm-256color` PTY) to the mail host — superadmins only, off by default, host key pinned on first use, credentials never stored, open/close audited, idle timeout; classic xterm palette (black console) in every theme
 - Interactive Swagger UI at `/swagger/` (toggle with `server.swagger_enable = true`)
 - Docker, Docker Compose, Makefile, native build, plus `.deb` / `.rpm` packaging (`make deb`, `make rpm`) with config embedding
 - Fully automated releases via GitHub Actions (`.tar.gz`, `.deb`, `.rpm`) and a multi-arch (amd64/arm64) image on GitHub Packages: `ghcr.io/jniltinho/go-postfixadmin`

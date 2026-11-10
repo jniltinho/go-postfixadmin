@@ -1,0 +1,161 @@
+/* Shape of the themes: corners, shadows and line weight. Default (neo-brutalist) keeps square corners, hard offset
+ * shadows and strong lines; every other theme gets subtle rounded corners, soft shadows and lighter lines (High
+ * contrast keeps strong lines and hard shadows). Components use --radius/--radius-sm and --shadow-N; the selectors
+ * below list the components that draw a full border. [data-theme] (not :root) so Settings previews follow their
+ * own theme. */
+:root,
+[data-theme='default'],
+[data-theme='high-contrast'] {
+  --radius: 0px;
+  --radius-sm: 0px;
+  --shadow-1: 1px 1px 0 var(--color-shadow);
+  --shadow-2: 2px 2px 0 var(--color-shadow);
+  --shadow-3: 3px 3px 0 var(--color-shadow);
+  --shadow-4: 4px 4px 0 var(--color-shadow);
+  --shadow-7: 7px 7px 0 var(--color-shadow);
+}
+[data-theme]:not([data-theme='default']) {
+  --radius: 0.5rem;
+  --radius-sm: 0.3125rem;
+}
+/* Windows 98 was square: keep it almost so */
+[data-theme='classic-gray'][data-theme] {
+  --radius: 0.125rem;
+  --radius-sm: 0.125rem;
+}
+[data-theme]:not([data-theme='default'], [data-theme='high-contrast']) {
+  /* near-black with a hint of the theme: in dark themes the theme's shadow color is light and would glow */
+  --shadow-tint: color-mix(in srgb, var(--color-shadow) 25%, #000);
+  --shadow-1: 0 1px 2px color-mix(in srgb, var(--shadow-tint) 22%, transparent);
+  --shadow-2:
+    0 1px 2px color-mix(in srgb, var(--shadow-tint) 18%, transparent),
+    0 2px 6px -1px color-mix(in srgb, var(--shadow-tint) 18%, transparent);
+  --shadow-3:
+    0 1px 3px color-mix(in srgb, var(--shadow-tint) 18%, transparent),
+    0 6px 14px -4px color-mix(in srgb, var(--shadow-tint) 22%, transparent);
+  --shadow-4:
+    0 1px 3px color-mix(in srgb, var(--shadow-tint) 16%, transparent),
+    0 10px 24px -8px color-mix(in srgb, var(--shadow-tint) 26%, transparent);
+  --shadow-7:
+    0 2px 6px color-mix(in srgb, var(--shadow-tint) 16%, transparent),
+    0 20px 48px -12px color-mix(in srgb, var(--shadow-tint) 32%, transparent);
+  /* lighter lines in the theme's own hue; form controls keep the full line (>= 3:1 for components) */
+  --color-line: color-mix(in srgb, var(--color-line-base, var(--color-fg)) 55%, var(--color-surface));
+}
+[data-theme]:not([data-theme='default'], [data-theme='high-contrast'])
+  :is(input:not([type='checkbox'], [type='radio']), select, textarea) {
+  border-color: var(--color-line-base, var(--color-line));
+}
+/* heavy 3px frames become hairlines on cards and panels */
+[data-theme]:not([data-theme='default'], [data-theme='high-contrast'])
+  :is(
+    .table-card,
+    .st-card,
+    .stat-card,
+    .cta-card,
+    .filter-card,
+    .role-card,
+    .login-card,
+    .login-card-neo,
+    .modal-card,
+    .modal-overlay > div,
+    .info-card,
+    .tm-term
+  ) {
+  border-width: 1px;
+}
+
+[data-theme]:not([data-theme='default'])
+  :is(
+    .table-card,
+    .Toastify__toast,
+    .info-callout,
+    .info-card,
+    .raw-token-box,
+    .success-banner,
+    .error-banner,
+    .error-banner-neo,
+    .error-msg,
+    .login-card,
+    .login-card-neo,
+    .cta-card,
+    .stat-card,
+    .filter-card,
+    .role-card,
+    .assignment-row,
+    .st-card,
+    .st-msg,
+    .st-theme,
+    .tm-empty,
+    .tm-term,
+    .tm-server,
+    .tm-fp
+  ) {
+  border-radius: var(--radius);
+}
+
+/* dialogs: the colored title bar must follow the corners */
+[data-theme]:not([data-theme='default']) :is(.modal-card, .modal-overlay > div) {
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+[data-theme]:not([data-theme='default'])
+  :is(
+    button,
+    select,
+    textarea,
+    input:not([type='checkbox'], [type='radio']),
+    .border,
+    .border-2,
+    .border-4,
+    .act-btn,
+    .ctrl-select,
+    .pg-btn,
+    .search-input,
+    .badge-yes,
+    .badge-no,
+    .logout-btn,
+    .user-avatar,
+    .logo-icon,
+    .badge-toggle,
+    .btn-refresh,
+    .form-input,
+    .form-select-plain,
+    .brand-icon-box,
+    .brutal-input,
+    .btn-authenticate,
+    .badge-super,
+    .role-badge,
+    .cta-btn,
+    .stat-badge,
+    .stat-icon-wrap,
+    .progress-bar-wrap,
+    .badge-action,
+    .btn-clear-filters,
+    .btn-primary,
+    .btn-add-big,
+    .perm-badge,
+    .st-badge,
+    .st-select,
+    .st-act,
+    .st-primary,
+    .st-preview,
+    .tm-input,
+    .btn-modal-cancel,
+    .btn-modal-save,
+    .btn-submit-blue,
+    .btn-submit-orange,
+    .btn-vacation,
+    .modal-close
+  ) {
+  border-radius: var(--radius-sm);
+}
+
+/* tabs and menu items open into the content: only the corners away from it are rounded */
+[data-theme]:not([data-theme='default']) .st-tab {
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+[data-theme]:not([data-theme='default']) .nav-item {
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+}

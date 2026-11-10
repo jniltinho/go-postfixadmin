@@ -31,7 +31,7 @@
             <button
               type="button"
               @click="close"
-              class="bg-surface hover:bg-surface-2 text-fg border-2 border-line font-black px-5 py-2.5 shadow-[2px_2px_0px_var(--color-shadow)] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_var(--color-shadow)] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest text-xs flex items-center"
+              class="bg-surface hover:bg-surface-2 text-fg border-2 border-line font-black px-5 py-2.5 shadow-(--shadow-2) transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-(--shadow-3) active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest text-xs flex items-center"
             >
               <Icon name="x" :size="13" class="mr-1.5" />
               CANCEL
@@ -40,7 +40,7 @@
               type="button"
               :disabled="loading"
               @click="emit('confirm')"
-              class="bg-danger hover:bg-surface hover:text-danger text-on-action border-2 border-line font-black px-5 py-2.5 shadow-[3px_3px_0px_var(--color-shadow)] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_var(--color-shadow)] active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest text-xs flex items-center disabled:opacity-60 disabled:cursor-not-allowed"
+              class="bg-danger hover:bg-surface hover:text-danger text-on-action border-2 border-line font-black px-5 py-2.5 shadow-(--shadow-3) transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-(--shadow-4) active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest text-xs flex items-center disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <Icon name="trash-2" :size="13" class="mr-1.5" />
               {{ loading ? 'DELETING...' : confirmLabel }}
