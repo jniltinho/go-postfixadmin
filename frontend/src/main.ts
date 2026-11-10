@@ -3,8 +3,6 @@ import { createPinia } from 'pinia'
 import router from './router'
 import { useAuthStore } from './stores/auth'
 import { useThemeStore } from './stores/theme'
-import Vue3Toastify from 'vue3-toastify'
-import 'vue3-toastify/dist/index.css'
 
 import './style.css'
 
@@ -26,7 +24,6 @@ async function bootstrap() {
 
   await useAuthStore(pinia).initAuth()
 
-  app.use(Vue3Toastify)
   app.use(router)
 
   app.mount('#app')

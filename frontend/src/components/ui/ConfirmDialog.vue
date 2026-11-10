@@ -31,7 +31,7 @@
             <button
               type="button"
               @click="close"
-              class="bg-surface hover:bg-surface-2 text-fg border-2 border-line font-black px-5 py-2.5 shadow-(--shadow-2) transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-(--shadow-3) active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest text-xs flex items-center"
+              class="btn-cancel bg-surface hover:bg-surface-2 text-fg border-2 border-line font-black px-5 py-2.5 shadow-(--shadow-2) transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-(--shadow-3) active:translate-x-0 active:translate-y-0 active:shadow-none cursor-pointer uppercase tracking-widest text-xs flex items-center"
             >
               <Icon name="x" :size="13" class="mr-1.5" />
               CANCEL

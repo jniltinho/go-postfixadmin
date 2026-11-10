@@ -7,7 +7,7 @@ const root = fileURLToPath(new URL('.', import.meta.url))
 const files = (dir: string): string[] =>
   readdirSync(dir).flatMap((f) => {
     const p = join(dir, f)
-    if (statSync(p).isDirectory()) return f === 'themes' ? [] : files(p)
+    if (statSync(p).isDirectory()) return f === 'themes' || f === 'lib' ? [] : files(p) // lib/: reusable modules with their own neutral defaults
     return /\.(vue|css)$/.test(f) ? [p] : []
   })
 const palette =

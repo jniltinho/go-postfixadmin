@@ -74,7 +74,7 @@
           <button
             type="button"
             @click="showAssign = false"
-            class="bg-surface text-fg border-2 border-line font-black px-5 py-2 cursor-pointer uppercase tracking-widest flex items-center text-xs hover:bg-surface-2 transition-colors"
+            class="btn-cancel bg-surface text-fg border-2 border-line font-black px-5 py-2 cursor-pointer uppercase tracking-widest flex items-center text-xs hover:bg-surface-2 transition-colors"
           >
             <Icon name="x" :size="14" class="mr-1" /> CANCEL
           </button>

@@ -398,7 +398,7 @@
 
         <!-- Footer actions -->
         <footer class="border-t-2 border-line px-6 py-4 flex items-center justify-end gap-3 shrink-0">
-          <button @click="showVacationModal = false" class="btn-modal-cancel">
+          <button @click="showVacationModal = false" class="btn-cancel btn-modal-cancel">
             <Icon name="x" :size="14" class="mr-1.5" />
             <span>{{ t.cancel }}</span>
           </button>

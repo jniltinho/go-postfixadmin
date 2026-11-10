@@ -583,3 +583,30 @@ body {
   outline: 3px solid var(--color-fg);
   outline-offset: 2px;
 }
+
+/* ─── Toasts (lib/toast) mapped to the theme roles ─────────────────────────── */
+:root {
+  --toast-font: var(--font-sans);
+  --toast-radius: var(--radius-sm);
+  --toast-shadow: var(--shadow-4);
+  --toast-border-width: 2px;
+  --toast-border-color: var(--color-line);
+  --toast-info-bg: var(--color-icon-accent);
+  --toast-info-fg: var(--color-on-toast-info);
+  --toast-success-bg: var(--color-ok);
+  --toast-success-fg: var(--color-on-toast-ok);
+  --toast-warning-bg: var(--color-warn);
+  --toast-warning-fg: var(--color-on-toast-warn);
+  --toast-error-bg: var(--color-err);
+  --toast-error-fg: var(--color-on-toast-err);
+}
+
+/* ─── Cancel buttons: red on hover/focus in every dialog ──────────────────────
+   Unlayered, so it wins over the buttons' own hover utilities; the text color is the per-theme contrast color for
+   the error red (also used by the error toasts). */
+.btn-cancel:hover,
+.btn-cancel:focus-visible {
+  background: var(--color-err);
+  border-color: var(--color-err);
+  color: var(--color-on-toast-err);
+}
