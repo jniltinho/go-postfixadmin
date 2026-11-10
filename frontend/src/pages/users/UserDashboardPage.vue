@@ -286,7 +286,7 @@
     </footer>
 
     <!-- Auto-Reply Vacation Modal -->
-    <div v-if="showVacationModal" class="vacation-modal-backdrop flex items-center justify-center px-4">
+    <div v-if="showVacationModal" class="vacation-modal-backdrop flex items-start justify-center px-4 pt-[5vh]">
       <div class="vacation-modal-box bg-surface border-2 border-line w-full max-w-2xl max-h-[90vh] flex flex-col">
         <!-- Modal Header -->
         <header class="bg-accent px-6 py-4 flex items-center justify-between text-on-action border-b-2 border-line">

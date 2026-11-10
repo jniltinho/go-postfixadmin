@@ -353,10 +353,11 @@ body {
   inset: 0;
   background: var(--color-backdrop);
   display: flex;
-  align-items: center;
+  /* every dialog opens 5% below the top of the window (they are at most 90vh tall) */
+  align-items: flex-start;
   justify-content: center;
   z-index: 9999;
-  padding: 1rem;
+  padding: 5vh 1rem 1rem;
 }
 .modal-card {
   background: var(--color-surface);

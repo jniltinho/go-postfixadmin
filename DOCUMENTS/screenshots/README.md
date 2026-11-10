@@ -40,6 +40,22 @@ All screenshots were taken from the Go-PostfixAdmin Vue 3 SPA using demo data.
 |-------------------|------------|
 | ![Mail log](maillog.png) | ![Swagger](swagger.png) |
 
+## Themes and Settings
+
+![Default, Windows XP, Matrix, Breeze dark, Aurora and Violet dark](themes.png)
+
+| Windows XP | Matrix | Breeze (dark) |
+|------------|--------|---------------|
+| ![Windows XP](theme-xp.png) | ![Matrix](theme-matrix.png) | ![Breeze dark](theme-breeze-dark.png) |
+
+| Appearance (language and themes) | Configuration |
+|----------------------------------|---------------|
+| ![Appearance](settings-themes.png) | ![Configuration](settings-config.png) |
+
+| Services | Web SSH terminal | Host key confirmation |
+|----------|------------------|-----------------------|
+| ![Services](settings-services.png) | ![Terminal](settings-terminal.png) | ![Host key](settings-terminal-hostkey.png) |
+
 ## User Portal
 
 | Login | Forwarding & password |
