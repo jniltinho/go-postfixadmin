@@ -11,7 +11,7 @@ const en = {
   configFile: 'File',
   notWritable: 'The panel cannot write config.toml (file or directory permissions), so every value is read-only.',
   configHint:
-    'Changes apply at once, except keys marked restart. The previous file is kept as config.toml.bak and the change is audited.',
+    'Changes apply at once, except keys marked restart. The previous file is kept as config.toml.YYYYMMDD-HHMMSS.bak and the change is audited.',
   readOnlyHint: 'Critical settings (database, security, delivery, access) are changed in config.toml on the server.',
   restartTag: 'restart',
   secretSet: 'set (hidden)',
@@ -114,7 +114,7 @@ const pt: Dict = {
   notWritable:
     'O painel não consegue gravar o config.toml (permissões do arquivo ou do diretório), então todos os valores estão somente leitura.',
   configHint:
-    'As mudanças valem na hora, exceto as chaves marcadas com reinício. O arquivo anterior fica salvo como config.toml.bak e a alteração vai para a auditoria.',
+    'As mudanças valem na hora, exceto as chaves marcadas com reinício. O arquivo anterior fica salvo como config.toml.AAAAMMDD-HHMMSS.bak e a alteração vai para a auditoria.',
   readOnlyHint: 'Configurações críticas (banco, segurança, entrega, acesso) são alteradas no config.toml no servidor.',
   restartTag: 'reinício',
   secretSet: 'definido (oculto)',
@@ -217,7 +217,7 @@ const es: Dict = {
   notWritable:
     'El panel no puede escribir config.toml (permisos del archivo o del directorio), así que todos los valores son de solo lectura.',
   configHint:
-    'Los cambios se aplican al momento, salvo las claves marcadas con reinicio. El archivo anterior queda como config.toml.bak y el cambio se audita.',
+    'Los cambios se aplican al momento, salvo las claves marcadas con reinicio. El archivo anterior queda como config.toml.AAAAMMDD-HHMMSS.bak y el cambio se audita.',
   readOnlyHint:
     'Los ajustes críticos (base de datos, seguridad, entrega, acceso) se cambian en config.toml en el servidor.',
   restartTag: 'reinicio',

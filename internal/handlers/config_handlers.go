@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -241,7 +243,7 @@ func parseConfigValue(f configField, v any) (any, string, error) {
 
 // UpdateConfigV1 godoc
 // @Summary      Update panel configuration
-// @Description  Changes editable config.toml keys (comments and formatting are kept, the previous file is saved as config.toml.bak). Read-only and unknown keys are refused. Superadmins only.
+// @Description  Changes editable config.toml keys (comments and formatting are kept, the previous file is saved as config.toml.YYYYMMDD-HHMMSS.bak). Read-only and unknown keys are refused. Superadmins only.
 // @Tags         System
 // @Accept       json
 // @Produce      json
@@ -317,14 +319,14 @@ func (h *Handler) UpdateConfigV1(c *echo.Context) error {
 	return dto.WriteSuccess(c, dto.ConfigUpdateResponse{Updated: keys, RestartRequired: restart})
 }
 
-// writeFileAtomic keeps the previous content as path.bak and replaces path through a temp file in the same
-// directory, with the original permissions.
+// writeFileAtomic keeps the previous content as path.YYYYMMDD-HHMMSS.bak (never overwriting an older backup) and
+// replaces path through a temp file in the same directory, with the original permissions.
 func writeFileAtomic(path string, data, previous []byte) error {
 	st, err := os.Stat(path)
 	if err != nil {
 		return err
 	}
-	if err := os.WriteFile(path+".bak", previous, st.Mode().Perm()); err != nil {
+	if err := writeBackup(path, previous, st.Mode().Perm()); err != nil {
 		return err
 	}
 	tmp, err := os.CreateTemp(filepath.Dir(path), ".config-*.toml")
@@ -343,4 +345,24 @@ func writeFileAtomic(path string, data, previous []byte) error {
 		return err
 	}
 	return os.Rename(tmp.Name(), path)
+}
+
+func writeBackup(path string, data []byte, perm os.FileMode) error {
+	stamp := time.Now().Format("20060102-150405")
+	name := fmt.Sprintf("%s.%s.bak", path, stamp)
+	for i := 2; ; i++ {
+		f, err := os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_EXCL, perm)
+		if errors.Is(err, fs.ErrExist) {
+			name = fmt.Sprintf("%s.%s-%d.bak", path, stamp, i)
+			continue
+		}
+		if err != nil {
+			return err
+		}
+		if _, err := f.Write(data); err != nil {
+			f.Close()
+			return err
+		}
+		return f.Close()
+	}
 }

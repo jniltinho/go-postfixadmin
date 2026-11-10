@@ -164,7 +164,7 @@ Superadmins only (with RBAC also `settings:read` / `settings:write`).
 
 Secrets are never sent to the browser (only "set" / "not set"). Saving validates each value, changes only those lines
 of `config.toml` (comments and alignment kept), checks the new file parses, keeps the previous one as
-`config.toml.bak`, replaces the file atomically with its permissions and logs `config_update` in the audit log.
+`config.toml.YYYYMMDD-HHMMSS.bak` (one per save, never overwritten), replaces the file atomically with its permissions and logs `config_update` in the audit log.
 A key set by an environment variable, or a file the panel cannot write, is shown locked.
 
 ### Terminal
