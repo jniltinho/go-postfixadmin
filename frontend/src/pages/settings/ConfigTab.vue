@@ -245,7 +245,7 @@ load()
   flex-direction: column;
   min-height: 0;
   /* as tall as its content, never taller than the window below the tabs (then it scrolls inside) */
-  max-height: calc(100vh - 16rem);
+  max-height: calc(100vh - 17.5rem);
 }
 .cf-scroll {
   flex: 1;
