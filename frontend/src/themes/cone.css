@@ -1,0 +1,47 @@
+/* Ported from jniltinho/ad-manager frontend/src/themes (cone): values of its role contract mapped onto
+ * ours (see ../style.css). Only role values; layout stays the same in every theme. */
+
+/* Cone (dark) */
+[data-theme='cone'] {
+  color-scheme: dark;
+  --color-page: #121212;
+  --color-login-page: #121212;
+  --color-page-dots: rgba(242, 242, 242, 0.18);
+  --color-surface: #212121;
+  --color-surface-2: #2a2a2a;
+  --color-surface-3: #2a2a2a;
+  --color-header: #212121;
+  --color-sidebar: #212121;
+  --color-backdrop: rgba(0, 0, 0, 0.6);
+  --color-fg: #f2f2f2;
+  --color-fg-2: #f2f2f2;
+  --color-fg-muted: #a6a6a6;
+  --color-fg-subtle: #a0a0a0;
+  --color-line: #6b6b6b;
+  --color-line-soft: #2a2a2a;
+  --color-field-line: #303030;
+  --color-strong-fill: #ff8800;
+  --color-action-hover: #ffa040;
+  --color-action-strong: #ff8800;
+  --color-action-soft: #303030;
+  --color-action-line-soft: #ff8800;
+  --color-on-action: #121212;
+  --color-accent-soft: #2a2a2a;
+  --color-err: #ff6b6b;
+  --color-danger-strong: #ff6b6b;
+  --color-err-soft: #422a2a;
+  --color-err-line-soft: #ff6b6b;
+  --color-ok-strong: #4caf50;
+  --color-ok-soft: #253526;
+  --color-warn-strong: #ffca28;
+  --color-warn-soft: #423a20;
+  --color-warn-line: #ffca28;
+  --color-action: #ff8800;
+  --color-accent: #ff8800;
+  --color-accent-strong: #ff8800;
+  --color-danger: #ff6b6b;
+  --color-ok: #4caf50;
+  --color-warn: #ffca28;
+  --color-shadow: color-mix(in srgb, #ff8800 35%, transparent);
+  --font-sans: 'Inter', Tahoma, Verdana, Arial, sans-serif;
+}

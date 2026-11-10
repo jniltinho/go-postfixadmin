@@ -2,6 +2,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import router from './router'
 import { useAuthStore } from './stores/auth'
+import { useThemeStore } from './stores/theme'
 import Vue3Toastify from 'vue3-toastify'
 import 'vue3-toastify/dist/index.css'
 
@@ -21,6 +22,7 @@ async function bootstrap() {
 
   const pinia = createPinia()
   app.use(pinia)
+  void useThemeStore(pinia).init()
 
   await useAuthStore(pinia).initAuth()
 

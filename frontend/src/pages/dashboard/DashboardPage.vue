@@ -1,6 +1,5 @@
 <template>
   <div class="dash-page">
-
     <!-- Page title -->
     <div class="dash-header">
       <h2 class="dash-title">OVERVIEW</h2>
@@ -9,12 +8,11 @@
 
     <!-- ─── Stats row ─── -->
     <div class="stats-row">
-
       <!-- Total Domains -->
       <div class="stat-card">
         <div class="stat-card-top">
           <div class="stat-icon-wrap">
-            <Icon name="globe" :size="20" color="white" />
+            <Icon name="globe" :size="20" class="text-on-action" />
           </div>
           <span class="stat-badge badge-green">ACTIVE</span>
         </div>
@@ -30,7 +28,7 @@
       <div class="stat-card">
         <div class="stat-card-top">
           <div class="stat-icon-wrap">
-            <Icon name="mail" :size="20" color="white" />
+            <Icon name="mail" :size="20" class="text-on-action" />
           </div>
           <span class="stat-badge badge-green">IN USE</span>
         </div>
@@ -46,7 +44,7 @@
       <div class="stat-card">
         <div class="stat-card-top">
           <div class="stat-icon-wrap">
-            <Icon name="arrow-left-right" :size="20" color="white" />
+            <Icon name="arrow-left-right" :size="20" class="text-on-action" />
           </div>
           <span class="stat-badge badge-green">ACTIVE</span>
         </div>
@@ -85,7 +83,6 @@
           <Icon name="plus-circle" :size="16" />
         </router-link>
       </div>
-
     </div>
 
     <!-- ─── Activity table ─── -->
@@ -140,10 +137,10 @@ const allRows = ref<any[]>([])
 
 const columns = [
   { key: 'timestamp', label: 'DATE/TIME' },
-  { key: 'username',  label: 'ADMINISTRATOR' },
-  { key: 'domain',    label: 'DOMAIN' },
-  { key: 'action',    label: 'ACTION' },
-  { key: 'data',      label: 'DESCRIPTION' },
+  { key: 'username', label: 'ADMINISTRATOR' },
+  { key: 'domain', label: 'DOMAIN' },
+  { key: 'action', label: 'ACTION' },
+  { key: 'data', label: 'DESCRIPTION' },
 ]
 
 async function loadDashboardData() {
@@ -152,17 +149,17 @@ async function loadDashboardData() {
     const res = await http.get(`${API_BASE}/dashboard`)
     const data = res.data?.data
 
-    stats.value.domains   = data?.domains   ?? 0
+    stats.value.domains = data?.domains ?? 0
     stats.value.mailboxes = data?.mailboxes ?? 0
-    stats.value.aliases   = data?.aliases   ?? 0
+    stats.value.aliases = data?.aliases ?? 0
 
     allRows.value = (data?.recent_logs ?? []).map((log: any, idx: number) => ({
       _key: String(idx),
       timestamp: log.timestamp ? new Date(log.timestamp).toLocaleString('pt-BR') : '-',
-      username:  log.username  || '-',
-      domain:    log.domain    || '-',
-      action:    log.action    || '-',
-      data:      log.data      || '',
+      username: log.username || '-',
+      domain: log.domain || '-',
+      action: log.action || '-',
+      data: log.data || '',
     }))
   } catch (e: any) {
     toast.error(e?.response?.data?.error?.message || 'Failed to load dashboard data')
@@ -172,32 +169,33 @@ async function loadDashboardData() {
 }
 
 onMounted(loadDashboardData)
-
 </script>
 
 <style scoped>
 .dash-page {
-  background: #ebf2fe;
-  padding: 24px 28px 40px;
+  background: var(--color-page);
+  padding: 1.5rem 1.75rem 2.5rem;
 }
 
 /* ─── Page heading ─── */
-.dash-header { margin-bottom: 18px; }
+.dash-header {
+  margin-bottom: 1.125rem;
+}
 .dash-title {
-  font-size: 26px;
+  font-size: 1.625rem;
   font-weight: 900;
-  color: #1e293b;
+  color: var(--color-fg);
   font-family: monospace;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.03125rem;
   line-height: 1;
   text-transform: uppercase;
-  margin: 0 0 4px;
+  margin: 0 0 0.25rem;
 }
 .dash-subtitle {
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 700;
-  color: #94a3b8;
-  letter-spacing: 0.8px;
+  color: var(--color-fg-subtle);
+  letter-spacing: 0.05rem;
   margin: 0;
   text-transform: uppercase;
 }
@@ -206,36 +204,38 @@ onMounted(loadDashboardData)
 .stats-row {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 16px;
-  margin-bottom: 18px;
+  gap: 1rem;
+  margin-bottom: 1.125rem;
 }
 
 /* Stat card */
 .stat-card {
-  background: #ffffff;
-  border: 2px solid #1e293b;
-  padding: 18px 18px 14px;
-  box-shadow: 2px 2px 0px #1e293b;
+  background: var(--color-surface);
+  border: 2px solid var(--color-line);
+  padding: 1.125rem 1.125rem 0.875rem;
+  box-shadow: 2px 2px 0px var(--color-shadow);
   cursor: pointer;
-  transition: transform .2s, box-shadow .2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 .stat-card:hover {
   transform: translate(-1px, -1px);
-  box-shadow: 3px 3px 0px #1e293b;
+  box-shadow: 3px 3px 0px var(--color-shadow);
 }
 
 .stat-card-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 0.625rem;
 }
 
 .stat-icon-wrap {
-  width: 40px;
-  height: 40px;
-  background: #3b82f6;
-  border: 2px solid #1e293b;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: var(--color-action);
+  border: 2px solid var(--color-line);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -243,124 +243,142 @@ onMounted(loadDashboardData)
 }
 
 .stat-badge {
-  font-size: 9px;
+  font-size: 0.5625rem;
   font-weight: 900;
-  letter-spacing: 0.6px;
-  padding: 2px 7px;
-  color: #fff;
-  border: 2px solid #1e293b;
+  letter-spacing: 0.0375rem;
+  padding: 0.125rem 0.4375rem;
+  color: var(--color-on-action);
+  border: 2px solid var(--color-line);
   text-transform: uppercase;
 }
-.badge-green { background: #22c55e; }
+.badge-green {
+  background: var(--color-ok);
+}
 
 .stat-label {
-  font-size: 10px;
+  font-size: 0.625rem;
   font-weight: 900;
-  color: #94a3b8;
-  letter-spacing: 0.6px;
+  color: var(--color-fg-subtle);
+  letter-spacing: 0.0375rem;
   text-transform: uppercase;
-  margin: 0 0 2px;
+  margin: 0 0 0.125rem;
 }
 
 .stat-value-row {
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: 0.375rem;
 }
 .stat-value {
-  font-size: 36px;
+  font-size: 2.25rem;
   font-weight: 900;
-  color: #1e293b;
+  color: var(--color-fg);
   font-family: monospace;
   line-height: 1.1;
 }
 .stat-sub {
-  font-size: 10px;
+  font-size: 0.625rem;
   font-weight: 700;
-  color: #94a3b8;
-  letter-spacing: 0.5px;
+  color: var(--color-fg-subtle);
+  letter-spacing: 0.03125rem;
   text-transform: uppercase;
 }
 
 /* CTA cards */
 .cta-card {
-  border: 2px solid #1e293b;
-  padding: 18px 18px 14px;
+  border: 2px solid var(--color-line);
+  padding: 1.125rem 1.125rem 0.875rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: 3px 3px 0px #1e293b;
+  box-shadow: 3px 3px 0px var(--color-shadow);
 }
 .cta-card--disabled {
   opacity: 0.58;
   cursor: not-allowed;
 }
-.cta-orange { background: #f97316; }
-.cta-blue   { background: #3b82f6; }
+.cta-orange {
+  background: var(--color-warn);
+}
+.cta-blue {
+  background: var(--color-action);
+}
 
 .cta-title {
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 900;
-  color: #fff;
-  letter-spacing: 0.3px;
+  color: var(--color-on-action);
+  letter-spacing: 0.01875rem;
   text-transform: uppercase;
-  margin: 0 0 4px;
+  margin: 0 0 0.25rem;
 }
 .cta-sub {
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 700;
-  color: rgba(255, 255, 255, .85);
-  margin: 0 0 14px;
+  color: color-mix(in srgb, var(--color-on-action) 85%, transparent);
+  margin: 0 0 0.875rem;
   text-transform: uppercase;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.01875rem;
 }
 .cta-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  background: #fff;
-  color: #1e293b;
-  font-size: 11px;
+  gap: 0.3125rem;
+  background: var(--color-surface);
+  color: var(--color-fg);
+  font-size: 0.6875rem;
   font-weight: 900;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.03125rem;
   text-transform: uppercase;
-  padding: 7px 12px;
+  padding: 0.4375rem 0.75rem;
   text-decoration: none;
-  border: 2px solid #1e293b;
-  box-shadow: 2px 2px 0px #1e293b;
-  transition: transform .15s, box-shadow .15s;
+  border: 2px solid var(--color-line);
+  box-shadow: 2px 2px 0px var(--color-shadow);
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
 }
 .cta-btn:hover {
   transform: translate(-1px, -1px);
-  box-shadow: 3px 3px 0px #1e293b;
+  box-shadow: 3px 3px 0px var(--color-shadow);
 }
 .cta-btn--disabled,
 .cta-btn--disabled:hover {
-  background: #e5e7eb;
-  color: #64748b;
+  background: var(--color-line-soft);
+  color: var(--color-fg-muted);
   cursor: not-allowed;
   transform: none;
-  box-shadow: 2px 2px 0px #1e293b;
+  box-shadow: 2px 2px 0px var(--color-shadow);
 }
 
 /* ─── Table Controls & Custom Elements ─── */
 .view-logs-link {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 11px;
+  gap: 0.25rem;
+  font-size: 0.6875rem;
   font-weight: 900;
-  color: #3b82f6;
+  color: var(--color-action);
   text-decoration: none;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.03125rem;
   text-transform: uppercase;
 }
-.view-logs-link:hover { text-decoration: underline; }
+.view-logs-link:hover {
+  text-decoration: underline;
+}
 
-.td-link { color: #3b82f6; font-weight: 700; }
-.activity-action { font-weight: 900; text-transform: uppercase; }
-.activity-data { word-break: break-all; }
+.td-link {
+  color: var(--color-action);
+  font-weight: 700;
+}
+.activity-action {
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.activity-data {
+  word-break: break-all;
+}
 
 /* Responsive */
 @media (max-width: 1100px) {

@@ -16,19 +16,19 @@ import SidebarNav from '../components/SidebarNav.vue'
 <style scoped>
 .app-shell {
   display: grid;
-  grid-template-columns: 240px 1fr;
-  grid-template-rows: 56px 1fr;
+  grid-template-columns: 15rem 1fr;
+  grid-template-rows: 3.5rem 1fr;
   grid-template-areas:
-    "sidebar header"
-    "sidebar content";
+    'sidebar header'
+    'sidebar content';
   height: 100vh;
   overflow: hidden;
-  background: #ebf2fe;
+  background: var(--color-page);
 }
 
 .page-content {
   grid-area: content;
-  background: #ebf2fe;
+  background: var(--color-page);
   overflow: auto;
 }
 </style>

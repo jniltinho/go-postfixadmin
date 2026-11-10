@@ -1,0 +1,92 @@
+/* Ported from jniltinho/ad-manager frontend/src/themes (violet): values of its role contract mapped onto
+ * ours (see ../style.css). Only role values; layout stays the same in every theme. */
+
+/* Violet */
+[data-theme='violet'] {
+  color-scheme: light;
+  --color-page: #f6f7fb;
+  --color-login-page: #f6f7fb;
+  --color-page-dots: rgba(21, 27, 38, 0.25);
+  --color-surface: #ffffff;
+  --color-surface-2: #fafafd;
+  --color-surface-3: #f1efff;
+  --color-header: #ffffff;
+  --color-sidebar: #ffffff;
+  --color-backdrop: rgba(0, 0, 0, 0.4);
+  --color-fg: #151b26;
+  --color-fg-2: #151b26;
+  --color-fg-muted: #606878;
+  --color-fg-subtle: #606878;
+  --color-line: #8b90a0;
+  --color-line-soft: #eeeff4;
+  --color-field-line: #e2e3eb;
+  --color-strong-fill: #151b26;
+  --color-action-hover: #6f2ad9;
+  --color-action-strong: #6f2ad9;
+  --color-action-soft: #f1efff;
+  --color-action-line-soft: #894ffb;
+  --color-on-action: #ffffff;
+  --color-accent-soft: #f1efff;
+  --color-err: #c0213a;
+  --color-danger-strong: #c0213a;
+  --color-err-soft: #f7e4e7;
+  --color-err-line-soft: #c0213a;
+  --color-ok-strong: #007a65;
+  --color-ok-soft: #e0efed;
+  --color-warn-strong: #845500;
+  --color-warn-soft: #fdf5e6;
+  --color-warn-line: #efa831;
+  --color-action: #6037b0;
+  --color-accent: #894ffb;
+  --color-accent-strong: #894ffb;
+  --color-danger: #861729;
+  --color-ok: #007a65;
+  --color-warn: #845500;
+  --color-shadow: color-mix(in srgb, #151b26 35%, transparent);
+  --font-sans: 'Inter', Tahoma, Verdana, Arial, sans-serif;
+}
+
+/* Violet (dark) */
+[data-theme='violet-dark'] {
+  color-scheme: dark;
+  --color-page: #0e0d19;
+  --color-login-page: #0e0d19;
+  --color-page-dots: rgba(231, 231, 240, 0.18);
+  --color-surface: #171624;
+  --color-surface-2: #1d1c2c;
+  --color-surface-3: #2c2546;
+  --color-header: #171624;
+  --color-sidebar: #171624;
+  --color-backdrop: rgba(0, 0, 0, 0.6);
+  --color-fg: #e7e7f0;
+  --color-fg-2: #e7e7f0;
+  --color-fg-muted: #9696a7;
+  --color-fg-subtle: #9696a7;
+  --color-line: #6b6a80;
+  --color-line-soft: #232232;
+  --color-field-line: #2a2a37;
+  --color-strong-fill: #a36eff;
+  --color-action-hover: #b98cff;
+  --color-action-strong: #b886ff;
+  --color-action-soft: #2c2546;
+  --color-action-line-soft: #a36eff;
+  --color-on-action: #0a0a13;
+  --color-accent-soft: #2c2546;
+  --color-err: #f75c66;
+  --color-danger-strong: #f75c66;
+  --color-err-soft: #3b212f;
+  --color-err-line-soft: #f75c66;
+  --color-ok-strong: #46bfa4;
+  --color-ok-soft: #1f3138;
+  --color-warn-strong: #f9bb51;
+  --color-warn-soft: #3b302b;
+  --color-warn-line: #f9bb51;
+  --color-action: #a36eff;
+  --color-accent: #a36eff;
+  --color-accent-strong: #a36eff;
+  --color-danger: #f75c66;
+  --color-ok: #46bfa4;
+  --color-warn: #f9bb51;
+  --color-shadow: color-mix(in srgb, #a36eff 35%, transparent);
+  --font-sans: 'Inter', Tahoma, Verdana, Arial, sans-serif;
+}

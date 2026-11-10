@@ -420,6 +420,51 @@ definitions:
       token_type:
         type: string
     type: object
+  dto.ServiceStatus:
+    properties:
+      active:
+        example: active
+        type: string
+      enabled:
+        example: enabled
+        type: string
+      found:
+        type: boolean
+      name:
+        example: postfix.service
+        type: string
+      since:
+        example: Sat 2026-11-07 20:15:02 -03
+        type: string
+      sub:
+        example: running
+        type: string
+    type: object
+  dto.ServicesResponse:
+    properties:
+      available:
+        type: boolean
+      message:
+        type: string
+      services:
+        items:
+          $ref: '#/definitions/dto.ServiceStatus'
+        type: array
+    type: object
+  dto.TerminalInfoResponse:
+    properties:
+      enabled:
+        type: boolean
+      host_key:
+        example: ssh-ed25519 SHA256:abc...
+        type: string
+      idle_minutes:
+        example: 30
+        type: integer
+      target:
+        example: 127.0.0.1:22
+        type: string
+    type: object
   dto.TransportResponse:
     properties:
       active:
@@ -2421,6 +2466,78 @@ paths:
       summary: Update API Key
       tags:
       - Settings
+  /system/services:
+    get:
+      description: Read-only systemd state of Postfix and Dovecot on the panel's host
+        (systemctl show).
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ServicesResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Mail service status
+      tags:
+      - System
+  /system/terminal:
+    get:
+      description: Whether the SSH terminal is enabled, its target and the pinned
+        host key fingerprint. Superadmins only.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TerminalInfoResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Web terminal status
+      tags:
+      - System
+  /system/terminal/hostkey:
+    delete:
+      description: The next terminal connection asks the operator to trust the host
+        key again. Superadmins only.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Forget the pinned SSH host key
+      tags:
+      - System
   /transports:
     get:
       description: Returns all transport entries. Restricted to superadmins only.

@@ -83,6 +83,7 @@ func MigrateDB(db *gorm.DB) error {
 		&models.DomainAdmin{},
 		&models.Fetchmail{},
 		&models.Log{},
+		&models.TerminalHostKey{},
 		&models.Mailbox{},
 		&models.MailboxAppPassword{},
 		&models.Quota{},

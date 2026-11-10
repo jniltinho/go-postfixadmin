@@ -70,6 +70,11 @@ func initConfig() {
 	}
 
 	viper.AutomaticEnv()
+	viper.SetDefault("ui.default_theme", "default")
+	viper.SetDefault("terminal.host", "127.0.0.1")
+	viper.SetDefault("terminal.port", 22)
+	viper.SetDefault("terminal.idle_timeout", "30m")
+	_ = viper.BindEnv("ui.default_theme", "UI_DEFAULT_THEME")
 	observability.BindConfig(viper.GetViper())
 
 	if err := viper.ReadInConfig(); err == nil {

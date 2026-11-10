@@ -1,24 +1,10 @@
 <template>
   <div class="login-page dot-pattern">
-
-    <!-- Floating Language Switcher -->
-    <div class="lang-bar">
-      <button
-        v-for="lang in ['PT', 'EN', 'ES']"
-        :key="lang"
-        class="lang-btn"
-        :class="{ 'lang-active': activeLang === lang }"
-        @click="selectLanguage(lang as 'PT' | 'EN' | 'ES')"
-      >
-        {{ lang }}
-      </button>
-    </div>
-
-    <div class="w-full max-w-md">
+    <div class="w-full login-col">
       <!-- Brand Header -->
       <div class="brand-header">
         <div class="brand-icon-box">
-          <Icon name="mail" :size="32" color="white" />
+          <Icon name="mail" :size="32" class="text-on-action" />
         </div>
         <h1 class="brand-title-mono">Go-PostfixAdmin</h1>
         <p class="brand-subtitle-flat">{{ t.adminSubtitle }}</p>
@@ -35,7 +21,7 @@
             <label class="form-label-neo">{{ t.username }}</label>
             <div class="relative-group">
               <div class="input-wrapper">
-                <Icon name="mail" :size="18" class="input-icon-left text-[#94a3b8]" />
+                <Icon name="mail" :size="18" class="input-icon-left text-fg-subtle" />
                 <input
                   v-model="form.username"
                   type="email"
@@ -53,7 +39,7 @@
             <label class="form-label-neo">{{ t.password }}</label>
             <div class="relative-group">
               <div class="input-wrapper">
-                <Icon name="lock" :size="18" class="input-icon-left text-[#94a3b8]" />
+                <Icon name="lock" :size="18" class="input-icon-left text-fg-subtle" />
                 <input
                   v-model="form.password"
                   :type="showPassword ? 'text' : 'password'"
@@ -64,7 +50,7 @@
                 />
                 <button
                   type="button"
-                  class="input-icon-right text-[#94a3b8] hover:text-[#1e293b]"
+                  class="input-icon-right text-fg-subtle hover:text-fg"
                   @click="showPassword = !showPassword"
                   tabindex="-1"
                 >
@@ -76,11 +62,7 @@
 
           <!-- Submit Button -->
           <div class="pt-2">
-            <button
-              type="submit"
-              class="btn-authenticate"
-              :disabled="loading"
-            >
+            <button type="submit" class="btn-authenticate" :disabled="loading">
               <span>{{ loading ? '...' : t.authenticate }}</span>
               <Icon name="arrow-right" :size="18" class="btn-arrow" />
             </button>
@@ -88,9 +70,9 @@
         </form>
 
         <div class="card-footer-neo">
-          <p class="text-xs text-gray-500">
+          <p class="text-xs text-fg-muted">
             {{ t.userLink1 }}
-            <a href="/users/login" class="text-brand-primary font-bold hover:underline">
+            <a href="/users/login" class="text-action font-bold hover:underline">
               {{ t.userLink2 }}
             </a>
             {{ t.userLink3 }}
@@ -102,14 +84,13 @@
       </div>
 
       <!-- Footer Info -->
-      <p class="copyright-footer">
-        &copy; {{ currentYear }} Go-Postfixadmin. {{ appVersion }}
-      </p>
+      <p class="copyright-footer">&copy; {{ currentYear }} Go-Postfixadmin. {{ appVersion }}</p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useLangStore } from '../stores/lang'
 import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import { useRouter } from 'vue-router'
@@ -123,7 +104,8 @@ const toast = useToastStore()
 const form = ref({ username: '', password: '' })
 const loading = ref(false)
 const showPassword = ref(false)
-const activeLang = ref('EN')
+const langStore = useLangStore()
+const activeLang = computed(() => langStore.lang) // saved choice (Settings), else the browser language
 const appVersion = ref('1.0.0')
 const currentYear = new Date().getFullYear()
 
@@ -139,7 +121,7 @@ const translations = {
     userLink1: 'Users should ',
     userLink2: 'click here',
     userLink3: ' to access the user section.',
-    secureSystem: 'SECURE ADMINISTRATIVE ACCESS SYSTEM'
+    secureSystem: 'SECURE ADMINISTRATIVE ACCESS SYSTEM',
   },
   PT: {
     title: 'ENTRAR',
@@ -152,7 +134,7 @@ const translations = {
     userLink1: 'Os usuários devem ',
     userLink2: 'clicar aqui',
     userLink3: ' para acessar a seção do usuário.',
-    secureSystem: 'SISTEMA DE ACESSO ADMINISTRATIVO SEGURO'
+    secureSystem: 'SISTEMA DE ACESSO ADMINISTRATIVO SEGURO',
   },
   ES: {
     title: 'INICIAR SESIÓN',
@@ -165,20 +147,11 @@ const translations = {
     userLink1: 'Los usuarios deben ',
     userLink2: 'hacer clic aquí',
     userLink3: ' para acceder a la sección de usuario.',
-    secureSystem: 'SISTEMA DE ACCESO ADMINISTRATIVO SEGURO'
-  }
+    secureSystem: 'SISTEMA DE ACCESO ADMINISTRATIVO SEGURO',
+  },
 }
 
 const t = computed(() => translations[activeLang.value as 'EN' | 'PT' | 'ES'])
-
-async function selectLanguage(lang: 'PT' | 'EN' | 'ES') {
-  activeLang.value = lang
-  try {
-    await http.get(`/lang/${lang.toLowerCase()}`)
-  } catch (e) {
-    // Ignore language set backend error
-  }
-}
 
 async function handleLogin() {
   if (!form.value.username.trim()) {
@@ -203,10 +176,6 @@ async function handleLogin() {
 
 onMounted(async () => {
   // Autodetect browser language if supported
-  const navLang = navigator.language.slice(0, 2).toUpperCase()
-  if (['PT', 'ES'].includes(navLang)) {
-    activeLang.value = navLang
-  }
 
   // Fetch dynamic version from backend
   try {
@@ -221,77 +190,51 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* 28rem up to FullHD (same as before), then 23% of the screen so the card does not shrink on QHD/4K */
+.login-col {
+  max-width: max(28rem, 23vw);
+}
 .login-page {
   min-height: 100vh;
-  background-color: #F8FAFC;
+  background-color: var(--color-surface-2);
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 24px;
+  padding: 1.5rem;
   padding-top: 6vh;
   position: relative;
 }
 
 .dot-pattern {
-  background-image: radial-gradient(circle, #cbd5e1 1.2px, transparent 1.2px);
-  background-size: 24px 24px;
+  background-image: radial-gradient(circle, var(--color-field-line) 1.2px, transparent 1.2px);
+  background-size: 1.5rem 1.5rem;
 }
 
 /* Floating Language Switcher */
-.lang-bar {
-  position: fixed;
-  top: 24px;
-  right: 24px;
-  display: flex;
-  gap: 8px;
-  z-index: 100;
-}
 
-.lang-btn {
-  padding: 4px 10px;
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: 0.8px;
-  border: 1px solid #cbd5e1;
-  background: #ffffff;
-  color: #94a3b8;
-  cursor: pointer;
-  border-radius: 0;
-  transition: all .15s;
-  text-transform: uppercase;
+.w-full {
+  width: 100%;
 }
-
-.lang-btn:hover {
-  border-color: #1E293B;
-  color: #1E293B;
+.max-w-md {
+  max-width: 27.5rem;
 }
-
-.lang-active {
-  background: #3B82F6 !important;
-  color: #ffffff !important;
-  border-color: #1E293B !important;
-  box-shadow: 1px 1px 0px #1E293B;
-}
-
-.w-full { width: 100%; }
-.max-w-md { max-width: 440px; }
 
 /* Brand Header */
 .brand-header {
   text-align: center;
-  margin-bottom: 28px;
+  margin-bottom: 1.75rem;
 }
 
 .brand-icon-box {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 64px;
-  height: 64px;
-  background: #3B82F6;
-  border: 2px solid #1E293B;
-  box-shadow: 2px 2px 0px #1E293B;
-  margin-bottom: 16px;
+  width: 4rem;
+  height: 4rem;
+  background: var(--color-action);
+  border: 2px solid var(--color-line);
+  box-shadow: 2px 2px 0px var(--color-shadow);
+  margin-bottom: 1rem;
   transition: transform 0.2s;
   cursor: pointer;
 }
@@ -301,57 +244,57 @@ onMounted(async () => {
 }
 
 .brand-title-mono {
-  font-size: 36px;
+  font-size: 2.25rem;
   font-weight: 700;
-  letter-spacing: -1px;
-  color: #1E293B;
-  margin: 0 0 6px;
+  letter-spacing: -0.0625rem;
+  color: var(--color-fg);
+  margin: 0 0 0.375rem;
   line-height: 1;
   font-family: monospace;
 }
 
 .brand-subtitle-flat {
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 600;
-  color: #64748B;
-  letter-spacing: 0.5px;
+  color: var(--color-fg-muted);
+  letter-spacing: 0.03125rem;
   text-transform: uppercase;
 }
 
 /* Card */
 .login-card-neo {
-  background: #ffffff;
-  border: 2px solid #1E293B;
-  padding: 32px;
+  background: var(--color-surface);
+  border: 2px solid var(--color-line);
+  padding: 2rem;
 }
 
 .neo-shadow {
-  box-shadow: 4px 4px 0px #1E293B;
+  box-shadow: 4px 4px 0px var(--color-shadow);
 }
 
 .card-heading-neo {
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 800;
-  letter-spacing: 1px;
-  color: #1E293B;
-  margin: 0 0 24px;
+  letter-spacing: 0.0625rem;
+  color: var(--color-fg);
+  margin: 0 0 1.5rem;
   text-transform: uppercase;
 }
 
 /* Form inputs */
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 1.25rem;
   display: flex;
   flex-direction: column;
 }
 
 .form-label-neo {
   display: block;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 800;
-  letter-spacing: 0.5px;
-  color: #1E293B;
-  margin-bottom: 8px;
+  letter-spacing: 0.03125rem;
+  color: var(--color-fg);
+  margin-bottom: 0.5rem;
   text-transform: uppercase;
 }
 
@@ -368,40 +311,42 @@ onMounted(async () => {
 
 .brutal-input {
   width: 100%;
-  height: 46px;
-  padding-left: 42px;
-  padding-right: 12px;
-  font-size: 14px;
-  border: 2px solid #1E293B;
+  height: 2.875rem;
+  padding-left: 2.625rem;
+  padding-right: 0.75rem;
+  font-size: 0.875rem;
+  border: 2px solid var(--color-line);
   border-radius: 0;
-  background: #ffffff;
-  color: #1E293B;
-  transition: border-color 0.1s, box-shadow 0.1s;
+  background: var(--color-surface);
+  color: var(--color-fg);
+  transition:
+    border-color 0.1s,
+    box-shadow 0.1s;
   outline: none;
 }
 
 .brutal-input:focus {
-  border-color: #3B82F6;
-  box-shadow: 4px 4px 0px #3B82F6;
+  border-color: var(--color-action);
+  box-shadow: 4px 4px 0px var(--color-action);
 }
 
 .brutal-input:disabled {
-  background: #f8fafc;
+  background: var(--color-surface-2);
   opacity: 0.7;
 }
 
 .input-icon-left {
   position: absolute;
-  left: 14px;
+  left: 0.875rem;
   pointer-events: none;
 }
 
 .input-icon-right {
   position: absolute;
-  right: 12px;
+  right: 0.75rem;
   background: none;
   border: none;
-  padding: 4px;
+  padding: 0.25rem;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -411,17 +356,17 @@ onMounted(async () => {
 /* Authenticate Button */
 .btn-authenticate {
   width: 100%;
-  background: #3B82F6;
-  color: #ffffff;
-  border: 2px solid #1E293B;
+  background: var(--color-action);
+  color: var(--color-on-action);
+  border: 2px solid var(--color-line);
   font-weight: 700;
-  padding: 14px 20px;
-  font-size: 13px;
-  letter-spacing: 1px;
+  padding: 0.875rem 1.25rem;
+  font-size: 0.8125rem;
+  letter-spacing: 0.0625rem;
   cursor: pointer;
   border-radius: 0;
-  box-shadow: 3px 3px 0px #1E293B;
-  transition: all .15s;
+  box-shadow: 3px 3px 0px var(--color-shadow);
+  transition: all 0.15s;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -429,8 +374,8 @@ onMounted(async () => {
 }
 
 .btn-authenticate:hover:not(:disabled) {
-  background: #ffffff;
-  color: #3B82F6;
+  background: var(--color-surface);
+  color: var(--color-action);
 }
 
 .btn-authenticate:active:not(:disabled) {
@@ -439,12 +384,12 @@ onMounted(async () => {
 }
 
 .btn-authenticate:disabled {
-  opacity: .6;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
 .btn-arrow {
-  margin-left: 8px;
+  margin-left: 0.5rem;
   transition: transform 0.2s;
 }
 
@@ -453,27 +398,27 @@ onMounted(async () => {
 }
 
 .pt-2 {
-  padding-top: 8px;
+  padding-top: 0.5rem;
 }
 
 /* Error Banner */
 .error-banner-neo {
-  background: #FEF2F2;
-  border: 2px solid #EF4444;
-  color: #EF4444;
-  padding: 12px 14px;
-  font-size: 13px;
+  background: var(--color-err-soft);
+  border: 2px solid var(--color-err);
+  color: var(--color-err);
+  padding: 0.75rem 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 600;
-  margin-bottom: 20px;
+  margin-bottom: 1.25rem;
   display: flex;
   align-items: center;
 }
 
 /* Card footer */
 .card-footer-neo {
-  margin-top: 32px;
-  padding-top: 24px;
-  border-top: 2px solid #F1F5F9;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid var(--color-surface-3);
   text-align: center;
 }
 
@@ -481,32 +426,40 @@ onMounted(async () => {
   margin: 0;
 }
 
-.text-xs { font-size: 12px; }
-.text-gray-500 { color: #64748B; }
-.text-brand-primary { color: #3B82F6; }
-.font-bold { font-weight: 700; }
+.text-xs {
+  font-size: 0.75rem;
+}
+.text-fg-muted {
+  color: var(--color-fg-muted);
+}
+.text-action {
+  color: var(--color-action);
+}
+.font-bold {
+  font-weight: 700;
+}
 
 .card-footer-neo a:hover {
   text-decoration: underline;
 }
 
 .secure-system-text {
-  font-size: 10px;
-  color: #94A3B8;
+  font-size: 0.625rem;
+  color: var(--color-fg-subtle);
   font-weight: 700;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.05rem;
   text-transform: uppercase;
-  margin-top: 12px !important;
+  margin-top: 0.75rem !important;
 }
 
 /* Copyright Footer */
 .copyright-footer {
   text-align: center;
-  margin-top: 32px;
-  font-size: 11px;
-  color: #94A3B8;
+  margin-top: 2rem;
+  font-size: 0.6875rem;
+  color: var(--color-fg-subtle);
   font-weight: 800;
-  letter-spacing: 1px;
+  letter-spacing: 0.0625rem;
   text-transform: uppercase;
 }
 </style>

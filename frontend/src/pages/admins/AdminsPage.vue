@@ -1,6 +1,5 @@
 <template>
   <div class="admins-page">
-
     <!-- ─── Header ─── -->
     <div class="page-header">
       <div>
@@ -8,7 +7,7 @@
         <div class="page-subtitle">MANAGE SYSTEM ADMINISTRATORS</div>
       </div>
       <button class="btn-primary" :disabled="!isSuperAdmin" @click="openAdd">
-        <Icon name="user-plus" :size="16" style="margin-right:6px;vertical-align:middle" />
+        <Icon name="user-plus" :size="16" style="margin-right: 0.375rem; vertical-align: middle" />
         ADD ADMINISTRATOR
       </button>
     </div>
@@ -36,16 +35,11 @@
       </template>
       <template #cell-roles="{ row }">
         <div class="roles-cell">
-          <span
-            v-for="role in (adminRoles[row.username] ?? [])"
-            :key="role"
-            class="role-badge"
-          >{{ role }}</span>
+          <span v-for="role in adminRoles[row.username] ?? []" :key="role" class="role-badge">{{ role }}</span>
           <span v-if="row.superadmin" class="role-badge role-badge--super">superadmin</span>
-          <span
-            v-if="!row.superadmin && !(adminRoles[row.username]?.length)"
-            class="text-xs text-gray-400 font-bold"
-          >—</span>
+          <span v-if="!row.superadmin && !adminRoles[row.username]?.length" class="text-xs text-fg-subtle font-bold"
+            >—</span
+          >
         </div>
       </template>
       <template #cell-active="{ value }">
@@ -59,7 +53,7 @@
           :disabled="!canEditAdmin(row)"
           @click="openEdit(row)"
         >
-          <Icon name="pencil" :size="12" style="margin-right:4px;vertical-align:middle" />EDIT
+          <Icon name="pencil" :size="12" style="margin-right: 0.25rem; vertical-align: middle" />EDIT
         </button>
         <button
           class="act-btn act-del"
@@ -67,18 +61,13 @@
           :disabled="!canDeleteAdmin(row)"
           @click="confirmDelete(row)"
         >
-          <Icon name="trash-2" :size="12" style="margin-right:4px;vertical-align:middle" />DELETE
+          <Icon name="trash-2" :size="12" style="margin-right: 0.25rem; vertical-align: middle" />DELETE
         </button>
       </template>
     </AppTable>
 
     <!-- ══════════ ADD MODAL ══════════ -->
-    <AdminAddModal
-      v-model="showAdd"
-      :domains="domains"
-      :saving="savingAdd"
-      @submit="handleAdd"
-    />
+    <AdminAddModal v-model="showAdd" :domains="domains" :saving="savingAdd" @submit="handleAdd" />
 
     <!-- ══════════ EDIT MODAL ══════════ -->
     <AdminEditModal
@@ -99,7 +88,6 @@
       :loading="deletingRow"
       @confirm="submitDelete"
     />
-
   </div>
 </template>
 
@@ -125,8 +113,13 @@ interface Admin {
   modified: string
 }
 
-interface Domain { domain: string }
-interface DomainOption { domain: string; assigned: boolean }
+interface Domain {
+  domain: string
+}
+interface DomainOption {
+  domain: string
+  assigned: boolean
+}
 
 const allAdmins = ref<Admin[]>([])
 const domains = ref<Domain[]>([])
@@ -135,11 +128,11 @@ const loading = ref(true)
 const adminRoles = ref<Record<string, string[]>>({})
 
 const columns = [
-  { key: 'username',     label: 'USERNAME' },
+  { key: 'username', label: 'USERNAME' },
   { key: 'domain_count', label: 'DOMAINS' },
-  { key: 'roles',        label: 'ROLES' },
-  { key: 'active',       label: 'ACTIVE' },
-  { key: 'modified',     label: 'MODIFIED' },
+  { key: 'roles', label: 'ROLES' },
+  { key: 'active', label: 'ACTIVE' },
+  { key: 'modified', label: 'MODIFIED' },
 ]
 
 function canEditAdmin(row: Admin): boolean {
@@ -152,29 +145,34 @@ function canDeleteAdmin(row: Admin): boolean {
 
 function formatDate(ts: string): string {
   if (!ts) return '—'
-  return new Date(ts).toLocaleString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+  return new Date(ts).toLocaleString('pt-BR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 async function load() {
   loading.value = true
   try {
-    const [admRes, domRes] = await Promise.all([
-      http.get(`${API_BASE}/admins`),
-      http.get(`${API_BASE}/domains`),
-    ])
+    const [admRes, domRes] = await Promise.all([http.get(`${API_BASE}/admins`), http.get(`${API_BASE}/domains`)])
     allAdmins.value = admRes.data?.data ?? []
     domains.value = domRes.data?.data ?? []
     // Load roles for all admins in parallel (superadmin only; non-fatal).
     loadAdminRoles(allAdmins.value)
   } catch (e: any) {
     toast.error(e?.response?.data?.error?.message || 'Failed to load administrators')
-  } finally { loading.value = false }
+  } finally {
+    loading.value = false
+  }
 }
 
 async function loadAdminRoles(admins: Admin[]) {
   if (!isSuperAdmin.value || admins.length === 0) return
   const results = await Promise.allSettled(
-    admins.map(a => http.get(`${API_BASE}/rbac/admins/${encodeURIComponent(a.username)}/roles`))
+    admins.map((a) => http.get(`${API_BASE}/rbac/admins/${encodeURIComponent(a.username)}/roles`)),
   )
   const map: Record<string, string[]> = {}
   results.forEach((r, i) => {
@@ -206,8 +204,14 @@ async function handleAdd(payload: any) {
     showAdd.value = false
     return
   }
-  if (!payload.username) { toast.error('Username is required'); return }
-  if (!payload.password || payload.password.length < 8) { toast.error('Password must be at least 8 characters'); return }
+  if (!payload.username) {
+    toast.error('Username is required')
+    return
+  }
+  if (!payload.password || payload.password.length < 8) {
+    toast.error('Password must be at least 8 characters')
+    return
+  }
   savingAdd.value = true
   try {
     await http.post(`${API_BASE}/admins`, payload)
@@ -216,7 +220,9 @@ async function handleAdd(payload: any) {
     await load()
   } catch (e: any) {
     toast.error(e?.response?.data?.error?.message || 'Failed to create administrator')
-  } finally { savingAdd.value = false }
+  } finally {
+    savingAdd.value = false
+  }
 }
 
 // ─── Edit modal ───
@@ -246,13 +252,21 @@ async function openEdit(row: Admin) {
       .map((opt: DomainOption) => ({ ...opt }))
   } catch (e: any) {
     toast.error(e?.response?.data?.error?.message || 'Failed to load administrator')
-  } finally { loadingEdit.value = false }
+  } finally {
+    loadingEdit.value = false
+  }
 }
 
 async function handleEdit(payload: any) {
   if (payload.change_password) {
-    if (!payload.password || payload.password.length < 8) { toast.error('Password must be at least 8 characters'); return }
-    if (payload.password !== payload.password_confirm) { toast.error('Passwords do not match'); return }
+    if (!payload.password || payload.password.length < 8) {
+      toast.error('Password must be at least 8 characters')
+      return
+    }
+    if (payload.password !== payload.password_confirm) {
+      toast.error('Passwords do not match')
+      return
+    }
   }
   savingEdit.value = true
   try {
@@ -262,7 +276,9 @@ async function handleEdit(payload: any) {
     await load()
   } catch (e: any) {
     toast.error(e?.response?.data?.error?.message || 'Failed to update administrator')
-  } finally { savingEdit.value = false }
+  } finally {
+    savingEdit.value = false
+  }
 }
 
 // ─── Delete ───
@@ -272,9 +288,11 @@ const deleteTarget = ref<Admin | null>(null)
 
 function confirmDelete(row: Admin) {
   if (!canDeleteAdmin(row)) {
-    toast.error(row.username === currentUsername.value
-      ? 'You cannot delete your own administrator account'
-      : 'You cannot delete this administrator')
+    toast.error(
+      row.username === currentUsername.value
+        ? 'You cannot delete your own administrator account'
+        : 'You cannot delete this administrator',
+    )
     return
   }
   deleteTarget.value = row
@@ -287,30 +305,64 @@ async function submitDelete() {
   try {
     const name = deleteTarget.value.username
     await http.delete(`${API_BASE}/admins/${encodeURIComponent(name)}`)
-    showDeleteConfirm.value = false; deleteTarget.value = null
+    showDeleteConfirm.value = false
+    deleteTarget.value = null
     toast.success(`Administrator ${name} deleted successfully`)
     await load()
   } catch (e: any) {
     toast.error(e?.response?.data?.error?.message || 'Failed to delete administrator')
     showDeleteConfirm.value = false
-  } finally { deletingRow.value = false }
+  } finally {
+    deletingRow.value = false
+  }
 }
 </script>
 
 <style scoped>
-.admins-page { background: #ebf2fe; padding: 24px 28px 40px; }
-.badge-super { background: #ede9fe; color: #7c3aed; padding: 4px 8px; font-size: 12px; font-weight: 700; border: 2px solid #7c3aed; }
-.act-disabled { opacity: .4; cursor: not-allowed; pointer-events: none; }
-.btn-primary:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+.admins-page {
+  background: var(--color-page);
+  padding: 1.5rem 1.75rem 2.5rem;
+}
+.badge-super {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-strong);
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 2px solid var(--color-accent-strong);
+}
+.act-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.btn-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
 
-.roles-cell { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.roles-cell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  align-items: center;
+}
 .role-badge {
-  font-size: 10px; font-weight: 800; font-family: monospace;
-  padding: 2px 6px; border: 1px solid #3b82f6;
-  color: #1d4ed8; background: #eff6ff;
-  text-transform: uppercase; letter-spacing: 0.3px; white-space: nowrap;
+  font-size: 0.625rem;
+  font-weight: 800;
+  font-family: monospace;
+  padding: 0.125rem 0.375rem;
+  border: 1px solid var(--color-action);
+  color: var(--color-action-strong);
+  background: var(--color-action-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.01875rem;
+  white-space: nowrap;
 }
 .role-badge--super {
-  border-color: #7c3aed; color: #6d28d9; background: #ede9fe;
+  border-color: var(--color-accent-strong);
+  color: var(--color-accent-strong);
+  background: var(--color-accent-soft);
 }
 </style>

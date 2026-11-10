@@ -2,7 +2,7 @@
   <aside class="sidebar">
     <div class="sidebar-logo">
       <div class="logo-icon">
-        <Icon name="mail" :size="20" color="white" />
+        <Icon name="mail" :size="20" class="text-on-action" />
       </div>
       <h1 class="logo-text">Go-PostfixAdmin</h1>
     </div>
@@ -31,7 +31,7 @@
           exact-active-class="nav-item--active"
         >
           <Icon :name="item.icon" :size="20" class="nav-icon" />
-          <span class="nav-label">{{ item.label }}</span>
+          <span class="nav-label">{{ 'i18n' in item ? settingsLabel : item.label }}</span>
         </router-link>
       </template>
     </nav>
@@ -39,25 +39,31 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useAuthStore } from '../stores/auth'
+import { useT } from '../pages/settings/i18n'
 
 const auth = useAuthStore()
+const t = useT()
+// only the Settings entry is translated so far (the rest of the admin menu is English)
+const settingsLabel = computed(() => t('tabsLabel'))
 
 const mainNav = [
-  { to: '/dashboard',     icon: 'layout-dashboard', label: 'Dashboard' },
-  { to: '/mailboxes',     icon: 'mail',             label: 'Mailboxes' },
-  { to: '/aliases',       icon: 'forward',          label: 'Aliases' },
-  { to: '/domains',       icon: 'globe',            label: 'My Domains' },
+  { to: '/dashboard', icon: 'layout-dashboard', label: 'Dashboard' },
+  { to: '/mailboxes', icon: 'mail', label: 'Mailboxes' },
+  { to: '/aliases', icon: 'forward', label: 'Aliases' },
+  { to: '/domains', icon: 'globe', label: 'My Domains' },
   { to: '/alias-domains', icon: 'arrow-left-right', label: 'Domain Aliases' },
-  { to: '/logs',          icon: 'history',          label: 'Logs' },
-  { to: '/maillog',       icon: 'mail',             label: 'MailLog' },
+  { to: '/logs', icon: 'history', label: 'Logs' },
+  { to: '/maillog', icon: 'mail', label: 'MailLog' },
 ]
 
 const settingsNav = [
-  { to: '/admins',     icon: 'users',        label: 'Administrators',  perm: 'admins:read' },
-  { to: '/roles',      icon: 'shield',       label: 'Roles',           perm: 'admins:write' },
+  { to: '/admins', icon: 'users', label: 'Administrators', perm: 'admins:read' },
+  { to: '/roles', icon: 'shield', label: 'Roles', perm: 'admins:write' },
   { to: '/transports', icon: 'arrow-up-down', label: 'Transport List', perm: 'transports:read' },
-  { to: '/apikeys',    icon: 'key',          label: 'API Keys',        perm: 'apikeys:read' },
+  { to: '/apikeys', icon: 'key', label: 'API Keys', perm: 'apikeys:read' },
+  { to: '/settings', icon: 'settings', label: 'Settings', perm: null, i18n: true },
 ]
 
 function isSettingsDisabled(item: { to: string; perm: string | null }) {
@@ -69,28 +75,28 @@ function isSettingsDisabled(item: { to: string; perm: string | null }) {
 <style scoped>
 .sidebar {
   grid-area: sidebar;
-  background: #ffffff;
-  border-right: 3px solid #1e293b;
+  background: var(--color-surface);
+  border-right: 3px solid var(--color-line);
   display: flex;
   flex-direction: column;
 }
 
 .sidebar-logo {
-  height: 56px;
-  padding: 0 16px;
+  height: 3.5rem;
+  padding: 0 1rem;
   display: flex;
   align-items: center;
-  gap: 12px;
-  border-bottom: 3px solid #1e293b;
+  gap: 0.75rem;
+  border-bottom: 3px solid var(--color-line);
   flex-shrink: 0;
 }
 
 .logo-icon {
-  width: 40px;
-  height: 40px;
-  background: var(--color-brand-primary);
-  border: 2px solid #1e293b;
-  box-shadow: 1px 1px 0 #1e293b;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: var(--color-action);
+  border: 2px solid var(--color-line);
+  box-shadow: 1px 1px 0 var(--color-shadow);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -98,76 +104,83 @@ function isSettingsDisabled(item: { to: string; perm: string | null }) {
 }
 
 .logo-text {
-  font-size: 17px;
+  font-size: 1.0625rem;
   white-space: nowrap;
   font-weight: 700;
   font-family: monospace;
-  color: var(--color-brand-text);
-  letter-spacing: -0.3px;
+  color: var(--color-fg);
+  letter-spacing: -0.01875rem;
 }
 
 .sidebar-nav {
   flex: 1;
-  padding-top: 8px;
+  padding-top: 0.5rem;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px 16px;
-  font-size: 14px;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
   font-weight: 700;
-  color: #374151;
+  color: var(--color-fg-2);
   text-decoration: none;
-  transition: background .12s, border-color .12s, color .12s;
+  transition:
+    background 0.12s,
+    border-color 0.12s,
+    color 0.12s;
   border: 2px solid transparent;
   border-left-width: 8px;
   border-right-width: 0;
 }
 
 .nav-icon {
-  color: #9ca3af;
+  color: var(--color-fg-subtle);
   flex-shrink: 0;
-  transition: color .12s;
+  transition: color 0.12s;
 }
 
 .nav-item:hover {
-  background: rgba(59, 130, 246, 0.1);
-  border-color: #1e293b;
+  background: color-mix(in srgb, var(--color-action) 10%, transparent);
+  border-color: var(--color-line);
   border-right-color: transparent !important;
-  color: #1e293b;
+  color: var(--color-fg);
 }
 
 .nav-item--disabled,
 .nav-item--disabled:hover {
   background: transparent;
   border-color: transparent;
-  color: #9ca3af;
+  color: var(--color-fg-subtle);
   cursor: not-allowed;
   opacity: 0.48;
 }
-.nav-item:hover :deep(.nav-icon) { color: var(--color-brand-primary); }
-.nav-item--disabled:hover :deep(.nav-icon) { color: #9ca3af; }
+.nav-item:hover :deep(.nav-icon) {
+  color: var(--color-action);
+}
+.nav-item--disabled:hover :deep(.nav-icon) {
+  color: var(--color-fg-subtle);
+}
 
 .nav-item--active {
-  background: #ebf2fe;
-  border-color: #1e293b;
+  background: var(--color-page);
+  border-color: var(--color-line);
   border-right-color: transparent !important;
-  color: #1e293b;
-  margin-right: -3px;
+  color: var(--color-fg);
+  margin-right: -0.1875rem;
 }
 
-
-.nav-item--active :deep(.nav-icon) { color: var(--color-brand-primary); }
+.nav-item--active :deep(.nav-icon) {
+  color: var(--color-action);
+}
 
 .nav-section-title {
-  padding: 16px 16px 6px;
-  font-size: 10px;
+  padding: 1rem 1rem 0.375rem;
+  font-size: 0.625rem;
   font-weight: 900;
-  letter-spacing: 1.5px;
+  letter-spacing: 0.09375rem;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: var(--color-fg-subtle);
 }
-
 </style>

@@ -1,14 +1,17 @@
 <template>
   <div v-if="modelValue" class="modal-overlay" @click.self="emit('update:modelValue', false)">
-    <div class="bg-white border-2 border-brand-text w-full max-w-2xl max-h-[90vh] flex flex-col">
+    <div class="bg-surface border-2 border-line w-full max-w-2xl max-h-[90vh] flex flex-col">
       <!-- Header -->
-      <div class="bg-brand-primary px-6 py-4 flex items-center justify-between flex-shrink-0">
-        <h3 class="text-lg font-mono font-black uppercase tracking-tight text-white flex items-center">
+      <div class="bg-action px-6 py-4 flex items-center justify-between flex-shrink-0">
+        <h3 class="text-lg font-mono font-black uppercase tracking-tight text-on-action flex items-center">
           <Icon name="edit" :size="20" class="mr-2" />
           EDIT DOMAIN
-          <span class="ml-2 text-gray-200 text-base font-mono">- {{ form.domain }}</span>
+          <span class="ml-2 text-on-action/80 text-base font-mono">- {{ form.domain }}</span>
         </h3>
-        <button @click="emit('update:modelValue', false)" class="text-white hover:text-gray-200 transition-colors">
+        <button
+          @click="emit('update:modelValue', false)"
+          class="text-on-action hover:text-on-action/80 transition-colors"
+        >
           <Icon name="x" :size="20" />
         </button>
       </div>
@@ -17,89 +20,155 @@
       <div class="overflow-y-auto flex-1">
         <form class="p-6 space-y-5" @submit.prevent="submit">
           <!-- Basic Information -->
-          <div class="border-2 border-brand-text p-4 space-y-4">
+          <div class="border-2 border-line p-4 space-y-4">
             <h4 class="text-sm font-mono font-black uppercase tracking-tight flex items-center">
               <Icon name="info" :size="16" class="mr-2" />
               BASIC INFORMATION
             </h4>
 
             <div>
-              <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">DOMAIN NAME</label>
-              <input :value="form.domain" readonly
-                class="w-full h-10 px-3 border-2 border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed font-medium transition-colors text-sm" />
-              <p class="text-[10px] text-gray-500 mt-1">Domain name cannot be changed after creation</p>
+              <label class="block text-xs font-black uppercase tracking-widest text-fg mb-1">DOMAIN NAME</label>
+              <input
+                :value="form.domain"
+                readonly
+                class="w-full h-10 px-3 border-2 border-field-line bg-surface-3 text-fg-muted cursor-not-allowed font-medium transition-colors text-sm"
+              />
+              <p class="text-[0.625rem] text-fg-muted mt-1">Domain name cannot be changed after creation</p>
             </div>
 
             <div>
-              <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">DESCRIPTION</label>
-              <input v-model="form.description" type="text" placeholder="Optional description for this domain"
-                class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm" />
+              <label class="block text-xs font-black uppercase tracking-widest text-fg mb-1">DESCRIPTION</label>
+              <input
+                v-model="form.description"
+                type="text"
+                placeholder="Optional description for this domain"
+                class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors text-sm"
+              />
             </div>
 
             <div class="flex items-center pt-1">
-              <input type="checkbox" id="dom-edit-active" v-model="form.active" class="w-5 h-5 border-2 border-brand-text cursor-pointer" />
+              <input
+                type="checkbox"
+                id="dom-edit-active"
+                v-model="form.active"
+                class="w-5 h-5 border-2 border-line cursor-pointer"
+              />
               <label for="dom-edit-active" class="ml-2 text-sm font-bold cursor-pointer">Active Domain</label>
             </div>
           </div>
 
           <!-- Advanced Settings: visible if domain_adset:read or domain_adset:write; editable only with domain_adset:write -->
-          <details v-if="canViewAdvanced" class="border-2 border-brand-text group" open>
-            <summary class="p-3 cursor-pointer font-bold uppercase tracking-tight text-sm flex items-center bg-gray-50 hover:bg-gray-100 transition-colors">
+          <details v-if="canViewAdvanced" class="border-2 border-line group" open>
+            <summary
+              class="p-3 cursor-pointer font-bold uppercase tracking-tight text-sm flex items-center bg-surface-2 hover:bg-surface-3 transition-colors"
+            >
               <Icon name="settings" :size="16" class="mr-2" />
               ADVANCED SETTINGS
               <Icon name="chevron-down" :size="16" class="ml-auto group-open:rotate-180 transition-transform" />
             </summary>
-            <div class="p-4 space-y-4 border-t-2 border-brand-text" :class="{ 'opacity-60 pointer-events-none': !canEditAdvanced }">
-              <div v-if="!canEditAdvanced" class="bg-amber-50 border border-amber-300 p-2 text-xs font-bold text-amber-700 flex items-center gap-2">
+            <div
+              class="p-4 space-y-4 border-t-2 border-line"
+              :class="{ 'opacity-60 pointer-events-none': !canEditAdvanced }"
+            >
+              <div
+                v-if="!canEditAdvanced"
+                class="bg-warn-soft border border-warn-line p-2 text-xs font-bold text-warn-strong flex items-center gap-2"
+              >
                 <Icon name="lock" :size="13" /> Read-only — you do not have permission to edit advanced settings.
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">ALIAS LIMIT</label>
-                  <input v-model.number="form.aliases" type="number" min="0" :disabled="!canEditAdvanced"
-                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm disabled:bg-gray-100 disabled:cursor-not-allowed" />
-                  <p class="text-[10px] text-gray-500 mt-1">Maximum number of aliases (0 = unlimited)</p>
+                  <label class="block text-xs font-black uppercase tracking-widest text-fg mb-1">ALIAS LIMIT</label>
+                  <input
+                    v-model.number="form.aliases"
+                    type="number"
+                    min="0"
+                    :disabled="!canEditAdvanced"
+                    class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors text-sm disabled:bg-surface-3 disabled:cursor-not-allowed"
+                  />
+                  <p class="text-[0.625rem] text-fg-muted mt-1">Maximum number of aliases (0 = unlimited)</p>
                 </div>
                 <div>
-                  <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">MAILBOX LIMIT</label>
-                  <input v-model.number="form.mailboxes" type="number" min="0" :disabled="!canEditAdvanced"
-                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm disabled:bg-gray-100 disabled:cursor-not-allowed" />
-                  <p class="text-[10px] text-gray-500 mt-1">Maximum number of mailboxes (0 = unlimited)</p>
+                  <label class="block text-xs font-black uppercase tracking-widest text-fg mb-1">MAILBOX LIMIT</label>
+                  <input
+                    v-model.number="form.mailboxes"
+                    type="number"
+                    min="0"
+                    :disabled="!canEditAdvanced"
+                    class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors text-sm disabled:bg-surface-3 disabled:cursor-not-allowed"
+                  />
+                  <p class="text-[0.625rem] text-fg-muted mt-1">Maximum number of mailboxes (0 = unlimited)</p>
                 </div>
                 <div>
-                  <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">QUOTA LIMIT (MB)</label>
-                  <input v-model.number="form.quotaMB" type="number" min="0" :disabled="!canEditAdvanced"
-                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm disabled:bg-gray-100 disabled:cursor-not-allowed" />
-                  <p class="text-[10px] text-gray-500 mt-1">Maximum quota limit in MB (0 = unlimited)</p>
+                  <label class="block text-xs font-black uppercase tracking-widest text-fg mb-1"
+                    >QUOTA LIMIT (MB)</label
+                  >
+                  <input
+                    v-model.number="form.quotaMB"
+                    type="number"
+                    min="0"
+                    :disabled="!canEditAdvanced"
+                    class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors text-sm disabled:bg-surface-3 disabled:cursor-not-allowed"
+                  />
+                  <p class="text-[0.625rem] text-fg-muted mt-1">Maximum quota limit in MB (0 = unlimited)</p>
                 </div>
                 <div>
-                  <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">PASSWORD EXPIRY (DAYS)</label>
-                  <input v-model.number="form.passwordExpiry" type="number" min="0" placeholder="365" :disabled="!canEditAdvanced"
-                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm disabled:bg-gray-100 disabled:cursor-not-allowed" />
-                  <p class="text-[10px] text-gray-500 mt-1">Password expiry in days (empty = never)</p>
+                  <label class="block text-xs font-black uppercase tracking-widest text-fg mb-1"
+                    >PASSWORD EXPIRY (DAYS)</label
+                  >
+                  <input
+                    v-model.number="form.passwordExpiry"
+                    type="number"
+                    min="0"
+                    placeholder="365"
+                    :disabled="!canEditAdvanced"
+                    class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors text-sm disabled:bg-surface-3 disabled:cursor-not-allowed"
+                  />
+                  <p class="text-[0.625rem] text-fg-muted mt-1">Password expiry in days (empty = never)</p>
                 </div>
               </div>
 
               <div>
-                <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-1">TRANSPORT</label>
+                <label class="block text-xs font-black uppercase tracking-widest text-fg mb-1">TRANSPORT</label>
                 <div class="relative">
-                  <select v-model="form.transport" :disabled="!canEditAdvanced"
-                    class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm appearance-none bg-white pr-10 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                    :class="canEditAdvanced ? 'cursor-pointer' : 'cursor-not-allowed'">
+                  <select
+                    v-model="form.transport"
+                    :disabled="!canEditAdvanced"
+                    class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors text-sm appearance-none bg-surface pr-10 disabled:bg-surface-3 disabled:cursor-not-allowed"
+                    :class="canEditAdvanced ? 'cursor-pointer' : 'cursor-not-allowed'"
+                  >
                     <option value="virtual">virtual</option>
-                    <option v-for="t in transports" :key="t.id" :value="t.transport">{{ t.domain }} → {{ t.transport }}</option>
+                    <option v-for="t in transports" :key="t.id" :value="t.transport">
+                      {{ t.domain }} → {{ t.transport }}
+                    </option>
                   </select>
-                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-brand-text border-l-2 border-brand-text">
+                  <div
+                    class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-fg border-l-2 border-line"
+                  >
                     <Icon name="chevron-down" :size="16" />
                   </div>
                 </div>
-                <p class="text-[10px] text-gray-500 mt-1">Select the mail transport for this domain</p>
+                <p class="text-[0.625rem] text-fg-muted mt-1">Select the mail transport for this domain</p>
               </div>
 
               <div class="flex items-center pt-2">
-                <input type="checkbox" id="dom-edit-backupmx" v-model="form.backupmx" :disabled="!canEditAdvanced" class="w-5 h-5 border-2 border-brand-text" :class="canEditAdvanced ? 'cursor-pointer' : 'cursor-not-allowed'" />
-                <label for="dom-edit-backupmx" class="ml-2 text-sm font-bold" :class="canEditAdvanced ? 'cursor-pointer' : 'cursor-not-allowed'">Enable Backup MX</label>
-                <span class="ml-auto text-[10px] text-gray-500 hidden sm:block">Use this server as a backup mail exchanger</span>
+                <input
+                  type="checkbox"
+                  id="dom-edit-backupmx"
+                  v-model="form.backupmx"
+                  :disabled="!canEditAdvanced"
+                  class="w-5 h-5 border-2 border-line"
+                  :class="canEditAdvanced ? 'cursor-pointer' : 'cursor-not-allowed'"
+                />
+                <label
+                  for="dom-edit-backupmx"
+                  class="ml-2 text-sm font-bold"
+                  :class="canEditAdvanced ? 'cursor-pointer' : 'cursor-not-allowed'"
+                  >Enable Backup MX</label
+                >
+                <span class="ml-auto text-[0.625rem] text-fg-muted hidden sm:block"
+                  >Use this server as a backup mail exchanger</span
+                >
               </div>
             </div>
           </details>
@@ -107,14 +176,21 @@
       </div>
 
       <!-- Footer -->
-      <div class="bg-gray-50 px-6 py-4 flex items-center justify-end space-x-3 border-t-2 border-brand-text flex-shrink-0">
-        <button type="button" @click="emit('update:modelValue', false)"
-          class="bg-white hover:bg-gray-100 text-brand-text border-2 border-brand-text font-black px-6 py-2.5 shadow-[2px_2px_0px_#1E293B] hover:translate-y-px hover:shadow-[1px_1px_0px_#1E293B] active:translate-y-0.5 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center">
+      <div class="bg-surface-2 px-6 py-4 flex items-center justify-end space-x-3 border-t-2 border-line flex-shrink-0">
+        <button
+          type="button"
+          @click="emit('update:modelValue', false)"
+          class="bg-surface hover:bg-surface-3 text-fg border-2 border-line font-black px-6 py-2.5 shadow-[2px_2px_0px_var(--color-shadow)] hover:translate-y-px hover:shadow-[1px_1px_0px_var(--color-shadow)] active:translate-y-0.5 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center"
+        >
           <Icon name="x" :size="16" class="mr-2" />
           CANCEL
         </button>
-        <button type="button" :disabled="saving" @click="submit"
-          class="bg-brand-primary hover:bg-white hover:text-brand-primary text-white border-2 border-brand-text font-black px-6 py-2.5 shadow-[3px_3px_0px_#1E293B] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_#1E293B] active:translate-x-0 active:translate-y-0 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center disabled:opacity-60">
+        <button
+          type="button"
+          :disabled="saving"
+          @click="submit"
+          class="bg-action hover:bg-surface hover:text-action text-on-action border-2 border-line font-black px-6 py-2.5 shadow-[3px_3px_0px_var(--color-shadow)] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_var(--color-shadow)] active:translate-x-0 active:translate-y-0 active:shadow-none transition-all uppercase tracking-widest text-sm flex items-center disabled:opacity-60"
+        >
           <Icon name="save" :size="16" class="mr-2" />
           {{ saving ? 'SAVING...' : 'UPDATE DOMAIN' }}
         </button>
@@ -126,7 +202,12 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 
-interface Transport { id: number; domain: string; transport: string; active: boolean }
+interface Transport {
+  id: number
+  domain: string
+  transport: string
+  active: boolean
+}
 
 interface DomainEditForm {
   domain: string
@@ -151,27 +232,39 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:modelValue': [val: boolean]
-  submit: [payload: {
-    description: string
-    aliases: number
-    mailboxes: number
-    quota: number
-    transport: string
-    backupmx: boolean
-    active: boolean
-    password_expiry: number | null
-  }]
+  submit: [
+    payload: {
+      description: string
+      aliases: number
+      mailboxes: number
+      quota: number
+      transport: string
+      backupmx: boolean
+      active: boolean
+      password_expiry: number | null
+    },
+  ]
 }>()
 
 const form = ref<DomainEditForm>({
-  domain: '', description: '', aliases: 10, mailboxes: 10,
-  quotaMB: 2048, passwordExpiry: null,
-  transport: 'virtual', active: true, backupmx: false,
+  domain: '',
+  description: '',
+  aliases: 10,
+  mailboxes: 10,
+  quotaMB: 2048,
+  passwordExpiry: null,
+  transport: 'virtual',
+  active: true,
+  backupmx: false,
 })
 
-watch(() => props.initialData, (data) => {
-  if (data) form.value = { ...data }
-}, { immediate: true })
+watch(
+  () => props.initialData,
+  (data) => {
+    if (data) form.value = { ...data }
+  },
+  { immediate: true },
+)
 
 function submit() {
   emit('submit', {

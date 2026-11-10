@@ -1,0 +1,47 @@
+/* Ported from jniltinho/ad-manager frontend/src/themes (high-contrast): values of its role contract mapped onto
+ * ours (see ../style.css). Only role values; layout stays the same in every theme. */
+
+/* High contrast (dark) */
+[data-theme='high-contrast'] {
+  color-scheme: dark;
+  --color-page: #000000;
+  --color-login-page: #000000;
+  --color-page-dots: rgba(255, 255, 255, 0.18);
+  --color-surface: #000000;
+  --color-surface-2: #000000;
+  --color-surface-3: #1a1a1a;
+  --color-header: #000000;
+  --color-sidebar: #000000;
+  --color-backdrop: rgba(0, 0, 0, 0.75);
+  --color-fg: #ffffff;
+  --color-fg-2: #ffffff;
+  --color-fg-muted: #e6e6e6;
+  --color-fg-subtle: #e6e6e6;
+  --color-line: #ffffff;
+  --color-line-soft: #808080;
+  --color-field-line: #bfbfbf;
+  --color-strong-fill: #ffff00;
+  --color-action-hover: #ffff99;
+  --color-action-strong: #ffff00;
+  --color-action-soft: #262626;
+  --color-action-line-soft: #ffff00;
+  --color-on-action: #000000;
+  --color-accent-soft: #1a1a1a;
+  --color-err: #ffa3a3;
+  --color-danger-strong: #ffa3a3;
+  --color-err-soft: #2a0000;
+  --color-err-line-soft: #ff8a8a;
+  --color-ok-strong: #5cff5c;
+  --color-ok-soft: #002a00;
+  --color-warn-strong: #ffc04d;
+  --color-warn-soft: #2a1d00;
+  --color-warn-line: #ffc04d;
+  --color-action: #ffff00;
+  --color-accent: #ffff00;
+  --color-accent-strong: #ffff00;
+  --color-danger: #ff8a8a;
+  --color-ok: #5cff5c;
+  --color-warn: #ffc04d;
+  --color-shadow: color-mix(in srgb, #ffff00 35%, transparent);
+  --font-sans: 'Inter', Tahoma, Verdana, Arial, sans-serif;
+}

@@ -1,0 +1,48 @@
+/* Ported from jniltinho/ad-manager frontend/src/themes (matrix): values of its role contract mapped onto
+ * ours (see ../style.css). Only role values; layout stays the same in every theme. */
+
+/* Matrix (dark) */
+[data-theme='matrix'] {
+  color-scheme: dark;
+  --color-page: #010502;
+  --color-login-page: #010502;
+  --color-page-dots: rgba(0, 255, 65, 0.16);
+  --color-surface: #07130b;
+  --color-surface-2: #0a1a0f;
+  --color-surface-3: #0d2213;
+  --color-header: #07130b;
+  --color-sidebar: #07130b;
+  --color-backdrop: rgba(0, 0, 0, 0.7);
+  --color-fg: #a8f0b8;
+  --color-fg-2: #a8f0b8;
+  --color-fg-muted: #5fc777;
+  --color-fg-subtle: #5fc777;
+  --color-line: #3c9c55;
+  --color-line-soft: #123019;
+  --color-field-line: #1c4a28;
+  --color-strong-fill: #00ff41;
+  --color-action-hover: #5dff85;
+  --color-action-strong: #39ff6a;
+  --color-action-soft: #10301a;
+  --color-action-line-soft: #00ff41;
+  --color-on-action: #010502;
+  --color-accent-soft: #0d2213;
+  --color-err: #ff7a7a;
+  --color-danger-strong: #ff7a7a;
+  --color-err-soft: #2a0d0d;
+  --color-err-line-soft: #ff4d4d;
+  --color-ok-strong: #6dff8f;
+  --color-ok-soft: #0c2a14;
+  --color-warn-strong: #ffd23f;
+  --color-warn-soft: #2a240a;
+  --color-warn-line: #ffd23f;
+  --color-action: #00e03a;
+  --color-accent: #00ff41;
+  --color-accent-strong: #00ff41;
+  --color-danger: #ff4d4d;
+  --color-ok: #00e03a;
+  --color-warn: #ffd23f;
+  --color-shadow: color-mix(in srgb, #00ff41 35%, transparent);
+  --font-sans:
+    'Cascadia Mono', 'JetBrains Mono', 'DejaVu Sans Mono', Consolas, 'Liberation Mono', 'Courier New', monospace;
+}

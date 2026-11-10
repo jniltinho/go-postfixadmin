@@ -4,7 +4,20 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
     <title>Go-PostfixAdmin</title>
+    <script>
+      // apply the saved theme before the first paint (the theme store validates it once the app loads)
+      try {
+        var t = localStorage.getItem('theme'),
+          s = localStorage.getItem('theme-scheme')
+        if (t) document.documentElement.dataset.theme = t
+        if (s) {
+          document.documentElement.style.colorScheme = s
+          document.querySelector('meta[name="color-scheme"]').content = s
+        }
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="app"></div>

@@ -1,43 +1,72 @@
 <template>
-  <div class="user-portal-layout dot-pattern min-h-screen flex flex-col bg-brand-background text-brand-text">
+  <div class="user-portal-layout dot-pattern min-h-screen flex flex-col bg-login-page text-fg">
     <!-- Top Nav Bar -->
-    <header class="h-14 bg-white border-b-2 border-brand-text flex items-center justify-between px-8 z-10">
+    <header class="h-14 bg-surface border-b-2 border-line flex items-center justify-between px-8 z-10">
       <div class="flex items-center">
-        <a href="/users/dashboard"
-          class="w-10 h-10 bg-brand-secondary border-2 border-brand-text neo-shadow-subtle flex items-center justify-center mr-3 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#1E293B] transition-all cursor-pointer">
-          <Icon name="user" class="text-white" :size="20" />
+        <a
+          href="/users/dashboard"
+          class="w-10 h-10 bg-accent border-2 border-line neo-shadow-subtle flex items-center justify-center mr-3 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_var(--color-shadow)] transition-all cursor-pointer"
+        >
+          <Icon name="user" class="text-on-action" :size="20" />
         </a>
-        <a href="/users/dashboard"
-          class="text-xl font-mono font-bold tracking-tight hover:text-brand-primary transition-colors">{{ t.userPortal }}</a>
+        <a
+          href="/users/dashboard"
+          class="text-xl font-mono font-bold tracking-tight hover:text-action transition-colors"
+          >{{ t.userPortal }}</a
+        >
       </div>
 
       <div class="flex items-center space-x-4">
-        <!-- Language Switcher -->
-        <div class="flex items-center space-x-2 mr-2">
-          <button
-            v-for="lang in ['PT', 'EN', 'ES']"
-            :key="lang"
-            class="px-2 py-1 text-[10px] font-black border transition-all uppercase tracking-widest cursor-pointer"
-            :class="activeLang === lang ? 'bg-brand-secondary text-white border-brand-text shadow-[1px_1px_0px_#1E293B]' : 'bg-white text-gray-400 border-gray-200 hover:border-brand-text hover:text-brand-text'"
-            @click="selectLanguage(lang as 'PT' | 'EN' | 'ES')"
+        <label class="flex items-center gap-1 text-[0.625rem] font-black uppercase tracking-widest text-fg-muted">
+          <Icon name="palette" :size="14" />
+          <span class="sr-only">{{ t.theme }}</span>
+          <select
+            :value="theme.current"
+            :aria-label="t.theme"
+            class="bg-surface text-fg border border-line-soft hover:border-line px-1 py-0.5 text-[0.6875rem] font-bold normal-case tracking-normal"
+            @change="theme.select(($event.target as HTMLSelectElement).value)"
           >
-            {{ lang }}
-          </button>
-        </div>
+            <option v-for="th in themes" :key="th.id" :value="th.id">
+              {{ themeLabel(th.label, activeLang as Lang) }}
+            </option>
+          </select>
+        </label>
+
+        <!-- Language (the portal has no Settings page) -->
+        <label class="flex items-center gap-1 text-[0.625rem] font-black uppercase tracking-widest text-fg-muted">
+          <Icon name="languages" :size="14" />
+          <select
+            :value="activeLang"
+            :aria-label="t.language"
+            class="bg-surface text-fg border border-line-soft hover:border-line px-1 py-0.5 text-[0.6875rem] font-bold normal-case tracking-normal"
+            @change="selectLanguage(($event.target as HTMLSelectElement).value as 'PT' | 'EN' | 'ES')"
+          >
+            <option value="EN">English</option>
+            <option value="PT">Português</option>
+            <option value="ES">Español</option>
+          </select>
+        </label>
 
         <div class="flex items-center space-x-3">
           <div class="text-right">
-            <p class="text-xs font-black uppercase text-brand-text tracking-tight">{{ auth.user?.username?.toUpperCase() }}</p>
-            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mt-0.5 font-mono">{{ t.userRole }}</p>
+            <p class="text-xs font-black uppercase text-fg tracking-tight">
+              {{ auth.user?.username?.toUpperCase() }}
+            </p>
+            <p class="text-[0.625rem] font-bold text-fg-subtle uppercase tracking-widest leading-none mt-0.5 font-mono">
+              {{ t.userRole }}
+            </p>
           </div>
           <div
-            class="w-10 h-10 border-2 border-brand-text bg-brand-secondary flex items-center justify-center text-white font-black shadow-subtle shrink-0">
+            class="w-10 h-10 border-2 border-line bg-accent flex items-center justify-center text-on-action font-black shadow-subtle shrink-0"
+          >
             <Icon name="user" :size="20" />
           </div>
         </div>
-        <div class="h-8 w-1 bg-brand-text mx-2"></div>
-        <button @click="handleLogout"
-          class="flex items-center py-2 px-4 border-2 border-transparent font-bold text-red-500 hover:border-red-500 hover:bg-red-50 transition-all cursor-pointer">
+        <div class="h-8 w-1 bg-strong-fill mx-2"></div>
+        <button
+          @click="handleLogout"
+          class="flex items-center py-2 px-4 border-2 border-transparent font-bold text-err hover:border-err hover:bg-err-soft transition-all cursor-pointer"
+        >
           <Icon name="log-out" :size="20" class="mr-2" />
           <span>{{ t.logout }}</span>
         </button>
@@ -46,29 +75,31 @@
 
     <!-- Main Content Area -->
     <main class="flex-1 px-12 pt-6 pb-12 overflow-y-auto w-full">
-      <div class="max-w-6xl mx-auto">
+      <div class="max-w-[max(72rem,60vw)] mx-auto">
         <!-- Title Block -->
         <div class="mb-10 text-left">
-          <h2 class="text-4xl font-mono font-black uppercase tracking-tight text-brand-text mb-2">
+          <h2 class="text-4xl font-mono font-black uppercase tracking-tight text-fg mb-2">
             {{ t.dashboardTitle }}
           </h2>
-          <p class="text-xs font-bold uppercase tracking-widest text-gray-400">
+          <p class="text-xs font-bold uppercase tracking-widest text-fg-subtle">
             {{ t.dashboardDesc }}
           </p>
         </div>
 
         <!-- User Info Card -->
-        <div class="bg-white border-2 border-brand-text neo-shadow px-8 py-5 mb-8">
+        <div class="bg-surface border-2 border-line neo-shadow px-8 py-5 mb-8">
           <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div class="flex items-center">
-              <div class="w-16 h-16 bg-brand-secondary border-2 border-brand-text flex items-center justify-center text-white mr-6 shrink-0">
+              <div
+                class="w-16 h-16 bg-accent border-2 border-line flex items-center justify-center text-on-action mr-6 shrink-0"
+              >
                 <Icon name="user" :size="32" />
               </div>
               <div>
-                <h3 class="text-2xl font-mono font-black tracking-tight text-brand-text">
+                <h3 class="text-2xl font-mono font-black tracking-tight text-fg">
                   {{ userProfile.name || getFallbackName(auth.user?.username) }}
                 </h3>
-                <p class="text-sm font-bold text-gray-500 font-mono">
+                <p class="text-sm font-bold text-fg-muted font-mono">
                   {{ userProfile.username || auth.user?.username }}
                 </p>
               </div>
@@ -82,35 +113,33 @@
           </div>
         </div>
 
-
-
         <!-- Settings Cards Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <!-- Configure Forwarding Card -->
-          <div class="bg-white border-2 border-brand-text neo-shadow p-8 h-full flex flex-col">
-            <h3 class="text-xl font-mono font-black uppercase tracking-tight text-brand-text mb-6 flex items-center">
-              <Icon name="corner-up-right" :size="20" class="mr-2 text-brand-text" />
+          <div class="bg-surface border-2 border-line neo-shadow p-8 h-full flex flex-col">
+            <h3 class="text-xl font-mono font-black uppercase tracking-tight text-fg mb-6 flex items-center">
+              <Icon name="corner-up-right" :size="20" class="mr-2 text-fg" />
               {{ t.forwardingTitle }}
             </h3>
-            <p class="text-xs text-gray-500 mb-6 leading-relaxed">
+            <p class="text-xs text-fg-muted mb-6 leading-relaxed">
               {{ t.forwardingDesc }}
             </p>
 
             <form @submit.prevent="saveForwarding" class="space-y-6 flex-1 flex flex-col justify-between">
               <div class="form-group flex-1">
-                <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
+                <label class="block text-xs font-black uppercase tracking-widest text-fg mb-2">
                   {{ t.forwardTo }}
                 </label>
                 <textarea
                   v-model="forwardingForm.forwarding"
                   rows="4"
-                  class="w-full px-4 py-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors resize-y text-sm bg-white"
+                  class="w-full px-4 py-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors resize-y text-sm bg-surface"
                   :placeholder="t.forwardToPlaceholder"
                   :disabled="savingForwarding"
                 ></textarea>
-                <p class="text-xs text-gray-500 leading-normal mt-2">
+                <p class="text-xs text-fg-muted leading-normal mt-2">
                   {{ t.forwardHelp1 }}
-                  <br>{{ t.forwardHelp2 }}
+                  <br />{{ t.forwardHelp2 }}
                 </p>
               </div>
 
@@ -122,12 +151,12 @@
           </div>
 
           <!-- Change Password Card -->
-          <div class="bg-white border-2 border-brand-text neo-shadow p-8 h-full flex flex-col">
-            <h3 class="text-xl font-mono font-black uppercase tracking-tight text-brand-text mb-6 flex items-center">
-              <Icon name="key" :size="20" class="mr-2 text-brand-text" />
+          <div class="bg-surface border-2 border-line neo-shadow p-8 h-full flex flex-col">
+            <h3 class="text-xl font-mono font-black uppercase tracking-tight text-fg mb-6 flex items-center">
+              <Icon name="key" :size="20" class="mr-2 text-fg" />
               {{ t.passwordTitle }}
             </h3>
-            <p class="text-xs text-gray-500 mb-6 leading-relaxed">
+            <p class="text-xs text-fg-muted mb-6 leading-relaxed">
               {{ t.passwordDesc }}
             </p>
 
@@ -135,11 +164,13 @@
               <div class="space-y-4">
                 <!-- Current Password -->
                 <div class="form-group">
-                  <label class="block text-xs font-black uppercase tracking-widest text-brand-text mb-2">
-                    {{ t.currentPassword }} <span class="text-red-500">*</span>
+                  <label class="block text-xs font-black uppercase tracking-widest text-fg mb-2">
+                    {{ t.currentPassword }} <span class="text-err">*</span>
                   </label>
                   <div class="relative group">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-brand-primary transition-colors">
+                    <div
+                      class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-fg-subtle group-focus-within:text-action transition-colors"
+                    >
                       <Icon name="lock" :size="20" />
                     </div>
                     <input
@@ -147,7 +178,7 @@
                       type="password"
                       required
                       :placeholder="t.placeholderCurrentPassword"
-                      class="w-full pl-11 pr-4 py-2 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors h-10 text-sm bg-white"
+                      class="w-full pl-11 pr-4 py-2 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors h-10 text-sm bg-surface"
                       :disabled="savingPassword"
                     />
                   </div>
@@ -157,13 +188,13 @@
                 <div class="mb-4">
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
                     <div>
-                      <label class="block text-xs font-black uppercase tracking-widest text-brand-text">
-                        {{ t.newPassword }} <span class="text-red-500">*</span>
+                      <label class="block text-xs font-black uppercase tracking-widest text-fg">
+                        {{ t.newPassword }} <span class="text-err">*</span>
                       </label>
                     </div>
                     <div>
-                      <label class="block text-xs font-black uppercase tracking-widest text-brand-text">
-                        {{ t.confirmPassword }} <span class="text-red-500">*</span>
+                      <label class="block text-xs font-black uppercase tracking-widest text-fg">
+                        {{ t.confirmPassword }} <span class="text-err">*</span>
                       </label>
                     </div>
                   </div>
@@ -175,10 +206,14 @@
                         :type="showNewPassword ? 'text' : 'password'"
                         required
                         :placeholder="t.placeholderNewPassword"
-                        class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm pr-10 bg-white"
+                        class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors text-sm pr-10 bg-surface"
                         :disabled="savingPassword"
                       />
-                      <button type="button" @click="showNewPassword = !showNewPassword" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary transition-colors cursor-pointer bg-none border-none p-1 flex items-center">
+                      <button
+                        type="button"
+                        @click="showNewPassword = !showNewPassword"
+                        class="absolute right-2 top-1/2 -translate-y-1/2 text-fg-muted hover:text-action transition-colors cursor-pointer bg-none border-none p-1 flex items-center"
+                      >
                         <Icon :name="showNewPassword ? 'eye-off' : 'eye'" :size="16" />
                       </button>
                     </div>
@@ -189,15 +224,24 @@
                         :type="showConfirmPassword ? 'text' : 'password'"
                         required
                         :placeholder="t.placeholderConfirmPassword"
-                        class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium transition-colors text-sm pr-10 bg-white"
+                        class="w-full h-10 px-3 border-2 border-line focus:border-action focus:outline-none font-medium transition-colors text-sm pr-10 bg-surface"
                         :disabled="savingPassword"
                       />
-                      <button type="button" @click="showConfirmPassword = !showConfirmPassword" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-brand-primary transition-colors cursor-pointer bg-none border-none p-1 flex items-center">
+                      <button
+                        type="button"
+                        @click="showConfirmPassword = !showConfirmPassword"
+                        class="absolute right-2 top-1/2 -translate-y-1/2 text-fg-muted hover:text-action transition-colors cursor-pointer bg-none border-none p-1 flex items-center"
+                      >
                         <Icon :name="showConfirmPassword ? 'eye-off' : 'eye'" :size="16" />
                       </button>
                     </div>
 
-                    <button type="button" @click="generateRandomPassword" class="bg-brand-secondary hover:bg-white hover:text-brand-secondary text-white text-xs font-black px-3 h-10 border-2 border-brand-text cursor-pointer uppercase tracking-widest flex items-center justify-center gap-1 shrink-0 transition-colors shadow-[1px_1px_0px_#1E293B]" title="Generate password">
+                    <button
+                      type="button"
+                      @click="generateRandomPassword"
+                      class="bg-accent hover:bg-surface hover:text-accent text-on-action text-xs font-black px-3 h-10 border-2 border-line cursor-pointer uppercase tracking-widest flex items-center justify-center gap-1 shrink-0 transition-colors shadow-[1px_1px_0px_var(--color-shadow)]"
+                      title="Generate password"
+                    >
                       <Icon name="wand-2" :size="14" />
                     </button>
                   </div>
@@ -206,11 +250,18 @@
                 <!-- Password Strength Meter -->
                 <div v-if="passwordForm.new_password" class="mb-4">
                   <div class="flex items-center justify-between mb-1">
-                    <span class="text-xs font-black uppercase tracking-widest text-brand-text">{{ t.strength }}</span>
-                    <span class="text-xs font-bold uppercase tracking-wider font-mono" :style="{ color: strengthInfo.color }">{{ strengthInfo.text }}</span>
+                    <span class="text-xs font-black uppercase tracking-widest text-fg">{{ t.strength }}</span>
+                    <span
+                      class="text-xs font-bold uppercase tracking-wider font-mono"
+                      :style="{ color: strengthInfo.color }"
+                      >{{ strengthInfo.text }}</span
+                    >
                   </div>
-                  <div class="h-2 bg-gray-200 border border-brand-text overflow-hidden">
-                    <div class="h-full transition-all duration-300" :style="{ width: strengthInfo.percent, background: strengthInfo.color }"></div>
+                  <div class="h-2 bg-line-soft border border-line overflow-hidden">
+                    <div
+                      class="h-full transition-all duration-300"
+                      :style="{ width: strengthInfo.percent, background: strengthInfo.color }"
+                    ></div>
                   </div>
                 </div>
               </div>
@@ -226,9 +277,9 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white border-t-2 border-brand-text mt-auto">
+    <footer class="bg-surface border-t-2 border-line mt-auto">
       <div class="py-4 px-8 text-center">
-        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+        <p class="text-[0.625rem] text-fg-subtle font-bold uppercase tracking-widest">
           &copy; {{ currentYear }} GO-POSTFIXADMIN. {{ appVersion }}
         </p>
       </div>
@@ -236,14 +287,14 @@
 
     <!-- Auto-Reply Vacation Modal -->
     <div v-if="showVacationModal" class="vacation-modal-backdrop flex items-center justify-center px-4">
-      <div class="vacation-modal-box bg-white border-2 border-brand-text w-full max-w-2xl max-h-[90vh] flex flex-col">
+      <div class="vacation-modal-box bg-surface border-2 border-line w-full max-w-2xl max-h-[90vh] flex flex-col">
         <!-- Modal Header -->
-        <header class="bg-brand-secondary px-6 py-4 flex items-center justify-between text-white border-b-2 border-brand-text">
+        <header class="bg-accent px-6 py-4 flex items-center justify-between text-on-action border-b-2 border-line">
           <h3 class="text-lg font-mono font-black uppercase tracking-tight flex items-center">
             <Icon name="plane-takeoff" :size="20" class="mr-2" />
             {{ t.vacationTitle }}
           </h3>
-          <button @click="showVacationModal = false" class="text-white hover:text-gray-200 transition-colors">
+          <button @click="showVacationModal = false" class="text-on-action hover:text-on-action/80 transition-colors">
             <Icon name="x" :size="20" />
           </button>
         </header>
@@ -251,50 +302,53 @@
         <!-- Scrollable Body -->
         <div class="overflow-y-auto flex-1 p-6 space-y-5">
           <!-- Dates Card -->
-          <div class="border-2 border-brand-text p-4 space-y-4">
-            <h4 class="text-xs font-mono font-black uppercase tracking-widest text-brand-text flex items-center">
+          <div class="border-2 border-line p-4 space-y-4">
+            <h4 class="text-xs font-mono font-black uppercase tracking-widest text-fg flex items-center">
               <Icon name="calendar" :size="14" class="mr-1.5" />
               {{ t.startDate }} / {{ t.endDate }}
             </h4>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label class="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1">
+                <label class="block text-[0.625rem] font-black uppercase tracking-widest text-fg-muted mb-1">
                   {{ t.startDate }}
                 </label>
                 <input
                   v-model="vacationForm.activefrom"
                   type="datetime-local"
                   required
-                  class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-secondary focus:outline-none font-medium transition-colors text-sm bg-white"
+                  class="w-full h-10 px-3 border-2 border-line focus:border-accent focus:outline-none font-medium transition-colors text-sm bg-surface"
                 />
               </div>
               <div>
-                <label class="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1">
+                <label class="block text-[0.625rem] font-black uppercase tracking-widest text-fg-muted mb-1">
                   {{ t.endDate }}
                 </label>
                 <input
                   v-model="vacationForm.activeuntil"
                   type="datetime-local"
                   required
-                  class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-secondary focus:outline-none font-medium transition-colors text-sm bg-white"
+                  class="w-full h-10 px-3 border-2 border-line focus:border-accent focus:outline-none font-medium transition-colors text-sm bg-surface"
                 />
               </div>
             </div>
           </div>
 
           <!-- Message Config Card -->
-          <div class="border-2 border-brand-text p-4 space-y-4">
-            <h4 class="text-xs font-mono font-black uppercase tracking-widest text-brand-text flex items-center">
+          <div class="border-2 border-line p-4 space-y-4">
+            <h4 class="text-xs font-mono font-black uppercase tracking-widest text-fg flex items-center">
               <Icon name="message-square-dashed" :size="14" class="mr-1.5" />
               {{ t.messageBody }}
             </h4>
 
             <!-- Reply Interval -->
             <div>
-              <label class="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1">
+              <label class="block text-[0.625rem] font-black uppercase tracking-widest text-fg-muted mb-1">
                 {{ t.replyOption }}
               </label>
-              <select v-model="vacationForm.interval_time" class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-secondary focus:outline-none font-medium transition-colors appearance-none bg-white text-sm cursor-pointer">
+              <select
+                v-model="vacationForm.interval_time"
+                class="w-full h-10 px-3 border-2 border-line focus:border-accent focus:outline-none font-medium transition-colors appearance-none bg-surface text-sm cursor-pointer"
+              >
                 <option :value="0">{{ t.replyOnce }}</option>
                 <option :value="86400">{{ t.replyEveryDay }}</option>
                 <option :value="604800">{{ t.replyEvery7Days }}</option>
@@ -303,27 +357,27 @@
 
             <!-- Subject -->
             <div>
-              <label class="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1">
+              <label class="block text-[0.625rem] font-black uppercase tracking-widest text-fg-muted mb-1">
                 {{ t.subject }}
               </label>
               <input
                 v-model="vacationForm.subject"
                 type="text"
                 required
-                class="w-full h-10 px-3 border-2 border-brand-text focus:border-brand-secondary focus:outline-none font-medium transition-colors text-sm bg-white"
+                class="w-full h-10 px-3 border-2 border-line focus:border-accent focus:outline-none font-medium transition-colors text-sm bg-surface"
               />
             </div>
 
             <!-- Message Body -->
             <div>
-              <label class="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1">
+              <label class="block text-[0.625rem] font-black uppercase tracking-widest text-fg-muted mb-1">
                 {{ t.messageBody }}
               </label>
               <textarea
                 v-model="vacationForm.body"
                 rows="4"
                 required
-                class="w-full px-3 py-2 border-2 border-brand-text focus:border-brand-secondary focus:outline-none font-medium transition-colors resize-y text-sm bg-white"
+                class="w-full px-3 py-2 border-2 border-line focus:border-accent focus:outline-none font-medium transition-colors resize-y text-sm bg-surface"
               ></textarea>
             </div>
 
@@ -335,7 +389,7 @@
                 id="active-chk"
                 class="w-4 h-4 cursor-pointer accent-brand-secondary"
               />
-              <label for="active-chk" class="text-xs font-black text-brand-text cursor-pointer">
+              <label for="active-chk" class="text-xs font-black text-fg cursor-pointer">
                 {{ t.active }}
               </label>
             </div>
@@ -343,7 +397,7 @@
         </div>
 
         <!-- Footer actions -->
-        <footer class="border-t-2 border-brand-text px-6 py-4 flex items-center justify-end gap-3 shrink-0">
+        <footer class="border-t-2 border-line px-6 py-4 flex items-center justify-end gap-3 shrink-0">
           <button @click="showVacationModal = false" class="btn-modal-cancel">
             <Icon name="x" :size="14" class="mr-1.5" />
             <span>{{ t.cancel }}</span>
@@ -361,12 +415,18 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '../../stores/auth'
+import { useThemeStore } from '../../stores/theme'
+import { themes } from '../../themes'
+import { themeLabel } from '../settings/i18n'
+import { useLangStore, type Lang } from '../../stores/lang'
 import { useRouter } from 'vue-router'
 import { useToastStore } from '../../stores/toast'
 import { calcStrength, generatePassword as fillPassword } from '../../utils/password'
 import http from '../../utils/http'
 
 const auth = useAuthStore()
+const theme = useThemeStore()
+const langStore = useLangStore()
 const router = useRouter()
 const toast = useToastStore()
 
@@ -384,7 +444,7 @@ const vacationForm = ref({
   body: 'I will be out of the office from <date> to <date>. In case of urgency, please contact <contact person>.',
   activefrom: '',
   activeuntil: '',
-  interval_time: 0
+  interval_time: 0,
 })
 
 const showNewPassword = ref(false)
@@ -393,8 +453,6 @@ const showConfirmPassword = ref(false)
 const savingForwarding = ref(false)
 const savingPassword = ref(false)
 const savingVacation = ref(false)
-
-
 
 function getFallbackName(email?: string) {
   if (!email) return 'User'
@@ -405,6 +463,8 @@ function getFallbackName(email?: string) {
 const translations = {
   EN: {
     userPortal: 'User Portal',
+    theme: 'Theme',
+    language: 'Language',
     userRole: 'USER',
     dashboardTitle: 'MY ACCOUNT',
     dashboardDesc: 'MANAGE YOUR PASSWORD AND FORWARDING SETTINGS.',
@@ -443,10 +503,12 @@ const translations = {
     successForwarding: 'Forwarding updated successfully',
     successPassword: 'Password updated successfully',
     successVacation: 'Auto-reply updated successfully',
-    logout: 'Logout'
+    logout: 'Logout',
   },
   PT: {
     userPortal: 'Portal do Usuário',
+    theme: 'Tema',
+    language: 'Idioma',
     userRole: 'USUÁRIO',
     dashboardTitle: 'MINHA CONTA',
     dashboardDesc: 'GERENCIE SUAS CONFIGURAÇÕES DE SENHA E ENCAMINHAMENTO.',
@@ -485,10 +547,12 @@ const translations = {
     successForwarding: 'Encaminhamento atualizado com sucesso',
     successPassword: 'Senha atualizada com sucesso',
     successVacation: 'Auto-resposta atualizada com sucesso',
-    logout: 'Sair'
+    logout: 'Sair',
   },
   ES: {
     userPortal: 'Portal de Usuario',
+    theme: 'Tema',
+    language: 'Idioma',
     userRole: 'USUARIO',
     dashboardTitle: 'MI CUENTA',
     dashboardDesc: 'ADMINISTRE SUS CONFIGURACIONES DE CONTRASEÑA Y REENVÍO.',
@@ -527,8 +591,8 @@ const translations = {
     successForwarding: 'Reenvío actualizado con éxito',
     successPassword: 'Contraseña actualizada con éxito',
     successVacation: 'Auto-respuesta actualizada con éxito',
-    logout: 'Cerrar Sesión'
-  }
+    logout: 'Cerrar Sesión',
+  },
 }
 
 const t = computed(() => translations[activeLang.value as 'EN' | 'PT' | 'ES'])
@@ -540,7 +604,7 @@ const strengthInfo = computed(() => {
   return {
     percent: `${res.pct}%`,
     text: res.label,
-    color: res.color
+    color: res.color,
   }
 })
 
@@ -557,11 +621,7 @@ function generateRandomPassword() {
 // Select portal language
 async function selectLanguage(lang: 'PT' | 'EN' | 'ES') {
   activeLang.value = lang
-  try {
-    await http.get(`/lang/${lang.toLowerCase()}`)
-  } catch (e) {
-    // Ignore language set backend error
-  }
+  await langStore.set(lang) // shared with the admin UI; also sets the backend lang cookie
 }
 
 // Logout virtual mailbox user
@@ -595,7 +655,7 @@ async function saveForwarding() {
   savingForwarding.value = true
   try {
     await http.post(`${API_BASE}/user/forwarding`, {
-      forwarding: forwardingForm.value.forwarding
+      forwarding: forwardingForm.value.forwarding,
     })
     toast.success(t.value.successForwarding)
     await fetchUserData()
@@ -618,7 +678,7 @@ async function changePassword() {
     await http.post(`${API_BASE}/user/password`, {
       current_password: passwordForm.value.current_password,
       new_password: passwordForm.value.new_password,
-      confirm_password: passwordForm.value.confirm_password
+      confirm_password: passwordForm.value.confirm_password,
     })
     toast.success(t.value.successPassword)
     passwordForm.value = { current_password: '', new_password: '', confirm_password: '' }
@@ -646,10 +706,7 @@ async function saveVacation() {
 
 onMounted(async () => {
   // Autodetect browser language if supported
-  const navLang = navigator.language.slice(0, 2).toUpperCase()
-  if (['PT', 'ES'].includes(navLang)) {
-    activeLang.value = navLang
-  }
+  activeLang.value = langStore.lang // saved choice, else the browser language
 
   // Fetch dynamic version from backend
   try {
@@ -668,48 +725,48 @@ onMounted(async () => {
 <style scoped>
 .user-portal-layout {
   min-height: 100vh;
-  background-color: var(--color-brand-background);
-  color: var(--color-brand-text);
+  background-color: var(--color-login-page);
+  color: var(--color-fg);
   font-family: var(--default-font-family);
   display: flex;
   flex-direction: column;
 }
 
 .dot-pattern {
-  background-image: radial-gradient(circle, #cbd5e1 1px, transparent 1px);
-  background-size: 32px 32px;
+  background-image: radial-gradient(circle, var(--color-field-line) 1px, transparent 1px);
+  background-size: 2rem 2rem;
 }
 
 .neo-shadow {
-  box-shadow: 4px 4px 0px #1E293B;
+  box-shadow: 4px 4px 0px var(--color-shadow);
 }
 
 .neo-shadow-subtle {
-  box-shadow: 1px 1px 0px #1E293B;
+  box-shadow: 1px 1px 0px var(--color-shadow);
 }
 
 /* Configure Vacation Button */
 .btn-vacation {
-  background: var(--color-brand-secondary);
-  color: #ffffff;
-  border: 2px solid #1E293B;
+  background: var(--color-accent);
+  color: var(--color-on-action);
+  border: 2px solid var(--color-line);
   font-weight: 900;
-  font-size: 12px;
-  padding: 12px 24px;
-  letter-spacing: 1px;
+  font-size: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  letter-spacing: 0.0625rem;
   cursor: pointer;
-  box-shadow: 3px 3px 0px #1E293B;
-  transition: all .15s;
+  box-shadow: 3px 3px 0px var(--color-shadow);
+  transition: all 0.15s;
   display: flex;
   align-items: center;
   text-transform: uppercase;
 }
 
 .btn-vacation:hover {
-  background: #ffffff;
-  color: var(--color-brand-secondary);
+  background: var(--color-surface);
+  color: var(--color-accent);
   transform: translate(-1px, -1px);
-  box-shadow: 4px 4px 0px #1E293B;
+  box-shadow: 4px 4px 0px var(--color-shadow);
 }
 
 .btn-vacation:active {
@@ -719,16 +776,16 @@ onMounted(async () => {
 
 /* Configure Forwarding Save Button */
 .btn-submit-blue {
-  background: var(--color-brand-secondary);
-  color: #ffffff;
-  border: 2px solid #1E293B;
+  background: var(--color-accent);
+  color: var(--color-on-action);
+  border: 2px solid var(--color-line);
   font-weight: 900;
-  font-size: 13px;
-  padding: 14px 20px;
-  letter-spacing: 1px;
+  font-size: 0.8125rem;
+  padding: 0.875rem 1.25rem;
+  letter-spacing: 0.0625rem;
   cursor: pointer;
-  box-shadow: 3px 3px 0px #1E293B;
-  transition: all .15s;
+  box-shadow: 3px 3px 0px var(--color-shadow);
+  transition: all 0.15s;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -737,10 +794,10 @@ onMounted(async () => {
 }
 
 .btn-submit-blue:hover:not(:disabled) {
-  background: #ffffff;
-  color: var(--color-brand-secondary);
+  background: var(--color-surface);
+  color: var(--color-accent);
   transform: translate(-1px, -1px);
-  box-shadow: 4px 4px 0px #1E293B;
+  box-shadow: 4px 4px 0px var(--color-shadow);
 }
 
 .btn-submit-blue:active:not(:disabled) {
@@ -750,16 +807,16 @@ onMounted(async () => {
 
 /* Change Password Save Button */
 .btn-submit-orange {
-  background: var(--color-brand-cta);
-  color: #ffffff;
-  border: 2px solid #1E293B;
+  background: var(--color-warn);
+  color: var(--color-on-action);
+  border: 2px solid var(--color-line);
   font-weight: 900;
-  font-size: 13px;
-  padding: 14px 20px;
-  letter-spacing: 1px;
+  font-size: 0.8125rem;
+  padding: 0.875rem 1.25rem;
+  letter-spacing: 0.0625rem;
   cursor: pointer;
-  box-shadow: 3px 3px 0px #1E293B;
-  transition: all .15s;
+  box-shadow: 3px 3px 0px var(--color-shadow);
+  transition: all 0.15s;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -768,10 +825,10 @@ onMounted(async () => {
 }
 
 .btn-submit-orange:hover:not(:disabled) {
-  background: #ffffff;
-  color: var(--color-brand-cta);
+  background: var(--color-surface);
+  color: var(--color-warn);
   transform: translate(-1px, -1px);
-  box-shadow: 4px 4px 0px #1E293B;
+  box-shadow: 4px 4px 0px var(--color-shadow);
 }
 
 .btn-submit-orange:active:not(:disabled) {
@@ -783,7 +840,7 @@ onMounted(async () => {
 .vacation-modal-backdrop {
   position: fixed;
   inset: 0;
-  background-color: rgba(30, 41, 59, 0.5);
+  background-color: color-mix(in srgb, var(--color-shadow) 50%, transparent);
   z-index: 1000;
   backdrop-filter: blur(1px);
 }
@@ -804,25 +861,25 @@ onMounted(async () => {
 }
 
 .btn-modal-cancel {
-  background: #ffffff;
-  color: #1E293B;
-  border: 2px solid #1E293B;
+  background: var(--color-surface);
+  color: var(--color-fg);
+  border: 2px solid var(--color-line);
   font-weight: 900;
-  font-size: 12px;
-  padding: 12px 24px;
-  letter-spacing: 0.5px;
+  font-size: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  letter-spacing: 0.03125rem;
   cursor: pointer;
-  box-shadow: 2px 2px 0px #1E293B;
-  transition: all .15s;
+  box-shadow: 2px 2px 0px var(--color-shadow);
+  transition: all 0.15s;
   display: flex;
   align-items: center;
   text-transform: uppercase;
 }
 
 .btn-modal-cancel:hover {
-  background: #F8FAFC;
+  background: var(--color-surface-2);
   transform: translate(-2px, -2px);
-  box-shadow: 3px 3px 0px #1E293B;
+  box-shadow: 3px 3px 0px var(--color-shadow);
 }
 
 .btn-modal-cancel:active {
@@ -831,32 +888,30 @@ onMounted(async () => {
 }
 
 .btn-modal-save {
-  background: var(--color-brand-secondary);
-  color: #ffffff;
-  border: 2px solid #1E293B;
+  background: var(--color-accent);
+  color: var(--color-on-action);
+  border: 2px solid var(--color-line);
   font-weight: 900;
-  font-size: 12px;
-  padding: 12px 24px;
-  letter-spacing: 0.5px;
+  font-size: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  letter-spacing: 0.03125rem;
   cursor: pointer;
-  box-shadow: 3px 3px 0px #1E293B;
-  transition: all .15s;
+  box-shadow: 3px 3px 0px var(--color-shadow);
+  transition: all 0.15s;
   display: flex;
   align-items: center;
   text-transform: uppercase;
 }
 
 .btn-modal-save:hover:not(:disabled) {
-  background: #ffffff;
-  color: var(--color-brand-secondary);
+  background: var(--color-surface);
+  color: var(--color-accent);
   transform: translate(-1px, -1px);
-  box-shadow: 4px 4px 0px #1E293B;
+  box-shadow: 4px 4px 0px var(--color-shadow);
 }
 
 .btn-modal-save:active:not(:disabled) {
   transform: translate(0px, 0px);
   box-shadow: none;
 }
-
-
 </style>

@@ -1,0 +1,47 @@
+/* Ported from jniltinho/ad-manager frontend/src/themes (pink-panther): values of its role contract mapped onto
+ * ours (see ../style.css). Only role values; layout stays the same in every theme. */
+
+/* Pink Panther */
+[data-theme='pink-panther'] {
+  color-scheme: light;
+  --color-page: #f7eef2;
+  --color-login-page: #f7eef2;
+  --color-page-dots: rgba(196, 77, 128, 0.22);
+  --color-surface: #ffffff;
+  --color-surface-2: #fbf1f5;
+  --color-surface-3: #f6e4ec;
+  --color-header: #ffffff;
+  --color-sidebar: #ffffff;
+  --color-backdrop: rgba(46, 24, 40, 0.45);
+  --color-fg: #2b1a23;
+  --color-fg-2: #2b1a23;
+  --color-fg-muted: #6e5562;
+  --color-fg-subtle: #6e5562;
+  --color-line: #b0849a;
+  --color-line-soft: #f4e5ec;
+  --color-field-line: #ecd3de;
+  --color-strong-fill: #6b1f45;
+  --color-action-hover: #8f2556;
+  --color-action-strong: #a52d63;
+  --color-action-soft: #f9e6ee;
+  --color-action-line-soft: #a52d63;
+  --color-on-action: #ffffff;
+  --color-accent-soft: #f6e4ec;
+  --color-err: #a8201a;
+  --color-danger-strong: #a8201a;
+  --color-err-soft: #fbe3e2;
+  --color-err-line-soft: #8a1913;
+  --color-ok-strong: #23703d;
+  --color-ok-soft: #e3f2e7;
+  --color-warn-strong: #8a5300;
+  --color-warn-soft: #fdf0d9;
+  --color-warn-line: #f2b84b;
+  --color-action: #a52d63;
+  --color-accent: #a52d63;
+  --color-accent-strong: #a52d63;
+  --color-danger: #a8201a;
+  --color-ok: #23703d;
+  --color-warn: #8a5300;
+  --color-shadow: color-mix(in srgb, #6b1f45 35%, transparent);
+  --font-sans: 'Inter', Tahoma, Verdana, Arial, sans-serif;
+}

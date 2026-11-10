@@ -19,7 +19,7 @@ import (
 	"go-postfixadmin/internal/routes"
 
 	"github.com/gorilla/sessions"
-	"github.com/labstack/echo-contrib/session"
+	"github.com/labstack/echo-contrib/v5/session"
 	"github.com/labstack/echo/v5"
 	echoMiddleware "github.com/labstack/echo/v5/middleware"
 	"github.com/spf13/viper"
@@ -52,6 +52,7 @@ func StartServer(embeddedFiles embed.FS, port int, db *gorm.DB, ssl bool, certFi
 	}
 
 	e := echo.New()
+	e.IPExtractor = clientIPExtractor(viper.GetStringSlice("server.trusted_proxies"))
 	if cfg.Enabled {
 		telemetry.Install(e)
 		e.Use(echoMiddleware.Recover())

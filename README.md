@@ -5,6 +5,7 @@
 [![Release](https://img.shields.io/github/v/release/jniltinho/go-postfixadmin?color=blue)](https://github.com/jniltinho/go-postfixadmin/releases)
 [![Downloads](https://img.shields.io/github/downloads/jniltinho/go-postfixadmin/total?color=blue)](https://github.com/jniltinho/go-postfixadmin/releases)
 [![Release Build](https://github.com/jniltinho/go-postfixadmin/actions/workflows/release.yml/badge.svg)](https://github.com/jniltinho/go-postfixadmin/actions/workflows/release.yml)
+[![Docker image](https://github.com/jniltinho/go-postfixadmin/actions/workflows/docker.yml/badge.svg)](https://github.com/jniltinho/go-postfixadmin/pkgs/container/go-postfixadmin)
 [![Stars](https://img.shields.io/github/stars/jniltinho/go-postfixadmin?style=social)](https://github.com/jniltinho/go-postfixadmin/stargazers)
 
 <p align="center">
@@ -23,6 +24,7 @@
 <p align="center">
   <a href="#-quick-start">Quick Start</a> ·
   <a href="#-screenshots">Screenshots</a> ·
+  <a href="#-themes-and-settings">Themes</a> ·
   <a href="#-features">Features</a> ·
   <a href="FEATURES.md">Full feature list</a> ·
   <a href="DOCUMENTS/setup/README.md">Setup guide</a>
@@ -38,6 +40,8 @@
 - **Built for teams** — superadmins, domain admins and fine-grained RBAC roles decide who can see and change what.
 - **Users help themselves** — a separate portal lets mailbox owners change their password, set forwarding and configure vacation auto-replies.
 - **Familiar data model** — PostfixAdmin-style tables (`domain`, `mailbox`, `alias`, …) and `$2y$` bcrypt hashes, on MariaDB/MySQL or PostgreSQL.
+- **Your look, any screen** — 20 themes (Windows XP included) picked in Settings, and a layout that scales from 1366×768 to FullHD, QHD and 4K.
+- **Ops from the panel** — Postfix/Dovecot service status and an opt-in web SSH terminal (`xterm-256color`) in Settings.
 - **Scriptable CLI** — bulk CSV import/export, domain/mailbox/transport management, MySQL backups, quota reports and a Postfix `transport_maps` TCP server.
 
 ## 🚀 Quick Start
@@ -50,14 +54,17 @@ cd go-postfixadmin
 docker compose up -d
 ```
 
-Open `http://localhost:8080` — the stack includes MariaDB and creates the first admin automatically (`admin@example.com` / `adminpassword` — change it in [docker-compose.yml](docker-compose.yml)).
+Open `http://localhost:8080` — the stack pulls the published image, includes MariaDB and creates the first admin automatically (`admin@example.com` / `adminpassword` — change it in [docker-compose.yml](docker-compose.yml)).
 
-### Docker
+### Docker (GitHub Packages)
+
+Multi-arch images (`linux/amd64`, `linux/arm64`) are published to [GitHub Packages](https://github.com/jniltinho/go-postfixadmin/pkgs/container/go-postfixadmin) for every release: `latest`, `X.Y.Z` and `X.Y`.
 
 ```bash
+docker pull ghcr.io/jniltinho/go-postfixadmin:latest
 docker run -p 8080:8080 \
   -e DB_URL="postfix:pass@tcp(your-db:3306)/postfix?charset=utf8mb4&parseTime=True" \
-  jniltinho/go-postfixadmin:latest
+  ghcr.io/jniltinho/go-postfixadmin:latest
 ```
 
 ### Binary / .deb / .rpm
@@ -117,6 +124,24 @@ See [DEVELOPMENT.md](DEVELOPMENT.md) for the full developer workflow.
 
 ![Swagger UI](DOCUMENTS/screenshots/swagger.png)
 
+## 🎨 Themes and Settings
+
+**Settings › Appearance** — 20 themes with live previews, saved per browser; `[ui] default_theme` sets the default. Default (neo-brutalist), ADManager, Breeze, Violet, Aurora and Crystal (light and dark), Cone, **Windows XP**, Windows 98, Graphite, Grafana, RabbitMQ, Matrix, Winamp, Pink Panther and High contrast — ported from [ad-manager](https://github.com/jniltinho/ad-manager).
+
+![Settings: themes](DOCUMENTS/screenshots/settings-themes.png)
+
+| Windows XP | Matrix | Breeze (dark) |
+|------------|--------|---------------|
+| ![Windows XP theme](DOCUMENTS/screenshots/theme-xp.png) | ![Matrix theme](DOCUMENTS/screenshots/theme-matrix.png) | ![Breeze dark theme](DOCUMENTS/screenshots/theme-breeze-dark.png) |
+
+**Settings › Services** shows `postfix.service` and `dovecot.service` from systemd. **Settings › Terminal** is an opt-in web SSH terminal (xterm.js, `xterm-256color`, 256 colors) for superadmins: credentials are never stored, the host key is pinned after you confirm its fingerprint, and opening/closing is audited. Enable it with `[terminal] enabled = true` — see the [setup guide](DOCUMENTS/setup/README.md#31-appearance-service-status-and-web-terminal-settings).
+
+| Services | Terminal |
+|----------|----------|
+| ![Settings: services](DOCUMENTS/screenshots/settings-services.png) | ![Settings: terminal](DOCUMENTS/screenshots/settings-terminal.png) |
+
+The whole UI is sized in `rem` on a root font that grows with the screen (16px on FullHD, ~19px on QHD, 24px on 4K), and Settings meets WCAG AAA text contrast.
+
 More screenshots (login pages, transports, API keys, create admin/alias…) in [DOCUMENTS/screenshots](DOCUMENTS/screenshots).
 
 ## 🧩 Features
@@ -126,7 +151,9 @@ More screenshots (login pages, transports, API keys, create admin/alias…) in [
 - **Security** — JWT (short-lived access token + httpOnly refresh cookie), CSRF origin check, login rate limiting, strong password policy with built-in generator, persistent API keys with expiry
 - **Access control** — superadmin / domain-admin separation plus optional fine-grained RBAC roles
 - **Operations** — admin audit log, mail delivery log ingestion (`readlog`), quota reports, MySQL/MariaDB backups, optional OpenTelemetry export to OpenObserve
-- **i18n** — English, Português (pt_BR) and Español
+- **Themes & layout** — 20 themes incl. Windows XP, FullHD/QHD/4K scaling, AAA contrast in Settings
+- **Settings** — Postfix/Dovecot status, opt-in web SSH terminal with pinned host key
+- **i18n** — English, Português (pt_BR) and Español; detected from the browser, changeable in Settings
 - **Databases** — MariaDB/MySQL and PostgreSQL
 
 Complete capability list: [FEATURES.md](FEATURES.md)
@@ -143,11 +170,11 @@ Complete capability list: [FEATURES.md](FEATURES.md)
 
 ## Tech Stack
 
-**Backend**: Go 1.26, Echo v5, GORM, Cobra, Viper, log/slog, Swaggo (OpenAPI)
+**Backend**: Go 1.27, Echo v5.4, GORM, Cobra, Viper, log/slog, Swaggo (OpenAPI), x/crypto/ssh
 
-**Frontend (embedded)**: Vue 3 + TS + Vite, Pinia, Vue Router, Tailwind CSS v4, Lucide icons
+**Frontend (embedded)**: Vue 3 + TS + [Vite+](https://viteplus.dev) (`vp`), Pinia, Vue Router, Tailwind CSS v4, Lucide icons, xterm.js
 
-**Packaging**: Multi-stage Docker, UPX-compressed binary, native .deb/.rpm via Makefile + GitHub Actions
+**Packaging**: Multi-stage multi-arch Docker image on GitHub Packages (`ghcr.io/jniltinho/go-postfixadmin`), UPX-compressed binary, native .deb/.rpm via Makefile + GitHub Actions
 
 ## Contributing
 

@@ -143,6 +143,8 @@ Before opening a pull request, verify the items relevant to your change:
 - templates, handlers, and JS stay aligned for any form flow you changed
 - handlers, repositories, and models stay aligned when changing data access logic
 - setup or config changes are documented in the correct markdown files
+- frontend: `npm run check` and `npm run test` pass (no literal colors outside `frontend/src/themes/`)
+- UI changes look right in at least `default`, `xp` and one dark theme at FullHD and 4K (`tests/visual/capture.sh`)
 
 ---
 
@@ -193,12 +195,25 @@ To add a new language:
 
 ## 🎨 Design Guidelines
 
-We use a **Neo-Brutalism** design aesthetic:
-- Thick black borders (`2px` or `4px`).
+The Default theme is **Neo-Brutalism**:
+- Thick borders (`2px` or `4px`) in `--color-line`.
 - High-contrast colors.
-- Sharp shadows (`neo-shadow`).
+- Sharp shadows in `--color-shadow` (`neo-shadow`).
 - Lucide icons throughout the UI.
-- CSS built with **Tailwind CSS** (see `tailwind.config.js`).
+- CSS built with **Tailwind CSS v4** (`frontend/src/style.css`, no `tailwind.config.js`).
+
+Rules that keep every theme working:
+- Use theme roles only (`bg-surface`, `text-fg`, `border-line`, `bg-action text-on-action`, `var(--color-…)`): never hex values or Tailwind palette classes such as `bg-white` or `text-gray-500` — a unit test rejects them.
+- Size with `rem` (Tailwind spacing, `font-size: 0.8125rem`), not `px`, so the UI scales on QHD/4K; borders and shadow offsets stay in `px`.
+
+## 🎨 Themes
+
+To add a theme:
+1. Add a `[data-theme='my-theme'] { color-scheme: light|dark; --color-…: …; }` block (one file per family) in `frontend/src/themes/` and import it from `themes/index.css`. Redefine only roles of the contract in `style.css`.
+2. Register it in `frontend/src/themes/index.ts` (`id`, `label`, `scheme`).
+3. Optionally give the SSH terminal its own palette in `themes/terminal.css` (`--term-*`).
+4. Run `npm run test` (registry ↔ CSS, scheme) and check body text contrast (≥ 4.5:1 on page and surface) and white-on-action buttons.
+5. Mention it in the `[ui] default_theme` comment of `config.toml.example` and `web/files/config.default.toml`.
 
 ---
 

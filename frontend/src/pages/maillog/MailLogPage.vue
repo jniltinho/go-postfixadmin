@@ -1,6 +1,5 @@
 <template>
   <div class="ml-page">
-
     <!-- ─── Header ─── -->
     <div class="page-header">
       <div>
@@ -13,7 +12,7 @@
           <span>AUTO REFRESH (10s)</span>
         </label>
         <button class="btn-primary" @click="load(false)">
-          <Icon name="refresh-cw" :size="16" style="margin-right:6px;vertical-align:middle" />
+          <Icon name="refresh-cw" :size="16" style="margin-right: 0.375rem; vertical-align: middle" />
           REFRESH
         </button>
       </div>
@@ -62,7 +61,6 @@
         <span class="font-mono text-right text-nowrap">{{ formatSize(value) }}</span>
       </template>
     </AppTable>
-
   </div>
 </template>
 
@@ -92,35 +90,35 @@ const loading = ref(true)
 const autoRefresh = ref(false)
 
 const columns = [
-  { key: 'logdate',     label: 'DATE/TIME' },
-  { key: 'm_from',      label: 'SENDER (FROM)' },
-  { key: 'm_to',        label: 'RECIPIENT (TO)' },
+  { key: 'logdate', label: 'DATE/TIME' },
+  { key: 'm_from', label: 'SENDER (FROM)' },
+  { key: 'm_to', label: 'RECIPIENT (TO)' },
   { key: 'domain_from', label: 'DOMAIN FROM' },
-  { key: 'domain_to',   label: 'DOMAIN TO' },
-  { key: 'host_ip',     label: 'CLIENT IP' },
-  { key: 'host_name',   label: 'HOST' },
-  { key: 'helo',        label: 'HELO' },
-  { key: 'msgsize',     label: 'SIZE' },
+  { key: 'domain_to', label: 'DOMAIN TO' },
+  { key: 'host_ip', label: 'CLIENT IP' },
+  { key: 'host_name', label: 'HOST' },
+  { key: 'helo', label: 'HELO' },
+  { key: 'msgsize', label: 'SIZE' },
 ]
 
 async function load(quiet = false) {
   if (!quiet) loading.value = true
   try {
     const res = await http.get(`${API_BASE}/maillog`, {
-      params: { page: 1, per_page: 9999, sort: 'tstamp', order: 'desc' }
+      params: { page: 1, per_page: 9999, sort: 'tstamp', order: 'desc' },
     })
     const data = res.data?.data?.data ?? []
     allRows.value = data.map((log: any, idx: number) => ({
-      _key:        String(idx),
-      logdate:     log.logdate     ?? '',
-      m_from:      log.m_from      || '—',
-      m_to:        log.m_to        || '—',
+      _key: String(idx),
+      logdate: log.logdate ?? '',
+      m_from: log.m_from || '—',
+      m_to: log.m_to || '—',
       domain_from: log.domain_from || '—',
-      domain_to:   log.domain_to   || '—',
-      host_ip:     log.host_ip     || '',
-      host_name:   log.host_name   || '—',
-      helo:        log.helo        || '—',
-      msgsize:     log.msgsize     ?? 0,
+      domain_to: log.domain_to || '—',
+      host_ip: log.host_ip || '',
+      host_name: log.host_name || '—',
+      helo: log.helo || '—',
+      msgsize: log.msgsize ?? 0,
     }))
   } catch (e: any) {
     toast.error(e?.response?.data?.error?.message || 'Failed to load delivery logs')
@@ -160,46 +158,119 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.ml-page { background: #ebf2fe; padding: 24px 28px 40px; }
+.ml-page {
+  background: var(--color-page);
+  padding: 1.5rem 1.75rem 2.5rem;
+}
 
 .page-header {
-  display: flex; justify-content: space-between; align-items: flex-end;
-  margin-bottom: 20px; gap: 20px; flex-wrap: wrap;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 1.25rem;
+  gap: 1.25rem;
+  flex-wrap: wrap;
 }
 .page-title {
-  font-size: 28px; font-weight: 900; color: #1e293b;
-  letter-spacing: -0.5px; line-height: 1; font-family: monospace; text-transform: uppercase;
+  font-size: 1.75rem;
+  font-weight: 900;
+  color: var(--color-fg);
+  letter-spacing: -0.03125rem;
+  line-height: 1;
+  font-family: monospace;
+  text-transform: uppercase;
 }
 .page-subtitle {
-  font-size: 10px; color: #94a3b8; letter-spacing: 0.8px;
-  margin-top: 6px; text-transform: uppercase; font-weight: 700;
+  font-size: 0.625rem;
+  color: var(--color-fg-subtle);
+  letter-spacing: 0.05rem;
+  margin-top: 0.375rem;
+  text-transform: uppercase;
+  font-weight: 700;
 }
 
-.refresh-controls { display: flex; align-items: center; gap: 14px; }
-.auto-refresh-chk { font-size: 11px; font-weight: 800; color: #1e293b; font-family: monospace; }
+.refresh-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+.auto-refresh-chk {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  color: var(--color-fg);
+  font-family: monospace;
+}
 
 .btn-primary {
-  background: #3b82f6; color: #fff; border: 2px solid #1e293b; padding: 10px 18px;
-  font-size: 11px; font-weight: 800; letter-spacing: 0.6px; cursor: pointer;
-  border-radius: 0; transition: all .15s; text-transform: uppercase;
-  box-shadow: 2px 2px 0 #1e293b; display: flex; align-items: center;
+  background: var(--color-action);
+  color: var(--color-on-action);
+  border: 2px solid var(--color-line);
+  padding: 0.625rem 1.125rem;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.0375rem;
+  cursor: pointer;
+  border-radius: 0;
+  transition: all 0.15s;
+  text-transform: uppercase;
+  box-shadow: 2px 2px 0 var(--color-shadow);
+  display: flex;
+  align-items: center;
 }
-.btn-primary:hover { background: #fff; color: #3b82f6; }
-.btn-primary:active { transform: translate(0, 0); box-shadow: none; }
+.btn-primary:hover {
+  background: var(--color-surface);
+  color: var(--color-action);
+}
+.btn-primary:active {
+  transform: translate(0, 0);
+  box-shadow: none;
+}
 
-.check-label { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #374151; cursor: pointer; }
-.check-label input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: #3b82f6; }
+.check-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-fg-2);
+  cursor: pointer;
+}
+.check-label input[type='checkbox'] {
+  width: 1.125rem;
+  height: 1.125rem;
+  cursor: pointer;
+  accent-color: var(--color-action);
+}
 
-.font-mono    { font-family: 'Fira Code', var(--font-mono), monospace; }
-.font-semibold { font-weight: 600; }
-.text-nowrap  { white-space: nowrap; }
-.text-right   { text-align: right; display: block; }
-.text-break   { word-break: break-all; }
-.text-grey    { color: #475569; }
+.font-mono {
+  font-family: 'Fira Code', var(--font-mono), monospace;
+}
+.font-semibold {
+  font-weight: 600;
+}
+.text-nowrap {
+  white-space: nowrap;
+}
+.text-right {
+  text-align: right;
+  display: block;
+}
+.text-break {
+  word-break: break-all;
+}
+.text-grey {
+  color: var(--color-fg-2);
+}
 
 .ip-address {
-  cursor: pointer; color: #3b82f6; font-weight: 700;
-  border-bottom: 1px dashed #3b82f6; padding: 1px 0;
+  cursor: pointer;
+  color: var(--color-action);
+  font-weight: 700;
+  border-bottom: 1px dashed var(--color-action);
+  padding: 0.0625rem 0;
 }
-.ip-address:hover { color: #1d4ed8; border-bottom-style: solid; }
+.ip-address:hover {
+  color: var(--color-action-strong);
+  border-bottom-style: solid;
+}
 </style>

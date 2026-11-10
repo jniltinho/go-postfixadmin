@@ -8,9 +8,9 @@ Related: [Project README](README.md) • [Features](FEATURES.md) • [Complete s
 
 To compile the project locally without Docker, install the following tools:
 
-1. **Go 1.26 or higher**: Main language of the project.
+1. **Go 1.27 or higher**: Main language of the project.
    [Download Go](https://go.dev/dl/)
-2. **Node.js 18 or higher**: Required to build the Vue 3 frontend.
+2. **Node.js 22.18+ or 24.11+**: Required to build the Vue 3 frontend with [Vite+](https://viteplus.dev) (`vp`).
    [Download Node.js](https://nodejs.org/)
 3. **Make**: Utility for command automation (native on Linux/macOS).
 4. **UPX (Optional)**: Used by `make build-prod` to compress the final binary.
@@ -94,14 +94,27 @@ To work on the Vue 3 frontend with hot module replacement:
 ```bash
 cd frontend
 npm install
-npm run dev
+npm run dev      # vp dev  — hot reload on :9000
+npm run check    # vp check — oxfmt formatting + oxlint
+npm run test     # vp test run — unit tests (themes, theme store, no literal colors)
+npm run build    # vue-tsc -b && vp build → ../web/dist
 ```
 
-The Vite dev server proxies API calls to the Go backend. Start the backend separately:
+The frontend uses Vite+ (`vite-plus`, CLI `vp`) with `vite` overridden to `@voidzero-dev/vite-plus-core` in `package.json`; `vite.config.ts` is the only config (the `vite.config.js`/`.d.ts` that `vue-tsc -b` used to emit are git-ignored). The dev server proxies API calls to the Go backend. Start the backend separately:
 
 ```bash
 ./bin/postfixadmin server --port=8080
 ```
+
+### Themes and the role contract
+
+Components never use literal colors: they use the roles of `frontend/src/style.css` (`bg-surface`, `text-fg`, `border-line`, `var(--color-action)`…), whose `@theme static` values are the Default theme. Each theme in `frontend/src/themes/*.css` only redefines roles under `[data-theme='id']`, and `frontend/src/themes/index.ts` is the registry shown in Settings. `npm run test` fails on a literal color outside `themes/`, on a registry/CSS mismatch and when `themes/default.css` drifts from `style.css`. The SSH terminal palette is the `--term-*` roles in `themes/terminal.css`. See [CONTRIBUTING.md](CONTRIBUTING.md#-themes) to add a theme.
+
+Sizes are in `rem`: the root font size is 16px up to FullHD and grows to ~19px on QHD and 24px on 4K, so the whole UI scales with the screen.
+
+### Visual checks (FullHD / QHD / 4K)
+
+`tests/visual/capture.sh` drives [agent-browser](https://github.com/vercel-labs/agent-browser) through login, dashboard, domains, mailboxes, a modal and the user portal for every theme and resolution, saves screenshots and fails on horizontal scroll, a too-small login card or root font. See [tests/visual/README.md](tests/visual/README.md).
 
 ### Generating Swagger Documentation
 
@@ -135,7 +148,7 @@ make build-docker  # Multi-stage Docker image (Alpine + UPX)
 make install-upx   # Install UPX (used by build-prod)
 ```
 
-Run `make help` for the current list. Note: `frontend` step requires Node 18+ and runs `npm install && npm run build` from `frontend/`.
+Run `make help` for the current list. Note: `frontend` step requires Node 22.18+ (or 24.11+) and runs `npm install && npm run build` (Vite+) from `frontend/`.
 
 ## CLI Overview
 

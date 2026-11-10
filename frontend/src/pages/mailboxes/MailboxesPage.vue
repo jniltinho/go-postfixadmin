@@ -1,6 +1,5 @@
 <template>
   <div class="dom-page">
-
     <!-- ─── Header ─── -->
     <div class="dom-header">
       <div>
@@ -8,11 +7,10 @@
         <div class="dom-subtitle">MANAGE YOUR EMAIL ACCOUNTS</div>
       </div>
       <button class="btn-add-big" @click="showAdd = true">
-        <Icon name="plus-circle" :size="20" style="margin-right:12px;vertical-align:middle" />
+        <Icon name="plus-circle" :size="20" style="margin-right: 0.75rem; vertical-align: middle" />
         ADD EMAIL ACCOUNT
       </button>
     </div>
-
 
     <!-- ─── Table ─── -->
     <AppTable
@@ -27,12 +25,20 @@
     >
       <template #toolbar>
         <div class="mb-4 flex items-center gap-3">
-          <label class="text-xs font-black uppercase tracking-widest text-brand-text">FILTER BY DOMAIN:</label>
-          <select v-model="domainFilter" class="h-9 px-3 border-2 border-brand-text focus:border-brand-primary focus:outline-none font-medium bg-white">
+          <label class="text-xs font-black uppercase tracking-widest text-fg">FILTER BY DOMAIN:</label>
+          <select
+            v-model="domainFilter"
+            class="h-9 px-3 border-2 border-line focus:border-action focus:outline-none font-medium bg-surface"
+          >
             <option value="">All Domains</option>
             <option v-for="d in domains" :key="d.domain" :value="d.domain">{{ d.domain }}</option>
           </select>
-          <a v-if="domainFilter" class="ml-2 text-xs font-bold text-red-500 hover:underline cursor-pointer" @click="domainFilter = ''">Clear Filter</a>
+          <a
+            v-if="domainFilter"
+            class="ml-2 text-xs font-bold text-err hover:underline cursor-pointer"
+            @click="domainFilter = ''"
+            >Clear Filter</a
+          >
         </div>
       </template>
 
@@ -43,8 +49,10 @@
         </div>
       </template>
       <template #cell-name="{ value }">{{ value || '—' }}</template>
-      <template #cell-domain="{ value }"><span class="mono">{{ value }}</span></template>
-      <template #cell-quota="{ value }">{{ value === 0 ? 'Unlimited' : (value / 1048576) + ' MB' }}</template>
+      <template #cell-domain="{ value }"
+        ><span class="mono">{{ value }}</span></template
+      >
+      <template #cell-quota="{ value }">{{ value === 0 ? 'Unlimited' : value / 1048576 + ' MB' }}</template>
       <template #cell-active="{ value }">
         <span :class="value ? 'badge-yes' : 'badge-no'">{{ value ? 'YES' : 'NO' }}</span>
       </template>
@@ -61,12 +69,7 @@
     />
 
     <!-- ══════════ EDIT MODAL ══════════ -->
-    <MailboxEditModal
-      v-model="showEdit"
-      :initial-data="editInitialData"
-      :saving="savingEdit"
-      @submit="handleEdit"
-    />
+    <MailboxEditModal v-model="showEdit" :initial-data="editInitialData" :saving="savingEdit" @submit="handleEdit" />
 
     <!-- ══════════ DELETE CONFIRM ══════════ -->
     <ConfirmDialog
@@ -76,7 +79,6 @@
       :loading="deletingRow"
       @confirm="submitDelete"
     />
-
   </div>
 </template>
 
@@ -101,7 +103,9 @@ interface Mailbox {
   created: string
 }
 
-interface Domain { domain: string }
+interface Domain {
+  domain: string
+}
 
 const allMailboxes = ref<Mailbox[]>([])
 const domains = ref<Domain[]>([])
@@ -110,35 +114,40 @@ const domainFilter = ref('')
 
 const columns = [
   { key: 'username', label: 'EMAIL' },
-  { key: 'name',     label: 'NAME' },
-  { key: 'domain',   label: 'DOMAIN' },
-  { key: 'quota',    label: 'QUOTA' },
-  { key: 'active',   label: 'ACTIVE' },
+  { key: 'name', label: 'NAME' },
+  { key: 'domain', label: 'DOMAIN' },
+  { key: 'quota', label: 'QUOTA' },
+  { key: 'active', label: 'ACTIVE' },
   { key: 'modified', label: 'MODIFIED' },
 ]
 
 const domainFilteredRows = computed(() => {
   if (!domainFilter.value) return allMailboxes.value
-  return allMailboxes.value.filter(r => r.domain === domainFilter.value)
+  return allMailboxes.value.filter((r) => r.domain === domainFilter.value)
 })
 
 function formatDate(ts: string): string {
   if (!ts) return '—'
-  return new Date(ts).toLocaleString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+  return new Date(ts).toLocaleString('pt-BR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 async function load() {
   loading.value = true
   try {
-    const [mbRes, domRes] = await Promise.all([
-      http.get(`${API_BASE}/mailboxes`),
-      http.get(`${API_BASE}/domains`),
-    ])
+    const [mbRes, domRes] = await Promise.all([http.get(`${API_BASE}/mailboxes`), http.get(`${API_BASE}/domains`)])
     allMailboxes.value = mbRes.data?.data ?? []
     domains.value = domRes.data?.data ?? []
   } catch (e: any) {
     toast.error(e?.response?.data?.error?.message || 'Failed to load mailboxes')
-  } finally { loading.value = false }
+  } finally {
+    loading.value = false
+  }
 }
 onMounted(load)
 
@@ -147,9 +156,18 @@ const showAdd = ref(false)
 const savingAdd = ref(false)
 
 async function handleAdd(payload: any) {
-  if (!payload.local_part || payload.local_part.length < 4) { toast.error('Username must be at least 4 characters'); return }
-  if (!payload.domain) { toast.error('Please select a domain'); return }
-  if (!payload.password || payload.password.length < 8) { toast.error('Password must be at least 8 characters'); return }
+  if (!payload.local_part || payload.local_part.length < 4) {
+    toast.error('Username must be at least 4 characters')
+    return
+  }
+  if (!payload.domain) {
+    toast.error('Please select a domain')
+    return
+  }
+  if (!payload.password || payload.password.length < 8) {
+    toast.error('Password must be at least 8 characters')
+    return
+  }
   savingAdd.value = true
   try {
     await http.post(`${API_BASE}/mailboxes`, payload)
@@ -158,7 +176,9 @@ async function handleAdd(payload: any) {
     await load()
   } catch (e: any) {
     toast.error(e?.response?.data?.error?.message || 'Failed to create mailbox')
-  } finally { savingAdd.value = false }
+  } finally {
+    savingAdd.value = false
+  }
 }
 
 // ─── Edit modal ───
@@ -190,8 +210,14 @@ async function openEdit(row: Mailbox) {
 
 async function handleEdit(payload: any) {
   if (payload.change_password) {
-    if (!payload.password || payload.password.length < 8) { toast.error('Password must be at least 8 characters'); return }
-    if (payload.password !== payload.password_confirm) { toast.error('Passwords do not match'); return }
+    if (!payload.password || payload.password.length < 8) {
+      toast.error('Password must be at least 8 characters')
+      return
+    }
+    if (payload.password !== payload.password_confirm) {
+      toast.error('Passwords do not match')
+      return
+    }
   }
   savingEdit.value = true
   try {
@@ -201,7 +227,9 @@ async function handleEdit(payload: any) {
     await load()
   } catch (e: any) {
     toast.error(e?.response?.data?.error?.message || 'Failed to update mailbox')
-  } finally { savingEdit.value = false }
+  } finally {
+    savingEdit.value = false
+  }
 }
 
 // ─── Delete ───
@@ -209,7 +237,10 @@ const showDeleteConfirm = ref(false)
 const deletingRow = ref(false)
 const deleteTarget = ref<Mailbox | null>(null)
 
-function confirmDelete(row: Mailbox) { deleteTarget.value = row; showDeleteConfirm.value = true }
+function confirmDelete(row: Mailbox) {
+  deleteTarget.value = row
+  showDeleteConfirm.value = true
+}
 
 async function submitDelete() {
   if (!deleteTarget.value) return
@@ -217,16 +248,22 @@ async function submitDelete() {
   try {
     const username = deleteTarget.value.username
     await http.delete(`${API_BASE}/mailboxes/${encodeURIComponent(username)}`)
-    showDeleteConfirm.value = false; deleteTarget.value = null
+    showDeleteConfirm.value = false
+    deleteTarget.value = null
     toast.success(`Mailbox ${username} deleted successfully`)
     await load()
   } catch (e: any) {
     toast.error(e?.response?.data?.error?.message || 'Failed to delete mailbox')
     showDeleteConfirm.value = false
-  } finally { deletingRow.value = false }
+  } finally {
+    deletingRow.value = false
+  }
 }
 </script>
 
 <style scoped>
-.dom-page { background: #ebf2fe; padding: 24px 28px 40px; }
+.dom-page {
+  background: var(--color-page);
+  padding: 1.5rem 1.75rem 2.5rem;
+}
 </style>

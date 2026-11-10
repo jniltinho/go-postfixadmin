@@ -39,6 +39,8 @@ A fully documented REST API at `/api/v1` with interactive Swagger UI at `/swagge
 | Logs | `GET /logs` (admin action logs), `GET /maillog` (SMTP logs) |
 | Dashboard | `GET /dashboard` |
 | Settings | `GET/POST /settings/apikeys`, `PUT/DELETE /settings/apikeys/{id}` |
+| System | `GET /system/services` (Postfix/Dovecot status), `GET /system/terminal`, `DELETE /system/terminal/hostkey`, `GET /system/terminal/ws` (WebSocket) |
+| Public | `GET /version` (version and `default_theme`) |
 
 All endpoints return a structured `APIResponse` envelope with `success`, `data`, and `error` fields. All request and response schemas are typed and visible in the Swagger UI.
 
@@ -107,13 +109,18 @@ All endpoints return a structured `APIResponse` envelope with `success`, `data`,
 - Portuguese (`pt_BR`), English (`en`), and Spanish (`es`)
 - Backend flash messages translated through the same i18n layer
 - All management UIs fully translated, including the transport list CRUD
+- Settings (Appearance, Services, Terminal), the login pages and the user portal in PT, EN and ES; the language follows the browser and can be fixed in **Settings › Appearance › Language** (the portal has its own select)
 
 ## UI / DX
 
-- Vue 3 SPA (Vite, Pinia, Vue Router, Tailwind CSS v4) with frontend fully embedded in the Go binary via `//go:embed` — single deployable artifact
+- Vue 3 SPA (Vite+, Pinia, Vue Router, Tailwind CSS v4) with frontend fully embedded in the Go binary via `//go:embed` — single deployable artifact
+- 20 themes, chosen in **Settings › Appearance** with live previews and saved per browser: Default (neo-brutalist), ADManager, Breeze, Violet, Aurora, Crystal (each light and dark), Cone, **Windows XP**, Windows 98, Graphite, Grafana, RabbitMQ, Matrix, Winamp, Pink Panther and High contrast — ported from [ad-manager](https://github.com/jniltinho/ad-manager); `[ui] default_theme` sets the server default
+- Layout that scales with the screen: FullHD (1920×1080), QHD (2560×1440) and 4K (3840×2160), still fine at 1366×768
+- **Settings › Services**: read-only `systemctl` status of `postfix.service` and `dovecot.service` (state, boot, since)
+- **Settings › Terminal**: web SSH terminal (xterm.js, `xterm-256color` PTY) to the mail host — superadmins only, off by default, host key pinned on first use, credentials never stored, open/close audited, idle timeout; its palette follows the theme
 - Interactive Swagger UI at `/swagger/` (toggle with `server.swagger_enable = true`)
 - Docker, Docker Compose, Makefile, native build, plus `.deb` / `.rpm` packaging (`make deb`, `make rpm`) with config embedding
-- Fully automated releases via GitHub Actions (`.tar.gz`, `.deb`, `.rpm`)
+- Fully automated releases via GitHub Actions (`.tar.gz`, `.deb`, `.rpm`) and a multi-arch (amd64/arm64) image on GitHub Packages: `ghcr.io/jniltinho/go-postfixadmin`
 
 ## Configuration Highlights
 
@@ -122,6 +129,8 @@ Key sections in `config.toml` (or env / CLI overrides):
 - `[database]` — MariaDB/MySQL or PostgreSQL (driver, host, etc.); `debug = true` for verbose GORM SQL
 - `[server]` — port, `ssl_enable`, cert/key paths, `swagger_enable`, JWT TTLs (`jwt_access_ttl`, `jwt_refresh_ttl`), `cleanup_maildir`
 - `[quota]`, `[vacation]`, `[alias]`, `[transport]`, `[features]` (e.g. `fetchmail`), `[rbac]` (`enabled = true` after `migrate rbac`), `[smtp]` (for welcome emails), `[backup]`
+- `[ui]` — `default_theme` (env `UI_DEFAULT_THEME`)
+- `[terminal]` — `enabled` (default false), `host`, `port`, `idle_timeout` for the web SSH terminal
 - SSL-ready, session secret, API key support
 
 See `config.toml.example` and the setup guides for full details.

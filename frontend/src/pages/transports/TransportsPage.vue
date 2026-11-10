@@ -1,6 +1,5 @@
 <template>
   <div class="tp-page">
-
     <!-- ─── Header ─── -->
     <div class="page-header">
       <div>
@@ -8,7 +7,7 @@
         <div class="page-subtitle">MANAGE MAIL TRANSPORT RULES</div>
       </div>
       <button class="btn-primary" @click="showAdd = true">
-        <Icon name="plus-circle" :size="16" style="margin-right:6px;vertical-align:middle" />
+        <Icon name="plus-circle" :size="16" style="margin-right: 0.375rem; vertical-align: middle" />
         ADD TRANSPORT
       </button>
     </div>
@@ -38,11 +37,7 @@
     </AppTable>
 
     <!-- ══════════ ADD MODAL ══════════ -->
-    <TransportAddModal
-      v-model="showAdd"
-      :saving="savingAdd"
-      @submit="handleAdd"
-    />
+    <TransportAddModal v-model="showAdd" :saving="savingAdd" @submit="handleAdd" />
 
     <!-- ══════════ EDIT MODAL ══════════ -->
     <TransportEditModal
@@ -61,7 +56,6 @@
       :loading="deletingRow"
       @confirm="submitDelete"
     />
-
   </div>
 </template>
 
@@ -87,16 +81,22 @@ const allTransports = ref<Transport[]>([])
 const loading = ref(true)
 
 const columns = [
-  { key: 'domain',    label: 'DOMAIN' },
+  { key: 'domain', label: 'DOMAIN' },
   { key: 'transport', label: 'TRANSPORT' },
-  { key: 'created',   label: 'CREATED' },
-  { key: 'modified',  label: 'MODIFIED' },
-  { key: 'active',    label: 'ACTIVE' },
+  { key: 'created', label: 'CREATED' },
+  { key: 'modified', label: 'MODIFIED' },
+  { key: 'active', label: 'ACTIVE' },
 ]
 
 function formatDate(ts: string): string {
   if (!ts) return '—'
-  return new Date(ts).toLocaleString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+  return new Date(ts).toLocaleString('pt-BR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 async function load() {
@@ -106,7 +106,9 @@ async function load() {
     allTransports.value = res.data?.data ?? []
   } catch (e: any) {
     toast.error(e?.response?.data?.error?.message || 'Failed to load transports')
-  } finally { loading.value = false }
+  } finally {
+    loading.value = false
+  }
 }
 onMounted(load)
 
@@ -115,8 +117,14 @@ const showAdd = ref(false)
 const savingAdd = ref(false)
 
 async function handleAdd(payload: { domain: string; transport: string; active: boolean }) {
-  if (!payload.domain.trim()) { toast.error('Domain is required'); return }
-  if (!payload.transport.trim()) { toast.error('Transport is required'); return }
+  if (!payload.domain.trim()) {
+    toast.error('Domain is required')
+    return
+  }
+  if (!payload.transport.trim()) {
+    toast.error('Transport is required')
+    return
+  }
   savingAdd.value = true
   try {
     await http.post(`${API_BASE}/transports`, payload)
@@ -125,7 +133,9 @@ async function handleAdd(payload: { domain: string; transport: string; active: b
     await load()
   } catch (e: any) {
     toast.error(e?.response?.data?.error?.message || 'Failed to create transport')
-  } finally { savingAdd.value = false }
+  } finally {
+    savingAdd.value = false
+  }
 }
 
 // ─── Edit modal ───
@@ -144,12 +154,20 @@ async function openEdit(row: Transport) {
     editInitialData.value = { id: t.id, domain: t.domain, transport: t.transport, active: t.active }
   } catch (e: any) {
     toast.error(e?.response?.data?.error?.message || 'Failed to load transport')
-  } finally { loadingEdit.value = false }
+  } finally {
+    loadingEdit.value = false
+  }
 }
 
 async function handleEdit(payload: { domain: string; transport: string; active: boolean }) {
-  if (!payload.domain.trim()) { toast.error('Domain is required'); return }
-  if (!payload.transport.trim()) { toast.error('Transport is required'); return }
+  if (!payload.domain.trim()) {
+    toast.error('Domain is required')
+    return
+  }
+  if (!payload.transport.trim()) {
+    toast.error('Transport is required')
+    return
+  }
   const id = editInitialData.value?.id
   savingEdit.value = true
   try {
@@ -159,7 +177,9 @@ async function handleEdit(payload: { domain: string; transport: string; active: 
     await load()
   } catch (e: any) {
     toast.error(e?.response?.data?.error?.message || 'Failed to update transport')
-  } finally { savingEdit.value = false }
+  } finally {
+    savingEdit.value = false
+  }
 }
 
 // ─── Delete ───
@@ -167,7 +187,10 @@ const showDeleteConfirm = ref(false)
 const deletingRow = ref(false)
 const deleteTarget = ref<Transport | null>(null)
 
-function confirmDelete(row: Transport) { deleteTarget.value = row; showDeleteConfirm.value = true }
+function confirmDelete(row: Transport) {
+  deleteTarget.value = row
+  showDeleteConfirm.value = true
+}
 
 async function submitDelete() {
   if (!deleteTarget.value) return
@@ -175,17 +198,28 @@ async function submitDelete() {
   try {
     const { id, domain } = deleteTarget.value
     await http.delete(`${API_BASE}/transports/${id}`)
-    showDeleteConfirm.value = false; deleteTarget.value = null
+    showDeleteConfirm.value = false
+    deleteTarget.value = null
     toast.success(`Transport for ${domain} deleted successfully`)
     await load()
   } catch (e: any) {
     toast.error(e?.response?.data?.error?.message || 'Failed to delete transport')
     showDeleteConfirm.value = false
-  } finally { deletingRow.value = false }
+  } finally {
+    deletingRow.value = false
+  }
 }
 </script>
 
 <style scoped>
-.tp-page { background: #ebf2fe; padding: 24px 28px 40px; }
-.mono-text { font-family: monospace; font-size: 12px; color: #1e293b; font-weight: 600; }
+.tp-page {
+  background: var(--color-page);
+  padding: 1.5rem 1.75rem 2.5rem;
+}
+.mono-text {
+  font-family: monospace;
+  font-size: 0.75rem;
+  color: var(--color-fg);
+  font-weight: 600;
+}
 </style>

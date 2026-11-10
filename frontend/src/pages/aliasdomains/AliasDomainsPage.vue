@@ -1,6 +1,5 @@
 <template>
   <div class="dom-page">
-
     <!-- ─── Header ─── -->
     <div class="dom-header">
       <div>
@@ -8,7 +7,7 @@
         <div class="dom-subtitle">MANAGE ALIAS DOMAIN MAPPINGS</div>
       </div>
       <button class="btn-add-big" @click="showAdd = true">
-        <Icon name="plus-circle" :size="20" style="margin-right:12px;vertical-align:middle" />
+        <Icon name="plus-circle" :size="20" style="margin-right: 0.75rem; vertical-align: middle" />
         ADD DOMAIN ALIAS
       </button>
     </div>
@@ -30,7 +29,9 @@
           {{ row.alias_domain }}
         </div>
       </template>
-      <template #cell-target_domain="{ value }"><span class="mono">{{ value }}</span></template>
+      <template #cell-target_domain="{ value }"
+        ><span class="mono">{{ value }}</span></template
+      >
       <template #cell-active="{ value }">
         <span :class="value ? 'badge-yes' : 'badge-no'">{{ value ? 'YES' : 'NO' }}</span>
       </template>
@@ -64,7 +65,6 @@
       :loading="deletingRow"
       @confirm="submitDelete"
     />
-
   </div>
 </template>
 
@@ -85,41 +85,48 @@ interface AliasDomain {
   modified: string
 }
 
-interface Domain { domain: string }
+interface Domain {
+  domain: string
+}
 
 const allAliasDomains = ref<AliasDomain[]>([])
 const domains = ref<Domain[]>([])
 const loading = ref(true)
 
 const availableAliasDomains = computed(() => {
-  const used = new Set(allAliasDomains.value.map(a => a.alias_domain))
-  return domains.value.filter(d => !used.has(d.domain))
+  const used = new Set(allAliasDomains.value.map((a) => a.alias_domain))
+  return domains.value.filter((d) => !used.has(d.domain))
 })
 
 const columns = [
-  { key: 'alias_domain',  label: 'ALIAS DOMAIN' },
+  { key: 'alias_domain', label: 'ALIAS DOMAIN' },
   { key: 'target_domain', label: 'TARGET DOMAIN' },
-  { key: 'active',        label: 'ACTIVE' },
-  { key: 'modified',      label: 'MODIFIED' },
+  { key: 'active', label: 'ACTIVE' },
+  { key: 'modified', label: 'MODIFIED' },
 ]
 
 function formatDate(ts: string): string {
   if (!ts) return '—'
-  return new Date(ts).toLocaleString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+  return new Date(ts).toLocaleString('pt-BR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 async function load() {
   loading.value = true
   try {
-    const [adRes, domRes] = await Promise.all([
-      http.get(`${API_BASE}/alias-domains`),
-      http.get(`${API_BASE}/domains`),
-    ])
+    const [adRes, domRes] = await Promise.all([http.get(`${API_BASE}/alias-domains`), http.get(`${API_BASE}/domains`)])
     allAliasDomains.value = adRes.data?.data ?? []
     domains.value = domRes.data?.data ?? []
   } catch (e: any) {
     toast.error(e?.response?.data?.error?.message || 'Failed to load alias domains')
-  } finally { loading.value = false }
+  } finally {
+    loading.value = false
+  }
 }
 onMounted(load)
 
@@ -128,9 +135,18 @@ const showAdd = ref(false)
 const savingAdd = ref(false)
 
 async function handleAdd(payload: { alias_domain: string; target_domain: string; active: boolean }) {
-  if (!payload.alias_domain) { toast.error('Please select a source alias domain'); return }
-  if (!payload.target_domain) { toast.error('Please select a target domain'); return }
-  if (payload.alias_domain === payload.target_domain) { toast.error('Alias domain and target domain must be different'); return }
+  if (!payload.alias_domain) {
+    toast.error('Please select a source alias domain')
+    return
+  }
+  if (!payload.target_domain) {
+    toast.error('Please select a target domain')
+    return
+  }
+  if (payload.alias_domain === payload.target_domain) {
+    toast.error('Alias domain and target domain must be different')
+    return
+  }
   savingAdd.value = true
   try {
     await http.post(`${API_BASE}/alias-domains`, payload)
@@ -139,7 +155,9 @@ async function handleAdd(payload: { alias_domain: string; target_domain: string;
     await load()
   } catch (e: any) {
     toast.error(e?.response?.data?.error?.message || 'Failed to create domain alias')
-  } finally { savingAdd.value = false }
+  } finally {
+    savingAdd.value = false
+  }
 }
 
 // ─── Edit modal ───
@@ -160,11 +178,16 @@ async function openEdit(row: AliasDomain) {
     editInitialData.value = { alias_domain: ad.alias_domain, target_domain: ad.target_domain, active: ad.active }
   } catch (e: any) {
     toast.error(e?.response?.data?.error?.message || 'Failed to load alias domain')
-  } finally { loadingEdit.value = false }
+  } finally {
+    loadingEdit.value = false
+  }
 }
 
 async function handleEdit(payload: { target_domain: string; active: boolean }) {
-  if (!payload.target_domain) { toast.error('Please select a target domain'); return }
+  if (!payload.target_domain) {
+    toast.error('Please select a target domain')
+    return
+  }
   savingEdit.value = true
   try {
     await http.put(`${API_BASE}/alias-domains/${encodeURIComponent(editAliasDomain.value)}`, payload)
@@ -173,7 +196,9 @@ async function handleEdit(payload: { target_domain: string; active: boolean }) {
     await load()
   } catch (e: any) {
     toast.error(e?.response?.data?.error?.message || 'Failed to update alias domain')
-  } finally { savingEdit.value = false }
+  } finally {
+    savingEdit.value = false
+  }
 }
 
 // ─── Delete ───
@@ -181,7 +206,10 @@ const showDeleteConfirm = ref(false)
 const deletingRow = ref(false)
 const deleteTarget = ref<AliasDomain | null>(null)
 
-function confirmDelete(row: AliasDomain) { deleteTarget.value = row; showDeleteConfirm.value = true }
+function confirmDelete(row: AliasDomain) {
+  deleteTarget.value = row
+  showDeleteConfirm.value = true
+}
 
 async function submitDelete() {
   if (!deleteTarget.value) return
@@ -189,16 +217,22 @@ async function submitDelete() {
   try {
     const name = deleteTarget.value.alias_domain
     await http.delete(`${API_BASE}/alias-domains/${encodeURIComponent(name)}`)
-    showDeleteConfirm.value = false; deleteTarget.value = null
+    showDeleteConfirm.value = false
+    deleteTarget.value = null
     toast.success(`Domain alias ${name} deleted successfully`)
     await load()
   } catch (e: any) {
     toast.error(e?.response?.data?.error?.message || 'Failed to delete alias domain')
     showDeleteConfirm.value = false
-  } finally { deletingRow.value = false }
+  } finally {
+    deletingRow.value = false
+  }
 }
 </script>
 
 <style scoped>
-.dom-page { background: #ebf2fe; padding: 24px 28px 40px; }
+.dom-page {
+  background: var(--color-page);
+  padding: 1.5rem 1.75rem 2.5rem;
+}
 </style>

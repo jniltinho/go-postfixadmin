@@ -4,7 +4,7 @@ Complete step-by-step guide to a production mail server on Ubuntu: Postfix + Dov
 
 For a shorter summary see [SETUP_MAILSERVER_MARIADB.md](SETUP_MAILSERVER_MARIADB.md).  
 For PostgreSQL variant see [SETUP_MAILSERVER_POSTGRESQL.md](SETUP_MAILSERVER_POSTGRESQL.md).  
-For Docker quick test: `docker compose up` (see root [docker-compose.yml](../../docker-compose.yml) and [DEVELOPMENT.md](../../DEVELOPMENT.md)).  
+For Docker quick test: `docker compose up` — it pulls the published image `ghcr.io/jniltinho/go-postfixadmin:latest` (linux/amd64 and linux/arm64; see root [docker-compose.yml](../../docker-compose.yml) and [DEVELOPMENT.md](../../DEVELOPMENT.md)).  
 Main project docs: [README.md](../../README.md) and [FEATURES.md](../../FEATURES.md).
 
 ---
@@ -189,6 +189,24 @@ Go-PostfixAdmin will manage the database structure (tables, domains, accounts, a
    sudo systemctl enable --now postfixadmin.service
    ```
    *Check logs with: `tail -f /opt/go-postfixadmin/postfixadmin.log`*
+
+### 3.1 Appearance, service status and web terminal (Settings)
+
+- **Theme**: each admin picks one of the 20 themes in *Settings › Appearance* (saved in the browser). The default for browsers without a choice is `[ui] default_theme` in `config.toml` (env `UI_DEFAULT_THEME`), e.g. `default_theme = "xp"`.
+- **Services**: *Settings › Services* shows `postfix.service` and `dovecot.service` from `systemctl show` (read-only, needs the `settings:read` permission when RBAC is on). It needs systemd on the host where Go-PostfixAdmin runs; inside a container it reports that systemctl is not available.
+- **Terminal**: *Settings › Terminal* opens an SSH shell (`xterm-256color`) to the mail host from the browser. It is **off by default**; enable it only if you need it:
+
+  ```toml
+  [terminal]
+  enabled = true
+  host = "127.0.0.1"   # sshd of the mail server
+  port = 22
+  idle_timeout = "30m"
+  ```
+
+  Only superadmins can use it (with RBAC on they also need `settings:write`). The SSH password or key is typed in the browser, used for the login and not stored. On the first connection the panel shows the host key fingerprint — compare it with `ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub` on the server before trusting it; it is then pinned (table `terminal_host_key`, created by `migrate`) and a different key is refused until a superadmin clicks *Forget host key*. Opening, closing and trusting are written to the admin log; the commands typed are not (use the server's own `auth.log`/`wtmp`). Behind a reverse proxy, forward WebSocket upgrades for `/api/v1/system/terminal/ws` and keep the `Host` header (the panel checks that the `Origin` matches it).
+- **Reverse proxy and client IP**: the login rate limiter and the audit log use the client IP. Go-PostfixAdmin reads `X-Forwarded-For` only when the connection comes from loopback (nginx on the same host) or from `[server] trusted_proxies` (e.g. `["172.18.0.0/16"]` for a proxy in a Docker network); other clients, LAN ones included, cannot spoof it.
+- **Language**: the UI follows the browser language (PT, ES, else EN); each admin can fix it in *Settings › Appearance › Language*.
 
 ---
 
