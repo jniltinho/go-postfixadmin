@@ -93,6 +93,7 @@
 - [x] 13.5 Menu icons on hover/active use `--color-icon-accent` (the theme's link color, >= 4:1 on the sidebar in every theme; Default unchanged): the action fill matched the Windows 98 sidebar (1:1) and was low on crystal-dark, graphite and grafana.
 - [x] 13.7 Own toast module `frontend/src/lib/toast` (reactive queue, `ToastHost` with ARIA roles, pause on hover/focus loss, progress, reduced motion, tests, README) replaces vue3-toastify (dependency and vendored tarball removed); toasts mapped to theme roles.
 - [x] 13.8 Cancel buttons (`btn-cancel`, 18 in dialogs): red text on hover/focus (`--color-danger-text`, >= 4.5:1 on the surface in every theme).
+- [x] 13.12 Configuration read-only card: one line per key (long values end in an ellipsis, full value as tooltip), sections in newspaper columns; smaller Settings card headers; no page or card scroll at 1920×1080, 2000×1100 and 2560×1440.
 - [x] 13.11 Configuration tab shows values in effect: `server.ssl_enable` follows the automatic TLS rule (ssl_cert + ssl_key without ssl_enable), `ssl_cert`/`ssl_key` paths listed, JWT lifetimes show their defaults (15m / 168h).
 - [x] 13.10 Buttons app-wide (dialogs, pages, portal, the big ADD buttons): subtle motion (1px rise, one shadow step, only color/shadow/position animate, none with reduced motion) instead of the 2–4px jump with transition-all.
 - [x] 13.9 Terminal errors (connection closed, auth, host key…) shown as toasts instead of a banner above the console, so the page no longer scrolls when a session ends.

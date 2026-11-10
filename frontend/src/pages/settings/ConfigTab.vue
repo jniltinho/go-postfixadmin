@@ -96,7 +96,7 @@
               <dl>
                 <template v-for="f in fields" :key="f.key">
                   <dt>{{ f.key.split('.')[1] }}</dt>
-                  <dd>
+                  <dd :title="f.secret ? undefined : show(f)">
                     <template v-if="f.secret">
                       <Icon :name="f.set ? 'eye-off' : 'circle-minus'" :size="14" />
                       {{ f.set ? t('secretSet') : t('secretUnset') }}
@@ -356,12 +356,14 @@ load()
   font-size: 0.75rem;
 }
 .cf-sections {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
-  gap: 0.75rem;
+  /* newspaper columns: each section takes its own height, no empty boxes next to taller ones */
+  columns: 15rem;
+  column-gap: 0.75rem;
   padding: 0.25rem 1.25rem 1rem;
 }
 .cf-section {
+  break-inside: avoid;
+  margin-bottom: 0.75rem;
   padding: 0.5rem 0.75rem;
   background: var(--color-surface-2);
   border: 1px solid var(--color-line-soft);
@@ -376,7 +378,7 @@ load()
 }
 dl {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: max-content minmax(0, 1fr);
   gap: 0.125rem 0.75rem;
   font-size: 0.75rem;
 }
@@ -388,9 +390,13 @@ dd {
   display: flex;
   align-items: center;
   gap: 0.375rem;
+  min-width: 0;
   font-family: var(--font-mono);
   font-weight: 600;
   color: var(--color-fg);
-  overflow-wrap: anywhere;
+  /* one line per key: long values (certificate paths) end in an ellipsis, the full value is the tooltip */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>
