@@ -91,10 +91,6 @@
         <Icon name="triangle-alert" :size="18" />
         <span>{{ t('disabled', { enabled: '[terminal] enabled = true', hostport: 'host/port' }) }}</span>
       </p>
-      <p v-if="error" class="st-msg st-msg--err" role="alert">
-        <Icon name="circle-x" :size="18" />
-        <span>{{ error && t(error) }}</span>
-      </p>
       <div v-if="!started && info?.enabled" class="tm-empty">
         <Icon name="square-terminal" :size="40" />
         <p>{{ t('empty', { target: info.target }) }}</p>
@@ -168,13 +164,19 @@ const codes: Key[] = [
 ]
 const codeKey = (c: string): Key => (codes.includes(c as Key) ? (c as Key) : 'internal')
 
+// errors are toasts: a message above the console pushed it down and made the page scroll
+function fail(key: Key) {
+  error.value = key
+  toast.error(t(key))
+}
+
 async function load() {
   loading.value = true
   try {
     // also refreshes the access token when it expired (the WebSocket sends it in its first message)
     info.value = (await http.get(`${API_BASE}/system/terminal`)).data?.data ?? null
   } catch (e: any) {
-    error.value = e?.response?.status === 403 ? 'forbidden' : 'loadError'
+    fail(e?.response?.status === 403 ? 'forbidden' : 'loadError')
   } finally {
     loading.value = false
   }
@@ -271,13 +273,14 @@ async function connect(trust = '') {
       pending.value = { fingerprint: m.fingerprint, key_type: m.key_type }
       askTrust.value = true
     } else if (m.type === 'error') {
-      error.value = codeKey(m.code)
-      if (state.value === 'open') term?.write('\r\n\x1b[2m[' + t(error.value) + ']\x1b[0m\r\n')
+      const k = codeKey(m.code)
+      fail(k)
+      if (state.value === 'open') term?.write('\r\n\x1b[2m[' + t(k) + ']\x1b[0m\r\n')
     }
   }
   sock.onclose = () => {
     if (ws !== sock) return
-    if (!answered && state.value === 'connecting') error.value = 'openFailed'
+    if (!answered && state.value === 'connecting') fail('openFailed')
     if (state.value === 'open' && !error.value) term?.write('\r\n\x1b[2m[' + t('closedNote') + ']\x1b[0m\r\n')
     state.value = 'idle'
     ws = null

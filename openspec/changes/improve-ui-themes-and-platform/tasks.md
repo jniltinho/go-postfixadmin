@@ -92,7 +92,8 @@
 - [x] 13.4 All dialogs open 5% below the top of the window.
 - [x] 13.5 Menu icons on hover/active use `--color-icon-accent` (the theme's link color, >= 4:1 on the sidebar in every theme; Default unchanged): the action fill matched the Windows 98 sidebar (1:1) and was low on crystal-dark, graphite and grafana.
 - [x] 13.7 Own toast module `frontend/src/lib/toast` (reactive queue, `ToastHost` with ARIA roles, pause on hover/focus loss, progress, reduced motion, tests, README) replaces vue3-toastify (dependency and vendored tarball removed); toasts mapped to theme roles.
-- [x] 13.8 Cancel buttons (`btn-cancel`, 18 in dialogs) turn red on hover/focus with the per-theme contrast text color.
+- [x] 13.8 Cancel buttons (`btn-cancel`, 18 in dialogs): red text on hover/focus (`--color-danger-text`, >= 4.5:1 on the surface in every theme).
+- [x] 13.9 Terminal errors (connection closed, auth, host key…) shown as toasts instead of a banner above the console, so the page no longer scrolls when a session ends.
 - [x] 13.6 Text/focus uses of the action fill moved to `--color-icon-accent(-hover)` (links, row icons, focus borders, checkbox accent); menu hover tint/bar from the accent; `--color-accent-text` for accent badges; per-theme `--color-on-toast-*` (white/black by contrast, 76 pairs >= 4.5:1); EDIT buttons on the action fill in ported themes; literal `oklch()`/named colors removed and now rejected by the test. AA check of every non-default theme on dashboard, admins, mailboxes, domains, transports and API keys: no text below 4.5:1 (Default left as designed).
 
 ## 11. Final validation

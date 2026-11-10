@@ -22,6 +22,8 @@
   --color-icon-accent: var(--color-action-strong);
   --color-icon-accent-hover: var(--color-action-strong);
   --color-accent-text: var(--color-action-strong);
+  /* the theme's error text color (>= 5.4:1 on its surface); danger is a fill there */
+  --color-danger-text: var(--color-err);
   /* row EDIT buttons: the action fill (contrast with on-action is guaranteed); the hover tint can be light */
   --color-action-edit: var(--color-action);
   --nav-hover-bar: var(--color-icon-accent);

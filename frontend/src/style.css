@@ -47,6 +47,7 @@
   /* accent for icons and text on surfaces (action is a fill: in some themes it is gray or dark) */
   --color-icon-accent: var(--color-action);
   --color-accent-text: var(--color-accent-strong);
+  --color-danger-text: var(--color-danger);
   --color-icon-accent-hover: var(--color-action-hover);
   /* text on the colored toasts (themes pick white or black per status for contrast) */
   --color-on-toast-info: var(--color-on-action);
@@ -601,12 +602,10 @@ body {
   --toast-error-fg: var(--color-on-toast-err);
 }
 
-/* ─── Cancel buttons: red on hover/focus in every dialog ──────────────────────
-   Unlayered, so it wins over the buttons' own hover utilities; the text color is the per-theme contrast color for
-   the error red (also used by the error toasts). */
+/* ─── Cancel buttons: red text on hover/focus in every dialog ─────────────────
+   Unlayered, so it wins over the buttons' own hover utilities; --color-danger-text is a red readable as text on
+   surfaces in every theme (>= 4.5:1). */
 .btn-cancel:hover,
 .btn-cancel:focus-visible {
-  background: var(--color-err);
-  border-color: var(--color-err);
-  color: var(--color-on-toast-err);
+  color: var(--color-danger-text);
 }

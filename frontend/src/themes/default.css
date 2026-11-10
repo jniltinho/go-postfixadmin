@@ -29,6 +29,7 @@
   --color-on-action: #ffffff;
   --color-icon-accent: var(--color-action);
   --color-accent-text: var(--color-accent-strong);
+  --color-danger-text: var(--color-danger);
   --color-icon-accent-hover: var(--color-action-hover);
   --color-on-toast-info: var(--color-on-action);
   --color-on-toast-ok: var(--color-on-action);
