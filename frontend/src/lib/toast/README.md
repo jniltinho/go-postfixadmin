@@ -41,14 +41,14 @@ configureToast({ duration: 3000, max: 5, newestOnTop: true }) // defaults
 
 ## Theming
 
-| Variable | Default |
-|----------|---------|
-| `--toast-{info,success,warning,error}-bg` / `-fg` | `#1d4ed8` / `#15803d` / `#b45309` / `#b91c1c`, white text |
-| `--toast-font`, `--toast-font-size`, `--toast-font-weight` | `inherit`, `0.9375rem`, `700` |
-| `--toast-radius`, `--toast-shadow` | `0.375rem`, soft shadow |
-| `--toast-border-width`, `--toast-border-color` | `0`, `transparent` |
-| `--toast-width`, `--toast-gap`, `--toast-offset`, `--toast-z` | `22.5rem`, `0.75rem`, `1rem`, `9999` |
-| `--toast-padding`, `--toast-min-height`, `--toast-bar-height` | `0.875rem 1rem 1.125rem`, `3.5rem`, `0.3125rem` |
+| Variable                                                      | Default                                                   |
+| ------------------------------------------------------------- | --------------------------------------------------------- |
+| `--toast-{info,success,warning,error}-bg` / `-fg`             | `#1d4ed8` / `#15803d` / `#b45309` / `#b91c1c`, white text |
+| `--toast-font`, `--toast-font-size`, `--toast-font-weight`    | `inherit`, `0.9375rem`, `700`                             |
+| `--toast-radius`, `--toast-shadow`                            | `0.375rem`, soft shadow                                   |
+| `--toast-border-width`, `--toast-border-color`                | `0`, `transparent`                                        |
+| `--toast-width`, `--toast-gap`, `--toast-offset`, `--toast-z` | `22.5rem`, `0.75rem`, `1rem`, `9999`                      |
+| `--toast-padding`, `--toast-min-height`, `--toast-bar-height` | `0.875rem 1rem 1.125rem`, `3.5rem`, `0.3125rem`           |
 
 Go-PostfixAdmin maps them to its theme roles at the end of `src/style.css`, so toasts follow the 20 themes (text color
 per status chosen for contrast in each theme).
