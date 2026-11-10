@@ -26,7 +26,7 @@ All other shown keys (database, server security, quota multiplier, RBAC, transpo
 - **THEN** the API answers 400 and the file is unchanged
 
 ### Requirement: Safe writes that keep the file readable
-Saving SHALL validate each value, change only the affected lines (comments and spacing kept), verify that the new file parses with the new values, keep `config.toml.bak`, replace the file atomically with its permissions, apply the values in memory and log `config_update`.
+Saving SHALL validate each value, change only the affected lines (comments and spacing kept), verify that the new file parses with the new values, keep the previous file as `config.toml.YYYYMMDD-HHMMSS.bak` (one per save, never overwritten), replace the file atomically with its permissions, apply the values in memory and log `config_update`.
 
 #### Scenario: Locked keys
 - **WHEN** an environment variable overrides a key or the panel cannot write config.toml
@@ -34,7 +34,7 @@ Saving SHALL validate each value, change only the affected lines (comments and s
 
 #### Scenario: Change the SMTP port
 - **WHEN** the superadmin sets `smtp.port` to 587 and saves
-- **THEN** only that line changes in config.toml, `config.toml.bak` holds the previous file, new welcome e-mails use port 587 and the log has `config_update smtp.port`
+- **THEN** only that line changes in config.toml, a dated `config.toml.*.bak` holds the previous file, new welcome e-mails use port 587 and the log has `config_update smtp.port`
 
 #### Scenario: Invalid value
 - **WHEN** `smtp.port` is 70000 or `smtp.server` contains a line break

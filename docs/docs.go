@@ -2703,7 +2703,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Changes editable config.toml keys (comments and formatting are kept, the previous file is saved as config.toml.bak). Read-only and unknown keys are refused. Superadmins only.",
+                "description": "Changes editable config.toml keys (comments and formatting are kept, the previous file is saved as config.toml.YYYYMMDD-HHMMSS.bak). Read-only and unknown keys are refused. Superadmins only.",
                 "consumes": [
                     "application/json"
                 ],

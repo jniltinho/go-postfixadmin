@@ -2553,8 +2553,8 @@ paths:
       consumes:
       - application/json
       description: Changes editable config.toml keys (comments and formatting are
-        kept, the previous file is saved as config.toml.bak). Read-only and unknown
-        keys are refused. Superadmins only.
+        kept, the previous file is saved as config.toml.YYYYMMDD-HHMMSS.bak). Read-only
+        and unknown keys are refused. Superadmins only.
       parameters:
       - description: keys to change
         in: body

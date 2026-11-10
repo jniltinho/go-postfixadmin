@@ -84,8 +84,12 @@ func TestConfigAPI(t *testing.T) {
 	if !strings.Contains(string(data), `server = "relay.example.com" # relay`) || !strings.Contains(string(data), "port   = 587") {
 		t.Fatalf("file not updated in place:\n%s", data)
 	}
-	if bak, _ := os.ReadFile(path + ".bak"); string(bak) != orig {
-		t.Fatal("previous config not kept as .bak")
+	baks, _ := filepath.Glob(path + ".????????-??????.bak")
+	if len(baks) != 1 {
+		t.Fatalf("backups = %v, want one dated .bak", baks)
+	}
+	if bak, _ := os.ReadFile(baks[0]); string(bak) != orig {
+		t.Fatal("previous config not kept in the dated .bak")
 	}
 	if st, _ := os.Stat(path); st.Mode().Perm() != 0o640 {
 		t.Fatalf("mode changed to %v", st.Mode().Perm())

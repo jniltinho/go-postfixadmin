@@ -553,12 +553,12 @@ body {
   border: 2px solid var(--color-line);
   cursor: pointer;
 }
-.st-act:hover {
+.st-act:hover:not(:disabled) {
   box-shadow: var(--shadow-2);
 }
 .st-act:disabled {
   opacity: 0.6;
-  cursor: wait;
+  cursor: not-allowed;
 }
 .st-primary {
   display: inline-flex;
@@ -576,14 +576,13 @@ body {
   box-shadow: var(--shadow-3);
   cursor: pointer;
 }
-.st-primary:hover {
+.st-primary:hover:not(:disabled) {
   transform: translate(-1px, -1px);
   box-shadow: var(--shadow-4);
 }
 .st-primary:disabled {
   opacity: 0.7;
-  cursor: wait;
-  transform: none;
+  cursor: not-allowed;
 }
 .st-page :is(a, button, input, select, [tabindex]):focus-visible {
   outline: 3px solid var(--color-fg);
