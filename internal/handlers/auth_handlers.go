@@ -141,6 +141,7 @@ func (h *Handler) UserPortalLogin(c *echo.Context) error {
 		AccessToken: accessToken,
 		TokenType:   "Bearer",
 		ExpiresIn:   int(auth.GetAccessTTL().Seconds()),
+		IdleTimeout: int(auth.GetIdleTimeout().Seconds()),
 		User: dto.UserInfo{
 			Username:   mailbox.Username,
 			Type:       "mailbox",
@@ -213,6 +214,7 @@ func (h *Handler) AuthLogin(c *echo.Context) error {
 				AccessToken: accessToken,
 				TokenType:   "Bearer",
 				ExpiresIn:   int(auth.GetAccessTTL().Seconds()),
+				IdleTimeout: int(auth.GetIdleTimeout().Seconds()),
 				User: dto.UserInfo{
 					Username:   admin.Username,
 					Type:       "admin",
@@ -251,6 +253,7 @@ func (h *Handler) AuthLogin(c *echo.Context) error {
 				AccessToken: accessToken,
 				TokenType:   "Bearer",
 				ExpiresIn:   int(auth.GetAccessTTL().Seconds()),
+				IdleTimeout: int(auth.GetIdleTimeout().Seconds()),
 				User: dto.UserInfo{
 					Username:   mailbox.Username,
 					Type:       "mailbox",
@@ -285,6 +288,12 @@ func (h *Handler) AuthRefresh(c *echo.Context) error {
 		clearRefreshCookie(c)
 		return dto.WriteError(c, dto.ErrCodeInvalidToken, "invalid or expired refresh token")
 	}
+	// the refresh token is rotated at least once per access token lifetime while the user is active, so an older one
+	// means no request for longer than the idle timeout (the SPA also logs out on its own after idle_timeout)
+	if claims.IssuedAt == nil || time.Since(claims.IssuedAt.Time) > auth.GetIdleTimeout()+auth.GetAccessTTL() {
+		clearRefreshCookie(c)
+		return dto.WriteError(c, dto.ErrCodeInvalidToken, "session expired after inactivity")
+	}
 
 	var params auth.TokenParams
 	params.Type = claims.Type
@@ -316,6 +325,9 @@ func (h *Handler) AuthRefresh(c *echo.Context) error {
 		}
 	}
 
+	if claims.ExpiresAt != nil {
+		params.Expires = claims.ExpiresAt.Time // rotation keeps the login's maximum lifetime
+	}
 	newAccess, err := auth.GenerateAccessToken(params)
 	if err != nil {
 		return dto.InternalError(c, "failed to generate access token")
@@ -332,6 +344,7 @@ func (h *Handler) AuthRefresh(c *echo.Context) error {
 		AccessToken: newAccess,
 		TokenType:   "Bearer",
 		ExpiresIn:   int(auth.GetAccessTTL().Seconds()),
+		IdleTimeout: int(auth.GetIdleTimeout().Seconds()),
 	})
 }
 
@@ -381,7 +394,7 @@ func setRefreshCookie(c *echo.Context, token string) {
 		HttpOnly: true,
 		Secure:   viper.GetBool("server.ssl_enable"),
 		SameSite: http.SameSiteLaxMode,
-		MaxAge:   int(auth.GetRefreshTTL().Seconds()),
+		MaxAge:   int(auth.GetRefreshTTL().Seconds()), // the token's own exp is the real limit
 	}
 	c.SetCookie(cookie)
 }

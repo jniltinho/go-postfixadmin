@@ -106,7 +106,8 @@ swagger_enable = false  # Set to true to expose /swagger/* in production
 
 # JWT tokens for the SPA frontend
 jwt_access_ttl  = "15m"   # short-lived access token
-jwt_refresh_ttl = "168h"  # 7-day refresh token (httpOnly cookie)
+jwt_refresh_ttl = "168h"  # maximum session lifetime, even for an active user
+session_idle_timeout = "30m"  # log out after this time without activity
 
 [rbac]
 # Enable after running "migrate rbac" and assigning roles to existing admins.

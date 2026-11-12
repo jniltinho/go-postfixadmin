@@ -22,7 +22,9 @@ async function bootstrap() {
   app.use(pinia)
   void useThemeStore(pinia).init()
 
-  await useAuthStore(pinia).initAuth()
+  const auth = useAuthStore(pinia)
+  await auth.initAuth()
+  auth.startIdleWatch()
 
   app.use(router)
 

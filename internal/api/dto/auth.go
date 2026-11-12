@@ -19,6 +19,7 @@ type LoginResponse struct {
 	AccessToken string   `json:"access_token"`
 	TokenType   string   `json:"token_type"`
 	ExpiresIn   int      `json:"expires_in"`
+	IdleTimeout int      `json:"idle_timeout"` // seconds without user activity before the SPA logs out
 	User        UserInfo `json:"user"`
 }
 
@@ -27,6 +28,7 @@ type RefreshResponse struct {
 	AccessToken string `json:"access_token"`
 	TokenType   string `json:"token_type"`
 	ExpiresIn   int    `json:"expires_in"`
+	IdleTimeout int    `json:"idle_timeout"`
 }
 
 // MeResponse is the response for GET /api/v1/auth/me

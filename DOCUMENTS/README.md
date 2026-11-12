@@ -128,7 +128,7 @@ key. Precedence: command-line flags › environment variables › config file �
 | Section | Main keys |
 |---------|-----------|
 | `[database]` | `driver` (`mysql`/`postgres`), `host`, `port`, `user`, `pass`, `name`, `debug` |
-| `[server]` | `port`, `ssl_enable`, `ssl_cert`, `ssl_key`, `session_secret`, `jwt_secret`, `jwt_access_ttl`, `jwt_refresh_ttl`, `trusted_proxies`, `swagger_enable`, `cleanup_maildir` |
+| `[server]` | `port`, `ssl_enable`, `ssl_cert`, `ssl_key`, `session_secret`, `jwt_secret`, `jwt_access_ttl`, `jwt_refresh_ttl`, `session_idle_timeout`, `trusted_proxies`, `swagger_enable`, `cleanup_maildir` |
 | `[ui]` | `default_theme` |
 | `[terminal]` | `enabled` (default `false`), `host`, `port`, `idle_timeout` |
 | `[rbac]` | `enabled` — after `migrate rbac` and assigning roles |
@@ -226,7 +226,8 @@ network; any other client, LAN ones included, is identified by its socket addres
 ## Security
 
 - **Sessions**: short-lived JWT access token (`jwt_access_ttl`, 15m) plus an httpOnly refresh cookie
-  (`jwt_refresh_ttl`, 7 days).
+  (`jwt_refresh_ttl`, 7 days: the maximum session lifetime). Idle sessions are logged out after
+  `session_idle_timeout` (30m) without activity.
 - **Login**: rate limited per IP (3 attempts, then 1 every 12 s); CSRF origin check on auth endpoints.
 - **Access**: superadmins, domain admins limited to their domains, and optional RBAC roles and permissions
   (`migrate rbac`, then `[rbac] enabled = true`).

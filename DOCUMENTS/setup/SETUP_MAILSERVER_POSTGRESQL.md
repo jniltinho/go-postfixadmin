@@ -110,7 +110,8 @@ Go-PostfixAdmin will manage the database structure (tables, domains, accounts, a
 
    # JWT tokens for the SPA frontend
    jwt_access_ttl  = "15m"   # short-lived access token
-   jwt_refresh_ttl = "168h"  # 7-day refresh token (httpOnly cookie)
+   jwt_refresh_ttl = "168h"  # maximum session lifetime, even for an active user
+   session_idle_timeout = "30m"  # log out after this time without activity
 
    [quota]
    enabled      = false
