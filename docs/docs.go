@@ -3964,6 +3964,10 @@ const docTemplate = `{
                 "expires_in": {
                     "type": "integer"
                 },
+                "idle_timeout": {
+                    "description": "seconds without user activity before the SPA logs out",
+                    "type": "integer"
+                },
                 "token_type": {
                     "type": "string"
                 },
@@ -4169,6 +4173,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "expires_in": {
+                    "type": "integer"
+                },
+                "idle_timeout": {
                     "type": "integer"
                 },
                 "token_type": {

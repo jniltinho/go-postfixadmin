@@ -27,7 +27,8 @@ trusted_proxies = []
 # JWT settings (for the new Vue/Quasar SPA frontend)
 # Access tokens should be short-lived. Refresh tokens use httpOnly cookies (7d).
 jwt_access_ttl  = "15m"   # short-lived access token
-jwt_refresh_ttl = "168h"  # 7 days refresh token (httpOnly cookie)
+jwt_refresh_ttl = "168h"  # maximum session lifetime, even for an active user
+session_idle_timeout = "30m"  # log out after this time without activity
 
 # Optional: dedicated JWT secret. If empty, falls back to session_secret for simplicity during transition.
 # jwt_secret = ""

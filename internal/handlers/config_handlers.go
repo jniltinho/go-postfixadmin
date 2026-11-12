@@ -63,6 +63,7 @@ var configSchema = []configField{
 	{Key: "server.cleanup_maildir", Kind: "bool"},
 	{Key: "server.jwt_access_ttl", Kind: "duration"},
 	{Key: "server.jwt_refresh_ttl", Kind: "duration"},
+	{Key: "server.session_idle_timeout", Kind: "duration"},
 	{Key: "server.trusted_proxies", Kind: "list"},
 	{Key: "server.session_secret", Kind: "string", Secret: true},
 	{Key: "server.jwt_secret", Kind: "string", Secret: true},
@@ -143,6 +144,8 @@ func displayValue(f configField) any {
 		return shortDuration(auth.GetAccessTTL())
 	case "server.jwt_refresh_ttl":
 		return shortDuration(auth.GetRefreshTTL())
+	case "server.session_idle_timeout":
+		return shortDuration(auth.GetIdleTimeout())
 	}
 	switch f.Kind {
 	case "bool":

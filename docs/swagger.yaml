@@ -337,6 +337,9 @@ definitions:
         type: string
       expires_in:
         type: integer
+      idle_timeout:
+        description: seconds without user activity before the SPA logs out
+        type: integer
       token_type:
         type: string
       user:
@@ -474,6 +477,8 @@ definitions:
       access_token:
         type: string
       expires_in:
+        type: integer
+      idle_timeout:
         type: integer
       token_type:
         type: string

@@ -76,14 +76,15 @@ func allowedHost(c *echo.Context) string {
 	return normalizeHost(base)
 }
 
+// normalizeHost keeps host[:port] from a URL or bare host, dropping scheme and path.
 func normalizeHost(s string) string {
 	s = strings.TrimPrefix(s, "https://")
 	s = strings.TrimPrefix(s, "http://")
-	s = strings.TrimSuffix(s, "/")
-	return s
+	s, _, _ = strings.Cut(s, "/")
+	return strings.ToLower(s)
 }
 
+// hostMatches compares hosts exactly: a prefix match would accept panel.example.com.attacker.tld.
 func hostMatches(headerValue, allowed string) bool {
-	h := normalizeHost(headerValue)
-	return strings.HasPrefix(h, allowed)
+	return normalizeHost(headerValue) == allowed
 }

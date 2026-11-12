@@ -47,11 +47,12 @@ func RegisterRoutes(e *echo.Echo, h *handlers.Handler, spaFS fs.FS) {
 	authPublic.POST("/auth/login", h.AuthLogin)
 	authPublic.POST("/auth/user-login", h.UserPortalLogin)
 	authPublic.POST("/auth/refresh", h.AuthRefresh)
+	// logout only clears the caller's refresh cookie, so it must also work once the access token has expired
+	apiV1.POST("/auth/logout", h.AuthLogout, middleware.CSRFOriginCheck())
 
 	// All protected endpoints require a valid JWT or API key.
 	protected := apiV1.Group("", middleware.JWTAuthMiddleware(h.DB))
 
-	protected.POST("/auth/logout", h.AuthLogout)
 	protected.GET("/auth/me", h.AuthMe)
 
 	// User portal endpoints (virtual mailbox users — no RBAC permission required)

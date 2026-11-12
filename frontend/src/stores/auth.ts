@@ -43,6 +43,29 @@ function persistSession(token: string, user: User) {
   localStorage.setItem('user_info', JSON.stringify(user))
 }
 
+const IDLE_KEY = 'idle_timeout'
+const ACTIVITY_KEY = 'last_activity'
+const DEFAULT_IDLE_SEC = 30 * 60
+
+function saveIdleTimeout(sec: unknown) {
+  if (typeof sec === 'number' && sec > 0) localStorage.setItem(IDLE_KEY, String(sec))
+}
+
+/** True when no user input was seen (in any tab) for longer than the server's session_idle_timeout. */
+export function idleExpired(now = Date.now()): boolean {
+  const last = Number(localStorage.getItem(ACTIVITY_KEY))
+  if (!last) return false
+  const sec = Number(localStorage.getItem(IDLE_KEY)) || DEFAULT_IDLE_SEC
+  return now - last > sec * 1000
+}
+
+export function markActivity(now = Date.now()) {
+  localStorage.setItem(ACTIVITY_KEY, String(now))
+}
+
+let idleWatch: ReturnType<typeof setInterval> | null = null
+let nextRenew = 0
+
 function storedUserType(): User['type'] | undefined {
   try {
     const saved = localStorage.getItem('user_info')
@@ -101,6 +124,8 @@ export const useAuthStore = defineStore('auth', {
       const decoded = decodeJWT(token)
       if (!decoded) throw new Error('invalid token')
 
+      saveIdleTimeout(data.data.idle_timeout)
+      markActivity()
       this.applySession(token, {
         ...data.data.user,
         permissions: decoded.permissions ?? [],
@@ -115,6 +140,8 @@ export const useAuthStore = defineStore('auth', {
       const decoded = decodeJWT(token)
       if (!decoded) throw new Error('invalid token')
 
+      saveIdleTimeout(data.data.idle_timeout)
+      markActivity()
       this.applySession(token, {
         ...data.data.user,
         permissions: decoded.permissions ?? [],
@@ -123,10 +150,16 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async refresh(): Promise<boolean> {
+      const before = localStorage.getItem('access_token')
       try {
         const { data } = await apiClient.post(`${API_BASE}/auth/refresh`)
+        // a logout or a new login happened meanwhile (this tab or another): keep that state, not this answer
+        const current = localStorage.getItem('access_token')
+        if (current !== before) return current !== null
         const newToken = data.data?.access_token
-        if (!newToken) return false
+        // a refresh that lands after an idle logout (here or in another tab) must not bring the session back
+        if (!newToken || idleExpired()) return false
+        saveIdleTimeout(data.data.idle_timeout)
 
         const decoded = decodeJWT(newToken)
         if (!decoded) return false
@@ -142,7 +175,9 @@ export const useAuthStore = defineStore('auth', {
         this.applySession(newToken, user)
         return true
       } catch {
-        return false
+        // a failure that lands after a new login must not log that new session out
+        const current = localStorage.getItem('access_token')
+        return current !== before && current !== null
       }
     },
 
@@ -187,8 +222,45 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
+    /** Logs out after session_idle_timeout without keyboard, mouse or touch input; polling pages do not count. */
+    startIdleWatch() {
+      if (idleWatch) return
+      let lastMark = 0
+      const onActivity = () => {
+        const now = Date.now()
+        if (!this.isAuthenticated || now - lastMark < 10_000) return
+        if (idleExpired(now)) return this.logout() // input after the deadline must not revive the session
+        lastMark = now
+        markActivity(now)
+      }
+      for (const ev of ['pointerdown', 'pointermove', 'keydown', 'wheel', 'touchstart'])
+        window.addEventListener(ev, onActivity, { passive: true })
+      // last_activity is shared, so an idle logout in one tab logs out the others on their next tick
+      idleWatch = setInterval(() => {
+        if (!this.isAuthenticated) return
+        if (idleExpired()) return this.logout()
+        // an active user may go a long time without API calls (typing a form): renew so the server sees the activity
+        // the stored token is shared, so once one tab renewed it the others skip; a failure (e.g. 429) only logs
+        // out once the token has really expired, and waits a minute before trying again
+        const token = localStorage.getItem('access_token')
+        if (!token || !isTokenExpired(token, 60) || Date.now() < nextRenew) return
+        nextRenew = Date.now() + 60_000
+        void this.refresh().then((ok) => {
+          if (ok) nextRenew = 0
+          else if (isTokenExpired(localStorage.getItem('access_token') ?? '', 0)) this.forceLogout()
+        })
+      }, 15_000)
+    },
+
     async initAuth() {
+      if (idleExpired()) {
+        // before the router is installed: drop the session here, its guards send the user to the login page
+        apiClient.post(`${API_BASE}/auth/logout`).catch(() => {})
+        for (const k of ['access_token', 'user_info']) localStorage.removeItem(k)
+        return
+      }
       this.initFromStorage()
+      if (this.accessToken) markActivity()
 
       const token = this.accessToken
       if (!token) {

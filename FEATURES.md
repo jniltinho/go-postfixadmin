@@ -49,7 +49,8 @@ All endpoints return a structured `APIResponse` envelope with `success`, `data`,
 - Superadmin and domain-admin separation via RBAC (enable with `rbac.enabled = true` after running `postfixadmin migrate rbac`)
 - `rbac` CLI subcommand for assigning roles (`rbac assign`, `rbac seed-existing`)
 - User self-service portal for password, forwarding, and vacation management (no admin rights needed)
-- JWT access tokens (short-lived, `jwt_access_ttl`) + httpOnly refresh cookies (`jwt_refresh_ttl`)
+- JWT access tokens (short-lived, `jwt_access_ttl`) + httpOnly refresh cookies (`jwt_refresh_ttl`, maximum session lifetime)
+- Logout after inactivity (`session_idle_timeout`, default 30m)
 - Persistent API keys (with optional expiry) under `/api/v1/settings/apikeys`
 
 ## Passwords
@@ -128,7 +129,7 @@ All endpoints return a structured `APIResponse` envelope with `success`, `data`,
 Key sections in `config.toml` (or env / CLI overrides):
 
 - `[database]` — MariaDB/MySQL or PostgreSQL (driver, host, etc.); `debug = true` for verbose GORM SQL
-- `[server]` — port, `ssl_enable`, cert/key paths, `swagger_enable`, JWT TTLs (`jwt_access_ttl`, `jwt_refresh_ttl`), `cleanup_maildir`
+- `[server]` — port, `ssl_enable`, cert/key paths, `swagger_enable`, JWT TTLs (`jwt_access_ttl`, `jwt_refresh_ttl`), `session_idle_timeout`, `cleanup_maildir`
 - `[quota]`, `[vacation]`, `[alias]`, `[transport]`, `[features]` (e.g. `fetchmail`), `[rbac]` (`enabled = true` after `migrate rbac`), `[smtp]` (for welcome emails), `[backup]`
 - `[ui]` — `default_theme` (env `UI_DEFAULT_THEME`)
 - `[terminal]` — `enabled` (default false), `host`, `port`, `idle_timeout` for the web SSH terminal

@@ -46,21 +46,20 @@ type TokenParams struct {
 	Username    string
 	Superadmin  bool
 	Domains     []string
-	Type        string   // "admin" | "mailbox"
-	Permissions []string // resolved RBAC permissions; nil is safe (treated as empty)
-	Roles       []string // resolved RBAC role names; nil is safe
+	Type        string    // "admin" | "mailbox"
+	Permissions []string  // resolved RBAC permissions; nil is safe (treated as empty)
+	Roles       []string  // resolved RBAC role names; nil is safe
+	Expires     time.Time // session end: refresh token expiry and access token cap; zero means now + GetRefreshTTL()
 }
 
-// jwtConfig holds the loaded JWT configuration (read once at startup via viper).
+// jwtConfig holds the signing secret (read once at startup via viper).
 type jwtConfig struct {
-	secret     []byte
-	accessTTL  time.Duration
-	refreshTTL time.Duration
+	secret []byte
 }
 
 var cfg jwtConfig
 
-// initConfig loads JWT settings from viper. Called lazily on first use.
+// initConfig loads the signing secret from viper. Called lazily on first use.
 // Falls back to session_secret when jwt_secret is not explicitly set.
 func initConfig() {
 	secret := viper.GetString("server.jwt_secret")
@@ -71,25 +70,6 @@ func initConfig() {
 		secret = "insecure-dev-only-change-me"
 	}
 	cfg.secret = []byte(secret)
-
-	access := viper.GetString("server.jwt_access_ttl")
-	if access == "" {
-		access = "15m"
-	}
-	refresh := viper.GetString("server.jwt_refresh_ttl")
-	if refresh == "" {
-		refresh = "168h"
-	}
-
-	var err error
-	cfg.accessTTL, err = time.ParseDuration(access)
-	if err != nil {
-		cfg.accessTTL = 15 * time.Minute
-	}
-	cfg.refreshTTL, err = time.ParseDuration(refresh)
-	if err != nil {
-		cfg.refreshTTL = 7 * 24 * time.Hour
-	}
 }
 
 // getSecret returns the signing secret, initializing config on first call.
@@ -100,20 +80,23 @@ func getSecret() []byte {
 	return cfg.secret
 }
 
-// GetAccessTTL returns the configured access token lifetime.
-func GetAccessTTL() time.Duration {
-	if cfg.accessTTL == 0 {
-		initConfig()
+// durationSetting reads key on every call, so a change made in Settings > Configuration applies to the next login.
+func durationSetting(key string, def time.Duration) time.Duration {
+	if d, err := time.ParseDuration(viper.GetString(key)); err == nil && d > 0 {
+		return d
 	}
-	return cfg.accessTTL
+	return def
 }
 
-// GetRefreshTTL returns the configured refresh token lifetime.
-func GetRefreshTTL() time.Duration {
-	if cfg.refreshTTL == 0 {
-		initConfig()
-	}
-	return cfg.refreshTTL
+// GetAccessTTL returns the configured access token lifetime.
+func GetAccessTTL() time.Duration { return durationSetting("server.jwt_access_ttl", 15*time.Minute) }
+
+// GetRefreshTTL returns the maximum session lifetime: a login never lasts longer, however active the user is.
+func GetRefreshTTL() time.Duration { return durationSetting("server.jwt_refresh_ttl", 7*24*time.Hour) }
+
+// GetIdleTimeout returns how long a session may go without user activity before it is logged out.
+func GetIdleTimeout() time.Duration {
+	return durationSetting("server.session_idle_timeout", 30*time.Minute)
 }
 
 // GenerateAccessToken creates a short-lived JWT access token from p.
@@ -121,6 +104,14 @@ func GetRefreshTTL() time.Duration {
 // middleware can authorize requests without a database query.
 func GenerateAccessToken(p TokenParams) (string, error) {
 	now := time.Now()
+	end := p.Expires
+	if end.IsZero() {
+		end = now.Add(GetRefreshTTL())
+	}
+	exp := now.Add(GetAccessTTL())
+	if end.Before(exp) {
+		exp = end // never outlive the session
+	}
 	claims := Claims{
 		Username:    p.Username,
 		Superadmin:  p.Superadmin,
@@ -132,7 +123,7 @@ func GenerateAccessToken(p TokenParams) (string, error) {
 			Issuer:    "go-postfixadmin",
 			Subject:   p.Username,
 			IssuedAt:  jwt.NewNumericDate(now),
-			ExpiresAt: jwt.NewNumericDate(now.Add(GetAccessTTL())),
+			ExpiresAt: jwt.NewNumericDate(exp),
 			NotBefore: jwt.NewNumericDate(now),
 		},
 	}
@@ -146,6 +137,10 @@ func GenerateAccessToken(p TokenParams) (string, error) {
 // issue a fresh access token without requiring the user to log in again.
 func GenerateRefreshToken(p TokenParams) (string, error) {
 	now := time.Now()
+	exp := p.Expires
+	if exp.IsZero() {
+		exp = now.Add(GetRefreshTTL())
+	}
 	claims := Claims{
 		Username:   p.Username,
 		Superadmin: p.Superadmin,
@@ -155,7 +150,7 @@ func GenerateRefreshToken(p TokenParams) (string, error) {
 			Issuer:    "go-postfixadmin",
 			Subject:   p.Username,
 			IssuedAt:  jwt.NewNumericDate(now),
-			ExpiresAt: jwt.NewNumericDate(now.Add(GetRefreshTTL())),
+			ExpiresAt: jwt.NewNumericDate(exp),
 			NotBefore: jwt.NewNumericDate(now),
 		},
 	}
